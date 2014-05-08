@@ -1,4 +1,4 @@
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 

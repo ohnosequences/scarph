@@ -1,36 +1,27 @@
-Nice.scalaProject
+lazy val commonSettings: Seq[Setting[_]] =
+  Nice.scalaProject ++
+  Seq[Setting[_]](
+    organization := "ohnosequences",
+    bucketSuffix := "era7.com",
+    scalaVersion := "2.11.0",
+    crossScalaVersions := Seq("2.10.4", "2.11.0"),
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % "2.1.6" % "test"
+    ),
+    dependencyOverrides ++= Set(
+      "tomcat" % "jasper-compiler" % "5.5.23",
+      "tomcat" % "jasper-runtime"  % "5.5.23"
+    )
+  )
 
-organization := "ohnosequences"
+// subprojects:
+lazy val core = Project("scarph-core", file("scarph-core")) settings(commonSettings: _*)
+lazy val titan = Project("scarph-titan", file("scarph-titan")) settings(commonSettings: _*) dependsOn core
 
-name := "scarph"
-
-description := "Scala graph model"
-
-bucketSuffix := "era7.com"
-
-scalaVersion := "2.11.0"
-
-crossScalaVersions := Seq("2.10.4", "2.11.0")
-
-libraryDependencies += {
-  CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, scalaMajor)) if scalaMajor >= 11 =>
-              "com.chuusai" %% "shapeless" % "2.0.0"
-    case _ => "com.chuusai"  % "shapeless" % "2.0.0" cross CrossVersion.full
-  }
-}
-
-// test-only dependencies:
-libraryDependencies ++= Seq(
-  "com.thinkaurelius.titan"   % "titan-all"   % "0.4.4" % "test",
-  "org.scalatest"            %% "scalatest"   % "2.1.3" % "test"
+// root project is only for aggregating:
+lazy val root = Project("scarph-all", file(".")) settings(commonSettings: _*) aggregate(core, titan) settings(
+  name := "scarph-all",
+  publish := {},
+  GithubRelease.assets := Seq(),
+  Literator.docsMap := Map()
 )
-
-dependencyOverrides ++= Set(
-  "tomcat" % "jasper-compiler" % "5.5.23",
-  "tomcat" % "jasper-runtime"  % "5.5.23"
-)
-
-// the new cool option for super-fast recompiling from sbt-0.13.2
-// but it doesn't work, don't know why...
-// incOptions := incOptions.value.withNameHashing(true)

@@ -1,4 +1,4 @@
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
@@ -24,11 +24,9 @@ object MakeKeys {
   case class   GraphSchemaOps(g: TitanGraph) {
 
     import scala.reflect._
-    import scala.reflect.runtime.universe._
 
     // TODO: add uniqueness and indexing parameters
     def addPropertyKey[P <: AnyProperty](p: P)(implicit c: ClassTag[p.Rep]): TitanKey = {
-      // FIXME: this compiles, but is not what we want (see the test)
       val clazz = c.runtimeClass.asInstanceOf[Class[p.Rep]]
       g.makeKey(p.label).dataType(clazz).single.make
     }

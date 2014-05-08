@@ -48,16 +48,7 @@ object vertexTypes {
         + scarph
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
-          + [expressions.scala][test/scala/ohnosequences/scarph/expressions.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
-          + titan
-            + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
-            + [godsSchema.scala][test/scala/ohnosequences/scarph/titan/godsSchema.scala]
-            + [TEdge.scala][test/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGodsTest.scala][test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]
-            + [TitanGraphSchema.scala][test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
-            + [TitanSchemaTest.scala][test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]
-            + [TVertex.scala][test/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [vertexTypes.scala][test/scala/ohnosequences/scarph/vertexTypes.scala]
           + [vertices.scala][test/scala/ohnosequences/scarph/vertices.scala]
 
@@ -71,14 +62,6 @@ object vertexTypes {
 [main/scala/ohnosequences/scarph/VertexType.scala]: ../../../../main/scala/ohnosequences/scarph/VertexType.scala.md
 [test/scala/ohnosequences/scarph/edges.scala]: edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: edgeTypes.scala.md
-[test/scala/ohnosequences/scarph/expressions.scala]: expressions.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: properties.scala.md
-[test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: titan/godsImplementation.scala.md
-[test/scala/ohnosequences/scarph/titan/godsSchema.scala]: titan/godsSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TEdge.scala]: titan/TEdge.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: titan/TitanGodsTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: titan/TitanGraphSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]: titan/TitanSchemaTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TVertex.scala]: titan/TVertex.scala.md
 [test/scala/ohnosequences/scarph/vertexTypes.scala]: vertexTypes.scala.md
 [test/scala/ohnosequences/scarph/vertices.scala]: vertices.scala.md

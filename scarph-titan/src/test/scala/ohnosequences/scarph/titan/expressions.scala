@@ -1,9 +1,9 @@
-package ohnosequences.scarph.test
+package ohnosequences.scarph.titan.test
 
-import edgeTypes._
 import ohnosequences.scarph._
+import ohnosequences.scarph.titan._
 
-import titan.GodsSchema._
+import GodsSchema._
 
 object expressions {
 

@@ -95,16 +95,7 @@ class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
         + scarph
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
-          + [expressions.scala][test/scala/ohnosequences/scarph/expressions.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
-          + titan
-            + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
-            + [godsSchema.scala][test/scala/ohnosequences/scarph/titan/godsSchema.scala]
-            + [TEdge.scala][test/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGodsTest.scala][test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]
-            + [TitanGraphSchema.scala][test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
-            + [TitanSchemaTest.scala][test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]
-            + [TVertex.scala][test/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [vertexTypes.scala][test/scala/ohnosequences/scarph/vertexTypes.scala]
           + [vertices.scala][test/scala/ohnosequences/scarph/vertices.scala]
 
@@ -118,14 +109,6 @@ class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
 [main/scala/ohnosequences/scarph/VertexType.scala]: VertexType.scala.md
 [test/scala/ohnosequences/scarph/edges.scala]: ../../../../test/scala/ohnosequences/scarph/edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../../../../test/scala/ohnosequences/scarph/edgeTypes.scala.md
-[test/scala/ohnosequences/scarph/expressions.scala]: ../../../../test/scala/ohnosequences/scarph/expressions.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../../../../test/scala/ohnosequences/scarph/properties.scala.md
-[test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
-[test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TEdge.scala]: ../../../../test/scala/ohnosequences/scarph/titan/TEdge.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: ../../../../test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../../../../test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]: ../../../../test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TVertex.scala]: ../../../../test/scala/ohnosequences/scarph/titan/TVertex.scala.md
 [test/scala/ohnosequences/scarph/vertexTypes.scala]: ../../../../test/scala/ohnosequences/scarph/vertexTypes.scala.md
 [test/scala/ohnosequences/scarph/vertices.scala]: ../../../../test/scala/ohnosequences/scarph/vertices.scala.md

@@ -1,4 +1,4 @@
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan.test
 
 // import org.scalatest._
 
@@ -6,11 +6,12 @@ import com.thinkaurelius.titan.example.GraphOfTheGodsFactory
 import com.thinkaurelius.titan.core._
 import java.io.File
 
+import ohnosequences.scarph._
+import ohnosequences.scarph.titan._
+
 import GodsSchema._
 import GodsImplementation._
 import MakeKeys._
-
-import ohnosequences.scarph._
 
 class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -38,21 +39,20 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
 
   test("create property keys") {
 
-    // g.addPropertyKey(age)
+    g.addPropertyKey(age)
     g.addPropertyKey(name)
     g.commit
 
-    // val ageType: TitanType = g.getType(age.label)
+    val ageType: TitanType = g.getType(age.label)
     val nameType: TitanType = g.getType(name.label)
     assert(nameType.getName === name.label)
     assert(nameType.isPropertyKey)
 
     // we checked that it's a property key, so we can cast:
-    // val ageKey: TitanKey = ageType.asInstanceOf[TitanKey]
+    val ageKey: TitanKey = ageType.asInstanceOf[TitanKey]
     val nameKey: TitanKey = nameType.asInstanceOf[TitanKey]
-    // FIXME: the data type is set to some crap
-    // PRIMITIVES that's the issue
-    // assert(ageKey.getDataType.getName === classOf[age.Rep].getName)
+
+    assert(ageKey.getDataType.getName === classOf[age.Rep].getName)
     assert(nameKey.getDataType.getName === classOf[name.Rep].getName)
 
   }

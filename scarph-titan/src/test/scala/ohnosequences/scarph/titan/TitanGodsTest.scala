@@ -1,4 +1,4 @@
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan.test
 
 // import org.scalatest._
 
@@ -10,6 +10,7 @@ import GodsSchema._
 import GodsImplementation._
 
 import ohnosequences.scarph._
+import ohnosequences.scarph.titan._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -52,7 +53,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   test("get vertex property") {
 
-    val saturn = g.getTagged(titan)("name", "saturn")
+    val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
 
     /* pure blueprints with string keys and casting: */
     assert(saturn.getProperty[Int]("age") === 10000)

@@ -1,6 +1,6 @@
 
 ```scala
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan.test
 
 import ohnosequences.scarph._
 ```
@@ -22,10 +22,10 @@ object GodsSchema {
 
 ```scala
   case object name extends Property[String]
-  case object age extends Property[Int]
+  case object age extends Property[Integer]
   // instead of this property we will create REAL types (because we are cool)
   // case object `type` extends Property[String]
-  case object time extends Property[Int]
+  case object time extends Property[Integer]
   case object reason extends Property[String]
   // This is something advanced:
   import com.thinkaurelius.titan.core.attribute.Geoshape
@@ -146,51 +146,26 @@ Monsters live in some Location (without any reason)
     + scala
       + ohnosequences
         + scarph
-          + [Denotation.scala][main/scala/ohnosequences/scarph/Denotation.scala]
-          + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
-          + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
-          + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
-          + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
-          + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
-          + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
+          + titan
+            + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
+            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
   + test
     + scala
       + ohnosequences
         + scarph
-          + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
-          + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
-          + [expressions.scala][test/scala/ohnosequences/scarph/expressions.scala]
-          + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
           + titan
+            + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
             + [godsSchema.scala][test/scala/ohnosequences/scarph/titan/godsSchema.scala]
-            + [TEdge.scala][test/scala/ohnosequences/scarph/titan/TEdge.scala]
             + [TitanGodsTest.scala][test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]
-            + [TitanGraphSchema.scala][test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
             + [TitanSchemaTest.scala][test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]
-            + [TVertex.scala][test/scala/ohnosequences/scarph/titan/TVertex.scala]
-          + [vertexTypes.scala][test/scala/ohnosequences/scarph/vertexTypes.scala]
-          + [vertices.scala][test/scala/ohnosequences/scarph/vertices.scala]
 
-[main/scala/ohnosequences/scarph/Denotation.scala]: ../../../../../main/scala/ohnosequences/scarph/Denotation.scala.md
-[main/scala/ohnosequences/scarph/Edge.scala]: ../../../../../main/scala/ohnosequences/scarph/Edge.scala.md
-[main/scala/ohnosequences/scarph/EdgeType.scala]: ../../../../../main/scala/ohnosequences/scarph/EdgeType.scala.md
-[main/scala/ohnosequences/scarph/Expressions.scala]: ../../../../../main/scala/ohnosequences/scarph/Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: ../../../../../main/scala/ohnosequences/scarph/HasProperties.scala.md
-[main/scala/ohnosequences/scarph/Property.scala]: ../../../../../main/scala/ohnosequences/scarph/Property.scala.md
-[main/scala/ohnosequences/scarph/Vertex.scala]: ../../../../../main/scala/ohnosequences/scarph/Vertex.scala.md
-[main/scala/ohnosequences/scarph/VertexType.scala]: ../../../../../main/scala/ohnosequences/scarph/VertexType.scala.md
-[test/scala/ohnosequences/scarph/edges.scala]: ../edges.scala.md
-[test/scala/ohnosequences/scarph/edgeTypes.scala]: ../edgeTypes.scala.md
-[test/scala/ohnosequences/scarph/expressions.scala]: ../expressions.scala.md
-[test/scala/ohnosequences/scarph/properties.scala]: ../properties.scala.md
+[main/scala/ohnosequences/scarph/titan/TEdge.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TEdge.scala.md
+[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TVertex.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TVertex.scala.md
+[test/scala/ohnosequences/scarph/titan/expressions.scala]: expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: godsSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TEdge.scala]: TEdge.scala.md
 [test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: TitanGodsTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: TitanGraphSchema.scala.md
 [test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]: TitanSchemaTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TVertex.scala]: TVertex.scala.md
-[test/scala/ohnosequences/scarph/vertexTypes.scala]: ../vertexTypes.scala.md
-[test/scala/ohnosequences/scarph/vertices.scala]: ../vertices.scala.md

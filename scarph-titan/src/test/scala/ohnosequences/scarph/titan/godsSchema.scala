@@ -1,4 +1,4 @@
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan.test
 
 import ohnosequences.scarph._
 
@@ -15,10 +15,10 @@ object GodsSchema {
     ### Properties
   */
   case object name extends Property[String]
-  case object age extends Property[Int]
+  case object age extends Property[Integer]
   // instead of this property we will create REAL types (because we are cool)
   // case object `type` extends Property[String]
-  case object time extends Property[Int]
+  case object time extends Property[Integer]
   case object reason extends Property[String]
   // This is something advanced:
   import com.thinkaurelius.titan.core.attribute.Geoshape

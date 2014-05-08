@@ -1,6 +1,7 @@
-package ohnosequences.scarph.test.titan
+package ohnosequences.scarph.titan.test
 
 import GodsSchema._
+import ohnosequences.scarph.titan._
 
 object GodsImplementation {
 
