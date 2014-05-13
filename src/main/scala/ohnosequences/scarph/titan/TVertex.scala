@@ -4,20 +4,20 @@ import ohnosequences.scarph._
 
 trait AnyTVertex extends AnyVertex { tvertex =>
 
-  type Rep = com.thinkaurelius.titan.core.TitanVertex
+  type Raw = com.thinkaurelius.titan.core.TitanVertex
 
   /* Reading any property from a TitanVertex */
   import AnyProperty._
-  implicit def readFromTitanVertex(vr: TaggedRep) = 
-    new ReadFrom[TaggedRep](vr) {
-      def apply[P <: AnyProperty](p: P): p.Rep = vr.getProperty[p.Rep](p.label)
+  implicit def readFromTitanVertex(vr: Rep) = 
+    new ReadFrom[Rep](vr) {
+      def apply[P <: AnyProperty](p: P): p.Raw = vr.getProperty[p.Raw](p.label)
     }
 
   /* Getting a property from any TitanVertex */
   import SmthHasProperty._
   implicit def unsafeGetProperty[P <: AnyProperty: PropertyOf[this.Tpe]#is](p: P) = 
     new GetProperty[P](p) {
-      def apply(rep: TaggedRep): p.Rep = rep.getProperty[p.Rep](p.label)
+      def apply(rep: Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }
 
   // TODO: provide ReadFrom for %:
@@ -33,10 +33,10 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     E <: Singleton with AnyEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
   ](e: E): RetrieveOutEdge[E] = new RetrieveOutEdge[E](e) {
 
-      def apply(rep: tvertex.TaggedRep): e.tpe.Out[e.TaggedRep] = {
+      def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
         
-        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.TaggedRep]]
-        it.headOption: Option[e.TaggedRep]
+        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.headOption: Option[e.Rep]
       }
     }
 
@@ -44,9 +44,9 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     E <: Singleton with AnyEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
   ](e: E): RetrieveOutEdge[E] = new RetrieveOutEdge[E](e) {
 
-      def apply(rep: tvertex.TaggedRep): e.tpe.Out[e.TaggedRep] = {
-        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.TaggedRep]]
-        it.toList: List[e.TaggedRep]
+      def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
+        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.toList: List[e.Rep]
       }
     }
 
@@ -55,9 +55,9 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     E <: Singleton with AnyEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
   ](e: E): RetrieveInEdge[E] = new RetrieveInEdge[E](e) {
 
-      def apply(rep: tvertex.TaggedRep): e.tpe.In[e.TaggedRep] = {
-        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.TaggedRep]]
-        it.headOption: Option[e.TaggedRep]
+      def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
+        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.headOption: Option[e.Rep]
       }
     }
 
@@ -65,9 +65,9 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     E <: Singleton with AnyEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
   ](e: E): RetrieveInEdge[E] = new RetrieveInEdge[E](e) {
 
-      def apply(rep: tvertex.TaggedRep): e.tpe.In[e.TaggedRep] = {
-        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.TaggedRep]]
-        it.toList: List[e.TaggedRep]
+      def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
+        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.toList: List[e.Rep]
       }
     }
 

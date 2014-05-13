@@ -52,8 +52,8 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
     val ageKey: TitanKey = ageType.asInstanceOf[TitanKey]
     val nameKey: TitanKey = nameType.asInstanceOf[TitanKey]
 
-    assert(ageKey.getDataType.getName === classOf[age.Rep].getName)
-    assert(nameKey.getDataType.getName === classOf[name.Rep].getName)
+    assert(ageKey.getDataType.getName === classOf[age.Raw].getName)
+    assert(nameKey.getDataType.getName === classOf[name.Raw].getName)
 
   }
 

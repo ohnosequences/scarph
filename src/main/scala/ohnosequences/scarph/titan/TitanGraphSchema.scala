@@ -26,8 +26,8 @@ object MakeKeys {
     import scala.reflect._
 
     // TODO: add uniqueness and indexing parameters
-    def addPropertyKey[P <: AnyProperty](p: P)(implicit c: ClassTag[p.Rep]): TitanKey = {
-      val clazz = c.runtimeClass.asInstanceOf[Class[p.Rep]]
+    def addPropertyKey[P <: AnyProperty](p: P)(implicit c: ClassTag[p.Raw]): TitanKey = {
+      val clazz = c.runtimeClass.asInstanceOf[Class[p.Raw]]
       g.makeKey(p.label).dataType(clazz).single.make
     }
 
