@@ -16,14 +16,14 @@ object vertices {
   
   case object user extends Vertex(User) { self =>
     /* Now users can be created with `user ->> UserImpl(...)`  */
-    type Rep = UserImpl
+    type Raw = UserImpl
 
     /* Provide implicits here (or elsewhere) for all (or some) properties */
     implicit object readId extends GetProperty(id) {
-      def apply(rep: user.TaggedRep): id.Rep = (rep: user.Rep).id
+      def apply(rep: user.Rep): id.Raw = (rep: user.Rep).id
     }
     implicit object readSince extends GetProperty(since) {
-      def apply(rep: self.TaggedRep): since.Rep = (rep: self.Rep).since
+      def apply(rep: self.Rep): since.Raw = (rep: self.Rep).since
     }
   }
 
@@ -32,10 +32,10 @@ object vertices {
       We are lazy, so we will use the same representation for orgs
       even though we care only about the `name` property
     */
-    type Rep = UserImpl
+    type Raw = UserImpl
 
     implicit object readName extends GetProperty(name) {
-      def apply(rep: self.TaggedRep) = rep.name
+      def apply(rep: self.Rep) = rep.name
     }
   }
 
@@ -64,7 +64,7 @@ class VertexSuite extends org.scalatest.FunSuite {
       We can also add a retriever for the `name` property externally:
     */
     implicit object readUserName extends GetProperty(name) {
-      def apply(rep: user.TaggedRep) = rep.name
+      def apply(rep: user.Rep) = rep.name
     }
 
     assert((u get id) === "1ad3a34df")
@@ -88,7 +88,7 @@ class VertexSuite extends org.scalatest.FunSuite {
     */
     implicit val orgFounded = Org has since
     implicit object readOrgSince extends org.GetProperty(since) {
-      def apply(rep: org.TaggedRep) = rep.since
+      def apply(rep: org.Rep) = rep.since
     }
     assert((o get since) === 1977)
 

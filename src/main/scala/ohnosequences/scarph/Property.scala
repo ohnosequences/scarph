@@ -9,14 +9,14 @@ package ohnosequences.scarph
 // TODO move to AnyDenotation
 trait AnyProperty extends LiteralType {
   // NOTE: should this go somewhere else?
-  type Rep
+  type Raw
 }
 
 import scala.reflect._
 
 class Property[V](implicit c: ClassTag[V]) extends AnyProperty with shapeless.FieldOf[V] { 
 
-  type Rep = V 
+  type Raw = V 
 }
 
 object AnyProperty {
@@ -32,14 +32,14 @@ object AnyProperty {
       (implicit
         ev: PropertyOf[vr.DenotedType]#is[P],
         mkReader: VT => ReadFrom[VT]
-      ): p.Rep = mkReader(vr).apply(p)
+      ): p.Raw = mkReader(vr).apply(p)
 
   }
 
   /* For using `%:` you have to provide an implicit val of `ReadFrom` */
   abstract class ReadFrom[VT <: VertexTag](val vt: VT) {
     // NOTE: can't add `PropertyOf[vt.DenotedType]#is` requirement here
-    def apply[P <: AnyProperty](p: P): p.Rep
+    def apply[P <: AnyProperty](p: P): p.Raw
   }
 
 }

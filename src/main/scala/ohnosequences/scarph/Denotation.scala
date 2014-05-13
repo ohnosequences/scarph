@@ -20,7 +20,7 @@ trait AnyDenotation { self =>
   /*
     Why not `Raw` or something like that?
   */
-  type Rep
+  type Raw
 
   import Tagged._
   /*
@@ -29,11 +29,11 @@ trait AnyDenotation { self =>
     - `buh ->> buh.Raw(args)` for building it
     - `buh.Rep` for requiring it
   */
-  final type TaggedRep = TaggedWith[self.type]
+  final type Rep = TaggedWith[self.type]
   /*
     `Raw` enters, `Rep` leaves
   */
-  final def ->>(r: Rep): TaggedWith[self.type] = tagWith[self.type](r)
+  final def ->>(r: Raw): TaggedWith[self.type] = tagWith[self.type](r)
   // def ->>(r: Raw): self.Rep = tagWith[self.type](r)
 }
 
@@ -48,7 +48,7 @@ trait AnyDenotationTag {
   type DenotedType = Denotation#Tpe
 }
 
-trait DenotationTag[D <: AnyDenotation] extends AnyDenotationTag with KeyTag[D, D#Rep] {
+trait DenotationTag[D <: AnyDenotation] extends AnyDenotationTag with KeyTag[D, D#Raw] {
 
   type Denotation = D
 }
@@ -58,12 +58,12 @@ trait DenotationTag[D <: AnyDenotation] extends AnyDenotationTag with KeyTag[D, 
 */
 object Tagged {
 
-  type TaggedWith[D <: AnyDenotation] = D#Rep with DenotationTag[D]
+  type TaggedWith[D <: AnyDenotation] = D#Raw with DenotationTag[D]
 
   def tagWith[D <: AnyDenotation with Singleton] = new TagBuilder[D]
 
   class TagBuilder[D <: AnyDenotation] {
-    def apply(dr : D#Rep): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
+    def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
   }
 
 }
