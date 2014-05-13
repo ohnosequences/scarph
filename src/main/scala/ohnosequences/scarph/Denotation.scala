@@ -18,14 +18,12 @@ trait AnyDenotation { self =>
   val tpe: Tpe
 
   /*
-    Why not `Raw` or something like that?
+    The raw type of the representation
   */
   type Raw
 
   import Tagged._
   /*
-    This could be called just `Rep` instead; then you'd do for `buh` extending `Buh` something like 
-
     - `buh ->> buh.Raw(args)` for building it
     - `buh.Rep` for requiring it
   */
