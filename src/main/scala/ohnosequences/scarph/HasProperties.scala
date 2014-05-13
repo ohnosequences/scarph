@@ -9,17 +9,17 @@ trait HasProperties { self: AnyDenotation =>
     type Property <: AnyProperty
     val p: Property
 
-    def apply(rep: self.TaggedRep): p.Rep
+    def apply(rep: self.Rep): p.Raw
   }
 
   abstract class GetProperty[P <: AnyProperty](val p: P) 
       extends AnyGetProperty { type Property = P }
 
-  implicit def propertyOps(rep: self.TaggedRep): PropertyOps = PropertyOps(rep)
-  case class   PropertyOps(rep: self.TaggedRep) {
+  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
+  case class   PropertyOps(rep: self.Rep) {
 
     def get[P <: AnyProperty: PropertyOf[self.Tpe]#is](p: P)
-      (implicit mkGetter: P => GetProperty[P]): P#Rep = mkGetter(p).apply(rep)
+      (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
 
   }
 

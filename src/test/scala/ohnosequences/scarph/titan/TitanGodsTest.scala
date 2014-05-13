@@ -46,7 +46,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[V <: AnyTVertex](vx: V)(k: String, v: String): vx.TaggedRep = {
+    def getTagged[V <: AnyTVertex](vx: V)(k: String, v: String): vx.Rep = {
       vx ->> tg.getVertices(k, v).iterator().next().asInstanceOf[TitanVertex]
     }
   } 
@@ -68,7 +68,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     
     assert(hercules.getProperty[Int]("age") === (hercules get age))
 
-    val es: List[battled.TaggedRep] = hercules out battled
+    val es: List[battled.Rep] = hercules out battled
     assert((hercules out battled map { _ get time }).toSet === Set(1, 12, 2))
   }
 
@@ -85,7 +85,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val pluto = g.getTagged(god)("name", "pluto")
 
-    val pe: List[pet.TaggedRep] = pluto out pet
+    val pe: List[pet.Rep] = pluto out pet
     assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
 
     assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))

@@ -7,14 +7,14 @@ trait AnyEdge extends Denotation[AnyEdgeType] with HasProperties { edge =>
 
   /* Get source/target from this representation */
   abstract class GetSource[S <: AnyVertex.ofType[Tpe#SourceType]](val source: S) {
-    def apply(edgeRep: edge.TaggedRep): source.TaggedRep
+    def apply(edgeRep: edge.Rep): source.Rep
   }
   abstract class GetTarget[T <: AnyVertex.ofType[Tpe#TargetType]](val target: T) {
-    def apply(edgeRep: edge.TaggedRep): target.TaggedRep
+    def apply(edgeRep: edge.Rep): target.Rep
   }
 
-  implicit def edgeOps(edgeRep: edge.TaggedRep) = EdgeOps(edgeRep)
-  case class   EdgeOps(edgeRep: edge.TaggedRep) {
+  implicit def edgeOps(edgeRep: edge.Rep) = EdgeOps(edgeRep)
+  case class   EdgeOps(edgeRep: edge.Rep) {
 
     def source[S <: Singleton with AnyVertex.ofType[Tpe#SourceType]](implicit getter: GetSource[S]) = getter(edgeRep)
 

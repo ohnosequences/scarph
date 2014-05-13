@@ -11,8 +11,8 @@ object edges {
   import properties._
 
   case class MemberOfImpl(
-    val source: user.TaggedRep,
-    val target: org.TaggedRep
+    val source: user.Rep,
+    val target: org.Rep
   )(
     val isPublic: Boolean,
     val since: Int,
@@ -21,36 +21,37 @@ object edges {
 
   case object memberOf extends Edge(MemberOf) {
     
-    type Rep = MemberOfImpl
+    type Raw = MemberOfImpl
 
     // implicit case object sourceGetter extends GetSource[user.type](user) {
-    //   def apply(rep: memberOf.TaggedRep) = rep.source
+    //   def apply(rep: memberOf.Rep) = rep.source
     // }
 
     implicit object readSince extends GetProperty(since) {
-      def apply(rep: TaggedRep) = rep.since
+      def apply(rep: Rep) = rep.since
     }
     implicit object readValidUntil extends GetProperty(validUntil) {
-      def apply(rep: TaggedRep) = rep.validUntil
+      def apply(rep: Rep) = rep.validUntil
     }
   }
 
   implicit case object memberSourceGetter extends memberOf.GetSource[user.type](user) {
-      def apply(rep: memberOf.TaggedRep) = rep.source
+      def apply(rep: memberOf.Rep) = rep.source
     }
 
   case class OwnsImpl(
-    val source: user.TaggedRep,
-    val target: org.TaggedRep
+    val source: user.Rep,
+    val target: org.Rep
   )
   object owns extends Edge(Owns) { self =>
-    type Rep = OwnsImpl
+    
+    type Raw = OwnsImpl
 
     implicit object sourceGetter extends GetSource[user.type](user) {
-      def apply(rep: self.TaggedRep) = rep.source
+      def apply(rep: self.Rep) = rep.source
     }
     implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: self.TaggedRep) = rep.target
+      def apply(rep: self.Rep) = rep.target
     }
   }
 
@@ -70,7 +71,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     import edges.memberOf._
     import edgeTypes.MemberOf._
     val u = user ->> UserImpl(id = "1ad3a34df", name = "Robustiano Satrústegui", since = 2349965)
-    val oracle: org.TaggedRep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
+    val oracle: org.Rep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
 
     val m = memberOf ->> MemberOfImpl(source = u, target = oracle)(isPublic = true, since = 2349965, validUntil = 38724987)
 
@@ -86,7 +87,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
 
     /* Adding target getter externally: */
     implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: memberOf.TaggedRep) = rep.target
+      def apply(rep: memberOf.Rep) = rep.target
     }
     assert(m.target === oracle)
 
@@ -101,7 +102,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     implicit val weForgotToImportIt = MemberOf has isPublic
 
     implicit object readIsPublic extends GetProperty(isPublic) {
-      def apply(rep: memberOf.TaggedRep) = rep.isPublic
+      def apply(rep: memberOf.Rep) = rep.isPublic
     }
     assert(m.get(isPublic) === true)
 
@@ -114,7 +115,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     
 
     /* Just a static list of all `memberOf` edges */
-    val members: List[memberOf.TaggedRep] = List(
+    val members: List[memberOf.Rep] = List(
       memberOf ->> MemberOfImpl(u, oracle)(false, 0, 0),
       // every company has some bob
       memberOf ->> MemberOfImpl(bob, oracle)(true, 0, 0),
@@ -125,19 +126,19 @@ class EdgeSuite extends org.scalatest.FunSuite {
 
     /* Retrieving edge */
     implicit def retrieveMemberOf(e: memberOf.type) = new user.RetrieveOutEdge(memberOf) {
-      def apply(rep: user.TaggedRep) = members filter { _.source == rep }
+      def apply(rep: user.Rep) = members filter { _.source == rep }
     }
     assert(bob.out(memberOf).map(_.target) === List(oracle, typesafe))
 
 
-    val owners: List[owns.TaggedRep] = List(
+    val owners: List[owns.Rep] = List(
       owns ->> OwnsImpl(u, oracle), // together with bob of course
       owns ->> OwnsImpl(bob, oracle),
       owns ->> OwnsImpl(martin, typesafe)
     )
 
     implicit def retrieveOwns(e: owns.type) = new user.RetrieveOutEdge(owns) {
-      def apply(rep: user.TaggedRep) = owners find { _.source == rep }
+      def apply(rep: user.Rep) = owners find { _.source == rep }
     }
     assert(((martin out owns) map (_.target)) === Some(typesafe))
     // cool, martin owns some typesafe org
