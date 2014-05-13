@@ -4,7 +4,7 @@ import ohnosequences.scarph._
 
 trait AnyTVertex extends AnyVertex { tvertex =>
 
-  type Raw = com.thinkaurelius.titan.core.TitanVertex
+  final type Raw = com.thinkaurelius.titan.core.TitanVertex
 
   /* Reading any property from a TitanVertex */
   import AnyProperty._
