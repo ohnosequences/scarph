@@ -94,9 +94,17 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
     val sysprog = g.getTagged(articleProps)("title", "Idris, a General Purpose Dependently Typed Programming Language: Design and Implementation ")
     assert(sysprog.get(published) === false)
     
+    // Vs - vertices, Es - edges
     val sysprogV = sysprog.source
+    val authorEs = sysprogV out author
+    val authorVs = authorEs map { _ target }
+    val humanEs = authorVs flatMap { _ out humanProps }
+    val names = humanEs map { _ get name }
 
-    // assert((sysprogV out author map { _ out human get name }).toSet === Set("Edwin Brady"))
+    assert(names === List("Edwin Brady"))
+
+    // in one line:
+    assert(((sysprogV out author) map { _ target } flatMap { _ out humanProps } map { _ get name }) === List("Edwin Brady"))
   }
 
 }
