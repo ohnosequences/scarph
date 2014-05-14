@@ -25,17 +25,17 @@ A representation of the `User` vertex type; note how it is external to `User`, a
 Now users can be created with `user ->> UserImpl(...)`
 
 ```scala
-    type Rep = UserImpl
+    type Raw = UserImpl
 ```
 
 Provide implicits here (or elsewhere) for all (or some) properties
 
 ```scala
     implicit object readId extends GetProperty(id) {
-      def apply(rep: user.TaggedRep): id.Rep = (rep: user.Rep).id
+      def apply(rep: user.Rep): id.Raw = (rep: user.Rep).id
     }
     implicit object readSince extends GetProperty(since) {
-      def apply(rep: self.TaggedRep): since.Rep = (rep: self.Rep).since
+      def apply(rep: self.Rep): since.Raw = (rep: self.Rep).since
     }
   }
 
@@ -48,10 +48,10 @@ even though we care only about the `name` property
 
 
 ```scala
-    type Rep = UserImpl
+    type Raw = UserImpl
 
     implicit object readName extends GetProperty(name) {
-      def apply(rep: self.TaggedRep) = rep.name
+      def apply(rep: self.Rep) = rep.name
     }
   }
 
@@ -87,7 +87,7 @@ We can also add a retriever for the `name` property externally:
 
 ```scala
     implicit object readUserName extends GetProperty(name) {
-      def apply(rep: user.TaggedRep) = rep.name
+      def apply(rep: user.Rep) = rep.name
     }
 
     assert((u get id) === "1ad3a34df")
@@ -116,7 +116,7 @@ representation of org so we just implement it in place:
 ```scala
     implicit val orgFounded = Org has since
     implicit object readOrgSince extends org.GetProperty(since) {
-      def apply(rep: org.TaggedRep) = rep.since
+      def apply(rep: org.Rep) = rep.since
     }
     assert((o get since) === 1977)
 
@@ -154,6 +154,10 @@ representation of org so we just implement it in place:
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -177,6 +181,9 @@ representation of org so we just implement it in place:
 [test/scala/ohnosequences/scarph/edges.scala]: edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: titan/godsSchema.scala.md

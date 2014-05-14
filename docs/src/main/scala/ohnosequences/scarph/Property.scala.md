@@ -8,18 +8,31 @@ Properties
 
 
 ```scala
-// LiteralType has a label!
-// TODO move to AnyDenotation
-trait AnyProperty extends LiteralType {
-  // NOTE: should this go somewhere else?
-  type Rep
+trait AnyProperty extends AnyDenotation {
+  val label: String
+
+  type TYPE <: AnyProperty
 }
 
 import scala.reflect._
+```
 
-class Property[V](implicit c: ClassTag[V]) extends AnyProperty with shapeless.FieldOf[V] { 
 
-  type Rep = V 
+Properties sould be defined as case objects:
+
+``` scala
+case object Name extends Property[String]
+```
+
+
+```scala
+class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
+  val label = this.toString
+
+  type Tpe = this.type
+  val  tpe = this: Tpe
+
+  type Raw = V 
 }
 
 object AnyProperty {
@@ -38,7 +51,7 @@ Right associative property getter for vertices
       (implicit
         ev: PropertyOf[vr.DenotedType]#is[P],
         mkReader: VT => ReadFrom[VT]
-      ): p.Rep = mkReader(vr).apply(p)
+      ): p.Raw = mkReader(vr).apply(p)
 
   }
 ```
@@ -48,7 +61,7 @@ For using `%:` you have to provide an implicit val of `ReadFrom`
 ```scala
   abstract class ReadFrom[VT <: VertexTag](val vt: VT) {
     // NOTE: can't add `PropertyOf[vt.DenotedType]#is` requirement here
-    def apply[P <: AnyProperty](p: P): p.Rep
+    def apply[P <: AnyProperty](p: P): p.Raw
   }
 
 }
@@ -109,6 +122,10 @@ object SmthHasProperty {
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -132,6 +149,9 @@ object SmthHasProperty {
 [test/scala/ohnosequences/scarph/edges.scala]: ../../../../test/scala/ohnosequences/scarph/edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../../../../test/scala/ohnosequences/scarph/edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../../../../test/scala/ohnosequences/scarph/properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md
