@@ -5,9 +5,14 @@ import java.io.File
 
 import ohnosequences.scarph._
 import ohnosequences.scarph.titan._
+import MakeKeys._
 
 import SimpleSchema._
 import SimpleSchemaImplementation._
+
+/* 
+  The point of this test is to create an example of a graph where properties are used only in edges
+*/
 
 class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -30,7 +35,19 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
         }
         cleanDir(graphLocation)
         g = TitanFactory.open(graphLocation.getAbsolutePath)
-        println("Created Titan graph")
+
+        // Defining property keys and edge labels
+        g.addPropertyKey(name)
+        g.addPropertyKey(phone)
+        g.addPropertyKey(title)
+        g.addPropertyKey(published)
+
+        g.addEdgeLabel(humanProps)
+        g.addEdgeLabel(articleProps)
+        g.addEdgeLabel(author)
+        g.addEdgeLabel(knows)
+
+        // Adding actual vertices/edges
         val humans = g.addVertex(null)
 
         val edwin = g.addVertex(null)
@@ -64,6 +81,8 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
 
         g.addEdge(null, sysprog, edwin, author.tpe.label)
 
+        g.commit
+        println("Created a new Titan graph")
       }
     }
   }
@@ -82,14 +101,14 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
     }
   } 
 
-  test("get edge property") {
+  test("get human's phone property") {
 
     val edwin = g.getTagged(humanProps)("name", "Edwin Brady")
     assert(edwin.get(phone) === 1334463271)
 
   }
 
-  test("get OUTgoing edges and their property") {
+  test("get names of authors of an article") {
 
     val sysprog = g.getTagged(articleProps)("title", "Idris, a General Purpose Dependently Typed Programming Language: Design and Implementation ")
     assert(sysprog.get(published) === false)
@@ -103,8 +122,8 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
 
     assert(names === List("Edwin Brady"))
 
-    // in one line:
-    assert(((sysprogV out author) map { _ target } flatMap { _ out humanProps } map { _ get name }) === List("Edwin Brady"))
+    // same, but in one line:
+    assert((sysprog.source out author map { _ target } flatMap { _ out humanProps } map { _ get name }) === List("Edwin Brady"))
   }
 
 }

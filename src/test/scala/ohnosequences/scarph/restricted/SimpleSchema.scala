@@ -9,7 +9,7 @@ object SimpleSchema {
   case object phone extends Property[Integer]
 
   case object title extends Property[String]
-  case object published extends Property[Boolean]
+  case object published extends Property[java.lang.Boolean]
 
   /* Vertex types and edge types representing them */
   case object Human extends VertexType("Human")
