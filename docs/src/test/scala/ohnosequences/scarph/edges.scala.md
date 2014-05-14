@@ -13,8 +13,8 @@ object edges {
   import properties._
 
   case class MemberOfImpl(
-    val source: user.TaggedRep,
-    val target: org.TaggedRep
+    val source: user.Rep,
+    val target: org.Rep
   )(
     val isPublic: Boolean,
     val since: Int,
@@ -23,36 +23,37 @@ object edges {
 
   case object memberOf extends Edge(MemberOf) {
     
-    type Rep = MemberOfImpl
+    type Raw = MemberOfImpl
 
     // implicit case object sourceGetter extends GetSource[user.type](user) {
-    //   def apply(rep: memberOf.TaggedRep) = rep.source
+    //   def apply(rep: memberOf.Rep) = rep.source
     // }
 
     implicit object readSince extends GetProperty(since) {
-      def apply(rep: TaggedRep) = rep.since
+      def apply(rep: Rep) = rep.since
     }
     implicit object readValidUntil extends GetProperty(validUntil) {
-      def apply(rep: TaggedRep) = rep.validUntil
+      def apply(rep: Rep) = rep.validUntil
     }
   }
 
   implicit case object memberSourceGetter extends memberOf.GetSource[user.type](user) {
-      def apply(rep: memberOf.TaggedRep) = rep.source
+      def apply(rep: memberOf.Rep) = rep.source
     }
 
   case class OwnsImpl(
-    val source: user.TaggedRep,
-    val target: org.TaggedRep
+    val source: user.Rep,
+    val target: org.Rep
   )
   object owns extends Edge(Owns) { self =>
-    type Rep = OwnsImpl
+    
+    type Raw = OwnsImpl
 
     implicit object sourceGetter extends GetSource[user.type](user) {
-      def apply(rep: self.TaggedRep) = rep.source
+      def apply(rep: self.Rep) = rep.source
     }
     implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: self.TaggedRep) = rep.target
+      def apply(rep: self.Rep) = rep.target
     }
   }
 
@@ -71,8 +72,8 @@ class EdgeSuite extends org.scalatest.FunSuite {
 
     import edges.memberOf._
     import edgeTypes.MemberOf._
-    val u = user ->> UserImpl(id = "1ad3a34df", name = "Robustiano Satr?stegui", since = 2349965)
-    val oracle: org.TaggedRep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
+    val u = user ->> UserImpl(id = "1ad3a34df", name = "Robustiano Satrústegui", since = 2349965)
+    val oracle: org.Rep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
 
     val m = memberOf ->> MemberOfImpl(source = u, target = oracle)(isPublic = true, since = 2349965, validUntil = 38724987)
 
@@ -92,7 +93,7 @@ Adding target getter externally:
 
 ```scala
     implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: memberOf.TaggedRep) = rep.target
+      def apply(rep: memberOf.Rep) = rep.target
     }
     assert(m.target === oracle)
 ```
@@ -110,7 +111,7 @@ Getting edge properties
     implicit val weForgotToImportIt = MemberOf has isPublic
 
     implicit object readIsPublic extends GetProperty(isPublic) {
-      def apply(rep: memberOf.TaggedRep) = rep.isPublic
+      def apply(rep: memberOf.Rep) = rep.isPublic
     }
     assert(m.get(isPublic) === true)
 ```
@@ -128,7 +129,7 @@ More vartices and edges
 Just a static list of all `memberOf` edges
 
 ```scala
-    val members: List[memberOf.TaggedRep] = List(
+    val members: List[memberOf.Rep] = List(
       memberOf ->> MemberOfImpl(u, oracle)(false, 0, 0),
       // every company has some bob
       memberOf ->> MemberOfImpl(bob, oracle)(true, 0, 0),
@@ -142,19 +143,19 @@ Retrieving edge
 
 ```scala
     implicit def retrieveMemberOf(e: memberOf.type) = new user.RetrieveOutEdge(memberOf) {
-      def apply(rep: user.TaggedRep) = members filter { _.source == rep }
+      def apply(rep: user.Rep) = members filter { _.source == rep }
     }
     assert(bob.out(memberOf).map(_.target) === List(oracle, typesafe))
 
 
-    val owners: List[owns.TaggedRep] = List(
+    val owners: List[owns.Rep] = List(
       owns ->> OwnsImpl(u, oracle), // together with bob of course
       owns ->> OwnsImpl(bob, oracle),
       owns ->> OwnsImpl(martin, typesafe)
     )
 
     implicit def retrieveOwns(e: owns.type) = new user.RetrieveOutEdge(owns) {
-      def apply(rep: user.TaggedRep) = owners find { _.source == rep }
+      def apply(rep: user.Rep) = owners find { _.source == rep }
     }
     assert(((martin out owns) map (_.target)) === Some(typesafe))
     // cool, martin owns some typesafe org
@@ -170,56 +171,56 @@ Retrieving edge
 ### Index
 
 + src
-  + main
-    + scala
-      + ohnosequences
-        + scarph
-          + [Denotation.scala][main/scala/ohnosequences/scarph/Denotation.scala]
-          + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
-          + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
-          + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
-          + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
-          + titan
-            + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
-            + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
-          + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
-          + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
   + test
     + scala
       + ohnosequences
         + scarph
+          + [vertices.scala][test/scala/ohnosequences/scarph/vertices.scala]
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
-          + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
           + titan
-            + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
             + [godsSchema.scala][test/scala/ohnosequences/scarph/titan/godsSchema.scala]
-            + [TitanGodsTest.scala][test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]
             + [TitanSchemaTest.scala][test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]
+            + [TitanGodsTest.scala][test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]
+            + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
           + [vertexTypes.scala][test/scala/ohnosequences/scarph/vertexTypes.scala]
-          + [vertices.scala][test/scala/ohnosequences/scarph/vertices.scala]
+          + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+  + main
+    + scala
+      + ohnosequences
+        + scarph
+          + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
+          + [Denotation.scala][main/scala/ohnosequences/scarph/Denotation.scala]
+          + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
+          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
+          + titan
+            + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
+            + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
+            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+          + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
+          + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
+          + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
 
-[main/scala/ohnosequences/scarph/Denotation.scala]: ../../../../main/scala/ohnosequences/scarph/Denotation.scala.md
-[main/scala/ohnosequences/scarph/Edge.scala]: ../../../../main/scala/ohnosequences/scarph/Edge.scala.md
-[main/scala/ohnosequences/scarph/EdgeType.scala]: ../../../../main/scala/ohnosequences/scarph/EdgeType.scala.md
-[main/scala/ohnosequences/scarph/Expressions.scala]: ../../../../main/scala/ohnosequences/scarph/Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: ../../../../main/scala/ohnosequences/scarph/HasProperties.scala.md
-[main/scala/ohnosequences/scarph/Property.scala]: ../../../../main/scala/ohnosequences/scarph/Property.scala.md
-[main/scala/ohnosequences/scarph/titan/TEdge.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala.md
-[main/scala/ohnosequences/scarph/titan/TVertex.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TVertex.scala.md
-[main/scala/ohnosequences/scarph/Vertex.scala]: ../../../../main/scala/ohnosequences/scarph/Vertex.scala.md
-[main/scala/ohnosequences/scarph/VertexType.scala]: ../../../../main/scala/ohnosequences/scarph/VertexType.scala.md
+[test/scala/ohnosequences/scarph/vertices.scala]: vertices.scala.md
 [test/scala/ohnosequences/scarph/edges.scala]: edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: edgeTypes.scala.md
-[test/scala/ohnosequences/scarph/properties.scala]: properties.scala.md
-[test/scala/ohnosequences/scarph/titan/expressions.scala]: titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: titan/godsSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: titan/TitanGodsTest.scala.md
 [test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]: titan/TitanSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: titan/TitanGodsTest.scala.md
+[test/scala/ohnosequences/scarph/titan/expressions.scala]: titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/vertexTypes.scala]: vertexTypes.scala.md
-[test/scala/ohnosequences/scarph/vertices.scala]: vertices.scala.md
+[test/scala/ohnosequences/scarph/properties.scala]: properties.scala.md
+[main/scala/ohnosequences/scarph/Property.scala]: ../../../../main/scala/ohnosequences/scarph/Property.scala.md
+[main/scala/ohnosequences/scarph/Denotation.scala]: ../../../../main/scala/ohnosequences/scarph/Denotation.scala.md
+[main/scala/ohnosequences/scarph/EdgeType.scala]: ../../../../main/scala/ohnosequences/scarph/EdgeType.scala.md
+[main/scala/ohnosequences/scarph/HasProperties.scala]: ../../../../main/scala/ohnosequences/scarph/HasProperties.scala.md
+[main/scala/ohnosequences/scarph/VertexType.scala]: ../../../../main/scala/ohnosequences/scarph/VertexType.scala.md
+[main/scala/ohnosequences/scarph/titan/TEdge.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TEdge.scala.md
+[main/scala/ohnosequences/scarph/titan/TVertex.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TVertex.scala.md
+[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/Vertex.scala]: ../../../../main/scala/ohnosequences/scarph/Vertex.scala.md
+[main/scala/ohnosequences/scarph/Expressions.scala]: ../../../../main/scala/ohnosequences/scarph/Expressions.scala.md
+[main/scala/ohnosequences/scarph/Edge.scala]: ../../../../main/scala/ohnosequences/scarph/Edge.scala.md
