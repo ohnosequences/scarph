@@ -6,12 +6,12 @@ import ohnosequences.scarph._
 
 trait AnyTEdge extends AnyEdge { tedge =>
 
-  type Rep = com.thinkaurelius.titan.core.TitanEdge
+  final type Raw = com.thinkaurelius.titan.core.TitanEdge
 
-  type Source <: AnyVertex.ofType[Tpe#SourceType]
+  type Source <: AnyVertex.ofType[Tpe#SourceType] with AnyTVertex
   val source: Source
 
-  type Target <: AnyVertex.ofType[Tpe#TargetType]
+  type Target <: AnyVertex.ofType[Tpe#TargetType] with AnyTVertex
   val target: Target
 ```
 
@@ -21,7 +21,7 @@ Getting a property from any TitanEdge
   import SmthHasProperty._
   implicit def unsafeGetProperty[P <: AnyProperty: PropertyOf[this.Tpe]#is](p: P) = 
     new GetProperty[P](p) {
-      def apply(rep: tedge.TaggedRep): p.Rep = rep.getProperty[p.Rep](p.label)
+      def apply(rep: tedge.Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }
 
   import com.tinkerpop.blueprints.Direction
@@ -31,8 +31,8 @@ Getting source vertex
 
 ```scala
   implicit object sourceGetter extends GetSource[Source](source) {
-    def apply(rep: tedge.TaggedRep): source.TaggedRep = 
-      source ->> rep.getVertex(Direction.OUT).asInstanceOf[source.Rep]
+    def apply(rep: tedge.Rep): source.Rep = 
+      source ->> rep.getVertex(Direction.OUT)
   }
 ```
 
@@ -40,16 +40,16 @@ Getting target vertex
 
 ```scala
   implicit object targetGetter extends GetTarget[Target](target) {
-    def apply(rep: tedge.TaggedRep): target.TaggedRep = 
-      target ->> rep.getVertex(Direction.IN).asInstanceOf[target.Rep]
+    def apply(rep: tedge.Rep): target.Rep = 
+      target ->> rep.getVertex(Direction.IN)
   }
 
 }
 
 class TEdge[
     ET <: AnyEdgeType, 
-    S <: AnyVertex.ofType[ET#SourceType], 
-    T <: AnyVertex.ofType[ET#TargetType]
+    S <: AnyVertex.ofType[ET#SourceType] with AnyTVertex, 
+    T <: AnyVertex.ofType[ET#TargetType] with AnyTVertex
   ](val source: S, val tpe: ET, val target: T) extends AnyTEdge { 
     type Source = S
     type Tpe = ET 
@@ -87,6 +87,10 @@ class TEdge[
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -110,6 +114,9 @@ class TEdge[
 [test/scala/ohnosequences/scarph/edges.scala]: ../../../../../test/scala/ohnosequences/scarph/edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../../../../../test/scala/ohnosequences/scarph/edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../../../../../test/scala/ohnosequences/scarph/properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: ../../../../../test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: ../../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md

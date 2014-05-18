@@ -9,13 +9,22 @@ import shapeless.record._
 This trait represents a mapping between 
 
 - members `Tpe` of a universe of types `TYPE`
-- and `Rep` a type meant to be a denotation of `Tpe` thus the name
+- and `Raw` a type meant to be a denotation of `Tpe` thus the name
 
-Tagging is used for being able to operate on `Rep` values knowing what they are denotating.
+Tagging is used for being able to operate on `Raw` values knowing what they are denotating; `Rep` is just `Raw` tagged with the `.type` of this denotation. So, summarizing
+
+- `Tpe` is the denotated type
+- `Raw` is its denotation
+- `Rep <: Raw` is just `Raw` tagged with `this.type`
 
 
 ```scala
-trait AnyDenotation { self =>
+trait AnyDenotationLike {
+
+ type Raw
+ type Rep <: Raw
+}
+trait AnyDenotation extends AnyDenotationLike { self =>
 ```
 
 The base type for the types that this thing denotes
@@ -23,28 +32,24 @@ The base type for the types that this thing denotes
 ```scala
   type TYPE
   type Tpe <: TYPE
+  // TODO what about a version without this val?
   val tpe: Tpe
 ```
 
 
-Why not `Raw` or something like that?
+The type used to denotate `Tpe`.
 
 
 ```scala
-  type Rep
-
-  import Tagged._
+  type Raw
 ```
 
 
-This could be called just `Rep` instead; then you'd do for `buh` extending `Buh` something like 
-
-- `buh ->> buh.Raw(args)` for building it
-- `buh.Rep` for requiring it
+`Raw` tagged with `self.type`; this lets you recognize a denotation while being able to operate on it as `Raw`.
 
 
 ```scala
-  final type TaggedRep = TaggedWith[self.type]
+  final type Rep = AnyDenotation.TaggedWith[self.type]
 ```
 
 
@@ -52,40 +57,45 @@ This could be called just `Rep` instead; then you'd do for `buh` extending `Buh`
 
 
 ```scala
-  final def ->>(r: Rep): TaggedWith[self.type] = tagWith[self.type](r)
-  // def ->>(r: Raw): self.Rep = tagWith[self.type](r)
-}
-
-trait Denotation[T] extends AnyDenotation { 
-
-  type TYPE = T
-}
-
-trait AnyDenotationTag {
-
-  type Denotation <: AnyDenotation
-  type DenotedType = Denotation#Tpe
-}
-
-trait DenotationTag[D <: AnyDenotation] extends AnyDenotationTag with KeyTag[D, D#Rep] {
-
-  type Denotation = D
+  final def ->>(r: Raw): self.Rep = AnyDenotation.tagWith[self.type](r)
 }
 ```
 
 
-tagging functionality
+Bound the universe of types to be `T`s
 
 
 ```scala
-object Tagged {
+trait Denotation[T] extends AnyDenotation { 
 
-  type TaggedWith[D <: AnyDenotation] = D#Rep with DenotationTag[D]
+  type TYPE = T
+}
+```
+
+
+The companion object contains mainly tagging functionality.
+
+
+```scala
+object AnyDenotation {
+
+  type TaggedWith[D <: AnyDenotation] = D#Raw with Tag[D]
 
   def tagWith[D <: AnyDenotation with Singleton] = new TagBuilder[D]
 
   class TagBuilder[D <: AnyDenotation] {
-    def apply(dr : D#Rep): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
+    def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
+  }
+
+  trait AnyTag {
+
+    type Denotation <: AnyDenotation
+    type DenotedType = Denotation#Tpe
+  }
+
+  trait Tag[D <: AnyDenotation] extends AnyTag with KeyTag[D, D#Raw] {
+
+    type Denotation = D
   }
 
 }
@@ -121,6 +131,10 @@ object Tagged {
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -144,6 +158,9 @@ object Tagged {
 [test/scala/ohnosequences/scarph/edges.scala]: ../../../../test/scala/ohnosequences/scarph/edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../../../../test/scala/ohnosequences/scarph/edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../../../../test/scala/ohnosequences/scarph/properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md

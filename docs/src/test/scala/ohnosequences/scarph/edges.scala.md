@@ -13,8 +13,8 @@ object edges {
   import properties._
 
   case class MemberOfImpl(
-    val source: user.TaggedRep,
-    val target: org.TaggedRep
+    val source: user.Rep,
+    val target: org.Rep
   )(
     val isPublic: Boolean,
     val since: Int,
@@ -23,36 +23,37 @@ object edges {
 
   case object memberOf extends Edge(MemberOf) {
     
-    type Rep = MemberOfImpl
+    type Raw = MemberOfImpl
 
     // implicit case object sourceGetter extends GetSource[user.type](user) {
-    //   def apply(rep: memberOf.TaggedRep) = rep.source
+    //   def apply(rep: memberOf.Rep) = rep.source
     // }
 
     implicit object readSince extends GetProperty(since) {
-      def apply(rep: TaggedRep) = rep.since
+      def apply(rep: Rep) = rep.since
     }
     implicit object readValidUntil extends GetProperty(validUntil) {
-      def apply(rep: TaggedRep) = rep.validUntil
+      def apply(rep: Rep) = rep.validUntil
     }
   }
 
   implicit case object memberSourceGetter extends memberOf.GetSource[user.type](user) {
-      def apply(rep: memberOf.TaggedRep) = rep.source
+      def apply(rep: memberOf.Rep) = rep.source
     }
 
   case class OwnsImpl(
-    val source: user.TaggedRep,
-    val target: org.TaggedRep
+    val source: user.Rep,
+    val target: org.Rep
   )
   object owns extends Edge(Owns) { self =>
-    type Rep = OwnsImpl
+    
+    type Raw = OwnsImpl
 
     implicit object sourceGetter extends GetSource[user.type](user) {
-      def apply(rep: self.TaggedRep) = rep.source
+      def apply(rep: self.Rep) = rep.source
     }
     implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: self.TaggedRep) = rep.target
+      def apply(rep: self.Rep) = rep.target
     }
   }
 
@@ -72,7 +73,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     import edges.memberOf._
     import edgeTypes.MemberOf._
     val u = user ->> UserImpl(id = "1ad3a34df", name = "Robustiano Satr?stegui", since = 2349965)
-    val oracle: org.TaggedRep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
+    val oracle: org.Rep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
 
     val m = memberOf ->> MemberOfImpl(source = u, target = oracle)(isPublic = true, since = 2349965, validUntil = 38724987)
 
@@ -92,7 +93,7 @@ Adding target getter externally:
 
 ```scala
     implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: memberOf.TaggedRep) = rep.target
+      def apply(rep: memberOf.Rep) = rep.target
     }
     assert(m.target === oracle)
 ```
@@ -110,7 +111,7 @@ Getting edge properties
     implicit val weForgotToImportIt = MemberOf has isPublic
 
     implicit object readIsPublic extends GetProperty(isPublic) {
-      def apply(rep: memberOf.TaggedRep) = rep.isPublic
+      def apply(rep: memberOf.Rep) = rep.isPublic
     }
     assert(m.get(isPublic) === true)
 ```
@@ -128,7 +129,7 @@ More vartices and edges
 Just a static list of all `memberOf` edges
 
 ```scala
-    val members: List[memberOf.TaggedRep] = List(
+    val members: List[memberOf.Rep] = List(
       memberOf ->> MemberOfImpl(u, oracle)(false, 0, 0),
       // every company has some bob
       memberOf ->> MemberOfImpl(bob, oracle)(true, 0, 0),
@@ -142,19 +143,19 @@ Retrieving edge
 
 ```scala
     implicit def retrieveMemberOf(e: memberOf.type) = new user.RetrieveOutEdge(memberOf) {
-      def apply(rep: user.TaggedRep) = members filter { _.source == rep }
+      def apply(rep: user.Rep) = members filter { _.source == rep }
     }
     assert(bob.out(memberOf).map(_.target) === List(oracle, typesafe))
 
 
-    val owners: List[owns.TaggedRep] = List(
+    val owners: List[owns.Rep] = List(
       owns ->> OwnsImpl(u, oracle), // together with bob of course
       owns ->> OwnsImpl(bob, oracle),
       owns ->> OwnsImpl(martin, typesafe)
     )
 
     implicit def retrieveOwns(e: owns.type) = new user.RetrieveOutEdge(owns) {
-      def apply(rep: user.TaggedRep) = owners find { _.source == rep }
+      def apply(rep: user.Rep) = owners find { _.source == rep }
     }
     assert(((martin out owns) map (_.target)) === Some(typesafe))
     // cool, martin owns some typesafe org
@@ -193,6 +194,10 @@ Retrieving edge
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -216,6 +221,9 @@ Retrieving edge
 [test/scala/ohnosequences/scarph/edges.scala]: edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: titan/godsSchema.scala.md

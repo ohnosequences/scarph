@@ -5,16 +5,26 @@ package ohnosequences.scarph
 */
 
 
-// LiteralType has a label!
-// TODO move to AnyDenotation
-trait AnyProperty extends LiteralType {
-  // NOTE: should this go somewhere else?
-  type Raw
+trait AnyProperty extends AnyDenotation {
+  val label: String
+
+  type TYPE <: AnyProperty
 }
 
 import scala.reflect._
 
-class Property[V](implicit c: ClassTag[V]) extends AnyProperty with shapeless.FieldOf[V] { 
+/* 
+  Properties sould be defined as case objects:
+
+  ``` scala
+  case object Name extends Property[String]
+  ```
+*/
+class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
+  val label = this.toString
+
+  type Tpe = this.type
+  val  tpe = this: Tpe
 
   type Raw = V 
 }
