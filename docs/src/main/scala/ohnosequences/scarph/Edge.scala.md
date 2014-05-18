@@ -12,14 +12,14 @@ Get source/target from this representation
 
 ```scala
   abstract class GetSource[S <: AnyVertex.ofType[Tpe#SourceType]](val source: S) {
-    def apply(edgeRep: edge.TaggedRep): source.TaggedRep
+    def apply(edgeRep: edge.Rep): source.Rep
   }
   abstract class GetTarget[T <: AnyVertex.ofType[Tpe#TargetType]](val target: T) {
-    def apply(edgeRep: edge.TaggedRep): target.TaggedRep
+    def apply(edgeRep: edge.Rep): target.Rep
   }
 
-  implicit def edgeOps(edgeRep: edge.TaggedRep) = EdgeOps(edgeRep)
-  case class   EdgeOps(edgeRep: edge.TaggedRep) {
+  implicit def edgeOps(edgeRep: edge.Rep) = EdgeOps(edgeRep)
+  case class   EdgeOps(edgeRep: edge.Rep) {
 
     def source[S <: Singleton with AnyVertex.ofType[Tpe#SourceType]](implicit getter: GetSource[S]) = getter(edgeRep)
 
@@ -68,6 +68,10 @@ object AnyEdge {
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -91,6 +95,9 @@ object AnyEdge {
 [test/scala/ohnosequences/scarph/edges.scala]: ../../../../test/scala/ohnosequences/scarph/edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../../../../test/scala/ohnosequences/scarph/edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../../../../test/scala/ohnosequences/scarph/properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md

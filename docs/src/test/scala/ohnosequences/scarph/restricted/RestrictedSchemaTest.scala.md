@@ -1,22 +1,26 @@
 
 ```scala
-package ohnosequences.scarph.titan.test
+package ohnosequences.scarph.restricted.test
 
-// import org.scalatest._
-
-import com.thinkaurelius.titan.example.GraphOfTheGodsFactory
 import com.thinkaurelius.titan.core._
 import java.io.File
 
-import GodsSchema._
-import GodsImplementation._
-
 import ohnosequences.scarph._
 import ohnosequences.scarph.titan._
+import MakeKeys._
 
-class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
+import SimpleSchema._
+import SimpleSchemaImplementation._
+```
 
-  val graphLocation = new File("/tmp/titanTest")
+
+The point of this test is to create an example of a graph where properties are used only in edges
+
+
+```scala
+class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
+
+  val graphLocation = new File("/tmp/restrictedTitanTest")
   var g: TitanGraph = null
 
   // Reusing the graph if possible, else cleaning the directory and creating graph
@@ -24,7 +28,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     try { 
       g = TitanFactory.open(graphLocation.getAbsolutePath)
       // checking that the graph is there:
-      g.getVertices("name", "saturn").iterator().next()
+      // g.getVertices("name", "saturn").iterator().next()
+      g.getEdges("name", "Edwin Brady").iterator.next
       println("Reusing Titan graph")
     } catch {
       case e: Exception => {
@@ -33,8 +38,55 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
           else { println(f.toString); f.delete }
         }
         cleanDir(graphLocation)
-        g = GraphOfTheGodsFactory.create(graphLocation.getAbsolutePath)
-        println("Created Titan graph")
+        g = TitanFactory.open(graphLocation.getAbsolutePath)
+
+        // Defining property keys and edge labels
+        g.addPropertyKey(name)
+        g.addPropertyKey(phone)
+        g.addPropertyKey(title)
+        g.addPropertyKey(published)
+
+        g.addEdgeLabel(humanProps)
+        g.addEdgeLabel(articleProps)
+        g.addEdgeLabel(author)
+        g.addEdgeLabel(knows)
+
+        // Adding actual vertices/edges
+        val humans = g.addVertex(null)
+
+        val edwin = g.addVertex(null)
+        val edwin_human = g.addEdge(null, edwin, humans, humanProps.tpe.label)
+        edwin_human.setProperty(name.label, "Edwin Brady")
+        edwin_human.setProperty(phone.label, 1334463271)
+
+        val kevin = g.addVertex(null)
+        val kevin_human = g.addEdge(null, kevin, humans, humanProps.tpe.label)
+        kevin_human.setProperty(name.label, "Kevin Hammond")
+        kevin_human.setProperty(phone.label, 1334463241)
+
+        g.addEdge(null, edwin, kevin, knows.tpe.label)
+        g.addEdge(null, kevin, edwin, knows.tpe.label)
+
+
+        val articles = g.addVertex(null)
+
+        val impl = g.addVertex(null)
+        val impl_article = g.addEdge(null, impl, articles, articleProps.tpe.label)
+        impl_article.setProperty(title.label, "Resource-safe Systems Programming with Embedded Domain Specific Languages")
+        impl_article.setProperty(published.label, true)
+
+        g.addEdge(null, impl, edwin, author.tpe.label)
+        g.addEdge(null, impl, kevin, author.tpe.label)
+
+        val sysprog = g.addVertex(null)
+        val sysprog_article = g.addEdge(null, sysprog, articles, articleProps.tpe.label)
+        sysprog_article.setProperty(title.label, "Idris, a General Purpose Dependently Typed Programming Language: Design and Implementation ")
+        sysprog_article.setProperty(published.label, false)
+
+        g.addEdge(null, sysprog, edwin, author.tpe.label)
+
+        g.commit
+        println("Created a new Titan graph")
       }
     }
   }
@@ -48,60 +100,36 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[V <: AnyTVertex](vx: V)(k: String, v: String): vx.Rep = {
-      vx ->> tg.getVertices(k, v).iterator().next().asInstanceOf[TitanVertex]
+    def getTagged[V <: AnyTEdge](vx: V)(k: String, v: String): vx.Rep = {
+      vx ->> tg.getEdges(k, v).iterator().next().asInstanceOf[TitanEdge]
     }
   } 
 
-  test("get vertex property") {
+  test("get human's phone property") {
 
-    val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
-```
-
-pure blueprints with string keys and casting:
-
-```scala
-    assert(saturn.getProperty[Int]("age") === 10000)
-```
-
-safe and nifty:
-
-```scala
-    assert(saturn.get(age) === 10000)
+    val edwin = g.getTagged(humanProps)("name", "Edwin Brady")
+    assert(edwin.get(phone) === 1334463271)
 
   }
 
-  test("get OUTgoing edges and their property") {
+  test("get names of authors of an article") {
 
-    val hercules = g.getTagged(demigod)("name", "hercules")
+    val sysprog = g.getTagged(articleProps)("title", "Idris, a General Purpose Dependently Typed Programming Language: Design and Implementation ")
+    assert(sysprog.get(published) === false)
     
-    assert(hercules.getProperty[Int]("age") === (hercules get age))
+    // Vs - vertices, Es - edges
+    val sysprogV = sysprog.source
+    val authorEs = sysprogV out author
+    val authorVs = authorEs map { _ target }
+    val humanEs = authorVs flatMap { _ out humanProps }
+    val names = humanEs map { _ get name }
 
-    val es: List[battled.Rep] = hercules out battled
-    assert((hercules out battled map { _ get time }).toSet === Set(1, 12, 2))
+    assert(names === List("Edwin Brady"))
+
+    // same, but in one line:
+    assert((sysprog.source out author map { _ target } flatMap { _ out humanProps } map { _ get name }) === List("Edwin Brady"))
   }
 
-  ignore("get INcoming edges and their property") {
-
-    val tartarus = g.getTagged(location)("name", "tartarus")
-
-    // FIXME: godLives and monsterLives have the same label.
-    // it should get only one edge (for pluto), but it gets both, because they have the same label:
-    info((tartarus in godLives map { _ get reason }).mkString("['","', '","']"))
-  }
-
-  test("get target/source vertices of incoming/outgoing edges") {
-
-    val pluto = g.getTagged(god)("name", "pluto")
-
-    val pe: List[pet.Rep] = pluto out pet
-    assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
-
-    assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
-    // symmetry:
-    assert(pluto.in(brother).map{ _.source } 
-      === pluto.out(brother).map{ _.target })
-  }
 }
 
 ```
@@ -162,13 +190,13 @@ safe and nifty:
 [test/scala/ohnosequences/scarph/edges.scala]: ../edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../properties.scala.md
-[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: ../restricted/RestrictedSchemaTest.scala.md
-[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: ../restricted/SimpleSchema.scala.md
-[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: ../restricted/SimpleSchemaImplementation.scala.md
-[test/scala/ohnosequences/scarph/titan/expressions.scala]: expressions.scala.md
-[test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: godsImplementation.scala.md
-[test/scala/ohnosequences/scarph/titan/godsSchema.scala]: godsSchema.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: TitanGodsTest.scala.md
-[test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]: TitanSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: SimpleSchemaImplementation.scala.md
+[test/scala/ohnosequences/scarph/titan/expressions.scala]: ../titan/expressions.scala.md
+[test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../titan/godsImplementation.scala.md
+[test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../titan/godsSchema.scala.md
+[test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]: ../titan/TitanGodsTest.scala.md
+[test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]: ../titan/TitanSchemaTest.scala.md
 [test/scala/ohnosequences/scarph/vertexTypes.scala]: ../vertexTypes.scala.md
 [test/scala/ohnosequences/scarph/vertices.scala]: ../vertices.scala.md

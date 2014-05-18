@@ -14,17 +14,17 @@ Read a property from this representation
     type Property <: AnyProperty
     val p: Property
 
-    def apply(rep: self.TaggedRep): p.Rep
+    def apply(rep: self.Rep): p.Raw
   }
 
   abstract class GetProperty[P <: AnyProperty](val p: P) 
       extends AnyGetProperty { type Property = P }
 
-  implicit def propertyOps(rep: self.TaggedRep): PropertyOps = PropertyOps(rep)
-  case class   PropertyOps(rep: self.TaggedRep) {
+  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
+  case class   PropertyOps(rep: self.Rep) {
 
     def get[P <: AnyProperty: PropertyOf[self.Tpe]#is](p: P)
-      (implicit mkGetter: P => GetProperty[P]): P#Rep = mkGetter(p).apply(rep)
+      (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
 
   }
 ```
@@ -68,6 +68,10 @@ If have just an independent getter for a particular property:
           + [edges.scala][test/scala/ohnosequences/scarph/edges.scala]
           + [edgeTypes.scala][test/scala/ohnosequences/scarph/edgeTypes.scala]
           + [properties.scala][test/scala/ohnosequences/scarph/properties.scala]
+          + restricted
+            + [RestrictedSchemaTest.scala][test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]
+            + [SimpleSchema.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]
+            + [SimpleSchemaImplementation.scala][test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -91,6 +95,9 @@ If have just an independent getter for a particular property:
 [test/scala/ohnosequences/scarph/edges.scala]: ../../../../test/scala/ohnosequences/scarph/edges.scala.md
 [test/scala/ohnosequences/scarph/edgeTypes.scala]: ../../../../test/scala/ohnosequences/scarph/edgeTypes.scala.md
 [test/scala/ohnosequences/scarph/properties.scala]: ../../../../test/scala/ohnosequences/scarph/properties.scala.md
+[test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/RestrictedSchemaTest.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchema.scala.md
+[test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/restricted/SimpleSchemaImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md
