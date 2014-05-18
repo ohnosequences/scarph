@@ -4,7 +4,7 @@ import ohnosequences.scarph._
 
 trait AnyTVertex extends AnyVertex { tvertex =>
 
-  type Raw = com.thinkaurelius.titan.core.TitanVertex
+  final type Raw = com.thinkaurelius.titan.core.TitanVertex
 
   /* Reading any property from a TitanVertex */
   import AnyProperty._
@@ -30,7 +30,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
   /* OUT */
   implicit def unsafeRetrieveOneOutEdge[
-    E <: Singleton with AnyEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
+    E <: Singleton with AnyTEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
   ](e: E): RetrieveOutEdge[E] = new RetrieveOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
@@ -41,7 +41,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     }
 
   implicit def unsafeRetrieveManyOutEdge[
-    E <: Singleton with AnyEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
+    E <: Singleton with AnyTEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
   ](e: E): RetrieveOutEdge[E] = new RetrieveOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
@@ -52,7 +52,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
   /* IN */
   implicit def unsafeRetrieveOneInEdge[
-    E <: Singleton with AnyEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
+    E <: Singleton with AnyTEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
   ](e: E): RetrieveInEdge[E] = new RetrieveInEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
@@ -62,7 +62,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     }
 
   implicit def unsafeRetrieveManyInEdge[
-    E <: Singleton with AnyEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
+    E <: Singleton with AnyTEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
   ](e: E): RetrieveInEdge[E] = new RetrieveInEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {

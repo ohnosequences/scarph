@@ -48,8 +48,10 @@ object GodsSchema {
     implicit val _name: GetProperty[name.type]
     implicit val _age:  GetProperty[age.type]
 
+    import ohnosequences.scarph.titan.AnyTEdge
+
     implicit def fatherIn[
-      E <: Singleton with AnyEdge {type Tpe = TitanFather.type }
+      E <: Singleton with AnyTEdge {type Tpe = TitanFather.type }
     ](e: E): RetrieveInEdge[E]
   }
 

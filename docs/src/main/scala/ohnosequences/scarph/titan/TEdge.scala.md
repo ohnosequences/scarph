@@ -6,12 +6,12 @@ import ohnosequences.scarph._
 
 trait AnyTEdge extends AnyEdge { tedge =>
 
-  type Raw = com.thinkaurelius.titan.core.TitanEdge
+  final type Raw = com.thinkaurelius.titan.core.TitanEdge
 
-  type Source <: AnyVertex.ofType[Tpe#SourceType]
+  type Source <: AnyVertex.ofType[Tpe#SourceType] with AnyTVertex
   val source: Source
 
-  type Target <: AnyVertex.ofType[Tpe#TargetType]
+  type Target <: AnyVertex.ofType[Tpe#TargetType] with AnyTVertex
   val target: Target
 ```
 
@@ -32,7 +32,7 @@ Getting source vertex
 ```scala
   implicit object sourceGetter extends GetSource[Source](source) {
     def apply(rep: tedge.Rep): source.Rep = 
-      source ->> rep.getVertex(Direction.OUT).asInstanceOf[source.Raw]
+      source ->> rep.getVertex(Direction.OUT)
   }
 ```
 
@@ -41,15 +41,15 @@ Getting target vertex
 ```scala
   implicit object targetGetter extends GetTarget[Target](target) {
     def apply(rep: tedge.Rep): target.Rep = 
-      target ->> rep.getVertex(Direction.IN).asInstanceOf[target.Raw]
+      target ->> rep.getVertex(Direction.IN)
   }
 
 }
 
 class TEdge[
     ET <: AnyEdgeType, 
-    S <: AnyVertex.ofType[ET#SourceType], 
-    T <: AnyVertex.ofType[ET#TargetType]
+    S <: AnyVertex.ofType[ET#SourceType] with AnyTVertex, 
+    T <: AnyVertex.ofType[ET#TargetType] with AnyTVertex
   ](val source: S, val tpe: ET, val target: T) extends AnyTEdge { 
     type Source = S
     type Tpe = ET 

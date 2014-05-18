@@ -23,7 +23,7 @@ object GodsImplementation {
     implicit val _age:  GetProperty[age.type] = unsafeGetProperty(age)
 
     implicit def fatherIn[
-      E <: Singleton with AnyEdge { type Tpe = TitanFather.type }
+      E <: Singleton with AnyTEdge { type Tpe = TitanFather.type }
     ](e: E): RetrieveInEdge[E] = unsafeRetrieveManyInEdge[E](e)
   }
 

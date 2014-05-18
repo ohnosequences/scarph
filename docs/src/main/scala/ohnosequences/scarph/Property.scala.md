@@ -39,7 +39,7 @@ object AnyProperty {
 
   import SmthHasProperty._
 
-  type VertexTag = AnyDenotationTag { type Denotation <: AnyVertex }
+  type VertexTag = AnyDenotation.AnyTag { type Denotation <: AnyVertex }
 ```
 
 Right associative property getter for vertices
