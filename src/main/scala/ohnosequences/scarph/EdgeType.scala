@@ -1,5 +1,8 @@
 package ohnosequences.scarph
 
+import scalaz._
+import std.option._, std.list._
+
 /*
   Witnesses of a sourceType/type adscription to an edge type.
 */
@@ -10,6 +13,8 @@ trait AnyEdgeType {
   // TODO add an applicative/monad requirement here
   type In[+X]
   type Out[+X]
+  implicit val inFunctor: Functor[In]
+  implicit val outFunctor: Functor[Out]
 
   type SourceType <: AnyVertexType
   val sourceType: SourceType
@@ -37,10 +42,10 @@ trait From[S <: AnyVertexType] extends AnyEdgeType { type SourceType = S }
 trait   To[T <: AnyVertexType] extends AnyEdgeType { type TargetType = T }
 
 /* Arities */
-trait ManyOut extends AnyEdgeType { type Out[+X] =   List[X] }
-trait  OneOut extends AnyEdgeType { type Out[+X] = Option[X] }
-trait ManyIn  extends AnyEdgeType { type  In[+X] =   List[X] }
-trait  OneIn  extends AnyEdgeType { type  In[+X] = Option[X] }
+trait ManyOut extends AnyEdgeType { type Out[+X] =   List[X]; val outFunctor = implicitly[Functor[Out]] }
+trait  OneOut extends AnyEdgeType { type Out[+X] = Option[X]; val outFunctor = implicitly[Functor[Out]] }
+trait ManyIn  extends AnyEdgeType { type  In[+X] =   List[X]; val  inFunctor = implicitly[Functor[In]] }
+trait  OneIn  extends AnyEdgeType { type  In[+X] = Option[X]; val  inFunctor = implicitly[Functor[In]] }
 
 class ManyToMany[S <: AnyVertexType, T <: AnyVertexType]
   (val sourceType: S, val label: String, val targetType: T) 

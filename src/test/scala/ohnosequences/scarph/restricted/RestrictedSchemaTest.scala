@@ -115,15 +115,15 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
     
     // Vs - vertices, Es - edges
     val sysprogV = sysprog.source
-    val authorEs = sysprogV out author
+    val authorEs = sysprogV outE author
     val authorVs = authorEs map { _ target }
-    val humanEs = authorVs flatMap { _ out humanProps }
+    val humanEs = authorVs flatMap { _ outE humanProps }
     val names = humanEs map { _ get name }
 
     assert(names === List("Edwin Brady"))
 
     // same, but in one line:
-    assert((sysprog.source out author map { _ target } flatMap { _ out humanProps } map { _ get name }) === List("Edwin Brady"))
+    assert((sysprog.source outE author map { _ target } flatMap { _ outE humanProps } map { _ get name }) === List("Edwin Brady"))
   }
 
 }
