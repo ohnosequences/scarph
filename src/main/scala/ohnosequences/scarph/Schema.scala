@@ -15,10 +15,8 @@ trait AnySchema {
   type EdgeTypes <: TypeSet
   val  edgeTypes: EdgeTypes
 
-  implicit def schemaOps(sch: AnySchema) = SchemaOps(sch)
-  case class   SchemaOps(sch: AnySchema) {
-    
-  }
+  // implicit def schemaOps(sch: AnySchema) = SchemaOps(sch)
+  // case class   SchemaOps(sch: AnySchema) {}
 
 }
 

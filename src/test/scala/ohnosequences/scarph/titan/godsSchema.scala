@@ -28,9 +28,9 @@ object GodsSchema {
   /*
     ### Vertices
   */
-  case object Titan extends VertexType("titan")
-  implicit val Titan_name = Titan has name
-  implicit val Titan_age  = Titan has age
+  case object Titan extends FinalVertexType("titan", name :~: age :~: ∅)
+  // implicit val Titan_name = Titan has name
+  // implicit val Titan_age  = Titan has age
 
   case object God extends VertexType("god")
   implicit val God_name = God has name

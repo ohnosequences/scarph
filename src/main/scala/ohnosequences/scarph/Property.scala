@@ -57,10 +57,7 @@ object AnyProperty {
 /* Evidence that an arbitrary type `Smth` has property `Property` */
 trait SmthHasProperty {
   type Smth
-  val smth: Smth
-
   type Property <: AnyProperty
-  val property: Property
 }
 
 case class HasProperty[S, P <: AnyProperty]
@@ -74,4 +71,10 @@ object SmthHasProperty {
   type PropertyOf[S] = { 
     type is[P <: AnyProperty] = SmthHasProperty { type Smth = S; type Property = P }
   }
+
+  import ohnosequences.typesets._
+
+  implicit def FinalVertexTypeHasProperty[VT <: AnyFinalVertexType, P <: AnyProperty]
+    (implicit e: P ∈ VT#Props): PropertyOf[VT]#is[P] =
+      new SmthHasProperty { type Smth = VT; type Property = P }
 }
