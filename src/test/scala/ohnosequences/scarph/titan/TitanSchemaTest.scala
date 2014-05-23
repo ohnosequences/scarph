@@ -8,10 +8,11 @@ import java.io.File
 
 import ohnosequences.scarph._
 import ohnosequences.scarph.titan._
+import ohnosequences.typesets._
 
 import GodsSchema._
 import GodsImplementation._
-import MakeKeys._
+import TSchema._
 
 class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -72,6 +73,12 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
     assert(petLabel.isDirected)
 
     // Don't know how to check arity for a TitanLabel
+  }
+
+  test("create a whole schema") {
+    // FIXME: doesn't work (no SetMapper)
+    g.createSchema(godsGraphSchema)
+    g.commit
   }
 
 }

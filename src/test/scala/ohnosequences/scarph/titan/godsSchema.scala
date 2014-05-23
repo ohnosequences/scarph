@@ -1,6 +1,8 @@
 package ohnosequences.scarph.titan.test
 
 import ohnosequences.scarph._
+import ohnosequences.typesets._
+
 /* 
   ## The Graph of the Gods Schema
 
@@ -29,20 +31,6 @@ object GodsSchema {
   case object Titan extends VertexType("titan")
   implicit val Titan_name = Titan has name
   implicit val Titan_age  = Titan has age
-
-  // example
-  // force the user to provide the right set of implicits for this schema
-  abstract class TitanImpl extends Vertex[Titan.type](Titan) {
-
-    implicit val _name: GetProperty[name.type]
-    implicit val _age:  GetProperty[age.type]
-
-    import ohnosequences.scarph.titan.AnyTEdge
-
-    implicit def fatherIn[
-      E <: Singleton with AnyTEdge {type Tpe = TitanFather.type }
-    ](e: E): RetrieveInEdge[E]
-  }
 
   case object God extends VertexType("god")
   implicit val God_name = God has name
@@ -103,5 +91,15 @@ object GodsSchema {
 
   /* Monsters live in some Location (without any reason) */
   case object MonsterLives extends ManyToOne(Monster, "lives", Location)
+
+
+  /*
+    ### Fixed Schema
+  */
+  val godsGraphSchema = Schema("godsGraphSchema",
+    propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
+    vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,
+    edgeTypes = TitanFather :~: GodFather :~: HumanMother :~: Brother :~: Pet :~: Battled :~: GodLives :~: MonsterLives :~: ∅
+  )
 
 }

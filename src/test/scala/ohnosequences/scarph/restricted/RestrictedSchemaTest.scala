@@ -4,8 +4,7 @@ import com.thinkaurelius.titan.core._
 import java.io.File
 
 import ohnosequences.scarph._
-import ohnosequences.scarph.titan._
-import MakeKeys._
+import ohnosequences.scarph.titan._, TSchema._
 
 import SimpleSchema._
 import SimpleSchemaImplementation._
