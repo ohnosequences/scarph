@@ -22,17 +22,6 @@ trait AnyVertex extends Denotation[AnyVertexType] with HasProperties { vertex =>
   abstract class RetrieveOutEdge[E <: Singleton with AnyEdge](val e: E) 
     extends AnyRetrieveOutEdge { type Edge = E }
 
-  // trait AnyRetrieveOutV {
-
-  //   type Vertex <: AnyVertex
-  //   val v: Vertex
-
-  //   def apply(rep: vertex.Rep): v.tpe.Out[v.Rep]
-  // }
-
-  // abstract class RetrieveOutEdge[E <: Singleton with AnyEdge](val v: E) 
-  //   extends AnyRetrieveOutEdge { type Vertex = E }
-
   trait AnyRetrieveInEdge {
 
     type Edge <: AnyEdge
