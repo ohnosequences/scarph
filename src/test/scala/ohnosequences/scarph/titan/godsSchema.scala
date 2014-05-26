@@ -97,7 +97,7 @@ object GodsSchema {
     ### Fixed Schema
   */
   val godsGraphSchema = Schema("godsGraphSchema",
-    // propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
+    propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
     vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,
     edgeTypes = TitanFather :~: GodFather :~: HumanMother :~: Brother :~: Pet :~: Battled :~: GodLives :~: MonsterLives :~: ∅
   )
