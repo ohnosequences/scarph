@@ -28,17 +28,17 @@ object GodsSchema {
   /*
     ### Vertices
   */
-  case object Titan extends FinalVertexType("titan", name :~: age :~: ∅)
+  case object Titan extends VertexType("titan", name :~: age :~: ∅) 
   // implicit val Titan_name = Titan has name
   // implicit val Titan_age  = Titan has age
 
-  case object God extends VertexType("god")
-  implicit val God_name = God has name
-  implicit val God_age  = God has age
+  case object God extends VertexType("god", name :~: age :~: ∅) 
+  // implicit val God_name = God has name
+  // implicit val God_age  = God has age
 
-  case object Demigod extends VertexType("demigod")
-  implicit val Demigod_name = Demigod has name
-  implicit val Demigod_age  = Demigod has age
+  case object Demigod extends VertexType("demigod", name :~: age :~: ∅) 
+  // implicit val Demigod_name = Demigod has name
+  // implicit val Demigod_age  = Demigod has age
 
   case object Human extends VertexType("human")
   implicit val Human_name = Human has name
@@ -77,7 +77,7 @@ object GodsSchema {
   /* #### Other relationships */
 
   /* a God can have moster pets */
-  case object Pet extends OneToMany(God, "pet", Monster)
+  case object Pet extends EdgeType(God, "pet", Monster) with OneIn with ManyOut
 
   /* Demigods battle with Monsters */
   case object Battled extends ManyToMany(Demigod, "battled", Monster)
@@ -97,7 +97,7 @@ object GodsSchema {
     ### Fixed Schema
   */
   val godsGraphSchema = Schema("godsGraphSchema",
-    propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
+    // propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
     vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,
     edgeTypes = TitanFather :~: GodFather :~: HumanMother :~: Brother :~: Pet :~: Battled :~: GodLives :~: MonsterLives :~: ∅
   )

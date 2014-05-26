@@ -74,7 +74,7 @@ object SmthHasProperty {
 
   import ohnosequences.typesets._
 
-  implicit def FinalVertexTypeHasProperty[VT <: AnyFinalVertexType, P <: AnyProperty]
+  implicit def FinalVertexTypeHasProperty[VT <: AnyVertexType, P <: AnyProperty]
     (implicit e: P ∈ VT#Props): PropertyOf[VT]#is[P] =
       new SmthHasProperty { type Smth = VT; type Property = P }
 }

@@ -16,7 +16,6 @@ trait AnyEdgeType {
 
   type TargetType <: AnyVertexType
   val targetType: TargetType
-
 }
 
 object AnyEdgeType {
@@ -37,6 +36,15 @@ trait From[S <: AnyVertexType] extends AnyEdgeType { type SourceType = S }
 trait   To[T <: AnyVertexType] extends AnyEdgeType { type TargetType = T }
 
 /* Arities */
+trait  In[I[+_]] extends AnyEdgeType { type In[+X] = I[X] }
+trait Out[O[+_]] extends AnyEdgeType { type Out[+X] = O[X] }
+
+import ohnosequences.typesets._
+
+class EdgeType[S <: AnyVertexType, T <: AnyVertexType, Ps <: TypeSet : boundedBy[AnyProperty]#is]
+  (val sourceType: S, val label: String, val targetType: T, val props: Ps = ∅) 
+    extends From[S] with To[T]
+
 trait ManyOut extends AnyEdgeType { type Out[+X] =   List[X] }
 trait  OneOut extends AnyEdgeType { type Out[+X] = Option[X] }
 trait ManyIn  extends AnyEdgeType { type  In[+X] =   List[X] }

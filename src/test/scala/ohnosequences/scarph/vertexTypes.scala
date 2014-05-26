@@ -12,5 +12,5 @@ object vertexTypes {
     implicit val userName   = this has name
   }
 
-  case object Org extends FinalVertexType("org", name :~: ∅)
+  case object Org extends VertexType("org", name :~: ∅)
 }
