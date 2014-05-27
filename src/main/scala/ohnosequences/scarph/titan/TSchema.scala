@@ -60,10 +60,10 @@ object TSchema {
     }
 
     def createSchema[S <: AnySchema](s: S)(implicit
-        // pm: SetMapper[mkKey.type, s.PropertyTypes],
+        pm: SetMapper[mkKey.type, s.PropertyTypes],
         em: SetMapper[mkLabel.type, s.EdgeTypes]
       ): TitanGraph = {
-        // s.propertyTypes.map(mkKey)
+        s.propertyTypes.map(mkKey)
         s.edgeTypes.map(mkLabel)
         g
       }
