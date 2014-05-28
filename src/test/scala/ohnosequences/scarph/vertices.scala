@@ -1,9 +1,9 @@
 package ohnosequences.scarph.test
 
-import vertexTypes._
-import properties._
 import ohnosequences.scarph._
 import shapeless.record.FieldType
+
+import simpleSchema._
 
 object vertices {
 
@@ -48,7 +48,6 @@ class VertexSuite extends org.scalatest.FunSuite {
   test("retrieve vertex properties") {
 
     import vertices.user._
-    import vertexTypes.User._
     val u = user ->> UserImpl(id = "1ad3a34df", name = "Robustiano Satrústegui", since = 2349965)
 
     val u_id = u.get(id)
@@ -77,7 +76,6 @@ class VertexSuite extends org.scalatest.FunSuite {
       even though it has only the `name` property
     */
     import vertices.org._
-    import vertexTypes.Org._
     val o = org ->> UserImpl(id = "NYSE:ORCL", name = "Oracle Inc.", since = 1977)
 
     assert((o get name) === "Oracle Inc.")
