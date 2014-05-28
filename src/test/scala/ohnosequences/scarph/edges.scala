@@ -2,13 +2,11 @@ package ohnosequences.scarph.test
 
 import ohnosequences.scarph._
 
+import simpleSchema._
+
 object edges {
 
-  import edgeTypes._
-  import vertexTypes._
-  
   import vertices._
-  import properties._
 
   case class MemberOfImpl(
     val source: user.Rep,
@@ -23,10 +21,6 @@ object edges {
     
     type Raw = MemberOfImpl
 
-    // implicit case object sourceGetter extends GetSource[user.type](user) {
-    //   def apply(rep: memberOf.Rep) = rep.source
-    // }
-
     implicit object readSince extends GetProperty(since) {
       def apply(rep: Rep) = rep.since
     }
@@ -35,9 +29,13 @@ object edges {
     }
   }
 
-  implicit case object memberSourceGetter extends memberOf.GetSource[user.type](user) {
-      def apply(rep: memberOf.Rep) = rep.source
-    }
+  implicit object memberSourceGetter extends memberOf.GetSource[user.type](user) {
+    def apply(rep: memberOf.Rep) = rep.source
+  }
+
+  implicit object memberTargetGetter extends memberOf.GetTarget[org.type](org) {
+    def apply(rep: memberOf.Rep) = rep.target
+  }
 
   case class OwnsImpl(
     val source: user.Rep,
@@ -47,10 +45,10 @@ object edges {
     
     type Raw = OwnsImpl
 
-    implicit object sourceGetter extends GetSource[user.type](user) {
+    implicit object sourceGetter extends self.GetSource[user.type](user) {
       def apply(rep: self.Rep) = rep.source
     }
-    implicit object targetGetter extends GetTarget[org.type](org) {
+    implicit object targetGetter extends self.GetTarget[org.type](org) {
       def apply(rep: self.Rep) = rep.target
     }
   }
@@ -60,16 +58,10 @@ object edges {
 class EdgeSuite extends org.scalatest.FunSuite {
 
   import edges._  
-  import edgeTypes._
-
-  import vertexTypes._
   import vertices._
-  import properties._
 
   test("retrieve edge's sourde-edge-target") {
 
-    import edges.memberOf._
-    import edgeTypes.MemberOf._
     val u = user ->> UserImpl(id = "1ad3a34df", name = "Robustiano Satrústegui", since = 2349965)
     val oracle: org.Rep = org ->> UserImpl(id = "NYSE:ORCL", name = "Orcale Inc.", since = 1977)
 
@@ -78,7 +70,6 @@ class EdgeSuite extends org.scalatest.FunSuite {
     assert((m source) === u)
 
     // I think this is a bug; this import shouldn't be needed
-    import vertexTypes.User._
     assert(
       (m.source get id) === "1ad3a34df"
     )
@@ -86,7 +77,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     // val followers_ids = (user out follows) map { _ get id }
 
     /* Adding target getter externally: */
-    implicit object targetGetter extends GetTarget[org.type](org) {
+    implicit object targetGetter extends memberOf.GetTarget[org.type](org) {
       def apply(rep: memberOf.Rep) = rep.target
     }
     assert(m.target === oracle)
@@ -101,7 +92,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     // implicit val weForgotToImportIt = (memberOf.tpe: memberOf.Tpe) has isPublic
     implicit val weForgotToImportIt = MemberOf has isPublic
 
-    implicit object readIsPublic extends GetProperty(isPublic) {
+    implicit object readIsPublic extends memberOf.GetProperty(isPublic) {
       def apply(rep: memberOf.Rep) = rep.isPublic
     }
     assert(m.get(isPublic) === true)
