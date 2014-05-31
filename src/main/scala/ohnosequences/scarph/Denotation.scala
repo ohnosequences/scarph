@@ -75,5 +75,4 @@ object AnyDenotation {
 
     type Denotation = D
   }
-
 }
