@@ -96,7 +96,8 @@ object GodsSchema {
   /*
     ### Fixed Schema
   */
-  val godsGraphSchema = Schema("godsGraphSchema",
+  case object godsGraphSchema extends Schema("godsGraphSchema",
+    dependencies = ∅,
     propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
     vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,
     edgeTypes = ∅ //TitanFather :~: GodFather :~: HumanMother :~: Brother :~: Pet :~: Battled :~: GodLives :~: MonsterLives :~: ∅

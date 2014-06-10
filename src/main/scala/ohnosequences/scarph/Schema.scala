@@ -6,6 +6,9 @@ trait AnySchema {
 
   val label: String
 
+  type Dependencies <: TypeSet
+  val  dependencies: Dependencies
+
   type PropertyTypes <: TypeSet
   val  propertyTypes: PropertyTypes
 
@@ -20,16 +23,19 @@ trait AnySchema {
 
 }
 
-case class Schema[
+class Schema[
+    Ds <: TypeSet : boundedBy[AnySchema]#is,
     Ps <: TypeSet : boundedBy[AnyProperty]#is,
     Vs <: TypeSet : boundedBy[AnyVertexType]#is,
     Es <: TypeSet : boundedBy[AnyEdgeType]#is
   ](val label: String,
-    val propertyTypes: Ps,
-    val vertexTypes: Vs,
-    val edgeTypes: Es
+    val dependencies: Ds = ∅,
+    val propertyTypes: Ps = ∅,
+    val vertexTypes: Vs = ∅,
+    val edgeTypes: Es = ∅
   ) extends AnySchema {
 
+  type Dependencies = Ds
   type PropertyTypes = Ps
   type VertexTypes = Vs
   type EdgeTypes = Es

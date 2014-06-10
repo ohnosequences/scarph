@@ -51,20 +51,20 @@ object TSchema {
 
     object mkKey extends Poly1 {
       implicit def default[P <: AnyProperty](implicit c: ClassTag[P#Raw]) = 
-        at[P]{ p => g.addPropertyKey(p); p }
+        at[P]{ p => g.addPropertyKey(p) }
     }
 
     object mkLabel extends Poly1 {
       implicit def default[E <: AnyEdge](implicit arityMaker: E#Tpe => ArityMaker[E#Tpe]) = 
-        at[E]{ e => g.addEdgeLabel(e); e }
+        at[E]{ e => g.addEdgeLabel(e) }
     }
 
     def createSchema[S <: AnySchema](s: S)(implicit
-        pm: SetMapper[mkKey.type, s.PropertyTypes],
-        em: SetMapper[mkLabel.type, s.EdgeTypes]
+        pm: ListMapper[mkKey.type, s.PropertyTypes],
+        em: ListMapper[mkLabel.type, s.EdgeTypes]
       ): TitanGraph = {
-        s.propertyTypes.map(mkKey)
-        s.edgeTypes.map(mkLabel)
+        s.propertyTypes.mapList(mkKey)
+        s.edgeTypes.mapList(mkLabel)
         g
       }
   }

@@ -79,7 +79,7 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
     // FIXME: doesn't work (no SetMapper)
     import ohnosequences.typesets._
     import shapeless._, poly._
-    g.createSchema(godsGraphSchema)(SetMapper.consMapper, SetMapper.emptyMapper)
+    // g.createSchema(godsGraphSchema) //(SetMapper.consMapper(g.mkKey.default, SetMapper.consMapper), SetMapper.emptyMapper)
     // g.commit
   }
 
