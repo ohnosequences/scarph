@@ -77,23 +77,29 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
 
   test("filter vertex types properties") {
     import ohnosequences.typesets._
-    val _Titan    = (GodsSchema.Titan, ∅)
-    val _God      = (God, ∅)
-    val _Demigod  = (Demigod, ∅)
-    val _Human    = (Human, name :~: age :~: ∅)
-    val _Monster  = (Monster, name :~: ∅)
-    val _Location = (Location, name :~: ∅)
+    val _Titan    = (GodsSchema.Titan, name :~: age :~: ∅)
+    val _God      = (God,              name :~: age :~: ∅)
+    val _Demigod  = (Demigod,          name :~: age :~: ∅)
+    val _Human    = (Human,            name :~: age :~: ∅)
+    val _Monster  = (Monster,          name :~: ∅)
+    val _Location = (Location,         name :~: ∅)
 
     val _Pet      = (Pet, ∅)
     val _Battled  = (Battled, time :~: place :~: ∅)
     val _GodLives = (GodLives, reason :~: ∅)
 
-    assert(godsGraphSchema.vTypeProps[_Demigod._1.type] === _Demigod._2)
-    assert(godsGraphSchema.vTypeProps[_Human._1.type] === _Human._2)
-    assert(godsGraphSchema.vTypeProps[_Monster._1.type] === _Monster._2)
+    implicitly[HasProperties[GodsSchema.Titan.type, name.type :~: age.type :~: ∅]]
+    implicitly[HasProperty[GodsSchema.Titan.type, name.type]]
+
+    assert(godsGraphSchema.vTypeProps[_Titan._1.type]    === _Titan._2)
+    assert(godsGraphSchema.vTypeProps[_God._1.type]      === _God._2)
+    assert(godsGraphSchema.vTypeProps[_Demigod._1.type]  === _Demigod._2)
+    assert(godsGraphSchema.vTypeProps[_Human._1.type]    === _Human._2)
+    assert(godsGraphSchema.vTypeProps[_Monster._1.type]  === _Monster._2)
     assert(godsGraphSchema.vTypeProps[_Location._1.type] === _Location._2)
-    assert(godsGraphSchema.eTypeProps[_Pet._1.type] === _Pet._2)
-    assert(godsGraphSchema.eTypeProps[_Battled._1.type] === _Battled._2)
+
+    assert(godsGraphSchema.eTypeProps[_Pet._1.type]      === _Pet._2)
+    assert(godsGraphSchema.eTypeProps[_Battled._1.type]  === _Battled._2)
     assert(godsGraphSchema.eTypeProps[_GodLives._1.type] === _GodLives._2)
 
     assert(godsGraphSchema.vTypesWithProps === _Titan :~: _God :~: _Demigod :~: _Human :~: _Monster :~: _Location :~: ∅)

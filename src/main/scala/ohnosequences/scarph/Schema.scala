@@ -31,8 +31,8 @@ class Schema[
     val vertexTypes: Vs = ∅,
     val edgeTypes: Es = ∅
   )(implicit
-    vp: ZipWithProps[Vs, Ps],
-    ep: ZipWithProps[Es, Ps]
+    val vp: ZipWithProps[Vs, Ps],
+    val ep: ZipWithProps[Es, Ps]
   ) extends AnySchema {
 
   type Dependencies = Ds
@@ -41,14 +41,16 @@ class Schema[
   type EdgeTypes = Es
 
   /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  val vTypesWithProps = implicitly[ZipWithProps[Vs, Ps]].apply(vertexTypes, propertyTypes)
-  val eTypesWithProps = implicitly[ZipWithProps[Es, Ps]].apply(edgeTypes, propertyTypes)
+  val vTypesWithProps = vp.apply(vertexTypes, propertyTypes)
+  val eTypesWithProps = ep.apply(edgeTypes, propertyTypes)
 
+  /* This method returns properties that are associated with the given **vertex** type */
   def vTypeProps[VT <: AnyVertexType](implicit
       e: VT ∈ Vs,
       f: FilterProps[VT, Ps]
     ): f.Out = f(propertyTypes)
 
+  /* This method returns properties that are associated with the given **edge** type */
   def eTypeProps[ET <: AnyEdgeType](implicit
       e: ET ∈ Es,
       f: FilterProps[ET, Ps]

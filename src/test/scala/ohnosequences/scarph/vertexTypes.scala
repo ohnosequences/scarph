@@ -12,7 +12,8 @@ object vertexTypes {
     implicit val userName   = this has name
   }
 
-  case object Org extends VertexType("org", name :~: ∅)
+  case object Org extends VertexType("org") //, name :~: ∅)
+  implicit val Org_name = Org has name
 }
 
 class VertexTypeSuite extends org.scalatest.FunSuite {

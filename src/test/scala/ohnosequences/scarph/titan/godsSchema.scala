@@ -28,27 +28,29 @@ object GodsSchema {
   /*
     ### Vertices
   */
-  case object Titan extends VertexType("titan", name :~: age :~: ∅) 
-  // implicit val Titan_name = Titan has name
-  // implicit val Titan_age  = Titan has age
-
-  case object God extends VertexType("god", name :~: age :~: ∅) 
-  // implicit val God_name = God has name
-  // implicit val God_age  = God has age
-
-  case object Demigod extends VertexType("demigod", name :~: age :~: ∅) 
-  // implicit val Demigod_name = Demigod has name
-  // implicit val Demigod_age  = Demigod has age
-
+  case object Titan extends VertexType("titan") {
+    // you can define properties inside of the type
+    implicit val _props = this has 
+      name :~: 
+      age :~: 
+      ∅
+  }
+  case object God extends VertexType("god")
+    // or outside
+    implicit val God_props = God has name :~: age :~: ∅
+  case object Demigod extends VertexType("demigod")
+    // or one by one in any place
+    implicit val Demigod_name = Demigod has name
+    implicit val Demigod_age  = Demigod has age
   case object Human extends VertexType("human")
-  implicit val Human_name = Human has name
-  implicit val Human_age  = Human has age
-
+    implicit val Human_name = Human has name
+    implicit val Human_age  = Human has age
   case object Monster extends VertexType("monster")
-  implicit val Monster_name = Monster has name
-  
+    // both ways are fine
+    implicit val Monster_name = Monster has name
+    implicit val Monster_props = Monster has name :~: ∅
   case object Location extends VertexType("location")
-  implicit val Location_name = Location has name
+    implicit val Location_name = Location has name
 
   /*
     ### Edges
@@ -77,11 +79,11 @@ object GodsSchema {
   /* #### Other relationships */
 
   /* a God can have moster pets */
-  case object Pet extends EdgeType(God, "pet", Monster) with OneIn with ManyOut
+  case object Pet extends OneToMany(God, "pet", Monster)
 
   /* Demigods battle with Monsters */
   case object Battled extends ManyToMany(Demigod, "battled", Monster)
-  implicit val Battled_time  = Battled has time
+  implicit val Battled_props = Battled has time :~: ∅
   implicit val Battled_place = Battled has place
  
 

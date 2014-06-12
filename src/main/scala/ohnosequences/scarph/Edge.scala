@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-trait AnyEdge extends Denotation[AnyEdgeType] with HasProperties { edge =>
+trait AnyEdge extends Denotation[AnyEdgeType] with CanHaveProperties { edge =>
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
   type Tpe <: AnyEdgeType

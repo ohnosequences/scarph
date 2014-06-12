@@ -1,17 +1,24 @@
 package ohnosequences.scarph
 
-/*
-  Properties
-*/
+import ohnosequences.typesets._
+import scala.reflect._
 
-
+/* Properties */
 trait AnyProperty extends AnyDenotation {
   val label: String
-
   type TYPE <: AnyProperty
 }
 
-import scala.reflect._
+/* Evidence that an arbitrary type `Smth` has property `P` */
+sealed class HasProperty[S, P <: AnyProperty]
+/* or a set of properties `Ps` */
+sealed class HasProperties[S, Ps <: TypeSet : boundedBy[AnyProperty]#is] 
+
+object AnyProperty {
+  /* This implicit is a bridge from `HasProperties` to `HasProperty` */ 
+  implicit def FromSetToAProperty[T, P <: AnyProperty, Ps <: TypeSet]
+    (implicit ps: T HasProperties Ps, ep: P ∈ Ps): HasProperty[T, P] = new HasProperty[T, P]
+}
 
 /* 
   Properties sould be defined as case objects:
@@ -23,61 +30,49 @@ import scala.reflect._
 class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
   val label = this.toString
 
+  /* Property denotes itself */
   type Tpe = this.type
   val  tpe = this: Tpe
 
   type Raw = V 
 }
 
-object AnyProperty {
+object Property {
+  /* Fro context bounds: `P <: AnyProperty: Property.Of[X]#is` */
+  type Of[S] = { type is[P <: AnyProperty] = S HasProperty P }
+}
 
-  import SmthHasProperty._
 
-  type VertexTag = AnyDenotation.AnyTag { type Denotation <: AnyVertex }
 
-  /* Right associative property getter for vertices */
-  implicit class PropertyOps[P <: AnyProperty](val p: P) {
+/* This trait should be mixed to the types that _can have properties_,
+   meaning that you are going to _get properties_ from it
+*/
+trait CanHaveProperties { self: AnyDenotation =>
 
-    def %:[VT <: VertexTag](vr: VT)
-      (implicit
-        ev: PropertyOf[vr.DenotedType]#is[P],
-        mkReader: VT => ReadFrom[VT]
-      ): p.Raw = mkReader(vr).apply(p)
+  /* Read a property from this representation */
+  trait AnyGetProperty {
+    type Property <: AnyProperty
+    val p: Property
+
+    def apply(rep: self.Rep): p.Raw
+  }
+
+  abstract class GetProperty[P <: AnyProperty](val p: P) 
+  extends AnyGetProperty { type Property = P }
+
+  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
+  case class   PropertyOps(rep: self.Rep) {
+
+    def get[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
+    (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
 
   }
 
-  /* For using `%:` you have to provide an implicit val of `ReadFrom` */
-  abstract class ReadFrom[VT <: VertexTag](val vt: VT) {
-    // NOTE: can't add `PropertyOf[vt.DenotedType]#is` requirement here
-    def apply[P <: AnyProperty](p: P): p.Raw
-  }
-
+  /* If have just an independent getter for a particular property: */
+  implicit def idGetter[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
+    (implicit getter: GetProperty[P]) = getter
 }
 
-/* Evidence that an arbitrary type `Smth` has property `Property` */
-trait SmthHasProperty {
-  type Smth
-  type Property <: AnyProperty
-}
-
-case class HasProperty[S, P <: AnyProperty]
-  (val smth: S, val property: P) extends SmthHasProperty {
-    type Smth = S
-    type Property = P
-}
-
-object SmthHasProperty {
-
-  type PropertyOf[S] = { 
-    type is[P <: AnyProperty] = SmthHasProperty { type Smth = S; type Property = P }
-  }
-
-  import ohnosequences.typesets._
-
-  implicit def FinalVertexTypeHasProperty[VT <: AnyVertexType, P <: AnyProperty]
-    (implicit e: P ∈ VT#Props): PropertyOf[VT]#is[P] =
-      new SmthHasProperty { type Smth = VT; type Property = P }
-}
 
 
 import shapeless._, poly._

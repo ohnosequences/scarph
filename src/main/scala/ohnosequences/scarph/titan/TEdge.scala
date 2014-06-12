@@ -13,8 +13,7 @@ trait AnyTEdge extends AnyEdge { tedge =>
   val target: Target
 
   /* Getting a property from any TitanEdge */
-  import SmthHasProperty._
-  implicit def unsafeGetProperty[P <: AnyProperty: PropertyOf[this.Tpe]#is](p: P) = 
+  implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
     new GetProperty[P](p) {
       def apply(rep: tedge.Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }
