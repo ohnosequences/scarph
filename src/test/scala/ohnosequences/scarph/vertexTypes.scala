@@ -1,9 +1,9 @@
 package ohnosequences.scarph.test
+  
+import ohnosequences.typesets._
+import ohnosequences.scarph._, properties._
 
 object vertexTypes {
-  
-  import ohnosequences.typesets._
-  import ohnosequences.scarph._, properties._
 
   // just labels and witnesses for properties
   case object User extends VertexType("user") {
@@ -13,4 +13,15 @@ object vertexTypes {
   }
 
   case object Org extends VertexType("org", name :~: ∅)
+}
+
+class VertexTypeSuite extends org.scalatest.FunSuite {
+
+  import vertexTypes._  
+
+  test("filter vertex type properties") {
+    assert(User.filterMyProps(allProperties) === name :~: id :~: ∅)
+    // assert( Org.filterMyProps(allProperties) === name :~: ∅)
+  }
+
 }

@@ -21,19 +21,10 @@ object AnyVertexType {
 }
 
 case class VertexTypeOps[VT <: AnyVertexType](val vt: VT) {
+
+  /* Handy way of creating an implicit evidence saying that this vertex type has that property */
   def has[P <: AnyProperty](p: P) = HasProperty[VT, P](vt, p)
-  // def :-[Ps <: TypeSet : boundedBy[AnyProperty]#is](props: Ps): FinalVertexType[Ps] =
-  //   new FinalVertexType(vt.label, props) 
+
+  /* Takes a set of properties and filters out only those, which this vertex "has" */
+  def filterMyProps[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps)(implicit f: FilterProps[VT, Ps]) = f(ps)
 }
-
-// trait AnyFinalVertexType extends AnyVertexType {
-//   type Props <: TypeSet
-//   val props: Props
-// }
-
-// class FinalVertexType[Ps <: TypeSet : boundedBy[AnyProperty]#is](val label: String, val props: Ps) 
-//   extends AnyFinalVertexType {
-//     type Props = Ps
-//   }
-
-// TODO: some kind of conversion from a normal VertexType + set of props to a FinalVertexType

@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 /*
   Witnesses of a sourceType/type adscription to an edge type.
 */
@@ -28,7 +30,12 @@ object AnyEdgeType {
 }
 
 case class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {
+
+  /* Handy way of creating an implicit evidence saying that this vertex type has that property */
   def has[P <: AnyProperty](p: P) = HasProperty[ET, P](et, p)
+
+  /* Takes a set of properties and filters out only those, which this vertex "has" */
+  def filterMyProps[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps)(implicit f: FilterProps[ET, Ps]) = f(ps)
 }
 
 /* Source/Target */
