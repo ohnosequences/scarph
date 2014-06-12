@@ -38,43 +38,6 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
     }
   }
 
-  // FIXME: this test _sometimes_ fails
-  ignore("create property keys") {
-
-    g.addPropertyKey(age)
-    g.addPropertyKey(name)
-    g.commit
-
-    val ageType: TitanType = g.getType(age.label)
-    val nameType: TitanType = g.getType(name.label)
-    assert(nameType.getName === name.label)
-    assert(nameType.isPropertyKey)
-
-    // we checked that it's a property key, so we can cast:
-    val ageKey: TitanKey = ageType.asInstanceOf[TitanKey]
-    val nameKey: TitanKey = nameType.asInstanceOf[TitanKey]
-
-    assert(ageKey.getDataType.getName === classOf[age.Raw].getName)
-    assert(nameKey.getDataType.getName === classOf[name.Raw].getName)
-
-  }
-
-  test("create edge labels") {
-
-    g.addEdgeLabel(pet)
-    g.commit
-
-    val petType: TitanType = g.getType(pet.tpe.label)
-    assert(petType.getName === pet.tpe.label)
-    assert(petType.isEdgeLabel)
-
-    // we checked that it's an edge label, so we can cast:
-    val petLabel: TitanLabel = petType.asInstanceOf[TitanLabel]
-    assert(petLabel.isDirected)
-
-    // Don't know how to check arity for a TitanLabel
-  }
-
   test("filter vertex types properties") {
     import ohnosequences.typesets._
     val _Titan    = (GodsSchema.Titan, name :~: age :~: ∅)
@@ -107,12 +70,30 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
     println(godsGraphSchema)
   }
 
-  test("create a whole schema") {
-    // FIXME: doesn't work (no SetMapper)
-    import ohnosequences.typesets._
-    import shapeless._, poly._
-    // g.createSchema(godsGraphSchema) //(SetMapper.consMapper(g.mkKey.default, SetMapper.consMapper), SetMapper.emptyMapper)
-    // g.commit
+  test("create all keys and labels from a given schema") {
+    g.createSchema(godsGraphSchema)
+    g.commit
+
+    // Checking all property keys:
+    for { p <- List(name, age, time, reason, place) }
+    yield {
+      val pType: TitanType = g.getType(p.label)
+      assert(pType.getName === p.label)
+      assert(pType.isPropertyKey)
+      // FIXME: can't check type, because `classOf` requires a stable identifier
+      // assert(pType.asInstanceOf[TitanKey].getDataType.getName === classOf[p.Raw].getName)
+    }
+
+    // Checking all edge labels:
+    // FIXME: Don't know how to check arity for a TitanLabel
+    for { e <- List(titanFather, godFather, humanMother, brother, pet, battled, godLives, monsterLives) }
+    yield {
+      val eType: TitanType = g.getType(e.tpe.label)
+      assert(eType.getName === e.tpe.label)
+      assert(eType.isEdgeLabel)
+      assert(eType.asInstanceOf[TitanLabel].isDirected)
+    }
+
   }
 
 }

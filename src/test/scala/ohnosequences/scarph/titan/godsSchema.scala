@@ -73,8 +73,6 @@ object GodsSchema {
   /* Gods can be brothers with Gods */
   case object Brother extends ManyToMany(God, "brother", God)
 
-  // TODO: other combinations are also possible, but are just not needed for the example
-
 
   /* #### Other relationships */
 
