@@ -42,7 +42,7 @@ object TSchema {
         catch { case _: java.lang.IllegalArgumentException => {} }
     }
 
-    def createSchema[S <: AnySchema](s: S)(implicit
+    def createSchema[S <: AnyGraphSchema](s: S)(implicit
         mkPropertyKeys: MkPropertyKeys[s.Properties],
         mkEdgeLabels: MkEdgeLabels[s.EdgeTypes]
       ): TitanGraph = {

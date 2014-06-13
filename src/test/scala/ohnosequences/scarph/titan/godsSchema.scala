@@ -4,7 +4,7 @@ import ohnosequences.scarph._
 import ohnosequences.typesets._
 
 /* 
-  ## The Graph of the Gods Schema
+  ## The Graph of the Gods GraphSchema
 
   See [Titan tutorial](https://github.com/thinkaurelius/titan/wiki/Getting-Started) and
   [the code](https://github.com/thinkaurelius/titan/blob/master/titan-core/src/main/java/com/thinkaurelius/titan/example/GraphOfTheGodsFactory.java) for the reference.
@@ -91,9 +91,9 @@ object GodsSchema {
 
 
   /*
-    ### Fixed Schema
+    ### Fixed GraphSchema
   */
-  object godsGraphSchema extends Schema("godsGraphSchema",
+  object godsGraphSchema extends GraphSchema("godsGraphSchema",
     dependencies = ∅,
     properties = name :~: age :~: time :~: reason :~: place :~: ∅,
     vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,

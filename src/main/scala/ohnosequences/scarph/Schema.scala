@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 import ohnosequences.typesets._
 
-trait AnySchema {
+trait AnyGraphSchema {
 
   val label: String
 
@@ -29,26 +29,30 @@ trait AnySchema {
   vertexTypes: ${verticesWithProperties}
     edgeTypes: ${edgesWithProperties}"""
 
+}
+
+object AnyGraphSchema {
+
   /* Additional methods */
-  implicit def schemaOps[S <: AnySchema](sch: S): SchemaOps[S] = SchemaOps[S](sch)
-  case class   SchemaOps[S <: AnySchema](sch: S) {
+  implicit def schemaOps[S <: AnyGraphSchema](sch: S): GraphSchemaOps[S] = GraphSchemaOps[S](sch)
+  case class   GraphSchemaOps[S <: AnyGraphSchema](schema: S) {
+
     /* This method returns properties that are associated with the given **vertex** type */
     def vertexProperties[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
-      e: VT ∈ VertexTypes,
-      f: FilterProps[VT, Properties]
-    ): f.Out = f(properties)
+      e: VT ∈ schema.VertexTypes,
+      f: FilterProps[VT, schema.Properties]
+    ): f.Out = f(schema.properties)
 
     /* This method returns properties that are associated with the given **edge** type */
     def edgeProperties[ET <: Singleton with AnyEdgeType](edgeType: ET)(implicit
-      e: ET ∈ EdgeTypes,
-      f: FilterProps[ET, Properties]
-    ): f.Out = f(properties)
+      e: ET ∈ schema.EdgeTypes,
+      f: FilterProps[ET, schema.Properties]
+    ): f.Out = f(schema.properties)
   }
-
 }
 
-case class Schema[
-    Ds <: TypeSet : boundedBy[AnySchema]#is,
+case class GraphSchema[
+    Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
     Ps <: TypeSet : boundedBy[AnyProperty]#is,
     Vs <: TypeSet : boundedBy[AnyVertexType]#is,
     Es <: TypeSet : boundedBy[AnyEdgeType]#is
@@ -60,7 +64,7 @@ case class Schema[
   )(implicit
     val vertexPropertyAssoc: ZipWithProps[Vs, Ps],
     val   edgePropertyAssoc: ZipWithProps[Es, Ps]
-  ) extends AnySchema {
+  ) extends AnyGraphSchema {
 
   type Dependencies = Ds
   type Properties   = Ps
