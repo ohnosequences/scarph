@@ -39,7 +39,7 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
   }
 
   test("filter vertex types properties") {
-    import ohnosequences.typesets._
+    // VERTEX TYPES //
     val _Titan    = (GodsSchema.Titan, name :~: age :~: ∅)
     val _God      = (God,              name :~: age :~: ∅)
     val _Demigod  = (Demigod,          name :~: age :~: ∅)
@@ -47,26 +47,34 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
     val _Monster  = (Monster,          name :~: ∅)
     val _Location = (Location,         name :~: ∅)
 
-    val _Pet      = (Pet, ∅)
-    val _Battled  = (Battled, time :~: place :~: ∅)
-    val _GodLives = (GodLives, reason :~: ∅)
-
     implicitly[HasProperties[GodsSchema.Titan.type, name.type :~: age.type :~: ∅]]
     implicitly[HasProperty[GodsSchema.Titan.type, name.type]]
 
-    assert(godsGraphSchema.vTypeProps[_Titan._1.type]    === _Titan._2)
-    assert(godsGraphSchema.vTypeProps[_God._1.type]      === _God._2)
-    assert(godsGraphSchema.vTypeProps[_Demigod._1.type]  === _Demigod._2)
-    assert(godsGraphSchema.vTypeProps[_Human._1.type]    === _Human._2)
-    assert(godsGraphSchema.vTypeProps[_Monster._1.type]  === _Monster._2)
-    assert(godsGraphSchema.vTypeProps[_Location._1.type] === _Location._2)
+    assert(godsGraphSchema.vertexProperties(_Titan._1)    === _Titan._2)
+    assert(godsGraphSchema.vertexProperties(_God._1)      === _God._2)
+    assert(godsGraphSchema.vertexProperties(_Demigod._1)  === _Demigod._2)
+    assert(godsGraphSchema.vertexProperties(_Human._1)    === _Human._2)
+    assert(godsGraphSchema.vertexProperties(_Monster._1)  === _Monster._2)
+    assert(godsGraphSchema.vertexProperties(_Location._1) === _Location._2)
 
-    assert(godsGraphSchema.eTypeProps[_Pet._1.type]      === _Pet._2)
-    assert(godsGraphSchema.eTypeProps[_Battled._1.type]  === _Battled._2)
-    assert(godsGraphSchema.eTypeProps[_GodLives._1.type] === _GodLives._2)
+    // EDGE TYPES //
+    val _TitanFather  = (TitanFather, ∅)
+    val _GodFather    = (GodFather, ∅)
+    val _HumanMother  = (HumanMother, ∅)
+    val _Brother      = (Brother, ∅)
+    val _Pet          = (Pet, ∅)
+    val _Battled      = (Battled, time :~: place :~: ∅)
+    val _GodLives     = (GodLives, reason :~: ∅)
+    val _MonsterLives = (MonsterLives, ∅)
 
-    assert(godsGraphSchema.vTypesWithProps === _Titan :~: _God :~: _Demigod :~: _Human :~: _Monster :~: _Location :~: ∅)
-    // println(godsGraphSchema.eTypesWithProps)
+    assert(godsGraphSchema.edgeProperties(_Pet._1)      === _Pet._2)
+    assert(godsGraphSchema.edgeProperties(_Battled._1)  === _Battled._2)
+    assert(godsGraphSchema.edgeProperties(_GodLives._1) === _GodLives._2)
+
+    assert(godsGraphSchema.verticesWithProperties === 
+           _Titan :~: _God :~: _Demigod :~: _Human :~: _Monster :~: _Location :~: ∅)
+    assert(godsGraphSchema.edgesWithProperties === 
+           _TitanFather :~: _GodFather :~: _HumanMother :~: _Brother :~: _Pet :~: _Battled :~: _GodLives :~: _MonsterLives :~: ∅)
     println(godsGraphSchema)
   }
 

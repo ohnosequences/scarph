@@ -18,9 +18,31 @@ trait AnySchema {
   type EdgeTypes <: TypeSet
   val  edgeTypes: EdgeTypes
 
+  /* This method returns properties that are associated with the given **vertex** type */
+  def vertexProperties[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
+    e: VT ∈ VertexTypes,
+    f: FilterProps[VT, Properties]
+  ): f.Out = f(properties)
+
+  /* This method returns properties that are associated with the given **edge** type */
+  def edgeProperties[ET <: Singleton with AnyEdgeType](edgeType: ET)(implicit
+    e: ET ∈ EdgeTypes,
+    f: FilterProps[ET, Properties]
+  ): f.Out = f(properties)
+
+  val vertexPropertyAssoc: ZipWithProps[VertexTypes, Properties]
+  val   edgePropertyAssoc: ZipWithProps[EdgeTypes, Properties]
+
+  /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
+  val verticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+  val    edgesWithProperties =   edgePropertyAssoc(edgeTypes,   properties)
+
+  override def toString = s"""${label} schema:
+  vertexTypes: ${verticesWithProperties}
+    edgeTypes: ${edgesWithProperties}"""
 }
 
-class Schema[
+case class Schema[
     Ds <: TypeSet : boundedBy[AnySchema]#is,
     Ps <: TypeSet : boundedBy[AnyProperty]#is,
     Vs <: TypeSet : boundedBy[AnyVertexType]#is,
@@ -31,8 +53,8 @@ class Schema[
     val vertexTypes: Vs = ∅,
     val edgeTypes: Es = ∅
   )(implicit
-    val vp: ZipWithProps[Vs, Ps],
-    val ep: ZipWithProps[Es, Ps]
+    val vertexPropertyAssoc: ZipWithProps[Vs, Ps],
+    val   edgePropertyAssoc: ZipWithProps[Es, Ps]
   ) extends AnySchema {
 
   type Dependencies = Ds
@@ -40,24 +62,4 @@ class Schema[
   type VertexTypes = Vs
   type EdgeTypes = Es
 
-  /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  val vTypesWithProps = vp.apply(vertexTypes, properties)
-  val eTypesWithProps = ep.apply(edgeTypes, properties)
-
-  /* This method returns properties that are associated with the given **vertex** type */
-  def vTypeProps[VT <: AnyVertexType](implicit
-      e: VT ∈ Vs,
-      f: FilterProps[VT, Ps]
-    ): f.Out = f(properties)
-
-  /* This method returns properties that are associated with the given **edge** type */
-  def eTypeProps[ET <: AnyEdgeType](implicit
-      e: ET ∈ Es,
-      f: FilterProps[ET, Ps]
-    ): f.Out = f(properties)
-
-  override def toString = s"""${label} schema:
-  vertexTypes: ${vTypesWithProps}
-  edgeTypes: ${eTypesWithProps}"""
-  
 }
