@@ -34,6 +34,7 @@ trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { verte
 
   abstract class Out[E <: Singleton with AnyEdge](edge: E) extends RetrieveOutEdge[E](edge)
 
+  /* Additional methods */
   implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
   case class   VertexOps(rep: vertex.Rep) {
 
@@ -48,13 +49,12 @@ trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { verte
         val retriever = mkRetriever(e)
         retriever(rep)
       }
-
   }
 
 }
 
 abstract class Vertex[VT <: AnyVertexType](val tpe: VT) 
-  extends AnyVertex { type Tpe = VT }
+    extends AnyVertex { type Tpe = VT }
 
 object AnyVertex {
   type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }

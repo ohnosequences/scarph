@@ -20,13 +20,7 @@ object AnyProperty {
     (implicit ps: T HasProperties Ps, ep: P ∈ Ps): HasProperty[T, P] = new HasProperty[T, P]
 }
 
-/* 
-  Properties sould be defined as case objects:
-
-  ``` scala
-  case object Name extends Property[String]
-  ```
-*/
+/* Properties sould be defined as case objects: `case object Name extends Property[String]` */
 class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
   val label = this.toString
 
@@ -38,14 +32,24 @@ class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[A
 }
 
 object Property {
-  /* Fro context bounds: `P <: AnyProperty: Property.Of[X]#is` */
+  /* For context bounds: `P <: AnyProperty: Property.Of[X]#is` */
   type Of[S] = { type is[P <: AnyProperty] = S HasProperty P }
 }
 
+class HasPropertiesOps[T](t: T) {
+  /* Handy way of creating an implicit evidence saying that this vertex type has that property */
+  def has[P <: AnyProperty](p: P) = new (T HasProperty P)
+  def has[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps) = new (T HasProperties Ps)
+
+  /* Takes a set of properties and filters out only those, which this vertex "has" */
+  def filterMyProps[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps)
+    (implicit f: FilterProps[T, Ps]) = f(ps)
+}
 
 
-/* This trait should be mixed to the types that _can have properties_,
-   meaning that you are going to _get properties_ from it
+/* 
+  This trait should be mixed to the types that _can have properties_,
+  meaning that you are going to _get properties_ from it
 */
 trait CanHaveProperties { self: AnyDenotation =>
 
@@ -58,7 +62,7 @@ trait CanHaveProperties { self: AnyDenotation =>
   }
 
   abstract class GetProperty[P <: AnyProperty](val p: P) 
-  extends AnyGetProperty { type Property = P }
+    extends AnyGetProperty { type Property = P }
 
   implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
   case class   PropertyOps(rep: self.Rep) {
@@ -78,8 +82,10 @@ trait CanHaveProperties { self: AnyDenotation =>
 import shapeless._, poly._
 import ohnosequences.typesets._
 
-/* For a given arbitrary type `Smth`, filters any property set, 
-   leaving only those which have the `Smth HasProperty _` evidence */
+/* 
+  For a given arbitrary type `Smth`, filters any property set, 
+  leaving only those which have the `Smth HasProperty _` evidence
+*/
 trait FilterProps[Smth, Ps <: TypeSet] extends DepFn1[Ps] {
   type Out <: TypeSet
 }
@@ -102,17 +108,17 @@ trait FilterProps2 {
   type Aux[Smth, In <: TypeSet, O <: TypeSet] = FilterProps[Smth, In] { type Out = O }
   
   implicit def emptyFilter[Smth]: Aux[Smth, ∅, ∅] =
-  new FilterProps[Smth, ∅] {
-    type Out = ∅
-    def apply(s: ∅): Out = ∅
-  }
+    new FilterProps[Smth, ∅] {
+      type Out = ∅
+      def apply(s: ∅): Out = ∅
+    }
 
   // the low-priority case when there is no evidence (just skipping head)
   implicit def skipFilter[Smth, H <: AnyProperty, T <: TypeSet, OutT <: TypeSet]
-  (implicit t: Aux[Smth, T, OutT]): Aux[Smth, H :~: T, OutT] =
-    new FilterProps[Smth, H :~: T] { type Out = OutT
-      def apply(s: H :~: T): Out = t(s.tail)
-    }
+    (implicit t: Aux[Smth, T, OutT]): Aux[Smth, H :~: T, OutT] =
+      new FilterProps[Smth, H :~: T] { type Out = OutT
+        def apply(s: H :~: T): Out = t(s.tail)
+      }
 }
 
 

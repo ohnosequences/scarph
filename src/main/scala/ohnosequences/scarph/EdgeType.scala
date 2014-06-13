@@ -3,7 +3,7 @@ package ohnosequences.scarph
 import ohnosequences.typesets._
 
 /*
-  Witnesses of a sourceType/type adscription to an edge type.
+  Declares an edge type. it is determined my a label, source/target vertex types and in/out arities
 */
 trait AnyEdgeType {
 
@@ -21,7 +21,10 @@ trait AnyEdgeType {
 }
 
 object AnyEdgeType {
+  /* Additional methods */
   implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET) = EdgeTypeOps(et)
+  case class   EdgeTypeOps[ET <: AnyEdgeType](et: ET) 
+    extends HasPropertiesOps(et) {}
 
   type ==>[S <: AnyVertexType, T <: AnyVertexType] = AnyEdgeType {
     type SourceType = S
@@ -29,24 +32,12 @@ object AnyEdgeType {
   }
 }
 
-case class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {
-
-  /* Handy way of creating an implicit evidence saying that this vertex type has that property */
-  def has[P <: AnyProperty](p: P) = new (ET HasProperty P)
-  def has[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps) = new (ET HasProperties Ps)
-
-  /* Takes a set of properties and filters out only those, which this vertex "has" */
-  def filterMyProps[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps)(implicit f: FilterProps[ET, Ps]) = f(ps)
-}
 
 /* Source/Target */
 trait From[S <: AnyVertexType] extends AnyEdgeType { type SourceType = S }
 trait   To[T <: AnyVertexType] extends AnyEdgeType { type TargetType = T }
 
 /* Arities */
-// trait  In[I[+_]] extends AnyEdgeType { type In[+X] = I[X] }
-// trait Out[O[+_]] extends AnyEdgeType { type Out[+X] = O[X] }
-
 trait ManyOut extends AnyEdgeType { type Out[+X] =   List[X] }
 trait  OneOut extends AnyEdgeType { type Out[+X] = Option[X] }
 trait ManyIn  extends AnyEdgeType { type  In[+X] =   List[X] }
