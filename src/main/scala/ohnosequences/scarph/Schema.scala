@@ -9,8 +9,8 @@ trait AnySchema {
   type Dependencies <: TypeSet
   val  dependencies: Dependencies
 
-  type PropertyTypes <: TypeSet
-  val  propertyTypes: PropertyTypes
+  type Properties <: TypeSet
+  val  properties: Properties
 
   type VertexTypes <: TypeSet
   val  vertexTypes: VertexTypes
@@ -27,7 +27,7 @@ class Schema[
     Es <: TypeSet : boundedBy[AnyEdgeType]#is
   ](val label: String,
     val dependencies: Ds = ∅,
-    val propertyTypes: Ps = ∅,
+    val properties: Ps = ∅,
     val vertexTypes: Vs = ∅,
     val edgeTypes: Es = ∅
   )(implicit
@@ -36,25 +36,25 @@ class Schema[
   ) extends AnySchema {
 
   type Dependencies = Ds
-  type PropertyTypes = Ps
+  type Properties = Ps
   type VertexTypes = Vs
   type EdgeTypes = Es
 
   /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  val vTypesWithProps = vp.apply(vertexTypes, propertyTypes)
-  val eTypesWithProps = ep.apply(edgeTypes, propertyTypes)
+  val vTypesWithProps = vp.apply(vertexTypes, properties)
+  val eTypesWithProps = ep.apply(edgeTypes, properties)
 
   /* This method returns properties that are associated with the given **vertex** type */
   def vTypeProps[VT <: AnyVertexType](implicit
       e: VT ∈ Vs,
       f: FilterProps[VT, Ps]
-    ): f.Out = f(propertyTypes)
+    ): f.Out = f(properties)
 
   /* This method returns properties that are associated with the given **edge** type */
   def eTypeProps[ET <: AnyEdgeType](implicit
       e: ET ∈ Es,
       f: FilterProps[ET, Ps]
-    ): f.Out = f(propertyTypes)
+    ): f.Out = f(properties)
 
   override def toString = s"""${label} schema:
   vertexTypes: ${vTypesWithProps}

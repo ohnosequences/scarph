@@ -43,10 +43,10 @@ object TSchema {
     }
 
     def createSchema[S <: AnySchema](s: S)(implicit
-        mkPropertyKeys: MkPropertyKeys[s.PropertyTypes],
+        mkPropertyKeys: MkPropertyKeys[s.Properties],
         mkEdgeLabels: MkEdgeLabels[s.EdgeTypes]
       ): TitanGraph = {
-        mkPropertyKeys(g, s.propertyTypes)
+        mkPropertyKeys(g, s.properties)
         mkEdgeLabels(g, s.edgeTypes)
         g
       }

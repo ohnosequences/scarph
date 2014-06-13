@@ -30,10 +30,7 @@ object GodsSchema {
   */
   case object Titan extends VertexType("titan") {
     // you can define properties inside of the type
-    implicit val _props = this has 
-      name :~: 
-      age :~: 
-      ∅
+    implicit val _props = this has name :~: age :~: ∅
   }
   case object God extends VertexType("god")
     // or outside
@@ -98,7 +95,7 @@ object GodsSchema {
   */
   case object godsGraphSchema extends Schema("godsGraphSchema",
     dependencies = ∅,
-    propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
+    properties = name :~: age :~: time :~: reason :~: place :~: ∅,
     vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,
     edgeTypes = TitanFather :~: GodFather :~: HumanMother :~: Brother :~: Pet :~: Battled :~: GodLives :~: MonsterLives :~: ∅
   )
