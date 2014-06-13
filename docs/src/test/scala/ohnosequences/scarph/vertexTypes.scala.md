@@ -1,13 +1,11 @@
 
 ```scala
 package ohnosequences.scarph.test
+  
+import ohnosequences.typesets._
+import ohnosequences.scarph._, properties._
 
 object vertexTypes {
-  
-  import ohnosequences.scarph.VertexType
-
-  import ohnosequences.scarph._
-  import properties._
 
   // just labels and witnesses for properties
   case object User extends VertexType("user") {
@@ -16,10 +14,19 @@ object vertexTypes {
     implicit val userName   = this has name
   }
 
-  case object Org extends VertexType("org") {
-    
-    implicit val orgName   = this has name
+  case object Org extends VertexType("org") //, name :~: ?)
+  implicit val Org_name = Org has name
+}
+
+class VertexTypeSuite extends org.scalatest.FunSuite {
+
+  import vertexTypes._  
+
+  test("filter vertex type properties") {
+    assert(User.filterMyProps(allProperties) === name :~: id :~: ?)
+    // assert( Org.filterMyProps(allProperties) === name :~: ?)
   }
+
 }
 
 ```
@@ -38,11 +45,11 @@ object vertexTypes {
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -70,10 +77,10 @@ object vertexTypes {
 [main/scala/ohnosequences/scarph/Edge.scala]: ../../../../main/scala/ohnosequences/scarph/Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: ../../../../main/scala/ohnosequences/scarph/EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: ../../../../main/scala/ohnosequences/scarph/Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: ../../../../main/scala/ohnosequences/scarph/HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: ../../../../main/scala/ohnosequences/scarph/GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: ../../../../main/scala/ohnosequences/scarph/Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: ../../../../main/scala/ohnosequences/scarph/titan/TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: ../../../../main/scala/ohnosequences/scarph/Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: ../../../../main/scala/ohnosequences/scarph/VertexType.scala.md

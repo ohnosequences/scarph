@@ -1,94 +1,198 @@
 
 ```scala
 package ohnosequences.scarph
+
+import ohnosequences.typesets._
+import scala.reflect._
 ```
 
-
 Properties
-
 
 ```scala
 trait AnyProperty extends AnyDenotation {
   val label: String
-
   type TYPE <: AnyProperty
 }
-
-import scala.reflect._
 ```
 
+Evidence that an arbitrary type `Smth` has property `P`
 
-Properties sould be defined as case objects:
-
-``` scala
-case object Name extends Property[String]
+```scala
+sealed class HasProperty[S, P <: AnyProperty]
 ```
 
+or a set of properties `Ps`
+
+```scala
+sealed class HasProperties[S, Ps <: TypeSet : boundedBy[AnyProperty]#is] 
+
+object AnyProperty {
+```
+
+This implicit is a bridge from `HasProperties` to `HasProperty`
+
+```scala
+  implicit def FromSetToAProperty[T, P <: AnyProperty, Ps <: TypeSet]
+    (implicit ps: T HasProperties Ps, ep: P ? Ps): HasProperty[T, P] = new HasProperty[T, P]
+}
+```
+
+Properties sould be defined as case objects: `case object Name extends Property[String]`
 
 ```scala
 class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
   val label = this.toString
+```
 
+Property denotes itself
+
+```scala
   type Tpe = this.type
   val  tpe = this: Tpe
 
   type Raw = V 
 }
 
-object AnyProperty {
-
-  import SmthHasProperty._
-
-  type VertexTag = AnyDenotation.AnyTag { type Denotation <: AnyVertex }
+object Property {
 ```
 
-Right associative property getter for vertices
+For context bounds: `P <: AnyProperty: Property.Of[X]#is`
 
 ```scala
-  implicit class PropertyOps[P <: AnyProperty](val p: P) {
+  type Of[S] = { type is[P <: AnyProperty] = S HasProperty P }
+}
 
-    def %:[VT <: VertexTag](vr: VT)
-      (implicit
-        ev: PropertyOf[vr.DenotedType]#is[P],
-        mkReader: VT => ReadFrom[VT]
-      ): p.Raw = mkReader(vr).apply(p)
+class HasPropertiesOps[T](t: T) {
+```
+
+Handy way of creating an implicit evidence saying that this vertex type has that property
+
+```scala
+  def has[P <: AnyProperty](p: P) = new (T HasProperty P)
+  def has[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps) = new (T HasProperties Ps)
+```
+
+Takes a set of properties and filters out only those, which this vertex "has"
+
+```scala
+  def filterMyProps[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps)
+    (implicit f: FilterProps[T, Ps]) = f(ps)
+}
+```
+
+
+This trait should be mixed to the types that _can have properties_,
+meaning that you are going to _get properties_ from it
+
+
+```scala
+trait CanHaveProperties { self: AnyDenotation =>
+```
+
+Read a property from this representation
+
+```scala
+  trait AnyGetProperty {
+    type Property <: AnyProperty
+    val p: Property
+
+    def apply(rep: self.Rep): p.Raw
+  }
+
+  abstract class GetProperty[P <: AnyProperty](val p: P) 
+    extends AnyGetProperty { type Property = P }
+
+  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
+  case class   PropertyOps(rep: self.Rep) {
+
+    def get[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
+    (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
 
   }
 ```
 
-For using `%:` you have to provide an implicit val of `ReadFrom`
+If have just an independent getter for a particular property:
 
 ```scala
-  abstract class ReadFrom[VT <: VertexTag](val vt: VT) {
-    // NOTE: can't add `PropertyOf[vt.DenotedType]#is` requirement here
-    def apply[P <: AnyProperty](p: P): p.Raw
-  }
+  implicit def idGetter[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
+    (implicit getter: GetProperty[P]) = getter
+}
 
+
+
+import shapeless._, poly._
+import ohnosequences.typesets._
+```
+
+
+For a given arbitrary type `Smth`, filters any property set, 
+leaving only those which have the `Smth HasProperty _` evidence
+
+
+```scala
+trait FilterProps[Smth, Ps <: TypeSet] extends DepFn1[Ps] {
+  type Out <: TypeSet
+}
+
+object FilterProps extends FilterProps2 {
+  // the case when there is this evidence (leaving the head)
+  implicit def consFilter[Smth, H <: AnyProperty, T <: TypeSet, OutT <: TypeSet]
+    (implicit
+      h: Smth HasProperty H,
+      t: Aux[Smth, T, OutT]
+    ): Aux[Smth, H :~: T, H :~: OutT] =
+      new FilterProps[Smth, H :~: T] { type Out = H :~: OutT
+        def apply(s: H :~: T): Out = s.head :~: t(s.tail)
+      }
+}
+
+trait FilterProps2 {
+  def apply[Smth, Ps <: TypeSet](implicit filt: FilterProps[Smth, Ps]): Aux[Smth, Ps, filt.Out] = filt
+
+  type Aux[Smth, In <: TypeSet, O <: TypeSet] = FilterProps[Smth, In] { type Out = O }
+  
+  implicit def emptyFilter[Smth]: Aux[Smth, ?, ?] =
+    new FilterProps[Smth, ?] {
+      type Out = ?
+      def apply(s: ?): Out = ?
+    }
+
+  // the low-priority case when there is no evidence (just skipping head)
+  implicit def skipFilter[Smth, H <: AnyProperty, T <: TypeSet, OutT <: TypeSet]
+    (implicit t: Aux[Smth, T, OutT]): Aux[Smth, H :~: T, OutT] =
+      new FilterProps[Smth, H :~: T] { type Out = OutT
+        def apply(s: H :~: T): Out = t(s.tail)
+      }
 }
 ```
 
-Evidence that an arbitrary type `Smth` has property `Property`
+This applies `FilterProps` to a list of `Smth`s (`Ts` here)
 
 ```scala
-trait SmthHasProperty {
-  type Smth
-  val smth: Smth
-
-  type Property <: AnyProperty
-  val property: Property
+trait ZipWithProps[Ts <: TypeSet, Ps <: TypeSet] extends DepFn2[Ts, Ps] {
+  type Out <: TypeSet
 }
 
-case class HasProperty[S, P <: AnyProperty]
-  (val smth: S, val property: P) extends SmthHasProperty {
-    type Smth = S
-    type Property = P
-}
+object ZipWithProps {
+  def apply[Ts <: TypeSet, Ps <: TypeSet]
+    (implicit z: ZipWithProps[Ts, Ps]): Aux[Ts, Ps, z.Out] = z
 
-object SmthHasProperty {
+  type Aux[Ts <: TypeSet, Ps <: TypeSet, O <: TypeSet] = ZipWithProps[Ts, Ps] { type Out = O }
+  
+  implicit def emptyZipWithProps[Ps <: TypeSet]: Aux[?, Ps, ?] =
+    new ZipWithProps[?, Ps] {
+      type Out = ?
+      def apply(s: ?, ps: Ps): Out = ?
+    }
 
-  type PropertyOf[S] = { 
-    type is[P <: AnyProperty] = SmthHasProperty { type Smth = S; type Property = P }
-  }
+  implicit def consZipWithProps[H, T <: TypeSet, Ps <: TypeSet, OutT <: TypeSet]
+    (implicit 
+      h: FilterProps[H, Ps],
+      t: Aux[T, Ps, OutT]
+    ): Aux[H :~: T, Ps, (H, h.Out) :~: OutT] =
+      new ZipWithProps[H :~: T, Ps] { type Out = (H, h.Out) :~: OutT
+        def apply(s: H :~: T, ps: Ps): Out = (s.head, h(ps)) :~: t(s.tail, ps)
+      }
 }
 
 ```
@@ -107,11 +211,11 @@ object SmthHasProperty {
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -139,10 +243,10 @@ object SmthHasProperty {
 [main/scala/ohnosequences/scarph/Edge.scala]: Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: titan/TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: titan/TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: VertexType.scala.md

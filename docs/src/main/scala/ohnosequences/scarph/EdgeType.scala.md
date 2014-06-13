@@ -1,10 +1,12 @@
 
 ```scala
 package ohnosequences.scarph
+
+import ohnosequences.typesets._
 ```
 
 
-Witnesses of a sourceType/type adscription to an edge type.
+Declares an edge type. it is determined my a label, source/target vertex types and in/out arities
 
 
 ```scala
@@ -21,20 +23,22 @@ trait AnyEdgeType {
 
   type TargetType <: AnyVertexType
   val targetType: TargetType
-
 }
 
 object AnyEdgeType {
+```
+
+Additional methods
+
+```scala
   implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET) = EdgeTypeOps(et)
+  case class   EdgeTypeOps[ET <: AnyEdgeType](et: ET) 
+    extends HasPropertiesOps(et) {}
 
   type ==>[S <: AnyVertexType, T <: AnyVertexType] = AnyEdgeType {
     type SourceType = S
     type TargetType = T
   }
-}
-
-case class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {
-  def has[P <: AnyProperty](p: P) = HasProperty[ET, P](et, p)
 }
 ```
 
@@ -85,11 +89,11 @@ class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -117,10 +121,10 @@ class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
 [main/scala/ohnosequences/scarph/Edge.scala]: Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: titan/TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: titan/TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: VertexType.scala.md

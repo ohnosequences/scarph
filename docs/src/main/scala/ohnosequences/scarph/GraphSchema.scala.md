@@ -2,38 +2,88 @@
 ```scala
 package ohnosequences.scarph
 
-trait HasProperties { self: AnyDenotation =>
+import ohnosequences.typesets._
+
+trait AnyGraphSchema {
+
+  val label: String
+
+  type Dependencies <: TypeSet
+  val  dependencies: Dependencies
+
+  type Properties <: TypeSet
+  val  properties: Properties
+
+  type VertexTypes <: TypeSet
+  val  vertexTypes: VertexTypes
+
+  type EdgeTypes <: TypeSet
+  val  edgeTypes: EdgeTypes
+
+  val vertexPropertyAssoc: ZipWithProps[VertexTypes, Properties]
+  val   edgePropertyAssoc: ZipWithProps[EdgeTypes, Properties]
 ```
 
-Read a property from this representation
+These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)`
 
 ```scala
-  import SmthHasProperty._
+  val verticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+  val    edgesWithProperties =   edgePropertyAssoc(edgeTypes,   properties)
 
-  trait AnyGetProperty {
-    type Property <: AnyProperty
-    val p: Property
+  override def toString = s"""${label} schema:
+  vertexTypes: ${verticesWithProperties}
+    edgeTypes: ${edgesWithProperties}"""
 
-    def apply(rep: self.Rep): p.Raw
-  }
+}
 
-  abstract class GetProperty[P <: AnyProperty](val p: P) 
-      extends AnyGetProperty { type Property = P }
-
-  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
-  case class   PropertyOps(rep: self.Rep) {
-
-    def get[P <: AnyProperty: PropertyOf[self.Tpe]#is](p: P)
-      (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
-
-  }
+object AnyGraphSchema {
 ```
 
-If have just an independent getter for a particular property:
+Additional methods
 
 ```scala
-  implicit def idGetter[P <: AnyProperty: PropertyOf[self.Tpe]#is](p: P)
-      (implicit getter: GetProperty[P]) = getter
+  implicit def schemaOps[S <: AnyGraphSchema](sch: S): GraphSchemaOps[S] = GraphSchemaOps[S](sch)
+  case class   GraphSchemaOps[S <: AnyGraphSchema](schema: S) {
+```
+
+This method returns properties that are associated with the given **vertex** type
+
+```scala
+    def vertexProperties[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
+      e: VT ? schema.VertexTypes,
+      f: FilterProps[VT, schema.Properties]
+    ): f.Out = f(schema.properties)
+```
+
+This method returns properties that are associated with the given **edge** type
+
+```scala
+    def edgeProperties[ET <: Singleton with AnyEdgeType](edgeType: ET)(implicit
+      e: ET ? schema.EdgeTypes,
+      f: FilterProps[ET, schema.Properties]
+    ): f.Out = f(schema.properties)
+  }
+}
+
+case class GraphSchema[
+    Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
+    Ps <: TypeSet : boundedBy[AnyProperty]#is,
+    Vs <: TypeSet : boundedBy[AnyVertexType]#is,
+    Es <: TypeSet : boundedBy[AnyEdgeType]#is
+  ](val label: String,
+    val dependencies: Ds = ?,
+    val properties:   Ps = ?,
+    val vertexTypes:  Vs = ?,
+    val edgeTypes:    Es = ?
+  )(implicit
+    val vertexPropertyAssoc: ZipWithProps[Vs, Ps],
+    val   edgePropertyAssoc: ZipWithProps[Es, Ps]
+  ) extends AnyGraphSchema {
+
+  type Dependencies = Ds
+  type Properties   = Ps
+  type VertexTypes  = Vs
+  type EdgeTypes    = Es
 
 }
 
@@ -53,11 +103,11 @@ If have just an independent getter for a particular property:
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -85,10 +135,10 @@ If have just an independent getter for a particular property:
 [main/scala/ohnosequences/scarph/Edge.scala]: Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: titan/TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: titan/TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: VertexType.scala.md

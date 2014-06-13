@@ -3,14 +3,13 @@ package ohnosequences.scarph
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.
 */
-trait AnyVertexType {  val label: String  }
-
-class VertexType(val label: String) extends AnyVertexType
+trait AnyVertexType { val label: String }
+class    VertexType ( val label: String ) extends AnyVertexType
 
 object AnyVertexType {
-  implicit def vertexTypeOps[VT <: AnyVertexType](et: VT) = VertexTypeOps(et)
+  /* Additional methods */
+  implicit def vertexTypeOps[VT <: AnyVertexType](vt: VT) = VertexTypeOps(vt)
+  case class   VertexTypeOps[VT <: AnyVertexType](val vt: VT) 
+    extends HasPropertiesOps(vt) {}
 }
 
-case class VertexTypeOps[VT <: AnyVertexType](val vt: VT) {
-  def has[P <: AnyProperty](p: P) = HasProperty[VT, P](vt, p)
-}

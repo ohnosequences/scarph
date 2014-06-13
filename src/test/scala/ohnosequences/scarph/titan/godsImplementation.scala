@@ -15,18 +15,6 @@ object GodsImplementation {
   case object monster  extends TVertex(Monster)
   case object location extends TVertex(Location)
 
-  case object alternativeTitan extends TitanImpl with AnyTVertex {
-
-    import ohnosequences.scarph.AnyEdge
-
-    implicit val _name: GetProperty[name.type] = unsafeGetProperty(name)
-    implicit val _age:  GetProperty[age.type] = unsafeGetProperty(age)
-
-    implicit def fatherIn[
-      E <: Singleton with AnyTEdge { type Tpe = TitanFather.type }
-    ](e: E): RetrieveInEdge[E] = unsafeRetrieveManyInEdge[E](e)
-  }
-
   /*
     ### Edges
   */
