@@ -18,9 +18,19 @@ trait AnySchema {
   type EdgeTypes <: TypeSet
   val  edgeTypes: EdgeTypes
 
+  def propertiesOfVertex[VT <: AnyVertexType](implicit
+      e: VT ∈ VertexTypes,
+      f: FilterProps[VT, PropertyTypes]
+    ): f.Out
+
+  def propertiesOfEdge[ET <: AnyEdgeType](implicit
+      e: ET ∈ EdgeTypes,
+      f: FilterProps[ET, PropertyTypes]
+    ): f.Out
+
 }
 
-class Schema[
+case class Schema[
     Ds <: TypeSet : boundedBy[AnySchema]#is,
     Ps <: TypeSet : boundedBy[AnyProperty]#is,
     Vs <: TypeSet : boundedBy[AnyVertexType]#is,
@@ -45,15 +55,20 @@ class Schema[
   val eTypesWithProps = ep.apply(edgeTypes, propertyTypes)
 
   /* This method returns properties that are associated with the given **vertex** type */
-  def vTypeProps[VT <: AnyVertexType](implicit
-      e: VT ∈ Vs,
-      f: FilterProps[VT, Ps]
+  def propertiesOfVertex[VT <: AnyVertexType](implicit
+      e: VT ∈ VertexTypes,
+      f: FilterProps[VT, PropertyTypes]
+    ): f.Out = f(propertyTypes)
+
+  def altPropertiesOfVertex[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
+      e: VT ∈ VertexTypes,
+      f: FilterProps[VT, PropertyTypes]
     ): f.Out = f(propertyTypes)
 
   /* This method returns properties that are associated with the given **edge** type */
-  def eTypeProps[ET <: AnyEdgeType](implicit
-      e: ET ∈ Es,
-      f: FilterProps[ET, Ps]
+  def propertiesOfEdge[ET <: AnyEdgeType](implicit
+      e: ET ∈ EdgeTypes,
+      f: FilterProps[ET, PropertyTypes]
     ): f.Out = f(propertyTypes)
 
   override def toString = s"""${label} schema:

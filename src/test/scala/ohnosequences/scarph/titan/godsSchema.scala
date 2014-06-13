@@ -96,7 +96,7 @@ object GodsSchema {
   /*
     ### Fixed Schema
   */
-  case object godsGraphSchema extends Schema("godsGraphSchema",
+  object godsGraphSchema extends Schema("godsGraphSchema",
     dependencies = ∅,
     propertyTypes = name :~: age :~: time :~: reason :~: place :~: ∅,
     vertexTypes = Titan :~: God :~: Demigod :~: Human :~: Monster :~: Location :~: ∅,
