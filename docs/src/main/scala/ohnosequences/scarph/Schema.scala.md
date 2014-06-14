@@ -3,196 +3,88 @@
 package ohnosequences.scarph
 
 import ohnosequences.typesets._
-import scala.reflect._
-```
 
-Properties
+trait AnyGraphSchema {
 
-```scala
-trait AnyProperty extends AnyDenotation {
   val label: String
-  type TYPE <: AnyProperty
-}
+
+  type Dependencies <: TypeSet
+  val  dependencies: Dependencies
+
+  type Properties <: TypeSet
+  val  properties: Properties
+
+  type VertexTypes <: TypeSet
+  val  vertexTypes: VertexTypes
+
+  type EdgeTypes <: TypeSet
+  val  edgeTypes: EdgeTypes
+
+  val vertexPropertyAssoc: ZipWithProps[VertexTypes, Properties]
+  val   edgePropertyAssoc: ZipWithProps[EdgeTypes, Properties]
 ```
 
-Evidence that an arbitrary type `Smth` has property `P`
+These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)`
 
 ```scala
-sealed class HasProperty[S, P <: AnyProperty]
-```
+  val verticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+  val    edgesWithProperties =   edgePropertyAssoc(edgeTypes,   properties)
 
-or a set of properties `Ps`
+  override def toString = s"""${label} schema:
+  vertexTypes: ${verticesWithProperties}
+    edgeTypes: ${edgesWithProperties}"""
 
-```scala
-sealed class HasProperties[S, Ps <: TypeSet : boundedBy[AnyProperty]#is] 
-
-object AnyProperty {
-```
-
-This implicit is a bridge from `HasProperties` to `HasProperty`
-
-```scala
-  implicit def FromSetToAProperty[T, P <: AnyProperty, Ps <: TypeSet]
-    (implicit ps: T HasProperties Ps, ep: P ∈ Ps): HasProperty[T, P] = new HasProperty[T, P]
-}
-```
-
-Properties sould be defined as case objects: `case object Name extends Property[String]`
-
-```scala
-class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
-  val label = this.toString
-```
-
-Property denotes itself
-
-```scala
-  type Tpe = this.type
-  val  tpe = this: Tpe
-
-  type Raw = V 
 }
 
-object Property {
+object AnyGraphSchema {
 ```
 
-For context bounds: `P <: AnyProperty: Property.Of[X]#is`
+Additional methods
 
 ```scala
-  type Of[S] = { type is[P <: AnyProperty] = S HasProperty P }
-}
-
-class HasPropertiesOps[T](t: T) {
+  implicit def schemaOps[S <: AnyGraphSchema](sch: S): GraphSchemaOps[S] = GraphSchemaOps[S](sch)
+  case class   GraphSchemaOps[S <: AnyGraphSchema](schema: S) {
 ```
 
-Handy way of creating an implicit evidence saying that this vertex type has that property
+This method returns properties that are associated with the given **vertex** type
 
 ```scala
-  def has[P <: AnyProperty](p: P) = new (T HasProperty P)
-  def has[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps) = new (T HasProperties Ps)
+    def vertexProperties[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
+      e: VT ∈ schema.VertexTypes,
+      f: FilterProps[VT, schema.Properties]
+    ): f.Out = f(schema.properties)
 ```
 
-Takes a set of properties and filters out only those, which this vertex "has"
+This method returns properties that are associated with the given **edge** type
 
 ```scala
-  def filterMyProps[Ps <: TypeSet : boundedBy[AnyProperty]#is](ps: Ps)
-    (implicit f: FilterProps[T, Ps]) = f(ps)
-}
-```
-
-
-This trait should be mixed to the types that _can have properties_,
-meaning that you are going to _get properties_ from it
-
-
-```scala
-trait CanHaveProperties { self: AnyDenotation =>
-```
-
-Read a property from this representation
-
-```scala
-  trait AnyGetProperty {
-    type Property <: AnyProperty
-    val p: Property
-
-    def apply(rep: self.Rep): p.Raw
+    def edgeProperties[ET <: Singleton with AnyEdgeType](edgeType: ET)(implicit
+      e: ET ∈ schema.EdgeTypes,
+      f: FilterProps[ET, schema.Properties]
+    ): f.Out = f(schema.properties)
   }
-
-  abstract class GetProperty[P <: AnyProperty](val p: P) 
-    extends AnyGetProperty { type Property = P }
-
-  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
-  case class   PropertyOps(rep: self.Rep) {
-
-    def get[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
-    (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
-
-  }
-```
-
-If have just an independent getter for a particular property:
-
-```scala
-  implicit def idGetter[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
-    (implicit getter: GetProperty[P]) = getter
 }
 
+case class GraphSchema[
+    Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
+    Ps <: TypeSet : boundedBy[AnyProperty]#is,
+    Vs <: TypeSet : boundedBy[AnyVertexType]#is,
+    Es <: TypeSet : boundedBy[AnyEdgeType]#is
+  ](val label: String,
+    val dependencies: Ds = ∅,
+    val properties:   Ps = ∅,
+    val vertexTypes:  Vs = ∅,
+    val edgeTypes:    Es = ∅
+  )(implicit
+    val vertexPropertyAssoc: ZipWithProps[Vs, Ps],
+    val   edgePropertyAssoc: ZipWithProps[Es, Ps]
+  ) extends AnyGraphSchema {
 
+  type Dependencies = Ds
+  type Properties   = Ps
+  type VertexTypes  = Vs
+  type EdgeTypes    = Es
 
-import shapeless._, poly._
-import ohnosequences.typesets._
-```
-
-
-For a given arbitrary type `Smth`, filters any property set, 
-leaving only those which have the `Smth HasProperty _` evidence
-
-
-```scala
-trait FilterProps[Smth, Ps <: TypeSet] extends DepFn1[Ps] {
-  type Out <: TypeSet
-}
-
-object FilterProps extends FilterProps2 {
-  // the case when there is this evidence (leaving the head)
-  implicit def consFilter[Smth, H <: AnyProperty, T <: TypeSet, OutT <: TypeSet]
-    (implicit
-      h: Smth HasProperty H,
-      t: Aux[Smth, T, OutT]
-    ): Aux[Smth, H :~: T, H :~: OutT] =
-      new FilterProps[Smth, H :~: T] { type Out = H :~: OutT
-        def apply(s: H :~: T): Out = s.head :~: t(s.tail)
-      }
-}
-
-trait FilterProps2 {
-  def apply[Smth, Ps <: TypeSet](implicit filt: FilterProps[Smth, Ps]): Aux[Smth, Ps, filt.Out] = filt
-
-  type Aux[Smth, In <: TypeSet, O <: TypeSet] = FilterProps[Smth, In] { type Out = O }
-  
-  implicit def emptyFilter[Smth]: Aux[Smth, ∅, ∅] =
-    new FilterProps[Smth, ∅] {
-      type Out = ∅
-      def apply(s: ∅): Out = ∅
-    }
-
-  // the low-priority case when there is no evidence (just skipping head)
-  implicit def skipFilter[Smth, H <: AnyProperty, T <: TypeSet, OutT <: TypeSet]
-    (implicit t: Aux[Smth, T, OutT]): Aux[Smth, H :~: T, OutT] =
-      new FilterProps[Smth, H :~: T] { type Out = OutT
-        def apply(s: H :~: T): Out = t(s.tail)
-      }
-}
-```
-
-This applies `FilterProps` to a list of `Smth`s (`Ts` here)
-
-```scala
-trait ZipWithProps[Ts <: TypeSet, Ps <: TypeSet] extends DepFn2[Ts, Ps] {
-  type Out <: TypeSet
-}
-
-object ZipWithProps {
-  def apply[Ts <: TypeSet, Ps <: TypeSet]
-    (implicit z: ZipWithProps[Ts, Ps]): Aux[Ts, Ps, z.Out] = z
-
-  type Aux[Ts <: TypeSet, Ps <: TypeSet, O <: TypeSet] = ZipWithProps[Ts, Ps] { type Out = O }
-  
-  implicit def emptyZipWithProps[Ps <: TypeSet]: Aux[∅, Ps, ∅] =
-    new ZipWithProps[∅, Ps] {
-      type Out = ∅
-      def apply(s: ∅, ps: Ps): Out = ∅
-    }
-
-  implicit def consZipWithProps[H, T <: TypeSet, Ps <: TypeSet, OutT <: TypeSet]
-    (implicit 
-      h: FilterProps[H, Ps],
-      t: Aux[T, Ps, OutT]
-    ): Aux[H :~: T, Ps, (H, h.Out) :~: OutT] =
-      new ZipWithProps[H :~: T, Ps] { type Out = (H, h.Out) :~: OutT
-        def apply(s: H :~: T, ps: Ps): Out = (s.head, h(ps)) :~: t(s.tail, ps)
-      }
 }
 
 ```

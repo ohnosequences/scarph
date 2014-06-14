@@ -6,16 +6,8 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
   final type Raw = com.thinkaurelius.titan.core.TitanVertex
 
-  /* Reading any property from a TitanVertex */
-  import AnyProperty._
-  implicit def readFromTitanVertex(vr: Rep) = 
-    new ReadFrom[Rep](vr) {
-      def apply[P <: AnyProperty](p: P): p.Raw = vr.getProperty[p.Raw](p.label)
-    }
-
   /* Getting a property from any TitanVertex */
-  import SmthHasProperty._
-  implicit def unsafeGetProperty[P <: AnyProperty: PropertyOf[this.Tpe]#is](p: P) = 
+  implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
     new GetProperty[P](p) {
       def apply(rep: Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }

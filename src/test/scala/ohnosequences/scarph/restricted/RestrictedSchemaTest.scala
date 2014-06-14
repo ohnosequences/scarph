@@ -4,8 +4,7 @@ import com.thinkaurelius.titan.core._
 import java.io.File
 
 import ohnosequences.scarph._
-import ohnosequences.scarph.titan._
-import MakeKeys._
+import ohnosequences.scarph.titan._, TSchema._
 
 import SimpleSchema._
 import SimpleSchemaImplementation._
@@ -42,10 +41,10 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
         g.addPropertyKey(title)
         g.addPropertyKey(published)
 
-        g.addEdgeLabel(humanProps)
-        g.addEdgeLabel(articleProps)
-        g.addEdgeLabel(author)
-        g.addEdgeLabel(knows)
+        g.addEdgeLabel(humanProps.tpe)
+        g.addEdgeLabel(articleProps.tpe)
+        g.addEdgeLabel(author.tpe)
+        g.addEdgeLabel(knows.tpe)
 
         // Adding actual vertices/edges
         val humans = g.addVertex(null)

@@ -1,7 +1,9 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 /*
-  Witnesses of a sourceType/type adscription to an edge type.
+  Declares an edge type. it is determined my a label, source/target vertex types and in/out arities
 */
 trait AnyEdgeType {
 
@@ -16,11 +18,13 @@ trait AnyEdgeType {
 
   type TargetType <: AnyVertexType
   val targetType: TargetType
-
 }
 
 object AnyEdgeType {
+  /* Additional methods */
   implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET) = EdgeTypeOps(et)
+  case class   EdgeTypeOps[ET <: AnyEdgeType](et: ET) 
+    extends HasPropertiesOps(et) {}
 
   type ==>[S <: AnyVertexType, T <: AnyVertexType] = AnyEdgeType {
     type SourceType = S
@@ -28,9 +32,6 @@ object AnyEdgeType {
   }
 }
 
-case class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {
-  def has[P <: AnyProperty](p: P) = HasProperty[ET, P](et, p)
-}
 
 /* Source/Target */
 trait From[S <: AnyVertexType] extends AnyEdgeType { type SourceType = S }
