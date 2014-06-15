@@ -59,7 +59,7 @@ object AnyDenotation {
 
   type TaggedWith[D <: AnyDenotation] = D#Raw with Tag[D]
 
-  def tagWith[D <: AnyDenotation with Singleton] = new TagBuilder[D]
+  def tagWith[D <: Singleton with AnyDenotation] = new TagBuilder[D]
 
   class TagBuilder[D <: AnyDenotation] {
     def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]

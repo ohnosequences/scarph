@@ -12,7 +12,7 @@ sealed trait Morphism {
   val target: Target
 }
 
-  case class Simple[E <: AnyEdgeType with Singleton](val edge: E)
+  case class Simple[E <: Singleton with AnyEdgeType](val edge: E)
 
   extends Morphism {
 
