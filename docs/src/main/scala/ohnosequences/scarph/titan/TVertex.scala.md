@@ -9,21 +9,10 @@ trait AnyTVertex extends AnyVertex { tvertex =>
   final type Raw = com.thinkaurelius.titan.core.TitanVertex
 ```
 
-Reading any property from a TitanVertex
-
-```scala
-  import AnyProperty._
-  implicit def readFromTitanVertex(vr: Rep) = 
-    new ReadFrom[Rep](vr) {
-      def apply[P <: AnyProperty](p: P): p.Raw = vr.getProperty[p.Raw](p.label)
-    }
-```
-
 Getting a property from any TitanVertex
 
 ```scala
-  import SmthHasProperty._
-  implicit def unsafeGetProperty[P <: AnyProperty: PropertyOf[this.Tpe]#is](p: P) = 
+  implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
     new GetProperty[P](p) {
       def apply(rep: Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }
@@ -111,11 +100,11 @@ class TVertex[VT <: AnyVertexType](val tpe: VT)
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -143,10 +132,10 @@ class TVertex[VT <: AnyVertexType](val tpe: VT)
 [main/scala/ohnosequences/scarph/Edge.scala]: ../Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: ../EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: ../Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: ../HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: ../GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: ../Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: ../Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: ../VertexType.scala.md

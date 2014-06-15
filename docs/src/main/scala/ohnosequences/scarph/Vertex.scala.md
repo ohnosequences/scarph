@@ -12,7 +12,7 @@ They are designed to be compatible with shapeless records (maybe, we'll see).
 
 
 ```scala
-trait AnyVertex extends Denotation[AnyVertexType] with HasProperties { vertex =>
+trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { vertex =>
 ```
 
 Getters for incoming/outgoing edges
@@ -40,7 +40,11 @@ Getters for incoming/outgoing edges
       extends AnyRetrieveInEdge { type Edge = E }
 
   abstract class Out[E <: Singleton with AnyEdge](edge: E) extends RetrieveOutEdge[E](edge)
+```
 
+Additional methods
+
+```scala
   implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
   case class   VertexOps(rep: vertex.Rep) {
 
@@ -55,13 +59,12 @@ Getters for incoming/outgoing edges
         val retriever = mkRetriever(e)
         retriever(rep)
       }
-
   }
 
 }
 
 abstract class Vertex[VT <: AnyVertexType](val tpe: VT) 
-  extends AnyVertex { type Tpe = VT }
+    extends AnyVertex { type Tpe = VT }
 
 object AnyVertex {
   type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
@@ -84,11 +87,11 @@ object AnyVertex {
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -116,10 +119,10 @@ object AnyVertex {
 [main/scala/ohnosequences/scarph/Edge.scala]: Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: titan/TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: titan/TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: VertexType.scala.md

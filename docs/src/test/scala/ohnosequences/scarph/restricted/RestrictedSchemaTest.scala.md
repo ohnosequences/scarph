@@ -6,8 +6,7 @@ import com.thinkaurelius.titan.core._
 import java.io.File
 
 import ohnosequences.scarph._
-import ohnosequences.scarph.titan._
-import MakeKeys._
+import ohnosequences.scarph.titan._, TSchema._
 
 import SimpleSchema._
 import SimpleSchemaImplementation._
@@ -46,10 +45,10 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
         g.addPropertyKey(title)
         g.addPropertyKey(published)
 
-        g.addEdgeLabel(humanProps)
-        g.addEdgeLabel(articleProps)
-        g.addEdgeLabel(author)
-        g.addEdgeLabel(knows)
+        g.addEdgeLabel(humanProps.tpe)
+        g.addEdgeLabel(articleProps.tpe)
+        g.addEdgeLabel(author.tpe)
+        g.addEdgeLabel(knows.tpe)
 
         // Adding actual vertices/edges
         val humans = g.addVertex(null)
@@ -148,11 +147,11 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
-          + [HasProperties.scala][main/scala/ohnosequences/scarph/HasProperties.scala]
+          + [GraphSchema.scala][main/scala/ohnosequences/scarph/GraphSchema.scala]
           + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TEdge.scala][main/scala/ohnosequences/scarph/titan/TEdge.scala]
-            + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
+            + [TSchema.scala][main/scala/ohnosequences/scarph/titan/TSchema.scala]
             + [TVertex.scala][main/scala/ohnosequences/scarph/titan/TVertex.scala]
           + [Vertex.scala][main/scala/ohnosequences/scarph/Vertex.scala]
           + [VertexType.scala][main/scala/ohnosequences/scarph/VertexType.scala]
@@ -180,10 +179,10 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
 [main/scala/ohnosequences/scarph/Edge.scala]: ../../../../../main/scala/ohnosequences/scarph/Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: ../../../../../main/scala/ohnosequences/scarph/EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: ../../../../../main/scala/ohnosequences/scarph/Expressions.scala.md
-[main/scala/ohnosequences/scarph/HasProperties.scala]: ../../../../../main/scala/ohnosequences/scarph/HasProperties.scala.md
+[main/scala/ohnosequences/scarph/GraphSchema.scala]: ../../../../../main/scala/ohnosequences/scarph/GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: ../../../../../main/scala/ohnosequences/scarph/Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TEdge.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TSchema.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TVertex.scala]: ../../../../../main/scala/ohnosequences/scarph/titan/TVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: ../../../../../main/scala/ohnosequences/scarph/Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: ../../../../../main/scala/ohnosequences/scarph/VertexType.scala.md
