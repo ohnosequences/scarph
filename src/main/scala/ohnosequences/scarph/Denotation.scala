@@ -57,21 +57,21 @@ trait Denotation[T] extends AnyDenotation {
 */
 object AnyDenotation {
 
-  type TaggedWith[D <: AnyDenotation] = D#Raw with Tag[D]
+  type TaggedWith[D <: Singleton with AnyDenotation] = D#Raw with Tag[D]
 
   def tagWith[D <: AnyDenotation with Singleton] = new TagBuilder[D]
 
-  class TagBuilder[D <: AnyDenotation] {
+  class TagBuilder[D <: Singleton with AnyDenotation] {
     def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
   }
 
   trait AnyTag {
 
-    type Denotation <: AnyDenotation
-    type DenotedType = Denotation#Tpe
+    type Denotation <: Singleton with AnyDenotation
+    type DenotedType = Singleton with Denotation#Tpe
   }
 
-  trait Tag[D <: AnyDenotation] extends AnyTag with KeyTag[D, D#Raw] {
+  trait Tag[D <: Singleton with AnyDenotation] extends AnyTag with KeyTag[D, D#Raw] {
 
     type Denotation = D
   }
