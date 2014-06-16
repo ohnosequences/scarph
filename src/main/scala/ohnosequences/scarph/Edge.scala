@@ -13,14 +13,6 @@ trait AnyEdge extends Denotation[AnyEdgeType] with CanHaveProperties { edge =>
     def apply(edgeRep: edge.Rep): target.Rep
   }
 
-  /* Additional methods */
-  implicit def edgeOps(edgeRep: edge.Rep) = EdgeOps(edgeRep)
-  case class   EdgeOps(edgeRep: edge.Rep) {
-
-    def source[S <: Singleton with AnyVertex.ofType[Tpe#SourceType]](implicit getter: GetSource[S]) = getter(edgeRep)
-    def target[T <: Singleton with AnyVertex.ofType[Tpe#TargetType]](implicit getter: GetTarget[T]) = getter(edgeRep)
-  }
-
 }
 
 class Edge[ET <: AnyEdgeType](val tpe: ET) 

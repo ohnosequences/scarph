@@ -18,29 +18,6 @@ trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { verte
     def apply(rep: vertex.Rep): e.tpe.In[e.Rep]
   }
 
-  /* Additional methods */
-  // implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
-  // case class   VertexOps(rep: vertex.Rep) {
-
-  //   def outT[ET <: From[vertex.Tpe], E <: Singleton with AnyEdge { type Tpe <: ET }]
-  //     (et: ET)(implicit e: E, mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
-  //       val retriever = mkRetriever(e)
-  //       retriever(rep)
-  //     }
-
-  //   def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
-  //     (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
-  //       val retriever = mkRetriever(e)
-  //       retriever(rep)
-  //     }
-
-  //   def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
-  //     (e: E)(implicit mkRetriever: E => RetrieveInEdge[E]): E#Tpe#In[E#Rep] = {
-  //       val retriever = mkRetriever(e)
-  //       retriever(rep)
-  //     }
-  // }
-
 }
 
 abstract class Vertex[VT <: AnyVertexType](val tpe: VT) 

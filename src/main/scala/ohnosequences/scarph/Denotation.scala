@@ -59,7 +59,7 @@ object AnyDenotation {
 
   type TaggedWith[D <: Singleton with AnyDenotation] = D#Raw with Tag[D]
 
-  def tagWith[D <: AnyDenotation with Singleton] = new TagBuilder[D]
+  def tagWith[D <: Singleton with AnyDenotation] = new TagBuilder[D]
 
   class TagBuilder[D <: Singleton with AnyDenotation] {
     def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
@@ -75,5 +75,8 @@ object AnyDenotation {
 
     type Denotation = D
   }
+
+  type VertexTag[V <: Singleton with AnyVertex] = AnyDenotation.TaggedWith[V]
+  type   EdgeTag[E <: Singleton with AnyEdge]   = AnyDenotation.TaggedWith[E]
 
 }

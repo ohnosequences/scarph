@@ -4,16 +4,8 @@ import  ohnosequences.scarph._, AnyDenotation._
 
 object default {
 
-  type VertexTag[V <: Singleton with AnyVertex] = AnyDenotation.TaggedWith[V]
-
-  implicit def vertexOps[V <: Singleton with AnyVertex](rep: VertexTag[V]) =  VertexOps[V](rep)
-  case class   VertexOps[V <: Singleton with AnyVertex](val rep: VertexTag[V]) {
-
-    def outT[ET <: From[rep.DenotedType], E <: Singleton with AnyEdge { type Tpe <: ET }]
-      (et: ET)(implicit e: E, mkRetriever: E => rep.Denotation#RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
+  implicit def vertexOps[V <: Singleton with AnyVertex](rep: VertexTag[V]): VertexOps[V] = VertexOps[V](rep)
+  case class   VertexOps[V <: Singleton with AnyVertex](rep: VertexTag[V]) {
 
     def out[E <: Singleton with AnyEdge { type Tpe <: From[rep.DenotedType] }]
       (e: E)(implicit mkRetriever: E => rep.Denotation#RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
@@ -26,6 +18,18 @@ object default {
         val retriever = mkRetriever(e)
         retriever(rep)
       }
+
+  }
+
+  implicit def edgeOps[E <: Singleton with AnyEdge](rep: EdgeTag[E]): EdgeOps[E] = EdgeOps(rep)
+  case class   EdgeOps[E <: Singleton with AnyEdge](rep: EdgeTag[E]) {
+
+    def source[S <: Singleton with AnyVertex.ofType[rep.Denotation#Tpe#SourceType]]
+      (implicit getter: rep.Denotation#GetSource[S]) = getter(rep)
+
+    def target[T <: Singleton with AnyVertex.ofType[rep.Denotation#Tpe#TargetType]]
+      (implicit getter: rep.Denotation#GetTarget[T]) = getter(rep)
+
   }
 
 }

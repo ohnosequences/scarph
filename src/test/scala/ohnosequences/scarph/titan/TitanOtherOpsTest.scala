@@ -55,13 +55,14 @@ class TitanImplementationSuite extends org.scalatest.FunSuite with org.scalatest
   test("testing titan implicit implementation") {
 
     import GodsImplementation._
+    import ops.typelevel._
 
     val pluto = g.getTagged(God)("name", "pluto")
     shapeless.test.typed[god.Rep](pluto)
 
-    val pe: List[pet.Rep] = pluto outT Pet
+    val pe: List[pet.Rep] = pluto out Pet
 
-    assert(pluto.outT(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
 
   }
 

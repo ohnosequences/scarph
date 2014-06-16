@@ -9,7 +9,7 @@ import java.io.File
 import GodsSchema._
 import GodsImplementation._
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, ops.default._
 import ohnosequences.scarph.titan._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
