@@ -35,8 +35,8 @@ trait AnyTEdge extends AnyEdge { tedge =>
 }
 
 class TEdge[
-    ET <: AnyEdgeType, 
     S <: AnyVertex.ofType[ET#SourceType] with AnyTVertex, 
+    ET <: AnyEdgeType, 
     T <: AnyVertex.ofType[ET#TargetType] with AnyTVertex
   ](val source: S, val tpe: ET, val target: T) extends AnyTEdge { 
     type Source = S
