@@ -87,10 +87,19 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val pe: List[pet.Rep] = pluto out pet
     assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    // same but using .outV
+    assert(pluto.outV(pet).map{ _.get(name) } === List("cerberus"))
 
     assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
     // symmetry:
     assert(pluto.in(brother).map{ _.source } 
       === pluto.out(brother).map{ _.target })
+
+    assert(pluto.inV(brother) === pluto.in(brother).map{ _.source })
+    assert(pluto.inV(brother) === pluto.outV(brother))
+
+    // FIXME: this doesn't work on the first flatMap
+    // assert(pluto.in(brother).flatMap{ _.out(godLives) }.map{ _.get(name) }.toSet === Set("sea", "sky"))
+    assert(pluto.inV(brother).map{ _.outV(godLives) }.flatten.map{ _.get(name) }.toSet === Set("sea", "sky"))
   }
 }

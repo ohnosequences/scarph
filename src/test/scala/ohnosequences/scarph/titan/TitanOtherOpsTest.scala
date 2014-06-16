@@ -63,6 +63,7 @@ class TitanImplementationSuite extends org.scalatest.FunSuite with org.scalatest
     val pe: List[pet.Rep] = pluto out Pet
 
     assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
 
   }
 

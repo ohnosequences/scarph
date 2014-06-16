@@ -114,7 +114,7 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
     
     // Vs - vertices, Es - edges
     val sysprogV = sysprog.source
-    val authorEs = vertexOps(sysprogV) out author
+    val authorEs = sysprogV out author
     val authorVs = authorEs map { _ target }
     val humanEs = authorVs flatMap { _ out humanProps }
     val names = humanEs map { _ get name }
