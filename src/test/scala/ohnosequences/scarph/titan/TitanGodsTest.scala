@@ -68,8 +68,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     
     assert(hercules.getProperty[Int]("age") === (hercules get age))
 
-    val es: List[battled.Rep] = hercules out battled
-    assert((hercules out battled map { _ get time }).toSet === Set(1, 12, 2))
+    val es: List[battled.Rep] = hercules outE battled
+    assert((hercules outE battled map { _ get time }).toSet === Set(1, 12, 2))
   }
 
   ignore("get INcoming edges and their property") {
@@ -78,19 +78,28 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // FIXME: godLives and monsterLives have the same label.
     // it should get only one edge (for pluto), but it gets both, because they have the same label:
-    info((tartarus in godLives map { _ get reason }).mkString("['","', '","']"))
+    info((tartarus inE godLives map { _ get reason }).mkString("['","', '","']"))
   }
 
   test("get target/source vertices of incoming/outgoing edges") {
 
     val pluto = g.getTagged(god)("name", "pluto")
 
-    val pe: List[pet.Rep] = pluto out pet
-    assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    val pe: List[pet.Rep] = pluto outE pet
+    assert(pluto.outE(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    // same but using .out
+    assert(pluto.out(pet).map{ _.get(name) } === List("cerberus"))
 
-    assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
+    assert(pluto.inE(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
     // symmetry:
-    assert(pluto.in(brother).map{ _.source } 
-      === pluto.out(brother).map{ _.target })
+    assert(pluto.inE(brother).map{ _.source } 
+      === pluto.outE(brother).map{ _.target })
+
+    assert(pluto.in(brother) === pluto.inE(brother).map{ _.source })
+    assert(pluto.in(brother) === pluto.out(brother))
+
+    // FIXME: this doesn't work on the first flatMap
+    // assert(pluto.in(brother).flatMap{ _.out(godLives) }.map{ _.get(name) }.toSet === Set("sea", "sky"))
+    assert(pluto.in(brother).map{ _.out(godLives) }.flatten.map{ _.get(name) }.toSet === Set("sea", "sky"))
   }
 }

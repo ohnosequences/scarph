@@ -128,7 +128,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     implicit def retrieveMemberOf(e: memberOf.type) = new user.RetrieveOutEdge(memberOf) {
       def apply(rep: user.Rep) = members filter { _.source == rep }
     }
-    assert(bob.out(memberOf).map(_.target) === List(oracle, typesafe))
+    assert(bob.outE(memberOf).map(_.target) === List(oracle, typesafe))
 
 
     val owners: List[owns.Rep] = List(
@@ -140,7 +140,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     implicit def retrieveOwns(e: owns.type) = new user.RetrieveOutEdge(owns) {
       def apply(rep: user.Rep) = owners find { _.source == rep }
     }
-    assert(((martin out owns) map (_.target)) === Some(typesafe))
+    assert(((martin outE owns) map (_.target)) === Some(typesafe))
     // cool, martin owns some typesafe org
 
   }

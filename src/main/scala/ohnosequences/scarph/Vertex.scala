@@ -38,17 +38,40 @@ trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { verte
   implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
   case class   VertexOps(rep: vertex.Rep) {
 
-    def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
+    /* OUTgoing edges */
+    def outE[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
       (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
         val retriever = mkRetriever(e)
         retriever(rep)
       }
 
-    def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
+    /* OUTgoing vertices */
+    def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] },
+             T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType] ]
+      (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E],
+                      getTarget: E#GetTarget[T]): E#Tpe#Out[T#Rep] = {
+        val retriever = mkRetriever(e)
+        val f = retriever.e.tpe.outFunctor
+        f.map(retriever(rep))(getTarget(_))
+      }
+
+    /* INcoming edges */
+    def inE[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
       (e: E)(implicit mkRetriever: E => RetrieveInEdge[E]): E#Tpe#In[E#Rep] = {
         val retriever = mkRetriever(e)
         retriever(rep)
       }
+
+    /* INcoming vertices */
+    def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] },
+           S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType] ]
+      (e: E)(implicit mkRetriever: E => RetrieveInEdge[E],
+                      getSource: E#GetSource[S]): E#Tpe#In[S#Rep] = {
+        val retriever = mkRetriever(e)
+        val f = retriever.e.tpe.inFunctor
+        f.map(retriever(rep))(getSource(_))
+      }
+
   }
 
 }
