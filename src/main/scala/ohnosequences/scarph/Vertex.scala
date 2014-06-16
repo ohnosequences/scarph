@@ -11,45 +11,35 @@ package ohnosequences.scarph
 trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { vertex =>
 
   /* Getters for incoming/outgoing edges */
-  trait AnyRetrieveOutEdge {
-
-    type Edge <: AnyEdge
-    val e: Edge
-
+  abstract class RetrieveOutEdge[E <: Singleton with AnyEdge](val e: E) {
     def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
   }
-
-  abstract class RetrieveOutEdge[E <: Singleton with AnyEdge](val e: E) 
-    extends AnyRetrieveOutEdge { type Edge = E }
-
-  trait AnyRetrieveInEdge {
-
-    type Edge <: AnyEdge
-    val e: Edge
-
+  abstract class RetrieveInEdge[E <: Singleton with AnyEdge](val e: E) {
     def apply(rep: vertex.Rep): e.tpe.In[e.Rep]
   }
-  abstract class RetrieveInEdge[E <: Singleton with AnyEdge](val e: E) 
-      extends AnyRetrieveInEdge { type Edge = E }
-
-  abstract class Out[E <: Singleton with AnyEdge](edge: E) extends RetrieveOutEdge[E](edge)
 
   /* Additional methods */
-  implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
-  case class   VertexOps(rep: vertex.Rep) {
+  // implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
+  // case class   VertexOps(rep: vertex.Rep) {
 
-    def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
-      (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
+  //   def outT[ET <: From[vertex.Tpe], E <: Singleton with AnyEdge { type Tpe <: ET }]
+  //     (et: ET)(implicit e: E, mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
+  //       val retriever = mkRetriever(e)
+  //       retriever(rep)
+  //     }
 
-    def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
-      (e: E)(implicit mkRetriever: E => RetrieveInEdge[E]): E#Tpe#In[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
-  }
+  //   def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
+  //     (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
+  //       val retriever = mkRetriever(e)
+  //       retriever(rep)
+  //     }
+
+  //   def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
+  //     (e: E)(implicit mkRetriever: E => RetrieveInEdge[E]): E#Tpe#In[E#Rep] = {
+  //       val retriever = mkRetriever(e)
+  //       retriever(rep)
+  //     }
+  // }
 
 }
 

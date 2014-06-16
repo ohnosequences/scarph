@@ -43,3 +43,7 @@ class TEdge[
     type Tpe = ET 
     type Target = T
   }
+
+object AnyTEdge {
+  type ofType[ET <: AnyEdgeType] = AnyTEdge { type Tpe = ET }
+}

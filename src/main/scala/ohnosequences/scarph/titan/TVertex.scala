@@ -67,3 +67,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
 class TVertex[VT <: AnyVertexType](val tpe: VT) 
   extends AnyTVertex { type Tpe = VT }
+
+object AnyTVertex {
+  type ofType[VT <: AnyVertexType] = AnyTVertex { type Tpe = VT }
+}

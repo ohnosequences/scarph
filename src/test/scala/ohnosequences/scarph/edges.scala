@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, ops.default._
 
 object edges {
 

@@ -29,5 +29,7 @@ class Edge[ET <: AnyEdgeType](val tpe: ET)
 object AnyEdge {
   import AnyEdgeType._
 
+  type ofType[ET <: AnyEdgeType] = AnyEdge { type Tpe = ET }
+
   type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type Tpe <: S ==> T }
 }

@@ -3,7 +3,7 @@ package ohnosequences.scarph.restricted.test
 import com.thinkaurelius.titan.core._
 import java.io.File
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, ops.default._
 import ohnosequences.scarph.titan._, TSchema._
 
 import SimpleSchema._
@@ -114,7 +114,7 @@ class RestrictedSchemaSuite extends org.scalatest.FunSuite with org.scalatest.Be
     
     // Vs - vertices, Es - edges
     val sysprogV = sysprog.source
-    val authorEs = sysprogV out author
+    val authorEs = vertexOps(sysprogV) out author
     val authorVs = authorEs map { _ target }
     val humanEs = authorVs flatMap { _ out humanProps }
     val names = humanEs map { _ get name }

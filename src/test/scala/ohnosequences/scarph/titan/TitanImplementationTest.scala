@@ -7,7 +7,6 @@ import com.thinkaurelius.titan.core._
 import java.io.File
 
 import GodsSchema._
-// import GodsImplementation._
 
 import ohnosequences.scarph._, titan._, TSchema._
 
@@ -47,33 +46,22 @@ class TitanImplementationSuite extends org.scalatest.FunSuite with org.scalatest
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[V <: AnyTVertex](vx: V)(k: String, v: String): vx.Rep = {
-      vx ->> tg.getVertices(k, v).iterator().next().asInstanceOf[TitanVertex]
+    def getTagged[VT <: AnyVertexType, V <: AnyTVertex.ofType[VT]](vt: VT)(k: String, s: String)
+      (implicit v: V): v.Rep = {
+      v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[TitanVertex]
     }
-    // def getTagged[VT <: AnyVertexType](vt: VT)(k: String, v: String//)(
-    //   // implicit toTVertex: VT => TVertex[VT]
-    // ): TitanVertex with AnyDenotation.Tag[TVertex[VT]] = {
-    //   // case object vx extends TVertex(vt)
-    //   // val vx = toTVertex(vt)
-    //   val vx = TitanImplementation.VTtoV(vt)
-    //   (vx: TVertex[VT]) ->> tg.getVertices(k, v).iterator().next().asInstanceOf[TitanVertex]
-    // }
   } 
 
   test("testing titan implicit implementation") {
 
-    import TitanImplementation._
+    import GodsImplementation._
 
-    object vGod extends TVertex(GodsSchema.God)
-    val pluto = g.getTagged(vGod)("name", "pluto")
+    val pluto = g.getTagged(God)("name", "pluto")
+    shapeless.test.typed[god.Rep](pluto)
 
-    // val pe: List[pet.Rep] = pluto out pet
-    assert(pluto.out(ETtoE(Pet)).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    val pe: List[pet.Rep] = pluto outT Pet
 
-    // assert(saturn.getProperty[Int]("age") === 10000)
-    // assert(saturn.get(age) === 10000)
-
-    // println(saturn in )
+    assert(pluto.outT(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
 
   }
 
