@@ -1,6 +1,6 @@
 package ohnosequences.scarph.ops
 
-import  ohnosequences.scarph._, AnyDenotation._
+import  ohnosequences.scarph._
 
 /* 
   The point of this is to do all ops on vertex/edge types instead of vertices and edges,
@@ -11,8 +11,8 @@ import  ohnosequences.scarph._, AnyDenotation._
 */
 object typelevel {
 
-  implicit def vertexOps[V <: Singleton with AnyVertex](rep: VertexTag[V]) =  VertexOps[V](rep)
-  case class   VertexOps[V <: Singleton with AnyVertex](rep: VertexTag[V]) {
+  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) =  VertexOps[V](rep)
+  case class   VertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
     type Vertex = rep.Denotation
     type VertexType = rep.DenotedType
@@ -21,10 +21,10 @@ object typelevel {
     def out[ET <: From[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
         e: E, 
-        mkRetriever: E => Vertex#RetrieveOutEdge[E]
+        mkGetter: E => Vertex#GetOutEdge[E]
       ): ET#Out[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
+        val getter = mkGetter(e)
+        getter(rep)
       }
 
     /* OUT vertices */
@@ -33,19 +33,19 @@ object typelevel {
              T <: Singleton with AnyVertex.ofType[ET#TargetType] ]
       (et: ET)(implicit 
         e: E,
-        mkRetriever: E => Vertex#RetrieveOutEdge[E],
+        mkGetter: E => Vertex#GetOutEdge[E],
         getTarget: E#GetTarget[T]
       ): ET#Out[T#Rep] = {
-        val retriever = mkRetriever(e)
-        val f = retriever.e.tpe.outFunctor
-        f.map(retriever(rep))(getTarget(_))
+        val getter = mkGetter(e)
+        val f = getter.e.tpe.outFunctor
+        f.map(getter(rep))(getTarget(_))
       }
 
     /* IN edges */
     def in[ET <: To[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
-      (et: ET)(implicit e: E, mkRetriever: E => Vertex#RetrieveInEdge[E]): ET#In[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
+      (et: ET)(implicit e: E, mkGetter: E => Vertex#GetInEdge[E]): ET#In[E#Rep] = {
+        val getter = mkGetter(e)
+        getter(rep)
       }
 
     /* IN vertices */
@@ -54,16 +54,16 @@ object typelevel {
             S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType] ]
       (et: ET)(implicit 
         e: E,
-        mkRetriever: E => Vertex#RetrieveInEdge[E],
+        mkGetter: E => Vertex#GetInEdge[E],
         getSource: E#GetSource[S]
       ): ET#In[S#Rep] = {
-        val retriever = mkRetriever(e)
-        val f = retriever.e.tpe.inFunctor
-        f.map(retriever(rep))(getSource(_))
+        val getter = mkGetter(e)
+        val f = getter.e.tpe.inFunctor
+        f.map(getter(rep))(getSource(_))
       }
   }
 
-  implicit def  edgeOps[E <: Singleton with AnyEdge](rep: EdgeTag[E]): 
+  implicit def  edgeOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): 
     ops.default.EdgeOps[E] = ops.default.EdgeOps(rep)
 
 }

@@ -51,7 +51,7 @@ class HasPropertiesOps[T](t: T) {
   This trait should be mixed to the types that _can have properties_,
   meaning that you are going to _get properties_ from it
 */
-trait CanHaveProperties { self: AnyDenotation =>
+trait PropertyGetters { self: AnyDenotation =>
 
   /* Read a property from this representation */
   trait AnyGetProperty {

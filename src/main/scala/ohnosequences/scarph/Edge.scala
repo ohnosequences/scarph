@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-trait AnyEdge extends Denotation[AnyEdgeType] with CanHaveProperties { edge =>
+trait AnyEdge extends Denotation[AnyEdgeType] with PropertyGetters { edge =>
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
   type Tpe <: AnyEdgeType
@@ -24,4 +24,8 @@ object AnyEdge {
   type ofType[ET <: AnyEdgeType] = AnyEdge { type Tpe = ET }
 
   type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type Tpe <: S ==> T }
+}
+
+object Edge {
+  type RepOf[E <: Singleton with AnyEdge] = AnyDenotation.TaggedWith[E]
 }

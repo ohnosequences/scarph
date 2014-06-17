@@ -66,17 +66,13 @@ object AnyDenotation {
   }
 
   trait AnyTag {
-
-    type Denotation <: Singleton with AnyDenotation
-    type DenotedType = Singleton with Denotation#Tpe
+    type Denotation <: AnyDenotation
+    type DenotedType = Denotation#Tpe
   }
 
   trait Tag[D <: Singleton with AnyDenotation] extends AnyTag with KeyTag[D, D#Raw] {
 
     type Denotation = D
   }
-
-  type VertexTag[V <: Singleton with AnyVertex] = AnyDenotation.TaggedWith[V]
-  type   EdgeTag[E <: Singleton with AnyEdge]   = AnyDenotation.TaggedWith[E]
 
 }

@@ -61,7 +61,7 @@ class VertexSuite extends org.scalatest.FunSuite {
     val u_since_again = u get since
 
     /* 
-      We can also add a retriever for the `name` property externally:
+      We can also add a getter for the `name` property externally:
     */
     implicit object readUserName extends GetProperty(name) {
       def apply(rep: user.Rep) = rep.name
