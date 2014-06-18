@@ -4,7 +4,10 @@ import ohnosequences.scarph._
 
 object TitanImplementation {
 
-  implicit def VTtoV[VT <: AnyVertexType](vt: VT): TVertex[VT] = new TVertex(vt)
+  implicit def VTtoV[VT <: AnyVertexType](vt: VT): TVertex[VT] = {
+    case object v extends TVertex(vt)
+    v: v.type
+  }
 
   trait ETtoE[ET <: AnyEdgeType] {
     type Out <: AnyEdge.ofType[ET]
@@ -24,4 +27,14 @@ object TitanImplementation {
     }
   }
 
+  implicit def ETTOE[ET <: AnyEdgeType](et: ET): 
+    TEdge[TVertex[ET#SourceType], ET, TVertex[ET#TargetType]] = {
+
+    // val s = VTtoV(et.sourceType)
+    // val t = VTtoV(et.targetType)
+    case object s extends TVertex[ET#SourceType](et.sourceType)
+    case object t extends TVertex[ET#TargetType](et.targetType)
+    case object e extends TEdge[TVertex[ET#SourceType], ET, TVertex[ET#TargetType]](s, et, t)
+    e: e.type
+  }
 }

@@ -61,7 +61,11 @@ class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.Befor
     val pluto = g.getTagged(God)("name", "pluto")
     shapeless.test.typed[god.Rep](pluto)
 
-    val pe: List[pet.Rep] = pluto.outT[Pet.type, pet.type](Pet)(ETtoE.ettoe(Pet), god.unsafeGetManyOutEdge)
+    // implicit val ppp = ETtoE.ettoe(Pet)
+    // import ETtoE._
+
+    // val pe = pluto.outT[Pet.type, pet.type](Pet)(ETtoE.ettoe(Pet), god.unsafeGetManyOutEdge)
+    val pe = pluto.outT(Pet)(ETTOE[Pet.type], god.unsafeGetManyOutEdge)
 
     assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
     assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))

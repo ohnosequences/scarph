@@ -29,7 +29,7 @@ object typelevel {
 
     def outT[ET <: From[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
-        toE: titan.TitanImplementation.ETtoE.Aux[ET, E], 
+        toE: ET => E,
         mkGetter: E => Vertex#GetOutEdge[E]
       ): ET#Out[E#Rep] = {
         val e = toE(et)
