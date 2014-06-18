@@ -27,6 +27,16 @@ object typelevel {
         getter(rep)
       }
 
+    def outT[ET <: From[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
+      (et: ET)(implicit 
+        toE: titan.TitanImplementation.ETtoE.Aux[ET, E], 
+        mkGetter: E => Vertex#GetOutEdge[E]
+      ): ET#Out[E#Rep] = {
+        val e = toE(et)
+        val getter = mkGetter(e)
+        getter(rep)
+      }
+
     /* OUT vertices */
     def outV[ET <: From[VertexType],
              E <: Singleton with AnyEdge.ofType[ET],

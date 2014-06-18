@@ -11,6 +11,9 @@ package ohnosequences.scarph
 trait AnyVertex extends Denotation[AnyVertexType] with PropertyGetters { vertex =>
 
   /* Getters for incoming/outgoing edges */
+  // abstract class GetOutEdgeT[ET <: AnyEdgeType, R](val e: ET) {
+  //   def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
+  // }
   abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
     def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
   }
