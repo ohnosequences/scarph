@@ -4,9 +4,9 @@ import ohnosequences.typesets._
 import scala.reflect._
 
 /* Properties */
-trait AnyProperty extends AnyDenotation {
+trait AnyProperty extends AnyRepresentable {
   val label: String
-  type TYPE <: AnyProperty
+  val classTag: ClassTag[Raw]
 }
 
 /* Evidence that an arbitrary type `Smth` has property `P` */
@@ -21,13 +21,8 @@ object AnyProperty {
 }
 
 /* Properties sould be defined as case objects: `case object Name extends Property[String]` */
-class Property[V](implicit c: ClassTag[V]) extends AnyProperty with Denotation[AnyProperty] {
+class Property[V](implicit val classTag: ClassTag[V]) extends AnyProperty {
   val label = this.toString
-
-  /* Property denotes itself */
-  type Tpe = this.type
-  val  tpe = this: Tpe
-
   type Raw = V 
 }
 

@@ -15,22 +15,8 @@ import shapeless.record._
   - `Rep <: Raw` is just `Raw` tagged with `this.type`
 */
 
-trait AnyDenotationLike {
+trait AnyRepresentable { self =>
 
- type Raw
- type Rep <: Raw
-}
-trait AnyDenotation extends AnyDenotationLike { self =>
-
-  /* The base type for the types that this thing denotes */
-  type TYPE
-  type Tpe <: TYPE
-  // TODO what about a version without this val?
-  val tpe: Tpe
-
-  /*
-    The type used to denotate `Tpe`.
-  */
   type Raw
  
   /*
@@ -42,6 +28,16 @@ trait AnyDenotation extends AnyDenotationLike { self =>
     `Raw` enters, `Rep` leaves
   */
   final def ->>(r: Raw): self.Rep = AnyDenotation.tagWith[self.type](r)
+}
+
+
+trait AnyDenotation extends AnyRepresentable {
+
+  /* The base type for the types that this thing denotes */
+  type TYPE
+  type Tpe <: TYPE
+  // TODO what about a version without this val?
+  val tpe: Tpe
 }
 
 /*
@@ -57,20 +53,20 @@ trait Denotation[T] extends AnyDenotation {
 */
 object AnyDenotation {
 
-  type TaggedWith[D <: Singleton with AnyDenotation] = D#Raw with Tag[D]
+  type TaggedWith[D <: Singleton with AnyRepresentable] = D#Raw with Tag[D]
 
-  def tagWith[D <: Singleton with AnyDenotation] = new TagBuilder[D]
+  def     tagWith[D <: Singleton with AnyRepresentable] = new TagBuilder[D]
 
-  class TagBuilder[D <: Singleton with AnyDenotation] {
+  class TagBuilder[D <: Singleton with AnyRepresentable] {
     def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
   }
 
   trait AnyTag {
-    type Denotation <: AnyDenotation
-    type DenotedType = Denotation#Tpe
+    type Denotation <: AnyRepresentable
+    // type DenotedType = Denotation#Tpe
   }
 
-  trait Tag[D <: Singleton with AnyDenotation] extends AnyTag with KeyTag[D, D#Raw] {
+  trait Tag[D <: Singleton with AnyRepresentable] extends AnyTag with KeyTag[D, D#Raw] {
 
     type Denotation = D
   }

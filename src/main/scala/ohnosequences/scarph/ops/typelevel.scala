@@ -15,7 +15,7 @@ object typelevel {
   case class   VertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
     type Vertex = rep.Denotation
-    type VertexType = rep.DenotedType
+    type VertexType = rep.Denotation#Tpe
 
     /* OUT edges */
     def out[ET <: From[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
