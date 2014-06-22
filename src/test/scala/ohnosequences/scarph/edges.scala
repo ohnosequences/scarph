@@ -27,10 +27,10 @@ object edges {
     //   def apply(rep: memberOf.Rep) = rep.source
     // }
 
-    implicit object readSince extends GetProperty(since) {
+    implicit object readSince extends PropertyGetter(since) {
       def apply(rep: Rep) = rep.since
     }
-    implicit object readValidUntil extends GetProperty(validUntil) {
+    implicit object readValidUntil extends PropertyGetter(validUntil) {
       def apply(rep: Rep) = rep.validUntil
     }
   }
@@ -101,7 +101,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     // implicit val weForgotToImportIt = (memberOf.tpe: memberOf.Tpe) has isPublic
     implicit val weForgotToImportIt = MemberOf has isPublic
 
-    implicit object readIsPublic extends GetProperty(isPublic) {
+    implicit object readIsPublic extends PropertyGetter(isPublic) {
       def apply(rep: memberOf.Rep) = rep.isPublic
     }
     assert(m.get(isPublic) === true)

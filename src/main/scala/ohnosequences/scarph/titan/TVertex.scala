@@ -7,8 +7,8 @@ trait AnyTVertex extends AnyVertex { tvertex =>
   final type Raw = com.thinkaurelius.titan.core.TitanVertex
 
   /* Getting a property from any TitanVertex */
-  implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
-    new GetProperty[P](p) {
+  implicit def unsafeGetProperty[P <: Singleton with AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
+    new PropertyGetter[P](p) {
       def apply(rep: Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }
 

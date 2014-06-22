@@ -19,10 +19,10 @@ object vertices {
     type Raw = UserImpl
 
     /* Provide implicits here (or elsewhere) for all (or some) properties */
-    implicit object readId extends GetProperty(id) {
+    implicit object readId extends PropertyGetter(id) {
       def apply(rep: user.Rep): id.Raw = (rep: user.Rep).id
     }
-    implicit object readSince extends GetProperty(since) {
+    implicit object readSince extends PropertyGetter(since) {
       def apply(rep: self.Rep): since.Raw = (rep: self.Rep).since
     }
   }
@@ -34,7 +34,7 @@ object vertices {
     */
     type Raw = UserImpl
 
-    implicit object readName extends GetProperty(name) {
+    implicit object readName extends PropertyGetter(name) {
       def apply(rep: self.Rep) = rep.name
     }
   }
@@ -63,7 +63,7 @@ class VertexSuite extends org.scalatest.FunSuite {
     /* 
       We can also add a getter for the `name` property externally:
     */
-    implicit object readUserName extends GetProperty(name) {
+    implicit object readUserName extends PropertyGetter(name) {
       def apply(rep: user.Rep) = rep.name
     }
 
@@ -87,7 +87,7 @@ class VertexSuite extends org.scalatest.FunSuite {
       representation of org so we just implement it in place:
     */
     implicit val orgFounded = Org has since
-    implicit object readOrgSince extends org.GetProperty(since) {
+    implicit object readOrgSince extends org.PropertyGetter(since) {
       def apply(rep: org.Rep) = rep.since
     }
     assert((o get since) === 1977)

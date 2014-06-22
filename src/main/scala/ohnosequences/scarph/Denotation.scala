@@ -15,7 +15,7 @@ import shapeless.record._
   - `Rep <: Raw` is just `Raw` tagged with `this.type`
 */
 
-trait AnyRepresentable { self =>
+trait Representable { self =>
 
   type Raw
  
@@ -31,7 +31,7 @@ trait AnyRepresentable { self =>
 }
 
 
-trait AnyDenotation extends AnyRepresentable {
+trait AnyDenotation extends Representable {
 
   /* The base type for the types that this thing denotes */
   type TYPE
@@ -53,20 +53,20 @@ trait Denotation[T] extends AnyDenotation {
 */
 object AnyDenotation {
 
-  type TaggedWith[D <: Singleton with AnyRepresentable] = D#Raw with Tag[D]
+  type TaggedWith[D <: Singleton with Representable] = D#Raw with Tag[D]
 
-  def     tagWith[D <: Singleton with AnyRepresentable] = new TagBuilder[D]
+  def     tagWith[D <: Singleton with Representable] = new TagBuilder[D]
 
-  class TagBuilder[D <: Singleton with AnyRepresentable] {
+  class TagBuilder[D <: Singleton with Representable] {
     def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
   }
 
   trait AnyTag {
-    type Denotation <: AnyRepresentable
+    type Denotation <: Representable
     // type DenotedType = Denotation#Tpe
   }
 
-  trait Tag[D <: Singleton with AnyRepresentable] extends AnyTag with KeyTag[D, D#Raw] {
+  trait Tag[D <: Singleton with Representable] extends AnyTag with KeyTag[D, D#Raw] {
 
     type Denotation = D
   }

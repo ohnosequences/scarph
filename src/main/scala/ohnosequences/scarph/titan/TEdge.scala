@@ -14,7 +14,7 @@ trait AnyTEdge extends AnyEdge { tedge =>
 
   /* Getting a property from any TitanEdge */
   implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
-    new GetProperty[P](p) {
+    new PropertyGetter[P](p) {
       def apply(rep: tedge.Rep): p.Raw = rep.getProperty[p.Raw](p.label)
     }
 

@@ -4,9 +4,9 @@ import ohnosequences.typesets._
 import scala.reflect._
 
 /* Properties */
-trait AnyProperty extends AnyRepresentable {
+trait AnyProperty extends Representable { self =>
   val label: String
-  val classTag: ClassTag[Raw]
+  val classTag: ClassTag[self.Raw]
 }
 
 /* Evidence that an arbitrary type `Smth` has property `P` */
@@ -42,37 +42,34 @@ class HasPropertiesOps[T](t: T) {
 }
 
 
-/* 
-  This trait should be mixed to the types that _can have properties_,
-  meaning that you are going to _get properties_ from it
-*/
-trait PropertyGetters { self: AnyDenotation =>
+/* Read a property from a representation */
+trait CanGetProperties { self: Representable =>
 
-  /* Read a property from this representation */
-  trait AnyGetProperty {
-    type Property <: AnyProperty
-    val p: Property
+  type PropertiesOwner
 
+  abstract class PropertyGetter[P <: AnyProperty](val p: P) {
     def apply(rep: self.Rep): p.Raw
   }
 
-  abstract class GetProperty[P <: AnyProperty](val p: P) 
-    extends AnyGetProperty { type Property = P }
-
   implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
   case class   PropertyOps(rep: self.Rep) {
-
-    def get[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
-    (implicit mkGetter: P => GetProperty[P]): P#Raw = mkGetter(p).apply(rep)
-
+    def get[P <: Singleton with AnyProperty: Property.Of[PropertiesOwner]#is](p: P)
+      (implicit mkGetter: p.type => PropertyGetter[p.type]): p.Raw = 
+        mkGetter(p).apply(rep)
   }
 
-  /* If have just an independent getter for a particular property: */
-  implicit def idGetter[P <: AnyProperty: Property.Of[self.Tpe]#is](p: P)
-    (implicit getter: GetProperty[P]) = getter
+  /* If we have just an independent getter for a particular property: */
+  implicit def idGetter[P <: AnyProperty: Property.Of[PropertiesOwner]#is](p: P)
+    (implicit getter: PropertyGetter[P]) = getter
 }
 
+trait CanGetPropertiesOfItself extends CanGetProperties { self: Representable =>
+  type PropertiesOwner = self.type
+}
 
+trait CanGetPropertiesOfTpe extends CanGetProperties { self: AnyDenotation =>
+  type PropertiesOwner = self.Tpe
+}
 
 import shapeless._, poly._
 import ohnosequences.typesets._
