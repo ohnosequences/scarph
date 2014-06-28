@@ -11,29 +11,26 @@ import  ohnosequences.scarph._
 */
 object typelevel {
 
-  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) =  VertexOps[V](rep)
+  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexOps[V] = VertexOps[V](rep)
   case class   VertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
-    type Vertex = rep.Denotation
-    type VertexType = rep.Denotation#Tpe
-
     /* OUT edges */
-    def out[ET <: From[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
+    def out[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
         e: E, 
-        mkGetter: E => Vertex#GetOutEdge[E]
+        mkGetter: E => V#GetOutEdge[E]
       ): ET#Out[E#Rep] = {
         val getter = mkGetter(e)
         getter(rep)
       }
 
     /* OUT vertices */
-    def outV[ET <: From[VertexType],
+    def outV[ET <: From[V#Tpe],
              E <: Singleton with AnyEdge.ofType[ET],
              T <: Singleton with AnyVertex.ofType[ET#TargetType] ]
       (et: ET)(implicit 
         e: E,
-        mkGetter: E => Vertex#GetOutEdge[E],
+        mkGetter: E => V#GetOutEdge[E],
         getTarget: E#GetTarget[T]
       ): ET#Out[T#Rep] = {
         val getter = mkGetter(e)
@@ -42,19 +39,19 @@ object typelevel {
       }
 
     /* IN edges */
-    def in[ET <: To[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
-      (et: ET)(implicit e: E, mkGetter: E => Vertex#GetInEdge[E]): ET#In[E#Rep] = {
+    def in[ET <: To[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
+      (et: ET)(implicit e: E, mkGetter: E => V#GetInEdge[E]): ET#In[E#Rep] = {
         val getter = mkGetter(e)
         getter(rep)
       }
 
     /* IN vertices */
-    def inV[ET <: To[VertexType],
+    def inV[ET <: To[V#Tpe],
             E <: Singleton with AnyEdge.ofType[ET],
             S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType] ]
       (et: ET)(implicit 
         e: E,
-        mkGetter: E => Vertex#GetInEdge[E],
+        mkGetter: E => V#GetInEdge[E],
         getSource: E#GetSource[S]
       ): ET#In[S#Rep] = {
         val getter = mkGetter(e)

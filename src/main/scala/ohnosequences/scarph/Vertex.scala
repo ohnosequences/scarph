@@ -28,5 +28,5 @@ object AnyVertex {
 }
 
 object Vertex {
-  type RepOf[V <: Singleton with AnyVertex] = AnyDenotation.TaggedWith[V]
+  type RepOf[V <: Singleton with AnyVertex] = AnyTag.TaggedWith[V]
 }

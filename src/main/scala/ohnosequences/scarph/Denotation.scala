@@ -22,12 +22,14 @@ trait Representable { self =>
   /*
     `Raw` tagged with `self.type`; this lets you recognize a denotation while being able to operate on it as `Raw`.
   */
-  final type Rep = AnyDenotation.TaggedWith[self.type]
+  final type Rep = AnyTag.TaggedWith[self.type]
 
   /*
     `Raw` enters, `Rep` leaves
   */
-  final def ->>(r: Raw): self.Rep = AnyDenotation.tagWith[self.type](r)
+  final def ->>(r: Raw): self.Rep = AnyTag.TagWith[self.type](self)(r)
+
+  implicit def fromRep(x: self.Rep): self.type = self
 }
 
 
@@ -36,39 +38,27 @@ trait AnyDenotation extends Representable {
   /* The base type for the types that this thing denotes */
   type TYPE
   type Tpe <: TYPE
-  // TODO what about a version without this val?
-  val tpe: Tpe
+  val  tpe: Tpe
 }
 
 /*
   Bound the universe of types to be `T`s
 */
-trait Denotation[T] extends AnyDenotation { 
-
-  type TYPE = T
-}
+trait Denotation[T] extends AnyDenotation { type TYPE = T }
 
 /*
   The companion object contains mainly tagging functionality.
 */
-object AnyDenotation {
+object AnyTag {
+
+  case class TagWith[D <: Singleton with Representable](val d: D) {
+    def apply(dr : d.Raw): TaggedWith[d.type] = dr.asInstanceOf[TaggedWith[d.type]]
+  }
 
   type TaggedWith[D <: Singleton with Representable] = D#Raw with Tag[D]
 
-  def     tagWith[D <: Singleton with Representable] = new TagBuilder[D]
-
-  class TagBuilder[D <: Singleton with Representable] {
-    def apply(dr : D#Raw): TaggedWith[D] = dr.asInstanceOf[TaggedWith[D]]
-  }
-
-  trait AnyTag {
-    type Denotation <: Representable
-    // type DenotedType = Denotation#Tpe
-  }
-
-  trait Tag[D <: Singleton with Representable] extends AnyTag with KeyTag[D, D#Raw] {
-
-    type Denotation = D
-  }
+  // Has to be empty! See http://www.scala-lang.org/old/node/11165.html#comment-49097
+  sealed trait AnyTag 
+  sealed trait Tag[D <: Singleton with Representable] extends AnyTag with KeyTag[D, D#Raw]
 
 }
