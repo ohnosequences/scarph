@@ -42,10 +42,11 @@ object typelevel {
              E <: Singleton with AnyEdge.ofType[ET],
              T <: Singleton with AnyVertex.ofType[ET#TargetType] ]
       (et: ET)(implicit 
-        e: E,
+        toE: ET => E,
         mkGetter: E => Vertex#GetOutEdge[E],
-        getTarget: E#GetTarget[T]
-      ): ET#Out[T#Rep] = {
+        getTarget: E#GetTarget
+      ): ET#Out[E#Target#Rep] = {
+        val e = toE(et)
         val getter = mkGetter(e)
         val f = getter.e.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
@@ -73,7 +74,16 @@ object typelevel {
       }
   }
 
-  implicit def  edgeOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): 
-    ops.default.EdgeOps[E] = ops.default.EdgeOps(rep)
+  implicit def edgeOps[E <: Singleton with AnyEdge](rep: E#Rep): EdgeOps[E] = EdgeOps(rep)
+  case class   EdgeOps[E <: Singleton with AnyEdge](rep: E#Rep) {
+
+    type Edge = rep.Denotation
+
+    def source[S <: Singleton with AnyVertex.ofType[Edge#Tpe#SourceType]]
+      (implicit getter: Edge#GetSource[S]) = getter(rep)
+
+    def target(implicit getter: Edge#GetTarget) = getter(rep)
+
+  }
 
 }

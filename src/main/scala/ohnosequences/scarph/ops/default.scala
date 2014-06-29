@@ -21,7 +21,7 @@ object default {
     def outV[E <: Singleton with AnyEdge { type Tpe <: From[VertexType] },
              T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType] ]
       (e: E)(implicit mkGetter: E => Vertex#GetOutEdge[E],
-                      getTarget: E#GetTarget[T]): E#Tpe#Out[T#Rep] = {
+                      getTarget: E#GetTarget): E#Tpe#Out[E#Target#Rep] = {
         val getter = mkGetter(e)
         val f = getter.e.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
@@ -54,7 +54,7 @@ object default {
       (implicit getter: Edge#GetSource[S]) = getter(rep)
 
     def target[T <: Singleton with AnyVertex.ofType[Edge#Tpe#TargetType]]
-      (implicit getter: Edge#GetTarget[T]) = getter(rep)
+      (implicit getter: Edge#GetTarget) = getter(rep)
 
   }
 

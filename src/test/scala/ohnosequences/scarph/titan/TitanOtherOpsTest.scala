@@ -46,9 +46,9 @@ class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.Befor
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[VT <: AnyVertexType, V <: AnyTVertex.ofType[VT]](vt: VT)(k: String, s: String)
-      (implicit v: V): v.Rep = {
-      v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[TitanVertex]
+    def getTagged[VT <: Singleton with AnyVertexType, V <: Singleton with AnyTVertex.ofType[VT]](vt: VT)(k: String, s: String)
+      (implicit toV: VT => V): V#Rep = {
+      toV(vt) ->> tg.getVertices(k, s).iterator().next().asInstanceOf[TitanVertex]
     }
   } 
 
@@ -59,16 +59,17 @@ class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.Befor
     import TitanImplementation._
 
     val pluto = g.getTagged(God)("name", "pluto")
-    shapeless.test.typed[god.Rep](pluto)
+    // shapeless.test.typed[god.Rep](pluto)
 
     // implicit val ppp = ETtoE.ettoe(Pet)
     // import ETtoE._
 
     // val pe = pluto.outT[Pet.type, pet.type](Pet)(ETtoE.ettoe(Pet), god.unsafeGetManyOutEdge)
-    val pe = pluto.outT(Pet)(ETTOE[Pet.type], god.unsafeGetManyOutEdge)
+    val pe = pluto.outT(Pet)
+    // shapeless.test.typed[List[pet.Rep]](pe)
 
-    assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
-    assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
+    assert(pe.map{ edgeOps(_).target }.map{ _.get(name) } === List("cerberus"))
+    // assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
 
   }
 

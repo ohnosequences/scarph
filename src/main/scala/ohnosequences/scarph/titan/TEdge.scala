@@ -7,10 +7,7 @@ trait AnyTEdge extends AnyEdge { tedge =>
   final type Raw = com.thinkaurelius.titan.core.TitanEdge
 
   type Source <: AnyVertex.ofType[Tpe#SourceType] with AnyTVertex
-  val source: Source
-
   type Target <: AnyVertex.ofType[Tpe#TargetType] with AnyTVertex
-  val target: Target
 
   /* Getting a property from any TitanEdge */
   implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
@@ -27,7 +24,7 @@ trait AnyTEdge extends AnyEdge { tedge =>
   }
 
   /* Getting target vertex */
-  implicit object targetGetter extends GetTarget[Target](target) {
+  implicit val targetGetter = new GetTarget {
     def apply(rep: tedge.Rep): target.Rep = 
       target ->> rep.getVertex(Direction.IN)
   }
