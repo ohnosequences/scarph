@@ -25,14 +25,12 @@ object typelevel {
       }
 
     /* OUT vertices */
-    def outV[ET <: From[V#Tpe],
-             E <: Singleton with AnyEdge.ofType[ET],
-             T <: Singleton with AnyVertex.ofType[ET#TargetType] ]
+    def outV[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
         e: E,
         mkGetter: E => V#GetOutEdge[E],
-        getTarget: E#GetTarget[T]
-      ): ET#Out[T#Rep] = {
+        getTarget: E#GetTarget
+      ): ET#Out[E#Target#Rep] = {
         val getter = mkGetter(e)
         val f = getter.e.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
@@ -46,14 +44,12 @@ object typelevel {
       }
 
     /* IN vertices */
-    def inV[ET <: To[V#Tpe],
-            E <: Singleton with AnyEdge.ofType[ET],
-            S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType] ]
+    def inV[ET <: To[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
         e: E,
         mkGetter: E => V#GetInEdge[E],
-        getSource: E#GetSource[S]
-      ): ET#In[S#Rep] = {
+        getSource: E#GetSource
+      ): ET#In[E#Source#Rep] = {
         val getter = mkGetter(e)
         val f = getter.e.tpe.inFunctor
         f.map(getter(rep))(getSource(_))

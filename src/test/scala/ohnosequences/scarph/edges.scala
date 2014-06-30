@@ -19,7 +19,7 @@ object edges {
     val validUntil: Int
   )
 
-  case object memberOf extends Edge(MemberOf) {
+  case object memberOf extends Edge(user, MemberOf, org) {
     
     type Raw = MemberOfImpl
 
@@ -35,7 +35,7 @@ object edges {
     }
   }
 
-  implicit case object memberSourceGetter extends memberOf.GetSource[user.type](user) {
+  implicit val memberSourceGetter = new memberOf.GetSource {
       def apply(rep: memberOf.Rep) = rep.source
     }
 
@@ -43,16 +43,12 @@ object edges {
     val source: user.Rep,
     val target: org.Rep
   )
-  object owns extends Edge(Owns) { self =>
+  object owns extends Edge(user, Owns, org) { self =>
     
     type Raw = OwnsImpl
 
-    implicit object sourceGetter extends GetSource[user.type](user) {
-      def apply(rep: self.Rep) = rep.source
-    }
-    implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: self.Rep) = rep.target
-    }
+    implicit val sourceGetter = new GetSource { def apply(rep: self.Rep) = rep.source }
+    implicit val targetGetter = new GetTarget { def apply(rep: self.Rep) = rep.target }
   }
 
 }
@@ -86,9 +82,7 @@ class EdgeSuite extends org.scalatest.FunSuite {
     // val followers_ids = (user out follows) map { _ get id }
 
     /* Adding target getter externally: */
-    implicit object targetGetter extends GetTarget[org.type](org) {
-      def apply(rep: memberOf.Rep) = rep.target
-    }
+    implicit val targetGetter = new GetTarget { def apply(rep: memberOf.Rep) = rep.target }
     assert(m.target === oracle)
 
     /* Getting edge properties */
