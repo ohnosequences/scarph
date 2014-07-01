@@ -102,4 +102,29 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // assert(pluto.in(brother).flatMap{ _.out(godLives) }.map{ _.get(name) }.toSet === Set("sea", "sky"))
     assert(pluto.inV(brother).map{ _.outV(godLives) }.flatten.map{ _.get(name) }.toSet === Set("sea", "sky"))
   }
+
+
+  test("testing titan implicit implementation") {
+
+    implicit class graphOps(tg: TitanGraph) {
+      // just a shortcut
+      def getTagged[VT <: AnyVertexType, V <: AnyTitanVertex.ofType[VT]](vt: VT)(k: String, s: String)
+        (implicit v: V): v.Rep = {
+        v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[com.thinkaurelius.titan.core.TitanVertex]
+      }
+    } 
+
+    import GodsImplementation._
+    import ops.typelevel._
+
+    val pluto = g.getTagged(God)("name", "pluto")
+    // shapeless.test.typed[god.Rep](pluto)
+
+    val pe: List[pet.Rep] = pluto out Pet
+
+    assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
+
+  }
+
 }
