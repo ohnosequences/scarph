@@ -9,14 +9,12 @@ import com.thinkaurelius.titan.core._
 import java.io.File
 
 import GodsSchema._
-import GodsImplementation._
 
-import ohnosequences.scarph._, ops.default._
-import ohnosequences.scarph.titan._
+import ohnosequences.scarph._, titan._, TSchema._
 
-class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
+class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
-  val graphLocation = new File("/tmp/titanTest")
+  val graphLocation = new File("/tmp/titanImplementationTest")
   var g: TitanGraph = null
 
   // Reusing the graph if possible, else cleaning the directory and creating graph
@@ -34,6 +32,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
         }
         cleanDir(graphLocation)
         g = GraphOfTheGodsFactory.create(graphLocation.getAbsolutePath)
+        g.createSchema(godsGraphSchema)
+        g.commit
         println("Created Titan graph")
       }
     }
@@ -48,69 +48,27 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[V <: AnyTVertex](vx: V)(k: String, v: String): vx.Rep = {
-      vx ->> tg.getVertices(k, v).iterator().next().asInstanceOf[TitanVertex]
+    def getTagged[VT <: AnyVertexType, V <: AnyTVertex.ofType[VT]](vt: VT)(k: String, s: String)
+      (implicit v: V): v.Rep = {
+      v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[TitanVertex]
     }
   } 
 
-  test("get vertex property") {
+  test("testing titan implicit implementation") {
 
-    val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
-```
+    import GodsImplementation._
+    import ops.typelevel._
 
-pure blueprints with string keys and casting:
+    // val pluto = g.getTagged(God)("name", "pluto")
+    // shapeless.test.typed[god.Rep](pluto)
 
-```scala
-    assert(saturn.getProperty[Int]("age") === 10000)
-```
+    // val pe: List[pet.Rep] = pluto out Pet
 
-safe and nifty:
-
-```scala
-    assert(saturn.get(age) === 10000)
+    // assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    // assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
 
   }
 
-  test("get OUTgoing edges and their property") {
-
-    val hercules = g.getTagged(demigod)("name", "hercules")
-    
-    assert(hercules.getProperty[Int]("age") === (hercules get age))
-
-    val es: List[battled.Rep] = hercules out battled
-    assert((hercules out battled map { _ get time }).toSet === Set(1, 12, 2))
-  }
-
-  ignore("get INcoming edges and their property") {
-
-    val tartarus = g.getTagged(location)("name", "tartarus")
-
-    // FIXME: godLives and monsterLives have the same label.
-    // it should get only one edge (for pluto), but it gets both, because they have the same label:
-    info((tartarus in godLives map { _ get reason }).mkString("['","', '","']"))
-  }
-
-  test("get target/source vertices of incoming/outgoing edges") {
-
-    val pluto = g.getTagged(god)("name", "pluto")
-
-    val pe: List[pet.Rep] = pluto out pet
-    assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
-    // same but using .outV
-    assert(pluto.outV(pet).map{ _.get(name) } === List("cerberus"))
-
-    assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
-    // symmetry:
-    assert(pluto.in(brother).map{ _.source } 
-      === pluto.out(brother).map{ _.target })
-
-    assert(pluto.inV(brother) === pluto.in(brother).map{ _.source })
-    assert(pluto.inV(brother) === pluto.outV(brother))
-
-    // FIXME: this doesn't work on the first flatMap
-    // assert(pluto.in(brother).flatMap{ _.out(godLives) }.map{ _.get(name) }.toSet === Set("sea", "sky"))
-    assert(pluto.inV(brother).map{ _.outV(godLives) }.flatten.map{ _.get(name) }.toSet === Set("sea", "sky"))
-  }
 }
 
 ```
