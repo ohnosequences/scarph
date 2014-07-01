@@ -8,47 +8,14 @@ package ohnosequences.scarph
   They are designed to be compatible with shapeless records (maybe, we'll see).
 */
 
-trait AnyVertex extends Denotation[AnyVertexType] with CanHaveProperties { vertex =>
+trait AnyVertex extends Denotation[AnyVertexType] with CanGetProperties { vertex =>
 
   /* Getters for incoming/outgoing edges */
-  trait AnyRetrieveOutEdge {
-
-    type Edge <: AnyEdge
-    val e: Edge
-
-    def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
+  abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
+    def apply(rep: vertex.Rep): e.tpe.Out[E#Rep]
   }
-
-  abstract class RetrieveOutEdge[E <: Singleton with AnyEdge](val e: E) 
-    extends AnyRetrieveOutEdge { type Edge = E }
-
-  trait AnyRetrieveInEdge {
-
-    type Edge <: AnyEdge
-    val e: Edge
-
-    def apply(rep: vertex.Rep): e.tpe.In[e.Rep]
-  }
-  abstract class RetrieveInEdge[E <: Singleton with AnyEdge](val e: E) 
-      extends AnyRetrieveInEdge { type Edge = E }
-
-  abstract class Out[E <: Singleton with AnyEdge](edge: E) extends RetrieveOutEdge[E](edge)
-
-  /* Additional methods */
-  implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
-  case class   VertexOps(rep: vertex.Rep) {
-
-    def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
-      (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
-
-    def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
-      (e: E)(implicit mkRetriever: E => RetrieveInEdge[E]): E#Tpe#In[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
+  abstract class GetInEdge[E <: Singleton with AnyEdge](val e: E) {
+    def apply(rep: vertex.Rep): e.tpe.In[E#Rep]
   }
 
 }
@@ -60,3 +27,6 @@ object AnyVertex {
   type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
 }
 
+object Vertex {
+  type RepOf[V <: Singleton with AnyVertex] = AnyTag.TaggedWith[V]
+}

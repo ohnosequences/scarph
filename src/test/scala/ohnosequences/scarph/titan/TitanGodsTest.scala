@@ -9,7 +9,7 @@ import java.io.File
 import GodsSchema._
 import GodsImplementation._
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, ops.default._
 import ohnosequences.scarph.titan._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
@@ -46,8 +46,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[V <: AnyTVertex](vx: V)(k: String, v: String): vx.Rep = {
-      vx ->> tg.getVertices(k, v).iterator().next().asInstanceOf[TitanVertex]
+    def getTagged[V <: AnyTitanVertex](vx: V)(k: String, v: String): vx.Rep = {
+      vx ->> tg.getVertices(k, v).iterator().next().asInstanceOf[com.thinkaurelius.titan.core.TitanVertex]
     }
   } 
 
@@ -87,10 +87,44 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val pe: List[pet.Rep] = pluto out pet
     assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    // same but using .outV
+    assert(pluto.outV(pet).map{ _.get(name) } === List("cerberus"))
 
     assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
     // symmetry:
     assert(pluto.in(brother).map{ _.source } 
       === pluto.out(brother).map{ _.target })
+
+    assert(pluto.inV(brother) === pluto.in(brother).map{ _.source })
+    assert(pluto.inV(brother) === pluto.outV(brother))
+
+    // FIXME: this doesn't work on the first flatMap
+    // assert(pluto.in(brother).flatMap{ _.out(godLives) }.map{ _.get(name) }.toSet === Set("sea", "sky"))
+    assert(pluto.inV(brother).map{ _.outV(godLives) }.flatten.map{ _.get(name) }.toSet === Set("sea", "sky"))
   }
+
+
+  test("testing titan implicit implementation") {
+
+    implicit class graphOps(tg: TitanGraph) {
+      // just a shortcut
+      def getTagged[VT <: AnyVertexType, V <: AnyTitanVertex.ofType[VT]](vt: VT)(k: String, s: String)
+        (implicit v: V): v.Rep = {
+        v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[com.thinkaurelius.titan.core.TitanVertex]
+      }
+    } 
+
+    import GodsImplementation._
+    import ops.typelevel._
+
+    val pluto = g.getTagged(God)("name", "pluto")
+    // shapeless.test.typed[god.Rep](pluto)
+
+    val pe: List[pet.Rep] = pluto out Pet
+
+    assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
+
+  }
+
 }

@@ -12,7 +12,7 @@ import ohnosequences.typesets._
 
 import GodsSchema._
 import GodsImplementation._
-import TSchema._
+import TitanGraphSchema._
 
 class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 

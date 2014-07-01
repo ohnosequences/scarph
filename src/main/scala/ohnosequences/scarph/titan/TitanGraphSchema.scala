@@ -6,7 +6,7 @@ import ohnosequences.typesets._
 import shapeless._, poly._
 import scala.reflect._
 
-object TSchema {
+object TitanGraphSchema {
 
   abstract class ArityMaker[ET <: AnyEdgeType](et: ET) {
     def apply: (LabelMaker => LabelMaker)
@@ -23,8 +23,8 @@ object TSchema {
       new ArityMaker[ET](et) { def apply = _.oneToOne }
   }
 
-  implicit def tSchemaOps(g: TitanGraph): TSchemaOps = TSchemaOps(g)
-  case class   TSchemaOps(g: TitanGraph) {
+  implicit def titanGraphSchemaOps(g: TitanGraph): TitanGraphSchemaOps = TitanGraphSchemaOps(g)
+  case class   TitanGraphSchemaOps(g: TitanGraph) {
 
     // TODO: add uniqueness and indexing parameters
     def addPropertyKey[P <: AnyProperty](p: P)(implicit c: ClassTag[P#Raw]) = {
@@ -58,7 +58,7 @@ trait MkPropertyKeys[Ps <: TypeSet] {
 }
 
 object MkPropertyKeys {
-  import TSchema._
+  import TitanGraphSchema._
 
   def apply[Ps <: TypeSet](implicit mk: MkPropertyKeys[Ps]): MkPropertyKeys[Ps] = mk
 
@@ -86,7 +86,7 @@ trait MkEdgeLabels[Es <: TypeSet] {
 }
 
 object MkEdgeLabels {
-  import TSchema._
+  import TitanGraphSchema._
 
   def apply[Es <: TypeSet](implicit mk: MkEdgeLabels[Es]): MkEdgeLabels[Es] = mk
 

@@ -18,12 +18,15 @@ trait AnyGraphSchema {
   type EdgeTypes <: TypeSet
   val  edgeTypes: EdgeTypes
 
-  val vertexPropertyAssoc: ZipWithProps[VertexTypes, Properties]
-  val   edgePropertyAssoc: ZipWithProps[EdgeTypes, Properties]
-
   /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  val verticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
-  val    edgesWithProperties =   edgePropertyAssoc(edgeTypes,   properties)
+  type VerticesWithProperties <: TypeSet
+  val  verticesWithProperties: VerticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+
+  type EdgesWithProperties <: TypeSet
+  val  edgesWithProperties: EdgesWithProperties = edgePropertyAssoc(edgeTypes, properties)
+
+  val vertexPropertyAssoc: ZipWithProps.Aux[VertexTypes, Properties, VerticesWithProperties]
+  val   edgePropertyAssoc: ZipWithProps.Aux[EdgeTypes, Properties, EdgesWithProperties]
 
   override def toString = s"""${label} schema:
   vertexTypes: ${verticesWithProperties}
@@ -55,20 +58,24 @@ case class GraphSchema[
     Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
     Ps <: TypeSet : boundedBy[AnyProperty]#is,
     Vs <: TypeSet : boundedBy[AnyVertexType]#is,
-    Es <: TypeSet : boundedBy[AnyEdgeType]#is
+    Es <: TypeSet : boundedBy[AnyEdgeType]#is,
+    VP <: TypeSet,
+    EP <: TypeSet
   ](val label: String,
     val dependencies: Ds = ∅,
     val properties:   Ps = ∅,
     val vertexTypes:  Vs = ∅,
     val edgeTypes:    Es = ∅
   )(implicit
-    val vertexPropertyAssoc: ZipWithProps[Vs, Ps],
-    val   edgePropertyAssoc: ZipWithProps[Es, Ps]
+    val vertexPropertyAssoc: ZipWithProps.Aux[Vs, Ps, VP],
+    val   edgePropertyAssoc: ZipWithProps.Aux[Es, Ps, EP]
   ) extends AnyGraphSchema {
 
   type Dependencies = Ds
   type Properties   = Ps
   type VertexTypes  = Vs
   type EdgeTypes    = Es
+  type VerticesWithProperties = VP
+  type    EdgesWithProperties = EP
 
 }
