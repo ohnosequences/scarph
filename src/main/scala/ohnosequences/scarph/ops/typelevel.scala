@@ -7,7 +7,7 @@ import  ohnosequences.scarph._
   i.e. `pluto out Pet` instead of `pluto out pet` (where `pet.tpe = Pet`)
 
   But for using this you have to provide implicits for all your vertices and edges. It doesn't
-  change much as you can just create things like `implicit case object pet extends TVertex(Pet)`.
+  change much as you can just create things like `implicit case object pet extends TitanVertex(Pet)`.
 */
 object typelevel {
 

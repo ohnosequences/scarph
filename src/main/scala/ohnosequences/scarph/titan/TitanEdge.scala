@@ -2,12 +2,12 @@ package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 
-trait AnyTEdge extends AnyEdge { tedge =>
+trait AnyTitanEdge extends AnyEdge { tedge =>
 
   final type Raw = com.thinkaurelius.titan.core.TitanEdge
 
-  type Source <: AnyVertex.ofType[Tpe#SourceType] with AnyTVertex
-  type Target <: AnyVertex.ofType[Tpe#TargetType] with AnyTVertex
+  type Source <: AnyVertex.ofType[Tpe#SourceType] with AnyTitanVertex
+  type Target <: AnyVertex.ofType[Tpe#TargetType] with AnyTitanVertex
 
   /* Getting a property from any TitanEdge */
   implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
@@ -29,16 +29,16 @@ trait AnyTEdge extends AnyEdge { tedge =>
 
 }
 
-class TEdge[
-    S <: AnyVertex.ofType[ET#SourceType] with AnyTVertex, 
+class TitanEdge[
+    S <: AnyVertex.ofType[ET#SourceType] with AnyTitanVertex, 
     ET <: AnyEdgeType, 
-    T <: AnyVertex.ofType[ET#TargetType] with AnyTVertex
-  ](val source: S, val tpe: ET, val target: T) extends AnyTEdge { 
+    T <: AnyVertex.ofType[ET#TargetType] with AnyTitanVertex
+  ](val source: S, val tpe: ET, val target: T) extends AnyTitanEdge { 
     type Source = S
     type Tpe = ET 
     type Target = T
   }
 
-object AnyTEdge {
-  type ofType[ET <: AnyEdgeType] = AnyTEdge { type Tpe = ET }
+object AnyTitanEdge {
+  type ofType[ET <: AnyEdgeType] = AnyTitanEdge { type Tpe = ET }
 }

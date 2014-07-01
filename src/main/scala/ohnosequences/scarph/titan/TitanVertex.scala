@@ -2,7 +2,7 @@ package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 
-trait AnyTVertex extends AnyVertex { tvertex =>
+trait AnyTitanVertex extends AnyVertex { tvertex =>
 
   final type Raw = com.thinkaurelius.titan.core.TitanVertex
 
@@ -22,7 +22,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
   /* OUT */
   implicit def unsafeGetOneOutEdge[
-    E <: Singleton with AnyTEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
+    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
   ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
@@ -33,7 +33,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     }
 
   implicit def unsafeGetManyOutEdge[
-    E <: Singleton with AnyTEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
+    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
   ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
@@ -44,7 +44,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
   /* IN */
   implicit def unsafeGetOneInEdge[
-    E <: Singleton with AnyTEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
+    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
   ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
@@ -54,7 +54,7 @@ trait AnyTVertex extends AnyVertex { tvertex =>
     }
 
   implicit def unsafeGetManyInEdge[
-    E <: Singleton with AnyTEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
+    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
   ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
@@ -65,9 +65,9 @@ trait AnyTVertex extends AnyVertex { tvertex =>
 
 }
 
-class TVertex[VT <: AnyVertexType](val tpe: VT) 
-  extends AnyTVertex { type Tpe = VT }
+class TitanVertex[VT <: AnyVertexType](val tpe: VT) 
+  extends AnyTitanVertex { type Tpe = VT }
 
-object AnyTVertex {
-  type ofType[VT <: AnyVertexType] = AnyTVertex { type Tpe = VT }
+object AnyTitanVertex {
+  type ofType[VT <: AnyVertexType] = AnyTitanVertex { type Tpe = VT }
 }

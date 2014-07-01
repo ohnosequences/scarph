@@ -8,7 +8,7 @@ import java.io.File
 
 import GodsSchema._
 
-import ohnosequences.scarph._, titan._, TSchema._
+import ohnosequences.scarph._, titan._, TitanGraphSchema._
 
 class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -46,9 +46,9 @@ class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.Befor
 
   implicit class graphOps(tg: TitanGraph) {
     // just a shortcut
-    def getTagged[VT <: AnyVertexType, V <: AnyTVertex.ofType[VT]](vt: VT)(k: String, s: String)
+    def getTagged[VT <: AnyVertexType, V <: AnyTitanVertex.ofType[VT]](vt: VT)(k: String, s: String)
       (implicit v: V): v.Rep = {
-      v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[TitanVertex]
+      v ->> tg.getVertices(k, s).iterator().next().asInstanceOf[com.thinkaurelius.titan.core.TitanVertex]
     }
   } 
 

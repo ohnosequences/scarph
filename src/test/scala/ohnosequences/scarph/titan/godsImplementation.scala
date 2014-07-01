@@ -8,23 +8,23 @@ object GodsImplementation {
   /*
     ### Vertices
   */
-  implicit case object titan    extends TVertex(Titan)
-  implicit case object god      extends TVertex(God)
-  implicit case object demigod  extends TVertex(Demigod)
-  implicit case object human    extends TVertex(Human)
-  implicit case object monster  extends TVertex(Monster)
-  implicit case object location extends TVertex(Location)
+  implicit case object titan    extends TitanVertex(Titan)
+  implicit case object god      extends TitanVertex(God)
+  implicit case object demigod  extends TitanVertex(Demigod)
+  implicit case object human    extends TitanVertex(Human)
+  implicit case object monster  extends TitanVertex(Monster)
+  implicit case object location extends TitanVertex(Location)
 
   /*
     ### Edges
   */
-  implicit case object titanFather  extends TEdge(god,     TitanFather,  titan)
-  implicit case object godFather    extends TEdge(demigod, GodFather,    god)
-  implicit case object humanMother  extends TEdge(demigod, HumanMother,  human)
-  implicit case object brother      extends TEdge(god,     Brother,      god)
-  implicit case object pet          extends TEdge(god,     Pet,          monster)
-  implicit case object battled      extends TEdge(demigod, Battled,      monster)
-  implicit case object godLives     extends TEdge(god,     GodLives,     location)
-  implicit case object monsterLives extends TEdge(monster, MonsterLives, location)
+  implicit case object titanFather  extends TitanEdge(god,     TitanFather,  titan)
+  implicit case object godFather    extends TitanEdge(demigod, GodFather,    god)
+  implicit case object humanMother  extends TitanEdge(demigod, HumanMother,  human)
+  implicit case object brother      extends TitanEdge(god,     Brother,      god)
+  implicit case object pet          extends TitanEdge(god,     Pet,          monster)
+  implicit case object battled      extends TitanEdge(demigod, Battled,      monster)
+  implicit case object godLives     extends TitanEdge(god,     GodLives,     location)
+  implicit case object monsterLives extends TitanEdge(monster, MonsterLives, location)
 
 }
