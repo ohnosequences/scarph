@@ -8,9 +8,9 @@ organization := "ohnosequences"
 
 bucketSuffix := "era7.com"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.1"
 
-crossScalaVersions := Seq("2.10.4", "2.11.0")
+crossScalaVersions := Seq("2.10.4", "2.11.1")
 
 libraryDependencies += {
   CrossVersion.partialVersion(scalaVersion.value) match {
