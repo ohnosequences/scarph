@@ -29,6 +29,9 @@ trait Representable { self =>
   */
   final def ->>(r: Raw): self.Rep = AnyTag.TagWith[self.type](self)(r)
 
+  /*
+    This lets you get the instance of the singleton type from a tagged `Rep` value.
+  */
   implicit def fromRep(x: self.Rep): self.type = self
 }
 

@@ -12,10 +12,10 @@ trait AnyVertex extends Denotation[AnyVertexType] with CanGetPropertiesOfTpe { v
 
   /* Getters for incoming/outgoing edges */
   abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
-    def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
+    def apply(rep: vertex.Rep): e.tpe.Out[E#Rep]
   }
   abstract class GetInEdge[E <: Singleton with AnyEdge](val e: E) {
-    def apply(rep: vertex.Rep): e.tpe.In[e.Rep]
+    def apply(rep: vertex.Rep): e.tpe.In[E#Rep]
   }
 
 }
