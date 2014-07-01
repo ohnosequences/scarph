@@ -54,13 +54,15 @@ class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.Befor
 
   test("testing titan implicit implementation") {
 
-    import GodsImplementation._
-    import ops.typelevel._
+    // import GodsImplementation._
+    // import TitanImplementation._
+    import ops.auto._
 
-    // val pluto = g.getTagged(God)("name", "pluto")
+    val pluto = g.getTagged(God)("name", "pluto")(GodsImplementation.god)
     // shapeless.test.typed[god.Rep](pluto)
 
-    // val pe: List[pet.Rep] = pluto out Pet
+    val pe = pluto.out(Pet) //(pluto.superAutoManyOutEdges)
+    // println(pe.map{ _.get(name) })
 
     // assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
     // assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))

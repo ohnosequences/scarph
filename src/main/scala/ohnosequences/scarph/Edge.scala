@@ -42,5 +42,5 @@ object AnyEdge {
 }
 
 object Edge {
-  type RepOf[E <: Singleton with AnyEdge] = AnyTag.TaggedWith[E]
+  type RepOf[E <: Singleton with AnyEdge] = Tagged.With[E]
 }

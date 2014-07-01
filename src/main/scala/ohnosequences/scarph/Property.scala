@@ -4,9 +4,12 @@ import ohnosequences.typesets._
 import scala.reflect._
 
 /* Properties */
-trait AnyProperty extends Representable { self =>
+trait AnyProperty extends Denotation[AnyProperty] { self =>
   val label: String
   val classTag: ClassTag[self.Raw]
+
+  type Tpe = self.type
+  val  tpe = self: self.type
 }
 
 /* Evidence that an arbitrary type `Smth` has property `P` */
