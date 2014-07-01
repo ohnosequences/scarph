@@ -1,91 +1,91 @@
 
 ```scala
-package ohnosequences.scarph.ops
+package ohnosequences.scarph.titan
 
-import  ohnosequences.scarph._
+import ohnosequences.scarph._
 
-object default {
+trait AnyTitanVertex extends AnyVertex { tvertex =>
+
+  final type Raw = com.thinkaurelius.titan.core.TitanVertex
 ```
 
-Common ops for getting properties
+Getting a property from any TitanVertex
 
 ```scala
-  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
-               PropertyGetterOps[T] = PropertyGetterOps[T](rep)
-  case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
+  implicit def unsafeGetProperty[P <: Singleton with AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
+    new PropertyGetter[P](p) {
+      def apply(rep: Rep): p.Raw = rep.getProperty[p.Raw](p.label)
+    }
 
-    def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
-      (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
-        mkGetter(p).apply(rep)
-  }
+  // TODO: provide ReadFrom for %:
+
 ```
 
-Vertex representation ops
+Retrieving edges
 
 ```scala
-  implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)
-  case class   VertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
+  import com.tinkerpop.blueprints.Direction
+  import scala.collection.JavaConversions._
+
+  // TODO: when we get all edges with the given label, they can come from vertices with the wrong type
+
 ```
 
-OUT edges
+OUT
 
 ```scala
-    def out[E <: Singleton with AnyEdge { type Tpe <: From[V#Tpe] }]
-      (e: E)(implicit mkGetter: E => V#GetOutEdge[E]): E#Tpe#Out[E#Rep] = {
-        val getter = mkGetter(e)
-        getter(rep)
+  implicit def unsafeGetOneOutEdge[
+    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
+  ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
+
+      def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
+        
+        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.headOption: Option[e.Rep]
       }
-```
+    }
 
-OUT vertices
+  implicit def unsafeGetManyOutEdge[
+    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
+  ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
-```scala
-    def outV[E <: Singleton with AnyEdge { type Tpe <: From[V#Tpe] }]
-      (e: E)(implicit mkGetter: E => V#GetOutEdge[E],
-                      getTarget: E#GetTarget): E#Tpe#Out[getTarget.Out] = {
-        val getter = mkGetter(e)
-        val f = getter.e.tpe.outFunctor
-        f.map(getter(rep))(getTarget(_))
+      def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
+        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.toList: List[e.Rep]
       }
+    }
 ```
 
-IN edges
+IN
 
 ```scala
-    def in[E <: Singleton with AnyEdge { type Tpe <: To[V#Tpe] }]
-      (e: E)(implicit mkGetter: E => V#GetInEdge[E]): E#Tpe#In[E#Rep] = {
-        val getter = mkGetter(e)
-        getter(rep)
+  implicit def unsafeGetOneInEdge[
+    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
+  ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
+
+      def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
+        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.headOption: Option[e.Rep]
       }
-```
+    }
 
-IN vertices
+  implicit def unsafeGetManyInEdge[
+    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
+  ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
 
-```scala
-    def inV[E <: Singleton with AnyEdge { type Tpe <: To[V#Tpe] }]
-      (e: E)(implicit mkGetter: E => V#GetInEdge[E],
-                      getSource: E#GetSource): E#Tpe#In[getSource.Out] = {
-        val getter = mkGetter(e)
-        val f = getter.e.tpe.inFunctor
-        f.map(getter(rep))(getSource(_))
+      def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
+        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
+        it.toList: List[e.Rep]
       }
-  }
-```
+    }
 
-Edge representation ops
+}
 
-```scala
-  implicit def edgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): EdgeRepOps[E] = EdgeRepOps(rep)
-  case class   EdgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]) {
+class TitanVertex[VT <: AnyVertexType](val tpe: VT) 
+  extends AnyTitanVertex { type Tpe = VT }
 
-    def source[S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType]]
-      (implicit getter: E#GetSource) = getter(rep)
-
-    def target[T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType]]
-      (implicit getter: E#GetTarget) = getter(rep)
-
-  }
-
+object AnyTitanVertex {
+  type ofType[VT <: AnyVertexType] = AnyTitanVertex { type Tpe = VT }
 }
 
 ```
@@ -131,12 +131,12 @@ Edge representation ops
 [main/scala/ohnosequences/scarph/EdgeType.scala]: ../EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: ../Expressions.scala.md
 [main/scala/ohnosequences/scarph/GraphSchema.scala]: ../GraphSchema.scala.md
-[main/scala/ohnosequences/scarph/ops/default.scala]: default.scala.md
-[main/scala/ohnosequences/scarph/ops/typelevel.scala]: typelevel.scala.md
+[main/scala/ohnosequences/scarph/ops/default.scala]: ../ops/default.scala.md
+[main/scala/ohnosequences/scarph/ops/typelevel.scala]: ../ops/typelevel.scala.md
 [main/scala/ohnosequences/scarph/Property.scala]: ../Property.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanEdge.scala]: ../titan/TitanEdge.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../titan/TitanGraphSchema.scala.md
-[main/scala/ohnosequences/scarph/titan/TitanVertex.scala]: ../titan/TitanVertex.scala.md
+[main/scala/ohnosequences/scarph/titan/TitanEdge.scala]: TitanEdge.scala.md
+[main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: TitanGraphSchema.scala.md
+[main/scala/ohnosequences/scarph/titan/TitanVertex.scala]: TitanVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: ../Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: ../VertexType.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
