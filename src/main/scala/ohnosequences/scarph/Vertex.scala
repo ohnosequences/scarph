@@ -8,16 +8,19 @@ package ohnosequences.scarph
   They are designed to be compatible with shapeless records (maybe, we'll see).
 */
 
-trait AnyVertex extends Denotation[AnyVertexType] with PropertyGetters { vertex =>
+trait AnyVertex extends Denotation[AnyVertexType] with CanGetPropertiesOfTpe { vertex =>
 
   /* Getters for incoming/outgoing edges */
-  // abstract class GetOutEdgeT[ET <: AnyEdgeType, R](val e: ET) {
-  //   def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
-  // }
-  abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
+  abstract class GetOutEdgeT[ET <: From[vertex.Tpe]](val et: ET) {
+    type Rep
+    type Out = et.Out[Rep]
+    def apply(rep: vertex.Rep): Out
+  }
+
+  abstract class GetOutEdge[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }](val e: E) {
     def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
   }
-  abstract class GetInEdge[E <: Singleton with AnyEdge](val e: E) {
+  abstract class GetInEdge[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }](val e: E) {
     def apply(rep: vertex.Rep): e.tpe.In[e.Rep]
   }
 
@@ -31,5 +34,5 @@ object AnyVertex {
 }
 
 object Vertex {
-  type RepOf[V <: Singleton with AnyVertex] = AnyDenotation.TaggedWith[V]
+  type RepOf[V <: Singleton with AnyVertex] = Tagged.With[V]
 }

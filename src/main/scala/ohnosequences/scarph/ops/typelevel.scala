@@ -11,17 +11,14 @@ import  ohnosequences.scarph._
 */
 object typelevel {
 
-  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) =  VertexOps[V](rep)
+  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexOps[V] = VertexOps[V](rep)
   case class   VertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
-    type Vertex = rep.Denotation
-    type VertexType = rep.DenotedType
-
     /* OUT edges */
-    def out[ET <: From[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
+    def out[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
         e: E, 
-        mkGetter: E => Vertex#GetOutEdge[E]
+        mkGetter: E => V#GetOutEdge[E]
       ): ET#Out[E#Rep] = {
         val getter = mkGetter(e)
         getter(rep)
@@ -38,36 +35,31 @@ object typelevel {
       }
 
     /* OUT vertices */
-    def outV[ET <: From[VertexType],
-             E <: Singleton with AnyEdge.ofType[ET],
-             T <: Singleton with AnyVertex.ofType[ET#TargetType] ]
+    def outV[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
-        toE: ET => E,
-        mkGetter: E => Vertex#GetOutEdge[E],
+        e: E,
+        mkGetter: E => V#GetOutEdge[E],
         getTarget: E#GetTarget
       ): ET#Out[E#Target#Rep] = {
-        val e = toE(et)
         val getter = mkGetter(e)
         val f = getter.e.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
       }
 
     /* IN edges */
-    def in[ET <: To[Vertex#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
-      (et: ET)(implicit e: E, mkGetter: E => Vertex#GetInEdge[E]): ET#In[E#Rep] = {
+    def in[ET <: To[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
+      (et: ET)(implicit e: E, mkGetter: E => V#GetInEdge[E]): ET#In[E#Rep] = {
         val getter = mkGetter(e)
         getter(rep)
       }
 
     /* IN vertices */
-    def inV[ET <: To[VertexType],
-            E <: Singleton with AnyEdge.ofType[ET],
-            S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType] ]
+    def inV[ET <: To[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
         e: E,
-        mkGetter: E => Vertex#GetInEdge[E],
-        getSource: E#GetSource[S]
-      ): ET#In[S#Rep] = {
+        mkGetter: E => V#GetInEdge[E],
+        getSource: E#GetSource
+      ): ET#In[E#Source#Rep] = {
         val getter = mkGetter(e)
         val f = getter.e.tpe.inFunctor
         f.map(getter(rep))(getSource(_))

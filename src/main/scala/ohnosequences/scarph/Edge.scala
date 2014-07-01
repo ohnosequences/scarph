@@ -1,28 +1,30 @@
 package ohnosequences.scarph
 
-trait AnyEdge extends Denotation[AnyEdgeType] with PropertyGetters { edge =>
+trait AnyEdge extends Denotation[AnyEdgeType] with CanGetPropertiesOfTpe { edge =>
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
   type Tpe <: AnyEdgeType
 
   type Source <: AnyVertex.ofType[Tpe#SourceType]
-  val source: Source
+  val  source: Source
 
   type Target <: AnyVertex.ofType[Tpe#TargetType]
-  val target: Target
+  val  target: Target
 
   /* Get source/target from this representation */
-  abstract class GetSource[S <: AnyVertex.ofType[Tpe#SourceType]](val source: S) {
-    def apply(edgeRep: edge.Rep): source.Rep
+  abstract class GetSource {
+    type Out = source.Rep
+    def apply(edgeRep: edge.Rep): Out
   }
-  abstract class GetTarget {
-    def apply(edgeRep: edge.Rep): target.Rep
+  abstract class GetTarget { 
+    type Out = target.Rep 
+    def apply(edgeRep: edge.Rep): Out
   }
 
 }
 
 class Edge[
-    S <: AnyVertex.ofType[ET#SourceType], 
+    S <: AnyVertex.ofType[ET#SourceType],
     ET <: AnyEdgeType, 
     T <: AnyVertex.ofType[ET#TargetType]
   ](val source: S, val tpe: ET, val target: T) extends AnyEdge { 
@@ -40,5 +42,5 @@ object AnyEdge {
 }
 
 object Edge {
-  type RepOf[E <: Singleton with AnyEdge] = AnyDenotation.TaggedWith[E]
+  type RepOf[E <: Singleton with AnyEdge] = Tagged.With[E]
 }
