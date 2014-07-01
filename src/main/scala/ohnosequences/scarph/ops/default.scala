@@ -4,8 +4,19 @@ import  ohnosequences.scarph._
 
 object default {
 
-  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexOps[V] = VertexOps[V](rep)
-  case class   VertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
+  /* Common ops for getting properties */
+  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+               PropertyGetterOps[T] = PropertyGetterOps[T](rep)
+  case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
+
+    def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
+      (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
+        mkGetter(p).apply(rep)
+  }
+
+  /* Vertex representation ops */
+  implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)
+  case class   VertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
     /* OUT edges */
     def out[E <: Singleton with AnyEdge { type Tpe <: From[V#Tpe] }]
@@ -40,8 +51,9 @@ object default {
       }
   }
 
-  implicit def edgeOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): EdgeOps[E] = EdgeOps(rep)
-  case class   EdgeOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]) {
+  /* Edge representation ops */
+  implicit def edgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): EdgeRepOps[E] = EdgeRepOps(rep)
+  case class   EdgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]) {
 
     def source[S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType]]
       (implicit getter: E#GetSource) = getter(rep)

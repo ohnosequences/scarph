@@ -43,32 +43,11 @@ class HasPropertiesOps[T](t: T) {
 
 
 /* Read a property from a representation */
-trait CanGetProperties { self: Representable =>
-
-  type PropertiesOwner
+trait CanGetProperties { self: AnyDenotation =>
 
   abstract class PropertyGetter[P <: AnyProperty](val p: P) {
     def apply(rep: self.Rep): p.Raw
   }
-
-  implicit def propertyOps(rep: self.Rep): PropertyOps = PropertyOps(rep)
-  case class   PropertyOps(rep: self.Rep) {
-    def get[P <: Singleton with AnyProperty: Property.Of[PropertiesOwner]#is](p: P)
-      (implicit mkGetter: p.type => PropertyGetter[p.type]): p.Raw = 
-        mkGetter(p).apply(rep)
-  }
-
-  /* If we have just an independent getter for a particular property: */
-  implicit def idGetter[P <: AnyProperty: Property.Of[PropertiesOwner]#is](p: P)
-    (implicit getter: PropertyGetter[P]) = getter
-}
-
-trait CanGetPropertiesOfItself extends CanGetProperties { self: Representable =>
-  type PropertiesOwner = self.type
-}
-
-trait CanGetPropertiesOfTpe extends CanGetProperties { self: AnyDenotation =>
-  type PropertiesOwner = self.Tpe
 }
 
 import shapeless._, poly._

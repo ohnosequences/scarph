@@ -11,8 +11,12 @@ import  ohnosequences.scarph._
 */
 object typelevel {
 
-  implicit def vertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexOps[V] = VertexOps[V](rep)
-  case class   VertexOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
+  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+               ops.default.PropertyGetterOps[T] = ops.default.PropertyGetterOps[T](rep)
+
+
+  implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)
+  case class   VertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
     /* OUT edges */
     def out[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
@@ -30,7 +34,7 @@ object typelevel {
         e: E,
         mkGetter: E => V#GetOutEdge[E],
         getTarget: E#GetTarget
-      ): ET#Out[E#Target#Rep] = {
+      ): ET#Out[getTarget.Out] = {
         val getter = mkGetter(e)
         val f = getter.e.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
@@ -49,14 +53,14 @@ object typelevel {
         e: E,
         mkGetter: E => V#GetInEdge[E],
         getSource: E#GetSource
-      ): ET#In[E#Source#Rep] = {
+      ): ET#In[getSource.Out] = {
         val getter = mkGetter(e)
         val f = getter.e.tpe.inFunctor
         f.map(getter(rep))(getSource(_))
       }
   }
 
-  implicit def  edgeOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): 
-    ops.default.EdgeOps[E] = ops.default.EdgeOps(rep)
+  implicit def  edgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): 
+    ops.default.EdgeRepOps[E] = ops.default.EdgeRepOps(rep)
 
 }

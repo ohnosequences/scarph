@@ -57,13 +57,13 @@ class TitanOtherOpsSuite extends org.scalatest.FunSuite with org.scalatest.Befor
     import GodsImplementation._
     import ops.typelevel._
 
-    // val pluto = g.getTagged(God)("name", "pluto")
+    val pluto = g.getTagged(God)("name", "pluto")
     // shapeless.test.typed[god.Rep](pluto)
 
-    // val pe: List[pet.Rep] = pluto out Pet
+    val pe: List[pet.Rep] = pluto out Pet
 
-    // assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
-    // assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
+    assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
 
   }
 
