@@ -6,10 +6,10 @@ import shapeless.ops.hlist._
 sealed trait Morphism {
 
   type Source <: HList
-  val source: Source
+  val  source: Source
 
   type Target <: HList
-  val target: Target
+  val  target: Target
 }
 
   case class Simple[E <: Singleton with AnyEdgeType](val edge: E)
@@ -17,10 +17,10 @@ sealed trait Morphism {
   extends Morphism {
 
     type Source = edge.SourceType :: HNil
-    val source  = edge.sourceType :: HNil
+    val  source = edge.sourceType :: HNil
 
     type Target = edge.TargetType :: HNil
-    val target  = edge.targetType :: HNil
+    val  target = edge.targetType :: HNil
   }
 
   case class Par[F <: Morphism, G <: Morphism](val f: F, val g: G)

@@ -21,8 +21,8 @@ libraryDependencies += {
 }
 
 libraryDependencies ++= Seq(
+  "ohnosequences" %% "type-sets" % "0.5.0-SNAPSHOT",
   "com.thinkaurelius.titan" % "titan-all" % "0.4.4",
-  "ohnosequences" %% "type-sets" % "0.4.0",
   "org.scalaz" %% "scalaz-core" % "7.0.6",
   "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 )

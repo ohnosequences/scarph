@@ -10,22 +10,28 @@ package ohnosequences.scarph
 
 trait AnyIndexType {
 
-  // TODO bound on something with properties
+  val label: String
+
   type IndexedType
-  val indexedType: IndexedType
+  val  indexedType: IndexedType
 
   type Property <: AnyProperty
-  val property: Property
+  val  property: Property
+
+  // should be provieded implicitly:
+  val indexedTypeHasProperty: IndexedType HasProperty Property
 
   /*
     The type of predicates that this index can be queried for
   */
-  type PredicateType
+  type PredicateType <: AnyPredicate.On[IndexedType]
 
   type Out[+X]
 }
 
-trait AnyVertexIndexType {
+abstract class IndexType[IT, P <: AnyProperty](val indexedType: IT, val p: P)
+  (implicit indexedTypeHasProperty: IT HasProperty P) extends AnyIndexType {
 
-  type IndexedType <: AnyVertexType 
-}
+    type IndexedType = IT
+    type Property = P
+  }
