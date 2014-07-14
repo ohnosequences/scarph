@@ -17,8 +17,8 @@ trait AnyPredicate {
   val  head: Head
 
   type TYPE
-  type Item <: Singleton with TYPE
-  val  item: Item
+  type ItemType <: Singleton with TYPE
+  val  itemType: ItemType
 }
 
 /*
@@ -29,7 +29,7 @@ trait AnyOrPredicate extends AnyPredicate {
   type Body <: AnyOrPredicate
 
   def or[Head <: AnyCondition](other: Head)(implicit 
-    ev: Item HasProperty other.Property
+    ev: ItemType HasProperty other.Property
   ): OR[Body, Head] = 
      OR(body, other)
 }
@@ -39,8 +39,8 @@ case class OR[B <: AnyOrPredicate, H <: AnyCondition]
   type Body = B; type Head = H
 
   type TYPE = body.TYPE
-  type Item = body.Item
-  val  item = body.item
+  type ItemType = body.ItemType
+  val  itemType = body.itemType
 } 
 
 
@@ -52,7 +52,7 @@ trait AnyAndPredicate extends AnyPredicate {
   type Body <: AnyAndPredicate
 
   def and[Head <: AnyCondition](other: Head)(implicit 
-    ev: Item HasProperty other.Property
+    ev: ItemType HasProperty other.Property
   ): AND[Body, Head] = 
      AND(body, other)
 }
@@ -62,8 +62,8 @@ case class AND[B <: AnyAndPredicate, H <: AnyCondition]
   type Body = B; type Head = H
 
   type TYPE = body.TYPE
-  type Item = body.Item
-  val  item = body.item 
+  type ItemType = body.ItemType
+  val  itemType = body.itemType 
 }
 
 
@@ -72,51 +72,51 @@ case class AND[B <: AnyAndPredicate, H <: AnyCondition]
 
   It contains only one condition and can be extended either to `OR` or `AND` predicate
 */
-trait AnyVertexPredicate extends AnyOrPredicate with AnyAndPredicate {
+trait AnySimplePredicate extends AnyOrPredicate with AnyAndPredicate {
   type Body = this.type
   val  body = this: this.type
+}
 
-  type TYPE = AnyVertexType
+trait AnyVertexPredicate extends AnySimplePredicate {
+ type TYPE = AnyVertexType
 }
 
 case class VertexPredicate[I <: Singleton with AnyVertexType, C <: AnyCondition]
-  (val item : I,  val head : C) extends AnyVertexPredicate {
-  type Item = I; type Head = C
+  (val itemType : I,  val head : C) extends AnyVertexPredicate {
+  type ItemType = I; type Head = C
 }
 
-trait AnyEdgePredicate extends AnyOrPredicate with AnyAndPredicate {
-  type Body = this.type
-  val  body = this: this.type
 
+trait AnyEdgePredicate extends AnySimplePredicate {
   type TYPE = AnyEdgeType
 }
 
 case class EdgePredicate[I <: Singleton with AnyEdgeType, C <: AnyCondition]
-  (val item : I,  val head : C) extends AnyEdgePredicate {
-  type Item = I; type Head = C
+  (val itemType : I,  val head : C) extends AnyEdgePredicate {
+  type ItemType = I; type Head = C
 }
 
 
 object AnyPredicate {
 
-  type HeadedBy[C <: AnyCondition] = AnyPredicate { type Head <: C }
+  type HeadedBy[C <: AnyCondition] = AnyPredicate { type Head = C }
 
-  type On[I] = AnyPredicate { type Item = I }
+  type On[I] = AnyPredicate { type ItemType = I }
 
   /* 
     With this you can write `item ? condition` which means `SimplePredicate(item, condition)`
   */
-  implicit def vertexPredicateOps[I <: Singleton with AnyVertexType](item: I): VertexPredicateOps[I] = VertexPredicateOps(item)
-  case class   VertexPredicateOps[I <: Singleton with AnyVertexType](item: I) {
+  implicit def vertexPredicateOps[VT <: Singleton with AnyVertexType](vt: VT): VertexPredicateOps[VT] = VertexPredicateOps(vt)
+  case class   VertexPredicateOps[VT <: Singleton with AnyVertexType](vt: VT) {
     def ?[C <: AnyCondition](c: C)(implicit 
-        ev: I HasProperty c.Property
-      ): VertexPredicate[I, C] = VertexPredicate(item, c)
+        ev: VT HasProperty c.Property
+      ): VertexPredicate[VT, C] = VertexPredicate(vt, c)
   }
 
-  implicit def edgePredicateOps[I <: Singleton with AnyEdgeType](item: I): EdgePredicateOps[I] = EdgePredicateOps(item)
-  case class   EdgePredicateOps[I <: Singleton with AnyEdgeType](item: I) {
+  implicit def edgePredicateOps[ET <: Singleton with AnyEdgeType](et: ET): EdgePredicateOps[ET] = EdgePredicateOps(et)
+  case class   EdgePredicateOps[ET <: Singleton with AnyEdgeType](et: ET) {
     def ?[C <: AnyCondition](c: C)(implicit 
-        ev: I HasProperty c.Property
-      ): EdgePredicate[I, C] = EdgePredicate(item, c)
+        ev: ET HasProperty c.Property
+      ): EdgePredicate[ET, C] = EdgePredicate(et, c)
   }
 }

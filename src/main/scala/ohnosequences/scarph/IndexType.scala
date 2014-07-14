@@ -15,7 +15,7 @@ trait AnyIndexType {
   type IndexedType
   val  indexedType: IndexedType
 
-  type Property <: AnyProperty
+  type Property <: Singleton with AnyProperty
   val  property: Property
 
   // should be provieded implicitly:
@@ -26,12 +26,22 @@ trait AnyIndexType {
   */
   type PredicateType <: AnyPredicate.On[IndexedType]
 
-  type Out[+X]
+  type Out[X]
 }
 
-abstract class IndexType[IT, P <: AnyProperty](val indexedType: IT, val p: P)
+abstract class IndexType[IT, P <: Singleton with AnyProperty](val indexedType: IT, val p: P)
   (implicit indexedTypeHasProperty: IT HasProperty P) extends AnyIndexType {
 
     type IndexedType = IT
     type Property = P
   }
+
+// Simple index type, which can be only queried for an exact property match
+trait AnyStandardIndexType extends AnyIndexType {
+
+  type Out[X] = List[X]
+
+  type PredicateType = AnyPredicate.On[IndexedType] 
+                  with AnyPredicate.HeadedBy[EQ[Property]]
+
+}

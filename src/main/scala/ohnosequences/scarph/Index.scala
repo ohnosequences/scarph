@@ -7,9 +7,11 @@ trait AnyIndex extends Denotation[AnyIndexType] { index =>
   }
   val  item: Item
 
-  abstract class LookupItem {
-    type Out = tpe.Out[item.Rep]
-    def apply(prop: tpe.Property, predicate: tpe.PredicateType): Out
+  type PredicateType = tpe.PredicateType
+  type Out[X] = tpe.Out[X]
+
+  abstract class LookupItem[P <: PredicateType](val predicate: P) {
+    def apply(rep: index.Rep): Out[item.Rep]
   }
 
 }
