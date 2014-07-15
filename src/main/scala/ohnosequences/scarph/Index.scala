@@ -2,8 +2,8 @@ package ohnosequences.scarph
 
 trait AnyIndex extends Denotation[AnyIndexType] { index =>
 
-  type IndexedType = tpe.IndexedType
-  type PredicateType = tpe.PredicateType
+  type IndexedType //= tpe.IndexedType
+  type PredicateType //= tpe.PredicateType
   type Out //<: tpe.Out[item.Rep]
 
   // TODO: couldn't place this bound

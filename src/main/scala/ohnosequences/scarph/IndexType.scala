@@ -44,13 +44,17 @@ object AnyIndexType {
 }
 
 // Simple index type, which can be only queried for an exact property match
-trait AnyStandardIndexType extends AnyIndexType {
+trait AnyStandardIndexType extends AnyIndexType { indexType =>
 
   override val label = "standard"
 
   type Out[X] = List[X]
 
-  type PredicateType = AnyPredicate.On[IndexedType] 
-                  with AnyPredicate.HeadedBy[EQ[Property]]
+  type PredicateType = AnySimplePredicate {
+    type ItemType = indexType.IndexedType
+    type Head = EQ[indexType.Property]
+  }
+                  // with AnyPredicate.On[IndexedType] 
+                  // with AnyPredicate.HeadedBy[EQ[Property]]
 
 }

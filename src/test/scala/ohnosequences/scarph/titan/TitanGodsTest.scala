@@ -58,9 +58,17 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val titanNames = titanNameIndex ->> g
     val pred: VertexPredicate[GodsSchema.Titan.type, EQ[name.type]] = GodsSchema.Titan ? (name === "saturn")
-    val sat = titanNames.lookup(pred)
+    implicitly[pred.type <:< AnySimplePredicate{
+      type ItemType = TitanNameIndex.IndexedType
+      type Head = EQ[TitanNameIndex.Property]
+    }]
+    implicitly[pred.type <:< TitanNameIndex.PredicateType]
+    implicitly[pred.type <:< titanNameIndex.tpe.PredicateType]
+    implicitly[pred.type <:< titanNameIndex.PredicateType]
+    val sat = titanNames.lookup(pred).head
 
     val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
+    assert(sat === saturn)
 
     /* pure blueprints with string keys and casting: */
     assert(saturn.getProperty[Int]("age") === 10000)

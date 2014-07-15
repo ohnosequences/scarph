@@ -12,6 +12,8 @@ trait AnyTitanStandardIndex extends AnyIndex { tindex =>
   type Raw = com.thinkaurelius.titan.core.TitanGraph
 
   // FIXME: couldn't avoid it: (should be just set once in AnyIndex type)
+  type IndexedType = tindex.tpe.IndexedType
+  type PredicateType = tindex.tpe.PredicateType
   type Out = tindex.tpe.Out[tindex.item.Rep]
 
   implicit def lookupper[P <: tindex.PredicateType 

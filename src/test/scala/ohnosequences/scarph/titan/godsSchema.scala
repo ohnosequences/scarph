@@ -28,10 +28,10 @@ object GodsSchema {
   /*
     ### Vertices
   */
-  case object Titan extends VertexType("titan") {
+  case object Titan extends VertexType("titan") //{
     // you can define properties inside of the type
-    implicit val _props = this has name :~: age :~: ∅
-  }
+    implicit val _props = Titan has name :~: age :~: ∅
+  // }
   case object God extends VertexType("god")
     // or outside
     implicit val God_props = God has name :~: age :~: ∅
@@ -104,6 +104,6 @@ object GodsSchema {
   /*
     ### Indexes
   */
-  case object TitanNameIndex extends IndexType("standard", Titan, name) with AnyStandardIndexType
+  case object TitanNameIndex extends IndexType("standard", Titan, name)(Titan has name) with AnyStandardIndexType
 
 }
