@@ -44,6 +44,11 @@ trait AnyDenotation extends Representable {
   val  tpe: Tpe
 }
 
+object AnyDenotation {
+  type Of[T] = AnyDenotation { type Tpe = T }
+}
+
+
 /*
   Bound the universe of types to be `T`s
 */

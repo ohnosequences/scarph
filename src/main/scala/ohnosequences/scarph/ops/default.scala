@@ -63,4 +63,18 @@ object default {
 
   }
 
+
+  /* Edge representation ops */
+  implicit def indexRepOps[I <: Singleton with AnyIndex](rep: I#Rep): IndexRepOps[I] = IndexRepOps(rep)
+  case class   IndexRepOps[I <: Singleton with AnyIndex](rep: I#Rep) {
+
+    def lookup[P <: I#PredicateType 
+                    with AnyVertexPredicate
+                    with AnyPredicate.HeadedBy[EQ[I#Tpe#Property]] 
+              ](p: P)(implicit mkLookupper: P => I#LookupItem[P]) = {
+                val lookupper = mkLookupper(p)
+                lookupper(rep)
+              }
+
+  }
 }

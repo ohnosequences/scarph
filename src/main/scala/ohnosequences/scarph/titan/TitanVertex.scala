@@ -17,8 +17,10 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
   /* Retrieving edges */
   import com.tinkerpop.blueprints.Direction
   import scala.collection.JavaConversions._
+  import java.lang.{Iterable => jIterable}
 
-  // TODO: when we get all edges with the given label, they can come from vertices with the wrong type
+  implicit def cnvrtOpt[T](it: jIterable[T]): Option[T] = iterableAsScalaIterable(it).headOption 
+  implicit def cnvrtLst[T](it: jIterable[T]): List[T] = iterableAsScalaIterable(it).toList
 
   /* OUT */
   implicit def unsafeGetOneOutEdge[
@@ -26,9 +28,7 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
   ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
-        
-        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.headOption: Option[e.Rep]
+        rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[jIterable[e.Rep]]
       }
     }
 
@@ -37,8 +37,7 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
   ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
-        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.toList: List[e.Rep]
+        rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[jIterable[e.Rep]]
       }
     }
 
@@ -48,8 +47,7 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
   ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
-        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.headOption: Option[e.Rep]
+        rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[jIterable[e.Rep]]
       }
     }
 
@@ -58,8 +56,7 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
   ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
-        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.toList: List[e.Rep]
+        rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[jIterable[e.Rep]]
       }
     }
 
