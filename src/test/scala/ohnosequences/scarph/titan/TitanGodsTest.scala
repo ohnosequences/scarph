@@ -53,6 +53,13 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   test("get vertex property") {
 
+    import AnyPredicate._
+    import AnyCondition._
+
+    val titanNames = titanNameIndex ->> g
+    val pred: VertexPredicate[GodsSchema.Titan.type, EQ[name.type]] = GodsSchema.Titan ? (name === "saturn")
+    val sat = titanNames.lookup(pred)
+
     val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
 
     /* pure blueprints with string keys and casting: */

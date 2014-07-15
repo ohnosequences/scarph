@@ -27,4 +27,9 @@ object GodsImplementation {
   implicit case object godLives     extends TitanEdge(god,     GodLives,     location)
   implicit case object monsterLives extends TitanEdge(monster, MonsterLives, location)
 
+  /*
+    ### Indexes
+  */
+  case object titanNameIndex extends TitanStandardIndex(TitanNameIndex, titan)
+
 }

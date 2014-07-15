@@ -100,4 +100,10 @@ object GodsSchema {
     edgeTypes = TitanFather :~: GodFather :~: HumanMother :~: Brother :~: Pet :~: Battled :~: GodLives :~: MonsterLives :~: ∅
   )
 
+
+  /*
+    ### Indexes
+  */
+  case object TitanNameIndex extends IndexType("standard", Titan, name) with AnyStandardIndexType
+
 }

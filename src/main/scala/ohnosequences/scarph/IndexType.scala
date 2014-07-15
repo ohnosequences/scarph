@@ -29,15 +29,24 @@ trait AnyIndexType {
   type Out[X]
 }
 
-abstract class IndexType[IT, P <: Singleton with AnyProperty](val indexedType: IT, val p: P)
-  (implicit indexedTypeHasProperty: IT HasProperty P) extends AnyIndexType {
+abstract class IndexType[IT, P <: Singleton with AnyProperty](
+  val label: String,
+  val indexedType: IT, 
+  val property: P
+  )(implicit val indexedTypeHasProperty: IT HasProperty P) extends AnyIndexType {
 
     type IndexedType = IT
     type Property = P
   }
 
+object AnyIndexType {
+  type Over[IT] = AnyIndexType { type IndexedType = IT }
+}
+
 // Simple index type, which can be only queried for an exact property match
 trait AnyStandardIndexType extends AnyIndexType {
+
+  override val label = "standard"
 
   type Out[X] = List[X]
 

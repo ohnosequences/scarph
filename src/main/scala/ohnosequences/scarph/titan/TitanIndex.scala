@@ -28,3 +28,12 @@ trait AnyTitanStandardIndex extends AnyIndex { tindex =>
     }
 
 }
+
+class TitanStandardIndex[I <: AnyDenotation.Of[T#IndexedType], T <: AnyStandardIndexType](
+  val tpe: T,
+  val item: I
+  ) extends AnyTitanStandardIndex {
+
+  type Tpe = T
+  type Item = I
+}
