@@ -57,7 +57,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     import AnyCondition._
 
     val titanNames = titanNameIndex ->> g
-    val pred: VertexPredicate[GodsSchema.Titan.type, EQ[name.type]] = GodsSchema.Titan ? (name === "saturn")
+    val pred =//: VertexPredicate[GodsSchema.Titan.type, EQ[name.type]] = 
+      GodsSchema.Titan ? (name === "saturn")
     implicitly[pred.type <:< AnySimplePredicate{
       type ItemType = TitanNameIndex.IndexedType
       type Head = EQ[TitanNameIndex.Property]

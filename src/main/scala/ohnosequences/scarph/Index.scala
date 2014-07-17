@@ -10,7 +10,7 @@ trait AnyIndex extends Denotation[AnyIndexType] { index =>
   type Item <: AnyDenotation //.Of[IndexedType]
   val  item: Item
 
-  abstract class LookupItem[P <: tpe.PredicateType](val predicate: P) {
+  abstract class LookupItem[P <: AnyPredicate](val predicate: P) {
 
     type Out = index.tpe.Out[index.item.Rep]
     def apply(rep: index.Rep): Out
@@ -24,7 +24,7 @@ trait AnyStandardIndex extends AnyIndex { index =>
   type Tpe <: AnyStandardIndexType
   val tpe: Tpe
 
-  abstract class LookupItem[P <: tpe.PredicateType](val predicate: P) {
+  abstract class LookupItem[P <: AnyPredicate](val predicate: P) {
 
     type Out = index.tpe.Out[index.item.Rep]
     def apply(rep: index.Rep): Out
