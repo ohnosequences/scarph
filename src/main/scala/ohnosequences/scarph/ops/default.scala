@@ -72,7 +72,7 @@ object default {
     }
   case class   IndexRepOps[I <: Singleton with AnyIndex](i: I, rep: I#Rep) {
 
-    def lookup[P <: i.PredicateType](p: P)
+    def lookup[P <: i.tpe.PredicateType](p: P)
       (implicit mkLookupper: P => I#LookupItem[P]) = {
         val lookupper = mkLookupper(p)
         lookupper(rep)

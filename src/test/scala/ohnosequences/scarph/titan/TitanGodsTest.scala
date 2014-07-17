@@ -62,9 +62,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       type ItemType = TitanNameIndex.IndexedType
       type Head = EQ[TitanNameIndex.Property]
     }]
-    implicitly[pred.type <:< TitanNameIndex.PredicateType]
+    // implicitly[pred.type <:< TitanNameIndex.PredicateType]
     implicitly[pred.type <:< titanNameIndex.tpe.PredicateType]
-    implicitly[pred.type <:< titanNameIndex.PredicateType]
+    // implicitly[pred.type <:< titanNameIndex.PredicateType]
     val sat = titanNames.lookup(pred).head
 
     val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
