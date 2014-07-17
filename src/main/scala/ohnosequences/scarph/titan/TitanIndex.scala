@@ -19,7 +19,7 @@ trait AnyTitanStandardIndex extends AnyStandardIndex { tindex =>
 
   // type Out = tpe.Out[item.Rep]
 
-  implicit def lookupper[P <: AnyVertexPredicate
+  implicit def lookupper[P <: Singleton with AnyVertexPredicate
                          with AnyPredicate.HeadedBy[EQ[tpe.Property]] 
                   ](p: P): this.LookupItem[P] =
     new LookupItem[P](p) {
