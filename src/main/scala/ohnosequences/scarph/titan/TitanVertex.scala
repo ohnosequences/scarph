@@ -4,9 +4,8 @@ import ohnosequences.scarph._
 import com.thinkaurelius.titan.core.{TitanGraph => TGraph}
 import com.thinkaurelius.titan.core.{TitanVertex => TVertex}
 
-trait AnyTitanVertex extends AnyVertex { tvertex =>
+trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
 
-  final type Graph = TGraph
   final type Raw = TVertex
 
   /* Getting a property from any TitanVertex */

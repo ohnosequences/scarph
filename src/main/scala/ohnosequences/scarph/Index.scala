@@ -1,34 +1,60 @@
 package ohnosequences.scarph
 
-trait AnyIndex extends Denotation[AnyIndexType] { index =>
+/*
+  ## Indexes, predicates and queries
 
-  type IndexedType = tpe.IndexedType
-  // type PredicateType = tpe.PredicateType
-  // type Out <: Tpe#Out[item.Rep]
+  
+  Let's try to map this to DynamoDB. There, predicates are over items, and consist in combinations of conditions over properties, using combinators (`and`, `or`). All this can be defined statically and without any reference to implementations. Given that, an index is something that can help you evaluate those predicates.
 
-  // TODO: couldn't place this bound
-  type Item <: AnyDenotation //.Of[IndexedType]
-  val  item: Item
+*/
 
+trait AnyIndex {
+
+  val label: String
+
+  type IndexedType <: Singleton with AnyItemType
+  val  indexedType: IndexedType
+
+  type Property <: Singleton with AnyProperty
+  val  property: Property
+
+  // should be provieded implicitly:
+  val indexedTypeHasProperty: IndexedType HasProperty Property
+
+  /*
+    The type of predicates that this index can be queried for
+  */
+  type PredicateType <: AnyPredicate.On[IndexedType]
+
+  type Out[X]
 }
 
-trait AnyStandardIndex extends AnyIndex { index =>
+abstract class Index[IT <: Singleton with AnyItemType, P <: Singleton with AnyProperty](
+  val label: String,
+  val indexedType: IT, 
+  val property: P
+  )(implicit val indexedTypeHasProperty: IT HasProperty P) extends AnyIndex {
 
-  type Tpe <: AnyStandardIndexType
-  val  tpe: Tpe
+    type IndexedType = IT
+    type Property = P
+  }
 
-  // abstract class LookupItem[P <: AnyPredicate] {
-
-  //   type Out = index.tpe.Out[index.item.Rep]
-  //   def apply(p: P, rep: index.Rep): Out
-  // }
+object AnyIndex {
+  type Over[IT] = AnyIndex { type IndexedType = IT }
 }
 
-abstract class LookupItem[I <: AnyIndex, P <: AnyPredicate](val index: I) {
+// Simple index type, which can be only queried for an exact property match
+trait AnyStandardIndex extends AnyIndex { indexType =>
 
-  type Pred = P
-  type Out = index.tpe.Out[index.item.Rep]
+  override val label = "standard"
 
-  def apply(p: Pred, rep: index.Rep): Out
+  type Out[X] = List[X]
+
+  type PredicateType = AnySimplePredicate {
+    type ItemType = indexType.IndexedType
+    type Head = EQ[indexType.Property]
+  }
+                  // with AnyPredicate.On[IndexedType] 
+                  // with AnyPredicate.HeadedBy[EQ[Property]]
+
 }
-

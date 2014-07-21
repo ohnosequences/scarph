@@ -4,9 +4,8 @@ import ohnosequences.scarph._
 import com.thinkaurelius.titan.core.{TitanGraph => TGraph}
 import com.thinkaurelius.titan.core.{TitanEdge => TEdge}
 
-trait AnyTitanEdge extends AnyEdge { tedge =>
+trait AnyTitanEdge extends AnyEdge with AnyTitanItem { tedge =>
 
-  final type Graph = TGraph
   final type Raw = TEdge
 
   type Source <: AnyVertex.ofType[Tpe#SourceType] with AnyTitanVertex

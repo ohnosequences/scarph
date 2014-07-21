@@ -27,11 +27,8 @@ class Edge[G,
     S <: AnyVertex.ofType[ET#SourceType],
     ET <: AnyEdgeType, 
     T <: AnyVertex.ofType[ET#TargetType]
-  ](val graph: G, val source: S, val tpe: ET, val target: T) extends AnyEdge { 
-    type Graph = G
-    type Source = S
-    type Tpe = ET 
-    type Target = T
+  ](val  graph : G, val  source : S, val  tpe : ET, val  target : T) extends AnyEdge { 
+    type Graph = G; type Source = S; type Tpe = ET; type Target = T
   }
 
 object AnyEdge {

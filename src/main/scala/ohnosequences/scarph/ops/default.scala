@@ -5,9 +5,9 @@ import  ohnosequences.scarph._
 object default {
 
   /* Common ops for getting properties */
-  implicit def propertyGetterOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
-               PropertyGetterOps[T] = PropertyGetterOps[T](rep)
-  case class   PropertyGetterOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]) {
+  implicit def itemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
+               ItemOps[T] = ItemOps[T](rep)
+  case class   ItemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]) {
 
     def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
       (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
@@ -65,20 +65,20 @@ object default {
 
 
   /* Edge representation ops */
-  implicit def indexRepOps[I <: Singleton with AnyIndex](rep: I#Rep)
-    (implicit getI: I#Rep => I): IndexRepOps[I] = {
-      val i = getI(rep)
-      IndexRepOps[I](i, rep)
-    }
-  case class   IndexRepOps[I <: Singleton with AnyIndex](i: I, rep: I#Rep) {
+  // implicit def indexRepOps[I <: Singleton with AnyIndex](rep: I#Rep)
+  //   (implicit getI: I#Rep => I): IndexRepOps[I] = {
+  //     val i = getI(rep)
+  //     IndexRepOps[I](i, rep)
+  //   }
+  // case class   IndexRepOps[I <: Singleton with AnyIndex](i: I, rep: I#Rep) {
 
-    type Pred = i.tpe.PredicateType
+  //   type Pred = i.tpe.PredicateType
 
-    // def lookup[P <: AnyPredicate](p: P)
-    //   (implicit lookupper: I#LookupItem[P]) = {
-    //     // val lookupper = mkLookupper(p)
-    //     lookupper(p, rep)
-    //   }
+  //   // def lookup[P <: AnyPredicate](p: P)
+  //   //   (implicit lookupper: I#LookupItem[P]) = {
+  //   //     // val lookupper = mkLookupper(p)
+  //   //     lookupper(p, rep)
+  //   //   }
 
-  }
+  // }
 }
