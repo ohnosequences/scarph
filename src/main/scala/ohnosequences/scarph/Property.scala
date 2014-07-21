@@ -43,12 +43,12 @@ class HasPropertiesOps[T](t: T) {
 
 
 /* Read a property from a representation */
-trait CanGetProperties { self: AnyDenotation =>
+// trait CanGetProperties { self: AnyDenotation =>
 
-  abstract class PropertyGetter[P <: AnyProperty](val p: P) {
-    def apply(rep: self.Rep): p.Raw
-  }
-}
+//   abstract class PropertyGetter[P <: AnyProperty](val p: P) {
+//     def apply(rep: self.Rep): p.Raw
+//   }
+// }
 
 import shapeless._, poly._
 import ohnosequences.typesets._

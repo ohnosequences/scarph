@@ -10,23 +10,25 @@ trait AnyIndex extends Denotation[AnyIndexType] { index =>
   type Item <: AnyDenotation //.Of[IndexedType]
   val  item: Item
 
-  abstract class LookupItem[P <: AnyPredicate](val predicate: P) {
-
-    type Out = index.tpe.Out[index.item.Rep]
-    def apply(rep: index.Rep): Out
-  }
-  
-
 }
 
 trait AnyStandardIndex extends AnyIndex { index =>
 
   type Tpe <: AnyStandardIndexType
-  val tpe: Tpe
+  val  tpe: Tpe
 
-  abstract class LookupItem[P <: AnyPredicate](val predicate: P) {
+  // abstract class LookupItem[P <: AnyPredicate] {
 
-    type Out = index.tpe.Out[index.item.Rep]
-    def apply(rep: index.Rep): Out
-  }
+  //   type Out = index.tpe.Out[index.item.Rep]
+  //   def apply(p: P, rep: index.Rep): Out
+  // }
 }
+
+abstract class LookupItem[I <: AnyIndex, P <: AnyPredicate](val index: I) {
+
+  type Pred = P
+  type Out = index.tpe.Out[index.item.Rep]
+
+  def apply(p: Pred, rep: index.Rep): Out
+}
+

@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-trait AnyEdge extends Denotation[AnyEdgeType] with CanGetProperties { edge =>
+trait AnyEdge extends Item[AnyEdgeType] { edge =>
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
   type Tpe <: AnyEdgeType
@@ -23,11 +23,12 @@ trait AnyEdge extends Denotation[AnyEdgeType] with CanGetProperties { edge =>
 
 }
 
-class Edge[
+class Edge[G,
     S <: AnyVertex.ofType[ET#SourceType],
     ET <: AnyEdgeType, 
     T <: AnyVertex.ofType[ET#TargetType]
-  ](val source: S, val tpe: ET, val target: T) extends AnyEdge { 
+  ](val graph: G, val source: S, val tpe: ET, val target: T) extends AnyEdge { 
+    type Graph = G
     type Source = S
     type Tpe = ET 
     type Target = T

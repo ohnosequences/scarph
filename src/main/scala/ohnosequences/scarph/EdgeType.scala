@@ -6,9 +6,7 @@ import scalaz._, std.option._, std.list._
 /*
   Declares an edge type. it is determined my a label, source/target vertex types and in/out arities
 */
-trait AnyEdgeType {
-
-  val label: String
+trait AnyEdgeType extends AnyItemType {
 
   // TODO add an applicative/monad requirement here
   type In[X]
@@ -17,10 +15,10 @@ trait AnyEdgeType {
   implicit val outFunctor: Functor[Out]
 
   type SourceType <: AnyVertexType
-  val sourceType: SourceType
+  val  sourceType: SourceType
 
   type TargetType <: AnyVertexType
-  val targetType: TargetType
+  val  targetType: TargetType
 }
 
 object AnyEdgeType {

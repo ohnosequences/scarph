@@ -11,7 +11,7 @@ import  ohnosequences.scarph._
 */
 object typelevel {
 
-  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+  implicit def propertyGetterOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
                ops.default.PropertyGetterOps[T] = ops.default.PropertyGetterOps[T](rep)
 
 

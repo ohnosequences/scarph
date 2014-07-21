@@ -1,10 +1,13 @@
 package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
+import com.thinkaurelius.titan.core.{TitanGraph => TGraph}
+import com.thinkaurelius.titan.core.{TitanVertex => TVertex}
 
 trait AnyTitanVertex extends AnyVertex { tvertex =>
 
-  final type Raw = com.thinkaurelius.titan.core.TitanVertex
+  final type Graph = TGraph
+  final type Raw = TVertex
 
   /* Getting a property from any TitanVertex */
   implicit def unsafeGetProperty[P <: Singleton with AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
@@ -62,7 +65,7 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
 
 }
 
-class TitanVertex[VT <: AnyVertexType](val tpe: VT) 
+class TitanVertex[VT <: AnyVertexType](val graph: TGraph, val tpe: VT) 
   extends AnyTitanVertex { type Tpe = VT }
 
 object AnyTitanVertex {

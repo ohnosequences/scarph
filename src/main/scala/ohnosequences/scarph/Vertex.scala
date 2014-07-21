@@ -8,7 +8,7 @@ package ohnosequences.scarph
   They are designed to be compatible with shapeless records (maybe, we'll see).
 */
 
-trait AnyVertex extends Denotation[AnyVertexType] with CanGetProperties { vertex =>
+trait AnyVertex extends Item[AnyVertexType] { vertex =>
 
   /* Getters for incoming/outgoing edges */
   abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
@@ -20,8 +20,10 @@ trait AnyVertex extends Denotation[AnyVertexType] with CanGetProperties { vertex
 
 }
 
-abstract class Vertex[VT <: AnyVertexType](val tpe: VT) 
-    extends AnyVertex { type Tpe = VT }
+abstract class Vertex[G, VT <: AnyVertexType](val graph: G, val tpe: VT) extends AnyVertex { 
+  type Graph = G
+  type Tpe = VT
+}
 
 object AnyVertex {
   type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }

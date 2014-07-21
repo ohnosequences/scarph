@@ -5,9 +5,9 @@ import  ohnosequences.scarph._
 object default {
 
   /* Common ops for getting properties */
-  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+  implicit def propertyGetterOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
                PropertyGetterOps[T] = PropertyGetterOps[T](rep)
-  case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
+  case class   PropertyGetterOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]) {
 
     def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
       (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
@@ -74,11 +74,11 @@ object default {
 
     type Pred = i.tpe.PredicateType
 
-    def lookup[P <: AnyPredicate](p: P)
-      (implicit mkLookupper: P => I#LookupItem[P]) = {
-        val lookupper = mkLookupper(p)
-        lookupper(rep)
-      }
+    // def lookup[P <: AnyPredicate](p: P)
+    //   (implicit lookupper: I#LookupItem[P]) = {
+    //     // val lookupper = mkLookupper(p)
+    //     lookupper(p, rep)
+    //   }
 
   }
 }

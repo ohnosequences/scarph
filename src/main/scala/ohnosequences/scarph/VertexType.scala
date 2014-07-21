@@ -3,7 +3,7 @@ package ohnosequences.scarph
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.
 */
-trait AnyVertexType { val label: String }
+trait AnyVertexType extends AnyItemType
 class    VertexType ( val label: String ) extends AnyVertexType
 
 object AnyVertexType {

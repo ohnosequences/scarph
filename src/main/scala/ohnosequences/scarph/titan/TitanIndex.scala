@@ -7,8 +7,8 @@ import scala.collection.JavaConversions._
 
 trait AnyTitanStandardIndex extends AnyStandardIndex { tindex =>
 
-  type Tpe <: AnyStandardIndexType
-  val tpe: Tpe
+  // type Tpe <: AnyStandardIndexType
+  // val  tpe: Tpe
 
   type Raw = com.thinkaurelius.titan.core.TitanGraph
 
@@ -19,17 +19,16 @@ trait AnyTitanStandardIndex extends AnyStandardIndex { tindex =>
 
   // type Out = tpe.Out[item.Rep]
 
-  implicit def lookupper[P <: Singleton with AnyVertexPredicate
-                         with AnyPredicate.HeadedBy[EQ[tpe.Property]] 
-                  ](p: P): this.LookupItem[P] =
-    new LookupItem[P](p) {
 
-      def apply(rep: tindex.Rep) = {
-        val it = rep.query().has(p.head.property.label, EQUAL, p.head.value).vertices.asInstanceOf[java.lang.Iterable[tindex.item.Rep]]
-        it.toList
-      }
+  // implicit def lookupper =
+  //   new LookupItem[tindex.type, VertexPredicate[tpe.IndexedType, EQ[tpe.Property]]](tindex) {
 
-    }
+  //     def apply(p: Pred, rep: tindex.Rep): Out = {
+  //       val it = rep.query().has(p.head.property.label, EQUAL, p.head.value).vertices.asInstanceOf[java.lang.Iterable[tindex.item.Rep]]
+  //       it.toList
+  //     }
+
+  //   }
 
 }
 
