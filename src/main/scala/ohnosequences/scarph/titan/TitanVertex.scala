@@ -9,11 +9,16 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
 
   final type Raw = TVertex
 
-  implicit def lookupper[I <: Singleton with AnyIndex.Over[tvertex.Tpe] with AnyStandardIndex](i: I) =
-    new LookupItem[I](i) {
+  implicit def simpleQueryEval[
+    Q <: AnySimpleQuery with AnyQuery.On[Tpe] with AnyQuery.HeadedBy[AnyEQ],
+    I <: Singleton with AnyIndex.Over[tvertex.Tpe] with AnyStandardIndex
+  ](implicit index: I) =
+    new QueryEval[Q] {
 
-      def apply(p: index.PredicateType): index.Out[tvertex.Rep] = {
-        graph.query().has(p.head.property.label, EQUAL, p.head.value).vertices.asInstanceOf[java.lang.Iterable[tvertex.Rep]]
+      def apply(query: Query): query.Out[tvertex.Rep] = {
+        graph.query()
+          .has(query.head.property.label, EQUAL, query.head.value)
+          .vertices.asInstanceOf[java.lang.Iterable[tvertex.Rep]]
       }
     }
 

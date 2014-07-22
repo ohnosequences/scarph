@@ -25,8 +25,6 @@ trait AnyCondition {
   val  property: Property
 }
 
-sealed trait KeyCondition extends AnyCondition
-
 object AnyCondition {
   type On[A <: Singleton with AnyProperty] = AnyCondition { type Property = A }
 
@@ -68,17 +66,16 @@ case class NOT_NULL[A <: Singleton with AnyProperty](val property: A) extends Nu
 /*
   ## Comparison Operators with **One** Property Value
 */
-trait SimpleCondition[A <: Singleton with AnyProperty] extends AnyCondition {
-
-  type Property = A
-  val value: A#Raw
-}
+trait AnySimpleCondition extends AnyCondition { val value: Property#Raw }
+trait SimpleCondition[A <: Singleton with AnyProperty] 
+  extends AnySimpleCondition { type Property = A }
 
 /* - `EQ` - true if an property is equal to a value */
+trait AnyEQ extends AnySimpleCondition
 case class EQ[A <: Singleton with AnyProperty](
   val property: A,
   val value: A#Raw
-) extends SimpleCondition[A] with KeyCondition
+) extends AnyEQ with SimpleCondition[A]
 
 /* - `NE` - true if an property is not equal to a value */
 // NOTE: this is not a KeyCondition for some reason
@@ -93,14 +90,14 @@ case class LE[A <: Singleton with AnyProperty](
   val value: A#Raw
 )(implicit 
   ev: A#Raw :<: NotSetValues
-) extends SimpleCondition[A] with KeyCondition
+) extends SimpleCondition[A]
 
 /* - `LT` - true if an property is less than a value */
 case class LT[A <: Singleton with AnyProperty](
   val property: A,
   val value: A#Raw
 )(implicit ev: A#Raw :<: NotSetValues)
-  extends SimpleCondition[A] with KeyCondition
+  extends SimpleCondition[A]
 
 /* - `GE` - true if an property is greater than or equal to a value */
 case class GE[A <: Singleton with AnyProperty](
@@ -108,7 +105,7 @@ case class GE[A <: Singleton with AnyProperty](
   val value: A#Raw
 )(implicit
   ev: A#Raw :<: NotSetValues
-) extends SimpleCondition[A] with KeyCondition
+) extends SimpleCondition[A]
 
 /* - `GT` - true if an property is greater than a value */
 case class GT[A <: Singleton with AnyProperty](
@@ -116,7 +113,7 @@ case class GT[A <: Singleton with AnyProperty](
   val value: A#Raw
 )(implicit 
   ev: A#Raw :<: NotSetValues
-) extends SimpleCondition[A] with KeyCondition
+) extends SimpleCondition[A]
 
 
 /* - `CONTAINS` - true if a value is present within a set, or if one value contains another */
@@ -144,7 +141,7 @@ case class BEGINS_WITH[A <: Singleton with AnyProperty](
   val value: A#Raw
 )(implicit 
   ev: A#Raw :<: ValuesWithPrefixes
-) extends SimpleCondition[A] with KeyCondition
+) extends SimpleCondition[A]
 
 
 /*
@@ -158,7 +155,7 @@ case class BETWEEN[A <: Singleton with AnyProperty](
   val end: A#Raw
 )(implicit
   ev: A#Raw :<: NotSetValues
-) extends KeyCondition { type Property = A }
+) extends AnyCondition { type Property = A }
 
 // NOTE: this is not in the Amazon documentation
 // case class NOT_BETWEEN[A <: Singleton with AnyProperty](

@@ -13,10 +13,14 @@ trait AnyItem extends AnyDenotation { item =>
     def apply(rep: item.Rep): p.Raw
   }
 
-  abstract class LookupItem[I <: AnyIndex.Over[Tpe]](val index: I) {
-
-    def apply(p: index.PredicateType): index.Out[item.Rep]
+  abstract class QueryEval[Q <: AnyQuery] {
+    type Query = Q
+    def apply(query: Query): query.Out[item.Rep]
   }
 }
 
 trait Item[T <: AnyItemType] extends AnyItem { type TYPE = T }
+
+object AnyItem {
+  type ofType[T <: AnyItemType] = AnyItem { type Tpe = T }
+}

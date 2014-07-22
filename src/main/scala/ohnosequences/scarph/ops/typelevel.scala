@@ -14,8 +14,9 @@ object typelevel {
   implicit def getPropertyOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
                ops.default.GetPropertyOps[T] = ops.default.GetPropertyOps[T](rep)
 
-  // implicit def itemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
-  //              ops.default.ItemOps[T] = ops.default.ItemOps[T](rep)
+
+  def query[Q <: AnySimpleQuery with AnyQuery.HeadedBy[AnyEQ], I <: Singleton with AnyItem.ofType[Q#ItemType]](q: Q)
+    (implicit i: I, evaluator: I#QueryEval[Q]): q.Out[I#Rep] = evaluator(q)
 
 
   implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)

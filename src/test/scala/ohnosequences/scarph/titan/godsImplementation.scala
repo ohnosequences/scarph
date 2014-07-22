@@ -1,6 +1,7 @@
 package ohnosequences.scarph.titan.test
 
 import GodsSchema._
+import ohnosequences.scarph._
 import ohnosequences.scarph.titan._
 
 case class GodsImplementation(tGraph: com.thinkaurelius.titan.core.TitanGraph) {
@@ -26,5 +27,11 @@ case class GodsImplementation(tGraph: com.thinkaurelius.titan.core.TitanGraph) {
   implicit case object battled      extends TitanEdge(tGraph, demigod, Battled,      monster)
   implicit case object godLives     extends TitanEdge(tGraph, god,     GodLives,     location)
   implicit case object monsterLives extends TitanEdge(tGraph, monster, MonsterLives, location)
+
+  /*
+    ### Indexes
+  */
+  implicit case object titanNameIndex extends StandardIndex(Titan, name)
+  implicit case object godNameIndex   extends StandardIndex(God, name)
 
 }

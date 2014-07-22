@@ -24,7 +24,7 @@ trait AnyIndex {
   /*
     The type of predicates that this index can be queried for
   */
-  type PredicateType <: AnyPredicate.On[IndexedType]
+  type QueryType <: AnyQuery.On[IndexedType]
 
   type Out[X]
 }
@@ -41,7 +41,7 @@ abstract class Index[IT <: Singleton with AnyItemType, P <: Singleton with AnyPr
 
 object AnyIndex {
   type Over[IT] = AnyIndex { type IndexedType = IT }
-  type WithPredicate[P] = AnyIndex { type PredicateType = P }
+  type WithQuery[P] = AnyIndex { type QueryType = P }
 }
 
 // Simple index type, which can be only queried for an exact property match
@@ -51,7 +51,7 @@ trait AnyStandardIndex extends AnyIndex { indexType =>
 
   type Out[X] = List[X]
 
-  type PredicateType = AnySimplePredicate {
+  type QueryType = AnySimpleQuery {
     type ItemType = indexType.IndexedType
     type Head = EQ[indexType.Property]
   }

@@ -14,14 +14,18 @@ object default {
         mkGetter(p).apply(rep)
   }
 
-  implicit def itemOps[T <: Singleton with AnyItem](item: T): 
-               ItemOps[T] = ItemOps[T](item)
-  case class   ItemOps[T <: Singleton with AnyItem](item: T) {
+  implicit def itemOps[I <: Singleton with AnyItem](item: I): 
+               ItemOps[I] = ItemOps[I](item)
+  case class   ItemOps[I <: Singleton with AnyItem](item: I) {
 
-    def lookup[I <: Singleton with AnyIndex.Over[T#Tpe] with AnyStandardIndex](index: I)(p: index.PredicateType)
-      (implicit mkLookupper: index.type => T#LookupItem[index.type]): index.Out[T#Rep] = {
-        val lookupper = mkLookupper(index)
-        lookupper(p)
+    // def lookup[C <: AnyEQ](c: C)
+    //   (implicit check: I HasProperty c.Property, lookupper: I#QueryEval[VertexQuery[item.Tpe, C]]): List[I#Rep] = {
+    //     lookupper(VertexQuery(item.tpe: item.tpe.type, c))
+    //   }
+
+    def query[Q <: AnySimpleQuery with AnyQuery.On[I#Tpe] with AnyQuery.HeadedBy[AnyEQ]](q: Q)
+      (implicit evaluator: I#QueryEval[Q]): q.Out[I#Rep] = {
+        evaluator(q)
       }
 
   }
@@ -75,17 +79,4 @@ object default {
 
   }
 
-
-  /* Edge representation ops */
-  // implicit def indexRepOps[I <: Singleton with AnyIndex](rep: I#Rep)
-  //   (implicit getI: I#Rep => I): IndexRepOps[I] = {
-  //     val i = getI(rep)
-  //     IndexRepOps[I](i, rep)
-  //   }
-  // case class   IndexRepOps[I <: Singleton with AnyIndex](i: I, rep: I#Rep) {
-
-  //   type Pred = i.tpe.PredicateType
-
-
-  // }
 }

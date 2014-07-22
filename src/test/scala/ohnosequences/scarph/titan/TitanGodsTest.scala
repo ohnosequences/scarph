@@ -9,7 +9,7 @@ import java.io.File
 
 import GodsSchema._
 
-import ohnosequences.scarph._, ops.default._, AnyPredicate._, AnyCondition._
+import ohnosequences.scarph._, ops.default._, AnyQuery._, AnyCondition._
 import ohnosequences.scarph.titan._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
@@ -57,10 +57,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // getting saturn directly
     val saturn = g.getTagged(titan)(name.label, "saturn")
     // getting it through a query to the standard index over the name property
-    val sat = titan.lookup(TitanNameIndex)(Titan ? (name === "saturn")).head
+    val sat = titan.query(Titan ? (name === "saturn"))
+    assert(sat.nonEmpty)
 
     // check the they are the same
-    assert(sat === saturn)
+    assert(sat.head === saturn)
 
     /* pure blueprints with string keys and casting: */
     assert(saturn.getProperty[Int]("age") === 10000)
@@ -125,11 +126,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       }
     } 
 
-    import GodsImplementation._
     import ops.typelevel._
 
-    val pluto = g.getTagged(God)("name", "pluto")
-    // shapeless.test.typed[god.Rep](pluto)
+    val plutos = query(God ? (name === "pluto"))
+    assert(plutos.nonEmpty)
+    val pluto = plutos.head
 
     val pe: List[pet.Rep] = pluto out Pet
 
