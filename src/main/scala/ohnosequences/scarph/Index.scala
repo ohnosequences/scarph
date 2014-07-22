@@ -41,6 +41,7 @@ abstract class Index[IT <: Singleton with AnyItemType, P <: Singleton with AnyPr
 
 object AnyIndex {
   type Over[IT] = AnyIndex { type IndexedType = IT }
+  type WithPredicate[P] = AnyIndex { type PredicateType = P }
 }
 
 // Simple index type, which can be only queried for an exact property match
@@ -54,7 +55,13 @@ trait AnyStandardIndex extends AnyIndex { indexType =>
     type ItemType = indexType.IndexedType
     type Head = EQ[indexType.Property]
   }
-                  // with AnyPredicate.On[IndexedType] 
-                  // with AnyPredicate.HeadedBy[EQ[Property]]
+}
 
+class StandardIndex[IT <: Singleton with AnyItemType, P <: Singleton with AnyProperty](
+  val indexedType: IT, 
+  val property: P
+)(implicit val indexedTypeHasProperty: IT HasProperty P) extends AnyStandardIndex {
+
+  type IndexedType = IT
+  type Property = P
 }

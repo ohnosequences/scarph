@@ -104,6 +104,6 @@ object GodsSchema {
   /*
     ### Indexes
   */
-  case object TitanNameIndex extends Index("standard", Titan, name)(Titan has name) with AnyStandardIndex
+  case object TitanNameIndex extends StandardIndex(Titan, name)
 
 }

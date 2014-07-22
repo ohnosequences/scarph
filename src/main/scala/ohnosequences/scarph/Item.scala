@@ -15,9 +15,7 @@ trait AnyItem extends AnyDenotation { item =>
 
   abstract class LookupItem[I <: AnyIndex.Over[Tpe]](val index: I) {
 
-    type Out = index.Out[item.Rep]
-
-    def apply(p: index.PredicateType, rep: item.Rep): Out
+    def apply(p: index.PredicateType): index.Out[item.Rep]
   }
 }
 

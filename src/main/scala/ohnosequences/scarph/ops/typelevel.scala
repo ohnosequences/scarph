@@ -11,8 +11,11 @@ import  ohnosequences.scarph._
 */
 object typelevel {
 
-  implicit def itemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
-               ops.default.ItemOps[T] = ops.default.ItemOps[T](rep)
+  implicit def getPropertyOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
+               ops.default.GetPropertyOps[T] = ops.default.GetPropertyOps[T](rep)
+
+  // implicit def itemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
+  //              ops.default.ItemOps[T] = ops.default.ItemOps[T](rep)
 
 
   implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)

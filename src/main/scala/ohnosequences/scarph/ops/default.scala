@@ -5,13 +5,25 @@ import  ohnosequences.scarph._
 object default {
 
   /* Common ops for getting properties */
-  implicit def itemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
-               ItemOps[T] = ItemOps[T](rep)
-  case class   ItemOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]) {
+  implicit def getPropertyOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]): 
+               GetPropertyOps[T] = GetPropertyOps[T](rep)
+  case class   GetPropertyOps[T <: Singleton with AnyItem](rep: AnyTag.TaggedWith[T]) {
 
     def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
       (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
         mkGetter(p).apply(rep)
+  }
+
+  implicit def itemOps[T <: Singleton with AnyItem](item: T): 
+               ItemOps[T] = ItemOps[T](item)
+  case class   ItemOps[T <: Singleton with AnyItem](item: T) {
+
+    def lookup[I <: Singleton with AnyIndex.Over[T#Tpe] with AnyStandardIndex](index: I)(p: index.PredicateType)
+      (implicit mkLookupper: index.type => T#LookupItem[index.type]): index.Out[T#Rep] = {
+        val lookupper = mkLookupper(index)
+        lookupper(p)
+      }
+
   }
 
   /* Vertex representation ops */
@@ -74,11 +86,6 @@ object default {
 
   //   type Pred = i.tpe.PredicateType
 
-  //   // def lookup[P <: AnyPredicate](p: P)
-  //   //   (implicit lookupper: I#LookupItem[P]) = {
-  //   //     // val lookupper = mkLookupper(p)
-  //   //     lookupper(p, rep)
-  //   //   }
 
   // }
 }

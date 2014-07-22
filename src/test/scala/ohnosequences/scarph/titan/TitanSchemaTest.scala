@@ -11,7 +11,6 @@ import ohnosequences.scarph.titan._
 import ohnosequences.typesets._
 
 import GodsSchema._
-import GodsImplementation._
 import TitanGraphSchema._
 
 class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
@@ -79,6 +78,8 @@ class TitanSchemaSuite extends org.scalatest.FunSuite with org.scalatest.BeforeA
   }
 
   test("create all keys and labels from a given schema") {
+    val impl = GodsImplementation(g); import impl._
+
     g.createSchema(godsGraphSchema)
     g.commit
 

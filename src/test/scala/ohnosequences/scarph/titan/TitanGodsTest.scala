@@ -3,13 +3,13 @@ package ohnosequences.scarph.titan.test
 // import org.scalatest._
 
 import com.thinkaurelius.titan.example.GraphOfTheGodsFactory
-import com.thinkaurelius.titan.core._
+import com.thinkaurelius.titan.core.TitanGraph
+import com.thinkaurelius.titan.core.TitanFactory
 import java.io.File
 
 import GodsSchema._
-import GodsImplementation._
 
-import ohnosequences.scarph._, ops.default._
+import ohnosequences.scarph._, ops.default._, AnyPredicate._, AnyCondition._
 import ohnosequences.scarph.titan._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
@@ -52,26 +52,15 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   } 
 
   test("get vertex property") {
+    val impl = GodsImplementation(g); import impl._
 
-    import AnyPredicate._
-    import AnyCondition._
+    // getting saturn directly
+    val saturn = g.getTagged(titan)(name.label, "saturn")
+    // getting it through a query to the standard index over the name property
+    val sat = titan.lookup(TitanNameIndex)(Titan ? (name === "saturn")).head
 
-    val titanNames = titanNameIndex ->> g
-    val pred: VertexPredicate[GodsSchema.Titan.type, EQ[name.type]] = 
-      GodsSchema.Titan ? (name === "saturn")
-    implicitly[pred.type <:< AnySimplePredicate{
-      type ItemType = TitanNameIndex.IndexedType
-      type Head = EQ[TitanNameIndex.Property]
-    }]
-    implicitly[ pred.type <:< Singleton with AnyVertexPredicate
-                         with AnyPredicate.HeadedBy[EQ[TitanNameIndex.Property]]]
-    // implicitly[pred.type <:< TitanNameIndex.PredicateType]
-    implicitly[pred.type <:< titanNameIndex.tpe.PredicateType]
-    // implicitly[pred.type <:< titanNameIndex.PredicateType]
-    val sat = titanNames.lookup(pred)//.head
-
-    val saturn = g.getTagged(GodsImplementation.titan)("name", "saturn")
-    // assert(sat === saturn)
+    // check the they are the same
+    assert(sat === saturn)
 
     /* pure blueprints with string keys and casting: */
     assert(saturn.getProperty[Int]("age") === 10000)
@@ -81,6 +70,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("get OUTgoing edges and their property") {
+    val impl = GodsImplementation(g); import impl._
 
     val hercules = g.getTagged(demigod)("name", "hercules")
     
@@ -91,6 +81,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   ignore("get INcoming edges and their property") {
+    val impl = GodsImplementation(g); import impl._
 
     val tartarus = g.getTagged(location)("name", "tartarus")
 
@@ -100,6 +91,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("get target/source vertices of incoming/outgoing edges") {
+    val impl = GodsImplementation(g); import impl._
 
     val pluto = g.getTagged(god)("name", "pluto")
 
@@ -123,6 +115,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
 
   test("testing titan implicit implementation") {
+    val impl = GodsImplementation(g); import impl._
 
     implicit class graphOps(tg: TitanGraph) {
       // just a shortcut
