@@ -137,6 +137,15 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
     assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
 
+
+    // TODO test for just this
+    val cerberus = query( Monster ? (name === "cerberus")).head
+
+    val timeQuery = Battled ? (time === 12)
+
+    val shouldBeBattleWithHercules = cerberus inQuery(Battled, timeQuery)
+
+    assert( ( shouldBeBattleWithHercules map ( _.source ) map ( _.get(name) ) ) === List("hercules") )
   }
 
 }

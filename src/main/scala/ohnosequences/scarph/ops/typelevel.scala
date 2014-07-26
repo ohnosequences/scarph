@@ -18,9 +18,24 @@ object typelevel {
   def query[Q <: AnySimpleQuery with AnyQuery.HeadedBy[AnyEQ], I <: Singleton with AnyItem.ofType[Q#ItemType]](q: Q)
     (implicit i: I, evaluator: I#QueryEval[Q]): q.Out[I#Rep] = evaluator(q)
 
-
   implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)
   case class   VertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
+
+    /* evaluate vertex-local in-queries */
+    def inQuery[
+      Q <: AnySimpleQuery with AnyQuery.HeadedBy[AnyEQ] with AnyQuery.On[ET],
+      ET <: To[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]  
+    ]
+    (edgeT: ET, query: Q)
+    (implicit 
+      edge: E, 
+      mkEvaluator: (E,Q) => V#InVertexQueryEval[E,Q]
+    )
+    : Q#Out[E#Rep] = {
+
+      val evaluator = mkEvaluator(edge, query)
+      evaluator(rep)
+    }
 
     /* OUT edges */
     def out[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]

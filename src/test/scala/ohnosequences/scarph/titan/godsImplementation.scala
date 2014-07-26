@@ -32,6 +32,8 @@ case class GodsImplementation(tGraph: com.thinkaurelius.titan.core.TitanGraph) {
     ### Indexes
   */
   implicit case object titanNameIndex extends StandardIndex(Titan, name)
+  implicit case object monsterNameIndex extends StandardIndex(Monster, name)
+  implicit case object battledTimeIndex extends StandardIndex(Battled, time)
   implicit case object godNameIndex   extends StandardIndex(God, name)
 
 }

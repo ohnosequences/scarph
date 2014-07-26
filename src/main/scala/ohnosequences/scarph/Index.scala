@@ -18,7 +18,7 @@ trait AnyIndex {
   type Property <: Singleton with AnyProperty
   val  property: Property
 
-  // should be provieded implicitly:
+  // should be provided implicitly:
   val indexedTypeHasProperty: IndexedType HasProperty Property
 
   /*

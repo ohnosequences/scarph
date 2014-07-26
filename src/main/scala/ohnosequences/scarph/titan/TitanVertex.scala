@@ -5,6 +5,10 @@ import com.thinkaurelius.titan.core.{TitanGraph => TGraph}
 import com.thinkaurelius.titan.core.{TitanVertex => TVertex}
 import com.thinkaurelius.titan.core.attribute.Cmp._
 
+import com.tinkerpop.blueprints.Direction
+import scala.collection.JavaConversions._
+import java.lang.{Iterable => jIterable}
+
 trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
 
   final type Raw = TVertex
@@ -12,15 +16,33 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
   implicit def simpleQueryEval[
     Q <: AnySimpleQuery with AnyQuery.On[Tpe] with AnyQuery.HeadedBy[AnyEQ],
     I <: Singleton with AnyIndex.Over[tvertex.Tpe] with AnyStandardIndex
-  ](implicit index: I) =
-    new QueryEval[Q] {
+  ](implicit index: I): QueryEval[Q] = new QueryEval[Q] {
 
-      def apply(query: Query): query.Out[tvertex.Rep] = {
-        graph.query()
-          .has(query.head.property.label, EQUAL, query.head.value)
-          .vertices.asInstanceOf[java.lang.Iterable[tvertex.Rep]]
-      }
+    def apply(query: Query): query.Out[tvertex.Rep] = {
+      graph.query()
+        .has(query.head.property.label, EQUAL, query.head.value)
+        .vertices.asInstanceOf[java.lang.Iterable[tvertex.Rep]]
     }
+  }
+
+  implicit def simpleVertexQueryInEval[
+    Q <: AnySimpleQuery with AnyQuery.On[E#Tpe] with AnyQuery.HeadedBy[AnyEQ],
+    I <: Singleton with AnyIndex.Over[E#Tpe] with AnyStandardIndex,
+    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] }
+  ](edge: E, query: Q)(implicit index: I)
+  : InVertexQueryEval[E,Q] = new InVertexQueryEval[E,Q](edge, query) {
+
+    def apply(rep: tvertex.Rep): query.Out[e.Rep] = {
+
+      // TODO simplify all this implicit conversions and stuff
+      // val tEdges: Iterable[edge.Raw] = 
+      rep.query()
+        .direction(Direction.IN)
+        .labels(edge.tpe.label)
+        .has(query.head.property.label, EQUAL, query.head.value)
+        .titanEdges().asInstanceOf[java.lang.Iterable[e.Rep]]
+    }
+  }
 
   /* Getting a property from any TitanVertex */
   implicit def unsafeGetProperty[P <: Singleton with AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
@@ -31,9 +53,6 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
   // TODO: provide ReadFrom for %:
 
   /* Retrieving edges */
-  import com.tinkerpop.blueprints.Direction
-  import scala.collection.JavaConversions._
-  import java.lang.{Iterable => jIterable}
 
   implicit def cnvrtOpt[T](it: jIterable[T]): Option[T] = iterableAsScalaIterable(it).headOption 
   implicit def cnvrtLst[T](it: jIterable[T]): List[T] = iterableAsScalaIterable(it).toList

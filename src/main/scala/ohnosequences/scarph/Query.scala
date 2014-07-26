@@ -3,9 +3,9 @@ package ohnosequences.scarph
 import ohnosequences.typesets._
 
 /*
-  ## Querys
+  ## Queries
 
-  Querys represent expressions combining several conditions for a particular item.
+  Queries represent expressions combining several conditions for a particular item.
   You can combine conditions **either** by `OR` or by `AND` conditional operator (_you can't mix them_).
   Query constructors check that the item has the attribute used in the applied condition.
 */
@@ -24,7 +24,7 @@ trait AnyQuery {
 }
 
 /*
-  ### OR Querys
+  ### OR Queries
 */
 trait AnyOrQuery extends AnyQuery {
 
@@ -47,7 +47,7 @@ case class OR[B <: AnyOrQuery, H <: AnyCondition]
 
 
 /* 
-  ### AND Querys
+  ### AND Queries
 */
 trait AnyAndQuery extends AnyQuery {
 
@@ -70,7 +70,7 @@ case class AND[B <: AnyAndQuery, H <: AnyCondition]
 
 
 /* 
-  ### Simple Querys
+  ### Simple Queries
 
   It contains only one condition and can be extended either to `OR` or `AND` predicate
 */
@@ -121,4 +121,6 @@ object AnyQuery {
         ev: ET HasProperty c.Property
       ): EdgeQuery[ET, C] = EdgeQuery(et, c)
   }
+
+  
 }
