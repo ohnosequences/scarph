@@ -25,6 +25,7 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
     }
   }
 
+  // TODO other arities and out
   implicit def simpleVertexQueryManyInEval[
     Q <: AnySimpleQuery with AnyQuery.On[E#Tpe] with AnyQuery.HeadedBy[AnyEQ],
     I <: Singleton with AnyIndex.Over[E#Tpe] with AnyStandardIndex,
