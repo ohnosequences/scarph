@@ -35,14 +35,14 @@ object default {
   case class   VertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]) {
 
     /* OUT edges */
-    def out[E <: Singleton with AnyEdge { type Tpe <: From[V#Tpe] }]
+    def out[E <: Singleton with AnyEdge { type Tpe <: From[Singleton with V#Tpe] }]
       (e: E)(implicit mkGetter: E => V#GetOutEdge[E]): E#Tpe#Out[E#Rep] = {
         val getter = mkGetter(e)
         getter(rep)
       }
 
     /* OUT vertices */
-    def outV[E <: Singleton with AnyEdge { type Tpe <: From[V#Tpe] }]
+    def outV[E <: Singleton with AnyEdge { type Tpe <: From[Singleton with V#Tpe] }]
       (e: E)(implicit mkGetter: E => V#GetOutEdge[E],
                       getTarget: E#GetTarget): E#Tpe#Out[getTarget.Out] = {
         val getter = mkGetter(e)

@@ -25,14 +25,14 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
     }
   }
 
-  implicit def simpleVertexQueryInEval[
+  implicit def simpleVertexQueryManyInEval[
     Q <: AnySimpleQuery with AnyQuery.On[E#Tpe] with AnyQuery.HeadedBy[AnyEQ],
     I <: Singleton with AnyIndex.Over[E#Tpe] with AnyStandardIndex,
-    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] }
+    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
   ](edge: E, query: Q)(implicit index: I)
   : InVertexQueryEval[E,Q] = new InVertexQueryEval[E,Q](edge, query) {
 
-    def apply(rep: tvertex.Rep): query.Out[e.Rep] = {
+    def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
 
       // TODO simplify all this implicit conversions and stuff
       // val tEdges: Iterable[edge.Raw] = 
@@ -59,7 +59,7 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
 
   /* OUT */
   implicit def unsafeGetOneOutEdge[
-    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
+    E <: Singleton with AnyTitanEdge { type Tpe <: From[Singleton with tvertex.Tpe] with OneOut }
   ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
@@ -68,7 +68,7 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanItem { tvertex =>
     }
 
   implicit def unsafeGetManyOutEdge[
-    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
+    E <: Singleton with AnyTitanEdge { type Tpe <: From[Singleton with tvertex.Tpe] with ManyOut }
   ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
       def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {

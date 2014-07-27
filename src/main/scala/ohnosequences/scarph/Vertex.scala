@@ -19,18 +19,18 @@ trait AnyVertex extends Item[AnyVertexType] { vertex =>
   }
 
   // no bounds for now, maybe later
-  abstract class OutVertexQueryEval[E <: Singleton with AnyEdge, Q <: AnyQuery] {
+  abstract class OutVertexQueryEval[E <: Singleton with AnyEdge, Q <: AnyQuery](val e: E, val query: Q) {
 
     type Query = Q
     // evaluate the query at the vertex rep
-    def apply(rep: vertex.Rep, query: Query): query.Out[E#Rep]
+    def apply(rep: vertex.Rep, query: Query): e.tpe.Out[E#Rep]
   }
 
   abstract class InVertexQueryEval[E <: Singleton with AnyEdge, Q <: AnyQuery](val e: E, val query: Q) {
 
     type Query = Q
     // evaluate the query at the vertex rep
-    def apply(rep: vertex.Rep): query.Out[e.Rep]
+    def apply(rep: vertex.Rep): e.tpe.In[E#Rep]
   }
 
 }

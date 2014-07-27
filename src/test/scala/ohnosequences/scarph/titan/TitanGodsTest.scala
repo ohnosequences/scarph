@@ -143,7 +143,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val timeQuery = Battled ? (time === 12)
 
-    val shouldBeBattleWithHercules = cerberus inQuery(Battled, timeQuery)
+    val shouldBeBattleWithHercules = cerberus ?-> (Battled, Battled ? (time === 12) )
 
     assert( ( shouldBeBattleWithHercules map ( _.source ) map ( _.get(name) ) ) === List("hercules") )
   }

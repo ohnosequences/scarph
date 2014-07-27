@@ -36,7 +36,7 @@ object AnyEdge {
 
   type ofType[ET <: AnyEdgeType] = AnyEdge { type Tpe = ET }
 
-  type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type Tpe <: S ==> T }
+  type -->[S <: Singleton with AnyVertexType, T <: AnyVertexType] = AnyEdge { type Tpe <: S ==> T }
 }
 
 object Edge {
