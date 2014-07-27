@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.
 */
@@ -13,3 +15,21 @@ object AnyVertexType {
     extends HasPropertiesOps(vt) {}
 }
 
+
+trait AnySealedVertexType extends AnyVertexType {
+
+  /* a fixed set of properties */
+  type Properties <: TypeSet
+  val  properties: Properties
+  // should be provided implicitly:
+  val  propertiesBound: Properties << AnyProperty
+}
+
+class SealedVertexType[Ps <: TypeSet](val label: String, val properties: Ps)
+(implicit 
+  val propertiesBound: Ps << AnyProperty
+)
+extends AnySealedVertexType {
+
+  type Properties = Ps
+}

@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 /*
   `AnyVertex` defines a denotation of the corresponding `VertexType`.
 
@@ -30,3 +32,21 @@ object AnyVertex {
 object Vertex {
   type RepOf[V <: Singleton with AnyVertex] = AnyTag.TaggedWith[V]
 }
+
+trait AnySealedVertex extends Denotation[AnySealedVertexType] {
+
+  type RawProperties <: TypeSet
+  // why??
+  type Tpe <: AnySealedVertexType
+  // should be provided implicitly:
+  val  representedProperties: Represented.By[Tpe#Properties, RawProperties]
+}
+
+abstract class SealedVertex[VT <: AnySealedVertexType, RPs <: TypeSet]
+  (val tpe: VT)
+  (implicit val representedProperties: Represented.By[VT#Properties, RPs]) 
+extends AnySealedVertex {
+
+  type RawProperties = RPs
+  type Tpe = VT
+} 

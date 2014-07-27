@@ -50,6 +50,12 @@ object GodsSchema {
     implicit val Location_name = Location has name
 
   /*
+    #### sealed vertices
+  */
+  case object Monster_s extends SealedVertexType("monster", name :~: ∅)
+  case object Demigod_s extends SealedVertexType("demigod", name :~: age :~: ∅)
+
+  /*
     ### Edges
   */
 
