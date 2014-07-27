@@ -23,19 +23,13 @@ trait AnySealedVertexType extends AnyVertexType {
   val  properties: Properties
   // should be provided implicitly:
   val  propertiesBound: Properties << AnyProperty
-
-  type RawProperties <: TypeSet
-  // should be provided implicitly:
-  val  representedProperties: Represented.By[Properties, RawProperties]
 }
 
-class SealedVertexType[Ps <: TypeSet, RPs <: TypeSet](val label: String, val properties: Ps)
+class SealedVertexType[Ps <: TypeSet](val label: String, val properties: Ps)
 (implicit 
-  val representedProperties: Represented.By[Ps, RPs],
   val propertiesBound: Ps << AnyProperty
 )
 extends AnySealedVertexType {
 
   type Properties = Ps
-  type RawProperties = RPs
 }
