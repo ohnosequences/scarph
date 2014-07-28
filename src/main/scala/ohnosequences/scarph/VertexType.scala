@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.
 */

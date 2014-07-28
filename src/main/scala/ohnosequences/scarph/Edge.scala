@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 trait AnyEdge extends Denotation[AnyEdgeType] with CanGetProperties { edge =>
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug

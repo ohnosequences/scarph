@@ -1,18 +1,19 @@
 package ohnosequences.scarph.ops
 
 import  ohnosequences.scarph._
+import ohnosequences.typesets._
 
 object default {
 
   /* Common ops for getting properties */
-  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
-               PropertyGetterOps[T] = PropertyGetterOps[T](rep)
-  case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
+  // implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+  //              PropertyGetterOps[T] = PropertyGetterOps[T](rep)
+  // case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
 
-    def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
-      (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
-        mkGetter(p).apply(rep)
-  }
+  //   def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
+  //     (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
+  //       mkGetter(p).apply(rep)
+  // }
 
   /* Vertex representation ops */
   implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)

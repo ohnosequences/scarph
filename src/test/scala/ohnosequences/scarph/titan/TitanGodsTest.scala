@@ -11,6 +11,7 @@ import GodsImplementation._
 
 import ohnosequences.scarph._, ops.default._
 import ohnosequences.scarph.titan._
+import ohnosequences.typesets.Property._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 

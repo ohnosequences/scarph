@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 /*
   `AnyVertex` defines a denotation of the corresponding `VertexType`.
 
