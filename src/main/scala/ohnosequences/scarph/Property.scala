@@ -7,6 +7,8 @@ import scala.reflect._
 trait AnyProperty extends Representable { self =>
   val label: String
   val classTag: ClassTag[self.Raw]
+
+  final def is(r: this.Raw): this.Rep = this ->> r
 }
 
 /* Evidence that an arbitrary type `Smth` has property `P` */
@@ -15,6 +17,8 @@ sealed class HasProperty[S, P <: AnyProperty]
 sealed class HasProperties[S, Ps <: TypeSet : boundedBy[AnyProperty]#is] 
 
 object AnyProperty {
+  type ofType[T] = AnyProperty { type Raw = T }
+
   /* This implicit is a bridge from `HasProperties` to `HasProperty` */ 
   implicit def FromSetToAProperty[T, P <: AnyProperty, Ps <: TypeSet]
     (implicit ps: T HasProperties Ps, ep: P ∈ Ps): HasProperty[T, P] = new HasProperty[T, P]
