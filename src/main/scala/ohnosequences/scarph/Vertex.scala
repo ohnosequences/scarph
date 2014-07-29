@@ -49,3 +49,8 @@ trait AnySealedVertex extends AnyVertex { sealedVertex =>
 
   implicit def propertyOps(rep: sealedVertex.Rep): tpe.record.PropertyOps = tpe.record.PropertyOps(rep.fields)
 }
+
+abstract class SealedVertex[VT <: AnySealedVertexType](val tpe: VT) extends AnySealedVertex { 
+
+  type Tpe = VT
+}

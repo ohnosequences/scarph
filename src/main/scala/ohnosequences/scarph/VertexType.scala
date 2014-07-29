@@ -20,3 +20,8 @@ trait AnySealedVertexType extends AnyVertexType {
   type Record <: AnyRecord
   val record: Record
 }
+
+class SealedVertexType[R <: AnyRecord](val label: String, val record: R) extends AnySealedVertexType {
+
+  type Record = R
+}
