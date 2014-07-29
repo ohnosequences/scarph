@@ -15,3 +15,8 @@ object AnyVertexType {
     extends HasPropertiesOps(vt) {}
 }
 
+trait AnySealedVertexType extends AnyVertexType {
+
+  type Record <: AnyRecord
+  val record: Record
+}

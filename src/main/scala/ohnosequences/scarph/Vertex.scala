@@ -32,3 +32,20 @@ object AnyVertex {
 object Vertex {
   type RepOf[V <: Singleton with AnyVertex] = AnyTag.TaggedWith[V]
 }
+
+// this denotation stuff is weird
+trait AnySealedVertex extends AnyVertex { sealedVertex =>
+
+  type Tpe <: AnySealedVertexType
+
+  final type Raw = raw
+
+  type Other
+  case class raw(val fields: tpe.record.Entry, val other: Other)
+  // double tagging FTW!
+  final def fields[R <: TypeSet](r: R)(implicit 
+    p: R ~> tpe.record.Raw
+  ): tpe.record.Entry = (tpe.record ->> p(r))
+
+  implicit def propertyOps(rep: sealedVertex.Rep): tpe.record.PropertyOps = tpe.record.PropertyOps(rep.fields)
+}
