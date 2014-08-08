@@ -39,7 +39,7 @@ object typelevel {
         getTarget: E#GetTarget
       ): ET#Out[getTarget.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.outFunctor
+        val f = getter.edge.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
       }
 
@@ -58,7 +58,7 @@ object typelevel {
         getSource: E#GetSource
       ): ET#In[getSource.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.inFunctor
+        val f = getter.edge.tpe.inFunctor
         f.map(getter(rep))(getSource(_))
       }
   }

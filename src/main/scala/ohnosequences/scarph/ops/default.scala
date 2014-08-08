@@ -31,7 +31,7 @@ object default {
       (e: E)(implicit mkGetter: E => V#GetOutEdge[E],
                       getTarget: E#GetTarget): E#Tpe#Out[getTarget.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.outFunctor
+        val f = getter.edge.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
       }
 
@@ -47,7 +47,7 @@ object default {
       (e: E)(implicit mkGetter: E => V#GetInEdge[E],
                       getSource: E#GetSource): E#Tpe#In[getSource.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.inFunctor
+        val f = getter.edge.tpe.inFunctor
         f.map(getter(rep))(getSource(_))
       }
   }
@@ -56,10 +56,10 @@ object default {
   implicit def edgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): EdgeRepOps[E] = EdgeRepOps(rep)
   case class   EdgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]) {
 
-    def source[S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType]]
+    def src[S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType]]
       (implicit getter: E#GetSource) = getter(rep)
 
-    def target[T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType]]
+    def tgt[T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType]]
       (implicit getter: E#GetTarget) = getter(rep)
 
   }

@@ -1,7 +1,7 @@
 package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
-import ohnosequences.typesets._
+import ohnosequences.typesets._, AnyTag._
 
 trait AnyTitanVertex extends AnyVertex { tvertex =>
 
@@ -22,45 +22,60 @@ trait AnyTitanVertex extends AnyVertex { tvertex =>
   // TODO: when we get all edges with the given label, they can come from vertices with the wrong type
 
   /* OUT */
-  implicit def unsafeGetOneOutEdge[
+  implicit def unsafeGetOneOutEdge [
     E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
-  ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
+  ]
+  (e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
 
-      def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
+      def apply(rep: tvertex.Rep): e.tpe.Out[TaggedWith[E]] = {
         
-        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.headOption: Option[e.Rep]
+        val it = rep.getEdges( Direction.OUT, e.tpe.label )
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+
+        it.headOption map { (e:E) ->> _ }
       }
     }
 
-  implicit def unsafeGetManyOutEdge[
-    E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
-  ](e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
+  implicit def unsafeGetManyOutEdge [
+    OE <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
+  ]
+  (edge: OE): GetOutEdge[OE] = new GetOutEdge[OE](edge) {
 
-      def apply(rep: tvertex.Rep): e.tpe.Out[e.Rep] = {
-        val it = rep.getEdges(Direction.OUT, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.toList: List[e.Rep]
+      def apply(rep: tvertex.Rep): edge.tpe.Out[TaggedWith[OE]] = {
+
+        val it = rep.getEdges( Direction.OUT, edge.tpe.label )
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+
+        it.toList map { (edge: OE) ->> _ }
       }
     }
 
   /* IN */
-  implicit def unsafeGetOneInEdge[
-    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
-  ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
+  implicit def unsafeGetOneInEdge [
+    IE <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
+  ]
+  (edge: IE): GetInEdge[IE] = new GetInEdge[IE](edge) {
 
-      def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
-        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.headOption: Option[e.Rep]
+      def apply(rep: tvertex.Rep): edge.tpe.In[TaggedWith[IE]] = {
+
+        val it = rep.getEdges(Direction.IN, edge.tpe.label)
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+
+        it.headOption map { (edge: IE) ->> _ }
       }
     }
 
-  implicit def unsafeGetManyInEdge[
-    E <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
-  ](e: E): GetInEdge[E] = new GetInEdge[E](e) {
+  implicit def unsafeGetManyInEdge [
+    IE <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
+  ]
+  (edge: IE): GetInEdge[IE] = new GetInEdge[IE](edge) {
+        
+      def apply(rep: tvertex.Rep): edge.tpe.In[TaggedWith[IE]] = {
 
-      def apply(rep: tvertex.Rep): e.tpe.In[e.Rep] = {
-        val it = rep.getEdges(Direction.IN, e.tpe.label).asInstanceOf[java.lang.Iterable[e.Rep]]
-        it.toList: List[e.Rep]
+        val it = rep.getEdges( Direction.IN, edge.tpe.label )
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+
+        it.toList map { (edge: IE) ->> _ }
       }
     }
 
