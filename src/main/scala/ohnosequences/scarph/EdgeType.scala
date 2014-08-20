@@ -35,6 +35,29 @@ object AnyEdgeType {
   }
 }
 
+trait AnySealedEdgeType extends AnyEdgeType {
+
+  // type SourceType <: AnySealedVertexType
+  // type TargetType <: AnySealedVertexType
+
+  type Record <: Singleton with AnyRecord
+  val record: Record
+}
+
+abstract class SealedEdgeType [
+  S <: AnyVertexType,
+  R <: Singleton with AnyRecord,
+  T <: AnyVertexType
+](
+  val sourceType: S,
+  val label: String,
+  val record: R,
+  val targetType: T
+) 
+extends AnySealedEdgeType with From[S] with To[T] {
+
+  type Record = R
+}
 
 /* Source/Target */
 trait From[S <: AnyVertexType] extends AnyEdgeType { type SourceType = S }

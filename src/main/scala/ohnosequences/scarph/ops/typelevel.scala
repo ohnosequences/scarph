@@ -2,6 +2,9 @@ package ohnosequences.scarph.ops
 
 import  ohnosequences.scarph._
 
+import ohnosequences.typesets._
+
+
 /* 
   The point of this is to do all ops on vertex/edge types instead of vertices and edges,
   i.e. `pluto out Pet` instead of `pluto out pet` (where `pet.tpe = Pet`)
@@ -11,8 +14,8 @@ import  ohnosequences.scarph._
 */
 object typelevel {
 
-  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
-               ops.default.PropertyGetterOps[T] = ops.default.PropertyGetterOps[T](rep)
+  // implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+  //              ops.default.PropertyGetterOps[T] = ops.default.PropertyGetterOps[T](rep)
 
 
   implicit def vertexRepOps[V <: Singleton with AnyVertex](rep: Vertex.RepOf[V]): VertexRepOps[V] = VertexRepOps[V](rep)
@@ -36,7 +39,7 @@ object typelevel {
         getTarget: E#GetTarget
       ): ET#Out[getTarget.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.outFunctor
+        val f = getter.edge.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
       }
 
@@ -55,7 +58,7 @@ object typelevel {
         getSource: E#GetSource
       ): ET#In[getSource.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.inFunctor
+        val f = getter.edge.tpe.inFunctor
         f.map(getter(rep))(getSource(_))
       }
   }

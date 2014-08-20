@@ -1,0 +1,2 @@
+* Got rid of props and denotation, they have been moved to the type-sets lib
+* Added sealed vertex types

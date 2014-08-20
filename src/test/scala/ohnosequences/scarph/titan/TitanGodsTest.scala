@@ -11,6 +11,7 @@ import GodsImplementation._
 
 import ohnosequences.scarph._, ops.default._
 import ohnosequences.scarph.titan._
+import ohnosequences.typesets.Property._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -86,16 +87,16 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val pluto = g.getTagged(god)("name", "pluto")
 
     val pe: List[pet.Rep] = pluto out pet
-    assert(pluto.out(pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.out(pet).map{ _.tgt }.map{ _.get(name) } === List("cerberus"))
     // same but using .outV
     assert(pluto.outV(pet).map{ _.get(name) } === List("cerberus"))
 
-    assert(pluto.in(brother).map{ _.source }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
+    assert(pluto.in(brother).map{ _.src }.map{ _.get(name) }.toSet === Set("neptune", "jupiter"))
     // symmetry:
-    assert(pluto.in(brother).map{ _.source } 
-      === pluto.out(brother).map{ _.target })
+    assert(pluto.in(brother).map{ _.tgt } 
+      === pluto.out(brother).map{ _.src })
 
-    assert(pluto.inV(brother) === pluto.in(brother).map{ _.source })
+    assert(pluto.inV(brother) === pluto.in(brother).map{ _.src })
     assert(pluto.inV(brother) === pluto.outV(brother))
 
     // FIXME: this doesn't work on the first flatMap
@@ -122,7 +123,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val pe: List[pet.Rep] = pluto out Pet
 
-    assert(pluto.out(Pet).map{ _.target }.map{ _.get(name) } === List("cerberus"))
+    assert(pluto.out(Pet).map{ _.tgt }.map{ _.get(name) } === List("cerberus"))
     assert(pluto.outV(Pet).map{ _.get(name) } === List("cerberus"))
 
   }

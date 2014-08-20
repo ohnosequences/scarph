@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._, AnyTag._
+
 /*
   `AnyVertex` defines a denotation of the corresponding `VertexType`.
 
@@ -11,11 +13,15 @@ package ohnosequences.scarph
 trait AnyVertex extends Denotation[AnyVertexType] with CanGetProperties { vertex =>
 
   /* Getters for incoming/outgoing edges */
-  abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
-    def apply(rep: vertex.Rep): e.tpe.Out[E#Rep]
+  // abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
+  abstract class GetOutEdge[OE <: AnyEdge](val edge: OE) {
+
+    // def apply(rep: vertex.Rep): e.tpe.Out[E#Rep]
+    def apply(rep: vertex.Rep): edge.tpe.Out[TaggedWith[OE]]
   }
-  abstract class GetInEdge[E <: Singleton with AnyEdge](val e: E) {
-    def apply(rep: vertex.Rep): e.tpe.In[E#Rep]
+  abstract class GetInEdge[IE <: AnyEdge](val edge: IE) {
+
+    def apply(rep: vertex.Rep): edge.tpe.In[TaggedWith[IE]]
   }
 
 }
@@ -29,4 +35,26 @@ object AnyVertex {
 
 object Vertex {
   type RepOf[V <: Singleton with AnyVertex] = AnyTag.TaggedWith[V]
+}
+
+// this denotation stuff is weird
+trait AnySealedVertex extends AnyVertex { sealedVertex =>
+
+  type Tpe <: AnySealedVertexType
+
+  final type Raw = raw
+
+  type Other
+  case class raw(val fields: tpe.record.Rep, val other: Other)
+  // double tagging FTW!
+  final def fields[R <: TypeSet](r: R)(implicit 
+    p: R ~> tpe.record.Raw
+  ): tpe.record.Rep = (tpe.record ->> p(r))
+
+  implicit def propertyOps(rep: sealedVertex.Rep): tpe.record.PropertyOps = tpe.record.PropertyOps(rep.fields)
+}
+
+abstract class SealedVertex[VT <: AnySealedVertexType](val tpe: VT) extends AnySealedVertex { 
+
+  type Tpe = VT
 }

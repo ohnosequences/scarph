@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.typesets._
+
 trait AnyEdge extends Denotation[AnyEdgeType] with CanGetProperties { edge =>
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
@@ -34,6 +36,7 @@ class Edge[
   }
 
 object AnyEdge {
+
   import AnyEdgeType._
 
   type ofType[ET <: AnyEdgeType] = AnyEdge { type Tpe = ET }
@@ -42,5 +45,38 @@ object AnyEdge {
 }
 
 object Edge {
+
   type RepOf[E <: Singleton with AnyEdge] = AnyTag.TaggedWith[E]
+}
+
+trait AnySealedEdge extends AnyEdge { sealedEdge =>
+  
+  type Tpe <: AnySealedEdgeType
+
+  final type Raw = raw
+  type Other
+
+  case class raw(val fields: tpe.record.Rep, val other: Other)
+  // double tagging FTW!
+  final def fields[R <: TypeSet](r: R)(implicit
+    p: R ~> tpe.record.Raw
+  ): tpe.record.Rep = ( tpe.record ->> p(r) )
+
+  implicit def propertyOps(rep: sealedEdge.Rep): tpe.record.PropertyOps = tpe.record.PropertyOps(rep.fields) 
+}
+
+abstract class SealedEdge [
+  S <: AnyVertex.ofType[ET#SourceType],
+  ET <: AnySealedEdgeType,
+  T <: AnyVertex.ofType[ET#TargetType]
+](
+  val source: S,
+  val tpe: ET,
+  val target: T
+) 
+extends AnySealedEdge { 
+
+  type Source = S
+  type Tpe = ET 
+  type Target = T
 }
