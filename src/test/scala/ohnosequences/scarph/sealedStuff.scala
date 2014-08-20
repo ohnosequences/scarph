@@ -16,22 +16,24 @@ object StupidSealedStuff {
   case object myFavRecord extends Record(id :~: happiness :~: name :~: ∅)
 
   // types
-  case object Yuhu extends SealedVertexType("yuhu", record)
-  case object OhNo extends SealedVertexType("ohno", anotherRecord)  
-  case object SayItTo extends SealedEdgeType(Yuhu, "sayitto", myFavRecord, OhNo) with ManyIn with OneOut
+  object Types {
+    case object Yuhu extends SealedVertexType("yuhu", record)
+    case object OhNo extends SealedVertexType("ohno", anotherRecord)  
+    case object SayItTo extends SealedEdgeType(Yuhu, "sayitto", myFavRecord, OhNo) with ManyIn with OneOut
+  }
 
-  case object yuhu extends SealedVertex(Yuhu) {
+  case object yuhu extends SealedVertex(Types.Yuhu) {
 
     type Other = String
   }
 
-  case object ohNo extends SealedVertex(OhNo) {
+  case object ohNo extends SealedVertex(Types.OhNo) {
 
     // why not?
     type Other = Integer
   }
 
-  case object sayItTo extends SealedEdge(yuhu, SayItTo, ohNo) { sayItTo =>
+  case object sayItTo extends SealedEdge(yuhu, Types.SayItTo, ohNo) { sayItTo =>
 
     type Other = (source.Rep, target.Rep)
 
