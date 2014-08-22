@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._, record._
 import scalaz._, std.option._, std.list._
 
 /*
@@ -25,9 +25,9 @@ trait AnyEdgeType {
 
 object AnyEdgeType {
   /* Additional methods */
-  implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET) = EdgeTypeOps(et)
-  case class   EdgeTypeOps[ET <: AnyEdgeType](et: ET) 
-    extends HasPropertiesOps(et) {}
+  // implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET) = EdgeTypeOps(et)
+  // case class   EdgeTypeOps[ET <: AnyEdgeType](et: ET) 
+  //   extends HasPropertiesOps(et) {}
 
   type ==>[S <: AnyVertexType, T <: AnyVertexType] = AnyEdgeType {
     type SourceType = S
@@ -37,16 +37,13 @@ object AnyEdgeType {
 
 trait AnySealedEdgeType extends AnyEdgeType {
 
-  // type SourceType <: AnySealedVertexType
-  // type TargetType <: AnySealedVertexType
-
-  type Record <: Singleton with AnyRecord
+  type Record <: AnyRecord
   val record: Record
 }
 
 abstract class SealedEdgeType [
   S <: AnyVertexType,
-  R <: Singleton with AnyRecord,
+  R <: AnyRecord,
   T <: AnyVertexType
 ](
   val sourceType: S,

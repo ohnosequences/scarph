@@ -10,7 +10,7 @@ import java.io.File
 
 import ohnosequences.scarph._
 import ohnosequences.scarph.titan._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 import GodsSchema._
 import GodsImplementation._

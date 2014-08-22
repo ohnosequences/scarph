@@ -4,7 +4,7 @@ package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 import shapeless._, poly._
 import scala.reflect._
 

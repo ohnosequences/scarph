@@ -1,7 +1,7 @@
 package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 trait AnyTitanEdge extends AnyEdge { tedge =>
 

@@ -1,7 +1,7 @@
 package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
-import ohnosequences.typesets._, AnyTag._
+import ohnosequences.pointless._, AnyTag._
 
 trait AnyTitanVertex extends AnyVertex { tvertex =>
 

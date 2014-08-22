@@ -2,7 +2,7 @@ package ohnosequences.scarph.ops
 
 import  ohnosequences.scarph._
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 
 /* 
@@ -24,7 +24,7 @@ object typelevel {
     /* OUT edges */
     def out[ET <: From[V#Tpe], E <: Singleton with AnyEdge.ofType[ET]]
       (et: ET)(implicit 
-        e: E, 
+        e: E,
         mkGetter: E => V#GetOutEdge[E]
       ): ET#Out[E#Rep] = {
         val getter = mkGetter(e)

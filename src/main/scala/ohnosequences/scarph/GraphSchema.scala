@@ -1,28 +1,28 @@
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._, typeSet._
 
 trait AnyGraphSchema {
 
   val label: String
 
-  type Dependencies <: TypeSet
+  type Dependencies <: AnyTypeSet
   val  dependencies: Dependencies
 
-  type Properties <: TypeSet
+  type Properties <: AnyTypeSet
   val  properties: Properties
 
-  type VertexTypes <: TypeSet
+  type VertexTypes <: AnyTypeSet
   val  vertexTypes: VertexTypes
 
-  type EdgeTypes <: TypeSet
+  type EdgeTypes <: AnyTypeSet
   val  edgeTypes: EdgeTypes
 
   /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  type VerticesWithProperties <: TypeSet
+  type VerticesWithProperties <: AnyTypeSet
   val  verticesWithProperties: VerticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
 
-  type EdgesWithProperties <: TypeSet
+  type EdgesWithProperties <: AnyTypeSet
   val  edgesWithProperties: EdgesWithProperties = edgePropertyAssoc(edgeTypes, properties)
 
   val vertexPropertyAssoc: ZipWithProps.Aux[VertexTypes, Properties, VerticesWithProperties]
@@ -55,12 +55,12 @@ object AnyGraphSchema {
 }
 
 case class GraphSchema[
-    Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
-    Ps <: TypeSet : boundedBy[AnyProperty]#is,
-    Vs <: TypeSet : boundedBy[AnyVertexType]#is,
-    Es <: TypeSet : boundedBy[AnyEdgeType]#is,
-    VP <: TypeSet,
-    EP <: TypeSet
+    Ds <: AnyTypeSet : boundedBy[AnyGraphSchema]#is,
+    Ps <: AnyTypeSet : boundedBy[AnyProperty]#is,
+    Vs <: AnyTypeSet : boundedBy[AnyVertexType]#is,
+    Es <: AnyTypeSet : boundedBy[AnyEdgeType]#is,
+    VP <: AnyTypeSet,
+    EP <: AnyTypeSet
   ](val label: String,
     val dependencies: Ds = ∅,
     val properties:   Ps = ∅,

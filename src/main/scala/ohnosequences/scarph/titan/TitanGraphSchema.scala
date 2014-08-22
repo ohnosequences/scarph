@@ -2,7 +2,7 @@ package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
-import ohnosequences.typesets._
+import ohnosequences.pointless._, typeSet._, property._
 import shapeless._, poly._
 import scala.reflect._
 
@@ -53,21 +53,21 @@ object TitanGraphSchema {
   }
 }
 
-trait MkPropertyKeys[Ps <: TypeSet] {
+trait MkPropertyKeys[Ps <: AnyTypeSet] {
   def apply(g: TitanGraph, ps: Ps): TitanGraph
 }
 
 object MkPropertyKeys {
   import TitanGraphSchema._
 
-  def apply[Ps <: TypeSet](implicit mk: MkPropertyKeys[Ps]): MkPropertyKeys[Ps] = mk
+  def apply[Ps <: AnyTypeSet](implicit mk: MkPropertyKeys[Ps]): MkPropertyKeys[Ps] = mk
 
   implicit val emptyMkKeys: MkPropertyKeys[∅] =
     new MkPropertyKeys[∅] {
       def apply(g: TitanGraph, ps: ∅) = g
     }
 
-  implicit def consMkKeys[H <: AnyProperty, T <: TypeSet]
+  implicit def consMkKeys[H <: AnyProperty, T <: AnyTypeSet]
     (implicit 
       c: ClassTag[H#Raw], 
       t: MkPropertyKeys[T]
@@ -81,21 +81,21 @@ object MkPropertyKeys {
     }
 }
 
-trait MkEdgeLabels[Es <: TypeSet] {
+trait MkEdgeLabels[Es <: AnyTypeSet] {
   def apply(g: TitanGraph, es: Es): TitanGraph
 }
 
 object MkEdgeLabels {
   import TitanGraphSchema._
 
-  def apply[Es <: TypeSet](implicit mk: MkEdgeLabels[Es]): MkEdgeLabels[Es] = mk
+  def apply[Es <: AnyTypeSet](implicit mk: MkEdgeLabels[Es]): MkEdgeLabels[Es] = mk
 
   implicit val emptyMkKeys: MkEdgeLabels[∅] =
     new MkEdgeLabels[∅] {
       def apply(g: TitanGraph, es: ∅) = g
     }
 
-  implicit def consMkKeys[H <: AnyEdgeType, T <: TypeSet]
+  implicit def consMkKeys[H <: AnyEdgeType, T <: AnyTypeSet]
     (implicit 
       a: H => ArityMaker[H], 
       t: MkEdgeLabels[T]

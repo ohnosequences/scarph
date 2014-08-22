@@ -1,7 +1,7 @@
 package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, ops.typelevel._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 object StupidSealedStuff {
   

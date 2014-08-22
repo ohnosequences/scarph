@@ -1,7 +1,7 @@
 package ohnosequences.scarph.titan.test
 
 import ohnosequences.scarph._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 /* 
   ## The Graph of the Gods GraphSchema

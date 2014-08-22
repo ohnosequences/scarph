@@ -2,7 +2,7 @@
 ```scala
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 import scala.reflect._
 ```
 
@@ -83,7 +83,7 @@ trait CanGetProperties { self: AnyDenotation =>
 }
 
 import shapeless._, poly._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 ```
 
 

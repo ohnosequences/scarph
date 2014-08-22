@@ -1,7 +1,7 @@
 package ohnosequences.scarph.ops
 
 import  ohnosequences.scarph._
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 object default {
 
