@@ -2,7 +2,7 @@ package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
-import ohnosequences.pointless._, typeSet._, property._
+import ohnosequences.pointless._, AnyTypeSet._
 import shapeless._, poly._
 import scala.reflect._
 

@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, record._
+import ohnosequences.pointless._
 import scalaz._, std.option._, std.list._
 
 /*

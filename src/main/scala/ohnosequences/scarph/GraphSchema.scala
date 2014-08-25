@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, typeSet._
+import ohnosequences.pointless._, AnyTypeSet._
 
 trait AnyGraphSchema {
 

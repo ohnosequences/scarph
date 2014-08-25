@@ -1,7 +1,7 @@
 package ohnosequences.scarph.ops
 
 import  ohnosequences.scarph._
-import ohnosequences.pointless._
+import ohnosequences.pointless._, AnyTaggedType._
 
 object default {
 
@@ -21,7 +21,7 @@ object default {
 
     /* OUT edges */
     def out[E <: Singleton with AnyEdge { type Tpe <: From[V#Tpe] }]
-      (e: E)(implicit mkGetter: E => V#GetOutEdge[E]): E#Tpe#Out[E#Rep] = {
+      (e: E)(implicit mkGetter: E => V#GetOutEdge[E]): E#Tpe#Out[Tagged[E]] = {
         val getter = mkGetter(e)
         getter(rep)
       }
@@ -37,11 +37,11 @@ object default {
 
     /* IN edges */
     def in[E <: Singleton with AnyEdge { type Tpe <: To[V#Tpe] }]
-      (e: E)(implicit mkGetter: E => V#GetInEdge[E]): E#Tpe#In[E#Rep] = {
+      (e: E)(implicit mkGetter: E => V#GetInEdge[E]): E#Tpe#In[Tagged[E]] = {
         val getter = mkGetter(e)
         getter(rep)
       }
-
+      
     /* IN vertices */
     def inV[E <: Singleton with AnyEdge { type Tpe <: To[V#Tpe] }]
       (e: E)(implicit mkGetter: E => V#GetInEdge[E],
