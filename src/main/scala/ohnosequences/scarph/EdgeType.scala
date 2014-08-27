@@ -17,10 +17,10 @@ trait AnyEdgeType {
   implicit val outFunctor: Functor[Out]
 
   type SourceType <: AnyVertexType
-  val sourceType: SourceType
+  val  sourceType: SourceType
 
   type TargetType <: AnyVertexType
-  val targetType: TargetType
+  val  targetType: TargetType
 }
 
 object AnyEdgeType {
@@ -38,7 +38,7 @@ object AnyEdgeType {
 trait AnySealedEdgeType extends AnyEdgeType {
 
   type Record <: AnyRecord
-  val record: Record
+  val  record: Record
 }
 
 abstract class SealedEdgeType [

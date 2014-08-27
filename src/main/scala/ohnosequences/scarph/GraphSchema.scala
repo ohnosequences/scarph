@@ -18,19 +18,19 @@ trait AnyGraphSchema {
   type EdgeTypes <: AnyTypeSet
   val  edgeTypes: EdgeTypes
 
-  /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  type VerticesWithProperties <: AnyTypeSet
-  val  verticesWithProperties: VerticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+  // /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
+  // type VerticesWithProperties <: AnyTypeSet
+  // val  verticesWithProperties: VerticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
 
-  type EdgesWithProperties <: AnyTypeSet
-  val  edgesWithProperties: EdgesWithProperties = edgePropertyAssoc(edgeTypes, properties)
+  // type EdgesWithProperties <: AnyTypeSet
+  // val  edgesWithProperties: EdgesWithProperties = edgePropertyAssoc(edgeTypes, properties)
 
-  val vertexPropertyAssoc: ZipWithProps.Aux[VertexTypes, Properties, VerticesWithProperties]
-  val   edgePropertyAssoc: ZipWithProps.Aux[EdgeTypes, Properties, EdgesWithProperties]
+  // val vertexPropertyAssoc: ZipWithProps.Aux[VertexTypes, Properties, VerticesWithProperties]
+  // val   edgePropertyAssoc: ZipWithProps.Aux[EdgeTypes, Properties, EdgesWithProperties]
 
-  override def toString = s"""${label} schema:
-  vertexTypes: ${verticesWithProperties}
-    edgeTypes: ${edgesWithProperties}"""
+  // override def toString = s"""${label} schema:
+  // vertexTypes: ${verticesWithProperties}
+  //   edgeTypes: ${edgesWithProperties}"""
 
 }
 
@@ -66,16 +66,16 @@ case class GraphSchema[
     val properties:   Ps = ∅,
     val vertexTypes:  Vs = ∅,
     val edgeTypes:    Es = ∅
-  )(implicit
-    val vertexPropertyAssoc: ZipWithProps.Aux[Vs, Ps, VP],
-    val   edgePropertyAssoc: ZipWithProps.Aux[Es, Ps, EP]
+  // )(implicit
+  //   val vertexPropertyAssoc: ZipWithProps.Aux[Vs, Ps, VP],
+  //   val   edgePropertyAssoc: ZipWithProps.Aux[Es, Ps, EP]
   ) extends AnyGraphSchema {
 
   type Dependencies = Ds
   type Properties   = Ps
   type VertexTypes  = Vs
   type EdgeTypes    = Es
-  type VerticesWithProperties = VP
-  type    EdgesWithProperties = EP
+  // type VerticesWithProperties = VP
+  // type    EdgesWithProperties = EP
 
 }

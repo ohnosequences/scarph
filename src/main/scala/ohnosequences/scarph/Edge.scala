@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyTaggedType.Tagged
+import ohnosequences.pointless._, AnyTaggedType._, AnyTypeSet._, AnyFn._
 
 trait AnyEdge extends Denotation[AnyEdgeType] { edge =>
 
@@ -57,12 +57,13 @@ trait AnySealedEdge extends AnyEdge { sealedEdge =>
   type Other
 
   case class raw(val fields: Tagged[Tpe#Record], val other: Other)
+
   // double tagging FTW!
   final def fields[R <: AnyTypeSet](r: R)(implicit
-    p: R ~> tpe.record.Raw
-  ): tpe.record.Rep = ( tpe.record =>> p(r) )
+    p: R As RawOf[tpe.Record]
+  ): Tagged[tpe.Record] = ( tpe.record =>> p(r) )
 
-  implicit def propertyOps(rep: Tagged[Me]): RepOps[Tpe#Record] = new RepOps(rep.fields) 
+  implicit def propertyOps(rep: Tagged[Me]): RecordRepOps[Tpe#Record] = new RecordRepOps(rep.fields) 
 }
 
 abstract class SealedEdge [

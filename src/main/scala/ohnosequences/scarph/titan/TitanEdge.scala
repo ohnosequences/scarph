@@ -1,7 +1,8 @@
 package ohnosequences.scarph.titan
 
 import ohnosequences.scarph._
-import ohnosequences.pointless._
+import ohnosequences.pointless._, AnyProperty._, AnyRecord._
+import ohnosequences.pointless.ops.record._
 
 trait AnyTitanEdge extends AnyEdge { tedge =>
 
@@ -11,9 +12,10 @@ trait AnyTitanEdge extends AnyEdge { tedge =>
   type Target <: AnyVertex.ofType[Tpe#TargetType] with AnyTitanVertex
 
   /* Getting a property from any TitanEdge */
-  implicit def unsafeGetProperty[P <: AnyProperty: Property.Of[this.Tpe]#is](p: P) = 
-    new PropertyGetter[P](p) {
-      def apply(rep: tedge.Rep): p.Raw = rep.getProperty[p.Raw](p.label)
+  implicit def unsafeGetProperty[P <: AnyProperty](p: P)
+    (implicit check: Tpe HasProperty P): Tpe#Record Get P = 
+    new (Tpe#Record Get P) {
+      def apply(rep: Tagged[Tpe#Record]): RawOf[P] = rep.getProperty[RawOf[P]](p.label)
     }
 
   import com.tinkerpop.blueprints.Direction
