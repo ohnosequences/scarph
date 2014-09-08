@@ -1,6 +1,7 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyTaggedType.{Tagged, @@, RawOf}
+import ohnosequences.pointless._, AnyDenotation._
+import AnyEdge._
 
 /*
   `AnyVertex` defines a denotation of the corresponding `VertexType`.
@@ -10,78 +11,14 @@ import ohnosequences.pointless._, AnyTaggedType.{Tagged, @@, RawOf}
   They are designed to be compatible with shapeless records (maybe, we'll see).
 */
 
-trait AnyVertex extends Denotation[AnyVertexType] { vertex =>
+trait AnyVertex extends Denotation[AnyVertexType]
 
-  /* Getters for incoming/outgoing edges */
-  // abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
-  abstract class GetOutEdge[OE <: AnyEdge](val edge: OE) {
-
-    // def apply(rep: vertex.Rep): e.tpe.Out[E#Rep]
-    def apply(rep: Tagged[Me]): edge.tpe.Out[Tagged[OE]]
-  }
-  abstract class GetInEdge[IE <: AnyEdge](val edge: IE) {
-
-    def apply(rep: Tagged[Me]): edge.tpe.In[Tagged[IE]]
-  }
-
-}
-
-trait GetSource[V <: AnyVertex, OE <: AnyEdge with AnyEdge.withSource[V]] {
-
-  def apply(vertex: Tagged[V]): OE#Tpe#Out[Tagged[OE]]
-}
-
-
-abstract class Vertex[VT <: AnyVertexType](val tpe: VT) extends AnyVertex { type Tpe = VT }
+abstract class Vertex[VT <: AnyVertexType](val denotedType: VT) 
+  extends AnyVertex { type DenotedType = VT }
 
 object AnyVertex {
 
-  type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
-}
+  type ofType[VT <: AnyVertexType] = AnyVertex { type DenotedType = VT }
 
-object Vertex {
-
-  type RepOf[V <: Singleton with AnyVertex] = Tagged[V]
-}
-
-// this denotation stuff is weird
-trait AnySealedVertex extends AnyVertex { sealedVertex =>
-
-  type Me = sealedVertex.type
-  type Tpe <: AnySealedVertexType
-  val tpe: Tpe
-  type Other
-
-  final type Raw = (Other, Tagged[Tpe#Record])
-
-  import ohnosequences.pointless.ops.typeSet.As
-
-  // double tagging FTW!
-  final def fields[R <: AnyTypeSet](r: R)(implicit 
-    p: R As RawOf[Tpe#Record]
-  )
-  : @@[Tpe#Record] = (tpe.record: Tpe#Record) =>> p(r)
-}
-
-object AnySealedVertex {
-
-  // It's amazing that I need this
-  type RepOfSealedVertex[SV <: AnySealedVertex] = SV#Raw with (SV#Other, Tagged[SV#Tpe#Record]) with Tag[SV]
-
-  implicit def propertyOps[SV <: AnySealedVertex](rep: RepOfSealedVertex[SV]): RecordRepOps[SV#Tpe#Record] = {
-
-    val fields: Tagged[ SV#Tpe#Record ] = rep._2
-
-    new RecordRepOps[SV#Tpe#Record](fields)
-  }
-
-  implicit def recOps[SV <: AnySealedVertex](recEntry: RepOfSealedVertex[SV]): RecordRepOps[SV#Tpe#Record] = new RecordRepOps[SV#Tpe#Record](recEntry._2)
-    
-
-  case class raw[SV <: AnySealedVertex](val fields: Tagged[SV#Tpe#Record], val other: SV#Other)
-}
-
-abstract class SealedVertex[VT <: AnySealedVertexType](val tpe: VT) extends AnySealedVertex { 
-
-  type Tpe = VT
+  type VertexTypeOf[V <: AnyVertex] = V#DenotedType
 }

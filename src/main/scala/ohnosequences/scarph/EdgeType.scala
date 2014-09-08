@@ -3,14 +3,12 @@ package ohnosequences.scarph
 import ohnosequences.pointless._
 import scalaz._, std.option._, std.list._
 
+// TODO: Add AnyRecord here
 /*
-  Declares an edge type. it is determined my a label, source/target vertex types and in/out arities
+  Declares an edge type. it is determined by source/target vertex types and in/out arities
 */
-trait AnyEdgeType {
+trait AnyEdgeType extends AnyType with AnyPropertiesHolder {
 
-  val label: String
-
-  // TODO add an applicative/monad requirement here
   type In[X]
   type Out[X]
   implicit val inFunctor: Functor[In]
@@ -24,36 +22,14 @@ trait AnyEdgeType {
 }
 
 object AnyEdgeType {
-  /* Additional methods */
-  // implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET) = EdgeTypeOps(et)
-  // case class   EdgeTypeOps[ET <: AnyEdgeType](et: ET) 
-  //   extends HasPropertiesOps(et) {}
 
   type ==>[S <: AnyVertexType, T <: AnyVertexType] = AnyEdgeType {
     type SourceType = S
     type TargetType = T
   }
-}
 
-trait AnySealedEdgeType extends AnyEdgeType {
-
-  type Record <: AnyRecord
-  val  record: Record
-}
-
-abstract class SealedEdgeType [
-  S <: AnyVertexType,
-  R <: AnyRecord,
-  T <: AnyVertexType
-](
-  val sourceType: S,
-  val label: String,
-  val record: R,
-  val targetType: T
-) 
-extends AnySealedEdgeType with From[S] with To[T] {
-
-  type Record = R
+  type SourceTypeOf[ET <: AnyEdgeType] = ET#SourceType
+  type TargetTypeOf[ET <: AnyEdgeType] = ET#TargetType
 }
 
 /* Source/Target */
@@ -66,18 +42,18 @@ trait  OneOut extends AnyEdgeType { type Out[X] = Option[X]; val outFunctor = im
 trait ManyIn  extends AnyEdgeType { type  In[X] =   List[X]; val  inFunctor = implicitly[Functor[In]] }
 trait  OneIn  extends AnyEdgeType { type  In[X] = Option[X]; val  inFunctor = implicitly[Functor[In]] }
 
-class ManyToMany[S <: AnyVertexType, T <: AnyVertexType]
+abstract class ManyToMany[S <: AnyVertexType, T <: AnyVertexType]
   (val sourceType: S, val label: String, val targetType: T) 
     extends From[S] with To[T] with ManyIn with ManyOut
 
-class OneToMany[S <: AnyVertexType, T <: AnyVertexType]
+abstract class OneToMany[S <: AnyVertexType, T <: AnyVertexType]
   (val sourceType: S, val label: String, val targetType: T) 
     extends From[S] with To[T] with OneIn with ManyOut
 
-class ManyToOne[S <: AnyVertexType, T <: AnyVertexType]
+abstract class ManyToOne[S <: AnyVertexType, T <: AnyVertexType]
   (val sourceType: S, val label: String, val targetType: T) 
     extends From[S] with To[T] with ManyIn with OneOut
 
-class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
+abstract class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
   (val sourceType: S, val label: String, val targetType: T) 
     extends From[S] with To[T] with OneIn with OneOut
