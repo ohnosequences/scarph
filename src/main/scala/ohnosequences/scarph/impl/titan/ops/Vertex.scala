@@ -1,8 +1,9 @@
 package ohnosequences.scarph.impl.titan.ops
 
 import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._
-import ohnosequences.scarph._, AnyPropertiesHolder._, AnyVertex._
+import ohnosequences.scarph._, AnyPropertiesHolder._, AnyVertex._, AnyEdge._
 import ohnosequences.scarph.impl.titan._, AnyTitanVertex._
+import scalaz._
 
 object vertex {
   import ohnosequences.scarph.ops.vertex._
@@ -17,68 +18,60 @@ object vertex {
       }
 
   /* Retrieving edges */
-  // import com.tinkerpop.blueprints.Direction
-  // import scala.collection.JavaConversions._
+  import com.tinkerpop.blueprints.Direction
+  import scala.collection.JavaConversions._
 
-  // // TODO: when we get all edges with the given label, they can come from vertices with the wrong type
+  implicit def unsafeGetOneOutEdge[E <: AnyTitanEdge.withType[OneOut]]:
+        GetOutEdge[E] = 
+    new GetOutEdge[E] {
 
-  // /* OUT */
-  // implicit def unsafeGetOneOutEdge [
-  //   E <: Singleton with AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with OneOut }
-  // ]
-  // (e: E): GetOutEdge[E] = new GetOutEdge[E](e) {
-
-  //     def apply(rep: ValueOf[Me]): E#Tpe#Out[ValueOf[E]] = {
+      def apply(rep: ValueOf[SourceOf[E]], e: E): Out = {
         
-  //       val it = rep.getEdges( Direction.OUT, e.tpe.label )
-  //         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        val it = rep.raw.getEdges(Direction.OUT, e.denotedType.label)
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
-  //       it.headOption map { (e:E) =>> _ }
-  //     }
-  //   }
+        it.headOption.map{ e.apply(_) }
+      }
+    }
 
-  // implicit def unsafeGetManyOutEdge [
-  //   OE <: AnyTitanEdge { type Tpe <: From[tvertex.Tpe] with ManyOut }
-  // ]
-  // (edge: OE)
-  // : GetOutEdge[OE] = new GetOutEdge[OE](edge) {
+  implicit def unsafeGetManyOutEdge[E <: AnyTitanEdge.withType[ManyOut]]:
+        GetOutEdge[E] = 
+    new GetOutEdge[E] {
 
-  //     def apply(rep: ValueOf[Me]): OE#Tpe#Out[ValueOf[OE]] = {
-
-  //       val it = rep.getEdges( Direction.OUT, edge.tpe.label )
-  //         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
-
-  //       it.toList map { (edge: OE) =>> _ }
-  //     }
-  //   }
-
-  // /* IN */
-  // implicit def unsafeGetOneInEdge [
-  //   IE <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with OneIn }
-  // ]
-  // (edge: IE): GetInEdge[IE] = new GetInEdge[IE](edge) {
-
-  //     def apply(rep: ValueOf[Me]): IE#Tpe#In[ValueOf[IE]] = {
-
-  //       val it = rep.getEdges(Direction.IN, edge.tpe.label)
-  //         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
-
-  //       it.headOption map { (edge: IE) =>> _ }
-  //     }
-  //   }
-
-  // implicit def unsafeGetManyInEdge [
-  //   IE <: Singleton with AnyTitanEdge { type Tpe <: To[tvertex.Tpe] with ManyIn }
-  // ]
-  // (edge: IE): GetInEdge[IE] = new GetInEdge[IE](edge) {
+      def apply(rep: ValueOf[SourceOf[E]], e: E): Out = {
         
-  //     def apply(rep: ValueOf[Me]): edge.tpe.In[ValueOf[IE]] = {
+        val it = rep.raw.getEdges(Direction.OUT, e.denotedType.label)
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
-  //       val it = rep.getEdges( Direction.IN, edge.tpe.label )
-  //         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        it.toList.map{ e.apply(_) }
+      }
+    }
 
-  //       it.toList map { (edge: IE) =>> _ }
-  //     }
-  //   }
+  /* IN */
+  implicit def unsafeGetOneInEdge[E <: AnyTitanEdge.withType[OneIn]]:
+        GetInEdge[E] = 
+    new GetInEdge[E] {
+
+      def apply(rep: ValueOf[TargetOf[E]], e: E): Out = {
+        
+        val it = rep.raw.getEdges(Direction.IN, e.denotedType.label)
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+
+        it.headOption.map{ e.apply(_) }
+      }
+    }
+
+  implicit def unsafeGetManyInEdge[E <: AnyTitanEdge.withType[ManyIn]]:
+        GetInEdge[E] = 
+    new GetInEdge[E] {
+
+      def apply(rep: ValueOf[TargetOf[E]], e: E): Out = {
+        
+        val it = rep.raw.getEdges(Direction.IN, e.denotedType.label)
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+
+        it.toList.map{ e.apply(_) }
+      }
+    }
 
 }

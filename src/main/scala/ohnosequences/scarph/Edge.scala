@@ -1,7 +1,7 @@
 package ohnosequences.scarph
 
 import ohnosequences.pointless._, AnyWrap._, AnyTypeSet._, AnyFn._
-import AnyEdgeType._
+import AnyEdgeType._, AnyEdge._
 
 trait AnyEdge extends Denotation[AnyEdgeType] {
 
@@ -27,6 +27,9 @@ object AnyEdge {
 
   import AnyEdgeType._
 
+  type withSource[S <: AnyVertex] = AnyEdge { type Source = S }
+  type withTarget[T <: AnyVertex] = AnyEdge { type Target = T }
+
   type ofType[ET <: AnyEdgeType] = AnyEdge { type DenotedType = ET }
 
   type EdgeTypeOf[E <: AnyEdge] = E#DenotedType
@@ -34,4 +37,16 @@ object AnyEdge {
   type TargetOf[E <: AnyEdge] = E#Target
 
   type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type DenotedType <: S ==> T }
+}
+
+class EdgeValueOps[E <: AnyEdge](rep: ValueOf[E]) {
+  import ohnosequences.scarph.ops.edge._
+
+  def get[P <: AnyProperty](prop: P)
+    (implicit getter: GetProperty[E, P]): ValueOf[P] = getter(rep, prop)
+
+  def source(implicit src: GetSource[E]): ValueOf[SourceOf[E]] = src(rep)
+
+  def target(implicit tgt: GetTarget[E]): ValueOf[TargetOf[E]] = tgt(rep)
+
 }

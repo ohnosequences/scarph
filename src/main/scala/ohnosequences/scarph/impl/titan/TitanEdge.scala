@@ -12,16 +12,14 @@ trait AnyTitanEdge extends AnyEdge {
   type Target <: AnyVertex.ofType[TargetTypeOf[DenotedType]] with AnyTitanVertex
 }
 
-// class TitanEdge[
-//     S <: AnyVertex.ofType[ET#SourceType] with AnyTitanVertex, 
-//     ET <: AnyEdgeType, 
-//     T <: AnyVertex.ofType[ET#TargetType] with AnyTitanVertex
-//   ](val source: S, val tpe: ET, val target: T) extends AnyTitanEdge { 
-//     type Source = S
-//     type DenotedType = ET 
-//     type Target = T
-//   }
+class TitanEdge[
+    S <: AnyVertex.ofType[ET#SourceType] with AnyTitanVertex, 
+    ET <: AnyEdgeType, 
+    T <: AnyVertex.ofType[ET#TargetType] with AnyTitanVertex
+  ](s: S, et: ET, t: T) extends Edge(s, et, t) with AnyTitanEdge 
 
 object AnyTitanEdge {
+
   type ofType[ET <: AnyEdgeType] = AnyTitanEdge { type DenotedType = ET }
+  type withType[ET <: AnyEdgeType] = AnyTitanEdge { type DenotedType <: ET }
 }

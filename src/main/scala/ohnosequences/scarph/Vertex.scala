@@ -21,4 +21,20 @@ object AnyVertex {
   type ofType[VT <: AnyVertexType] = AnyVertex { type DenotedType = VT }
 
   type VertexTypeOf[V <: AnyVertex] = V#DenotedType
+
+  implicit def vertexValueOps[V <: AnyVertex](rep: ValueOf[V]): VertexValueOps[V] = new VertexValueOps[V](rep)
+}
+
+class VertexValueOps[V <: AnyVertex](rep: ValueOf[V]) {
+  import ohnosequences.scarph.ops.vertex._
+
+  def get[P <: AnyProperty](prop: P)
+    (implicit getter: GetProperty[V, P]): ValueOf[P] = getter(rep, prop)
+
+  def in[E <: AnyEdge.withTarget[V]](e: E)
+    (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(rep, e)
+
+  def out[E <: AnyEdge.withSource[V]](e: E)
+    (implicit out: GetOutEdge[E]): EdgeTypeOf[E]#Out[ValueOf[E]] = out(rep, e)
+
 }
