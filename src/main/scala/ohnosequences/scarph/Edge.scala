@@ -37,16 +37,20 @@ object AnyEdge {
   type TargetOf[E <: AnyEdge] = E#Target
 
   type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type DenotedType <: S ==> T }
+
+  implicit def edgeRawOps[E <: AnyEdge](rep: ValueOf[E]): 
+        EdgeRawOps[E] = 
+    new EdgeRawOps[E](rep.raw)
 }
 
-class EdgeValueOps[E <: AnyEdge](rep: ValueOf[E]) {
+class EdgeRawOps[E <: AnyEdge](val raw: RawOf[E]) extends AnyVal {
   import ohnosequences.scarph.ops.edge._
 
   def get[P <: AnyProperty](prop: P)
-    (implicit getter: GetProperty[E, P]): ValueOf[P] = getter(rep, prop)
+    (implicit getter: GetProperty[E, P]): ValueOf[P] = getter(raw, prop)
 
-  def source(implicit src: GetSource[E]): ValueOf[SourceOf[E]] = src(rep)
+  def src(implicit src: GetSource[E]): ValueOf[SourceOf[E]] = src(raw)
 
-  def target(implicit tgt: GetTarget[E]): ValueOf[TargetOf[E]] = tgt(rep)
+  def tgt(implicit tgt: GetTarget[E]): ValueOf[TargetOf[E]] = tgt(raw)
 
 }

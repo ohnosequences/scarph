@@ -11,9 +11,12 @@ trait AnyPropertiesHolder {
   implicit val myOwnProperties: Me Has Properties = (this: Me) has properties
 }
 
-abstract class Properties[Props <: AnyTypeSet.Of[AnyProperty]](
-  val properties: Props
-) extends AnyPropertiesHolder { type Properties = Props }
+trait Properties[Props <: AnyTypeSet.Of[AnyProperty]]
+  extends AnyPropertiesHolder { type Properties = Props }
+
+// class properties[Props <: AnyTypeSet.Of[AnyProperty]](
+//   val properties: Props
+// ) extends AnyPropertiesHolder { type Properties = Props }
 
 object AnyPropertiesHolder {
 

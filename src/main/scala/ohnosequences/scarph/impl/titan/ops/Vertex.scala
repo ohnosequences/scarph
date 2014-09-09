@@ -9,12 +9,12 @@ object vertex {
   import ohnosequences.scarph.ops.vertex._
 
   /* Getting a property from any TitanVertex */
-  implicit def unsafeGetProperty[V <: AnyTitanVertex, P <: AnyProperty]
+  implicit def unsafeGetVertexProperty[V <: AnyTitanVertex, P <: AnyProperty]
     (implicit hasProp: P ∈ PropertiesOf[VertexTypeOf[V]]):
           GetProperty[V, P] = 
       new GetProperty[V, P] {
 
-        def apply(rep: ValueOf[V], prop: P): Out = prop(rep.raw.getProperty[RawOf[P]](prop.label))
+        def apply(raw: RawOf[V], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
       }
 
   /* Retrieving edges */
@@ -25,9 +25,9 @@ object vertex {
         GetOutEdge[E] = 
     new GetOutEdge[E] {
 
-      def apply(rep: ValueOf[SourceOf[E]], e: E): Out = {
+      def apply(raw: RawOf[SourceOf[E]], e: E): Out = {
         
-        val it = rep.raw.getEdges(Direction.OUT, e.denotedType.label)
+        val it = raw.getEdges(Direction.OUT, e.denotedType.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.headOption.map{ e.apply(_) }
@@ -38,9 +38,9 @@ object vertex {
         GetOutEdge[E] = 
     new GetOutEdge[E] {
 
-      def apply(rep: ValueOf[SourceOf[E]], e: E): Out = {
+      def apply(raw: RawOf[SourceOf[E]], e: E): Out = {
         
-        val it = rep.raw.getEdges(Direction.OUT, e.denotedType.label)
+        val it = raw.getEdges(Direction.OUT, e.denotedType.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.toList.map{ e.apply(_) }
@@ -52,9 +52,9 @@ object vertex {
         GetInEdge[E] = 
     new GetInEdge[E] {
 
-      def apply(rep: ValueOf[TargetOf[E]], e: E): Out = {
+      def apply(raw: RawOf[TargetOf[E]], e: E): Out = {
         
-        val it = rep.raw.getEdges(Direction.IN, e.denotedType.label)
+        val it = raw.getEdges(Direction.IN, e.denotedType.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.headOption.map{ e.apply(_) }
@@ -65,9 +65,9 @@ object vertex {
         GetInEdge[E] = 
     new GetInEdge[E] {
 
-      def apply(rep: ValueOf[TargetOf[E]], e: E): Out = {
+      def apply(raw: RawOf[TargetOf[E]], e: E): Out = {
         
-        val it = rep.raw.getEdges(Direction.IN, e.denotedType.label)
+        val it = raw.getEdges(Direction.IN, e.denotedType.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.toList.map{ e.apply(_) }

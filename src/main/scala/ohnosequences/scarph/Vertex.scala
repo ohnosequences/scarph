@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyDenotation._
+import ohnosequences.pointless._, AnyDenotation._, AnyWrap._
 import AnyEdge._
 
 /*
@@ -22,19 +22,21 @@ object AnyVertex {
 
   type VertexTypeOf[V <: AnyVertex] = V#DenotedType
 
-  implicit def vertexValueOps[V <: AnyVertex](rep: ValueOf[V]): VertexValueOps[V] = new VertexValueOps[V](rep)
+  implicit def vertexRawOps[V <: AnyVertex](rep: ValueOf[V]): 
+        VertexRawOps[V] = 
+    new VertexRawOps[V](rep.raw)
 }
 
-class VertexValueOps[V <: AnyVertex](rep: ValueOf[V]) {
+class VertexRawOps[V <: AnyVertex](val raw: RawOf[V]) extends AnyVal {
   import ohnosequences.scarph.ops.vertex._
 
   def get[P <: AnyProperty](prop: P)
-    (implicit getter: GetProperty[V, P]): ValueOf[P] = getter(rep, prop)
+    (implicit getter: GetProperty[V, P]): ValueOf[P] = getter(raw, prop)
 
   def in[E <: AnyEdge.withTarget[V]](e: E)
-    (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(rep, e)
+    (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
 
   def out[E <: AnyEdge.withSource[V]](e: E)
-    (implicit out: GetOutEdge[E]): EdgeTypeOf[E]#Out[ValueOf[E]] = out(rep, e)
+    (implicit out: GetOutEdge[E]): EdgeTypeOf[E]#Out[ValueOf[E]] = out(raw, e)
 
 }

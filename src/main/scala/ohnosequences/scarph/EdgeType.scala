@@ -42,18 +42,22 @@ trait  OneOut extends AnyEdgeType { type Out[X] = Option[X]; val outFunctor = im
 trait ManyIn  extends AnyEdgeType { type  In[X] =   List[X]; val  inFunctor = implicitly[Functor[In]] }
 trait  OneIn  extends AnyEdgeType { type  In[X] = Option[X]; val  inFunctor = implicitly[Functor[In]] }
 
-abstract class ManyToMany[S <: AnyVertexType, T <: AnyVertexType]
-  (val sourceType: S, val label: String, val targetType: T) 
-    extends From[S] with To[T] with ManyIn with ManyOut
+abstract class EdgeType[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
+  (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
+    extends From[S] with To[T] with Properties[Props]
 
-abstract class OneToMany[S <: AnyVertexType, T <: AnyVertexType]
-  (val sourceType: S, val label: String, val targetType: T) 
-    extends From[S] with To[T] with OneIn with ManyOut
+// class ManyToMany[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
+//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
+//     extends From[S] with To[T] with ManyIn with ManyOut with Properties[Props]
 
-abstract class ManyToOne[S <: AnyVertexType, T <: AnyVertexType]
-  (val sourceType: S, val label: String, val targetType: T) 
-    extends From[S] with To[T] with ManyIn with OneOut
+// class OneToMany[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
+//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
+//     extends From[S] with To[T] with OneIn with ManyOut with Properties[Props]
 
-abstract class OneToOne[S <: AnyVertexType, T <: AnyVertexType]
-  (val sourceType: S, val label: String, val targetType: T) 
-    extends From[S] with To[T] with OneIn with OneOut
+// class ManyToOne[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
+//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
+//     extends From[S] with To[T] with ManyIn with OneOut with Properties[Props]
+
+// class OneToOne[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
+//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
+//     extends From[S] with To[T] with OneIn with OneOut with Properties[Props]

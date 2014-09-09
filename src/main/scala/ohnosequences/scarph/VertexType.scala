@@ -7,4 +7,7 @@ import ohnosequences.pointless._, AnyTypeSet._
 */
 trait AnyVertexType extends AnyType with AnyPropertiesHolder
 
-abstract class VertexType(val label: String) extends AnyVertexType
+class VertexType[Props <: AnyTypeSet.Of[AnyProperty]](
+  val label: String,
+  val properties: Props
+) extends AnyVertexType { type Properties = Props }
