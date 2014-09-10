@@ -2,12 +2,15 @@ package ohnosequences.scarph.test.titan
 
 import com.thinkaurelius.titan.core._
 import com.thinkaurelius.titan.core.Multiplicity._
+import com.thinkaurelius.titan.core.schema._
 import com.tinkerpop.blueprints.Edge
 import com.tinkerpop.blueprints.Vertex
 import java.io.File
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._
-import ohnosequences.scarph._, impl.titan._
+import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._, AnyTypeSet._
+import ohnosequences.pointless.ops.typeSet._
+import ohnosequences.scarph._, impl.titan._, TitanGraphSchema._
+import ohnosequences.scarph.syntax.simple._
 import ohnosequences.scarph.test._, TwitterSchema._, TwitterImpl._
 import ohnosequences.scarph.impl.titan.ops.vertex._
 import ohnosequences.scarph.impl.titan.ops.edge._
@@ -19,23 +22,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   def createTitanTwitterInstance(g: TitanGraph): Unit = {
 
-    val mgmt = g.getManagementSystem
-
-    /* Creating the schema */
-
-    mgmt.makePropertyKey(name.label).dataType(classOf[String]).make();
-    mgmt.makePropertyKey(age.label).dataType(classOf[Integer]).make();
-    mgmt.makePropertyKey(text.label).dataType(classOf[String]).make();
-    mgmt.makePropertyKey(url.label).dataType(classOf[String]).make();
-    mgmt.makePropertyKey(time.label).dataType(classOf[String]).make();
-
-    mgmt.makeVertexLabel(User.label).make()
-    mgmt.makeVertexLabel(Tweet.label).make()
-
-    mgmt.makeEdgeLabel(Posted.label).multiplicity(ONE2MANY).make()
-    mgmt.makeEdgeLabel(Follows.label).multiplicity(MULTI).make()
-
-    mgmt.commit
+    g.createSchema(TwitterSchema.schema)
 
     /* Adding things */
     val edu = g.addVertexWithLabel(User.label)
@@ -140,23 +127,20 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   // Reusing the graph if possible, else cleaning the directory and creating graph
   override def beforeAll() {
-    try { 
-      g = TitanFactory.open(graphLocation.getAbsolutePath)
-      // checking that the graph is there:
-      g.getManagementSystem.containsRelationType("name")
+    g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
+    // checking that the graph is there:
+    // FIXME: it doesn't reuse the graph
+    if (g.getManagementSystem.containsRelationType("posted")) { 
       println("Reusing Titan graph")
-    } catch {
-      case e: Exception => {
-        def cleanDir(f: File) {
-          if (f.isDirectory) f.listFiles.foreach(cleanDir(_))
-          else { println(f.toString); f.delete }
-        }
-        cleanDir(graphLocation)
-        g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
-        createTitanTwitterInstance(g)
-        // TODO: create a graph
-        println("Created Titan graph")
+    } else {
+      def cleanDir(f: File) {
+        if (f.isDirectory) f.listFiles.foreach(cleanDir(_))
+        else { println(f.toString); f.delete }
       }
+      cleanDir(graphLocation)
+      g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
+      createTitanTwitterInstance(g)
+      println("Created Titan graph")
     }
   }
 
@@ -167,14 +151,14 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     }
   }
 
-  implicit class graphOps(tg: TitanGraph) {
-    // just a shortcut
-    def retrieve[V <: AnyTitanVertex, P <: AnyProperty](v: V)(p: P)(pval: RawOf[P]): ValueOf[V] = {
-      v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[com.thinkaurelius.titan.core.TitanVertex] )
-    }
-  } 
-
   object TestContext {
+
+    implicit class graphOps(tg: TitanGraph) {
+      // just a shortcut
+      def retrieve[V <: AnyTitanVertex, P <: AnyProperty](v: V)(p: P)(pval: RawOf[P]): ValueOf[V] = {
+        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[com.thinkaurelius.titan.core.TitanVertex] )
+      }
+    } 
 
     val edu = g.retrieve(user)(name)("@eparejatobes")
     val laughedelic = g.retrieve(user)(name)("@laughedelic")
@@ -185,13 +169,52 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
   import TestContext._
 
+  // checks existence and arity
+  def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET) = {
+
+    assert{ mgmt.containsRelationType(et.label) }
+
+    assertResult(multiplicity(et)) {
+      mgmt.getEdgeLabel(et.label).getMultiplicity
+    }
+  }
+
+  // checks existence and dataType
+  def checkPropertyKey[P <: AnyProperty](mgmt: TitanManagement, p: P) = {
+
+    assert{ mgmt.containsRelationType(p.label) }
+
+    import scala.reflect._
+    assertResult(p.classTag.runtimeClass.asInstanceOf[Class[RawOf[P]]]) {
+      mgmt.getPropertyKey(p.label).getDataType
+    }
+  }
+
+  test("check schema keys/labels") {
+    val mgmt = g.getManagementSystem
+
+    checkPropertyKey(mgmt, name)
+    checkPropertyKey(mgmt, age)
+    checkPropertyKey(mgmt, text)
+    checkPropertyKey(mgmt, url)
+    checkPropertyKey(mgmt, time)
+
+    checkEdgeLabel(mgmt, Posted)
+    checkEdgeLabel(mgmt, Follows)
+
+    assert{ mgmt.containsVertexLabel(User.label) }
+    assert{ mgmt.containsVertexLabel(Tweet.label) }
+
+    mgmt.commit
+  }
+
   test("get vertex property") {
 
-    /* pure blueprints with string keys and casting: */
+    // pure blueprints with string keys and casting: 
     assert(edu.raw.getProperty[Int]("age") == 95)
-    /* safe and nifty: */
+    // safe and nifty: 
     assert(edu.get(age).raw == 95)
-
+    // and it's the same thing
     assert(edu.raw.getProperty[Int]("age") == edu.get(age).raw)
   }
 
@@ -231,5 +254,13 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     }
 
   }
+
+  // test("out + target vs. outV") {
+
+  //   assert {
+  //     (edu out  follows map { _.tgt }) ==
+  //     (edu outV follows)
+  //   }
+  // }
 
 }

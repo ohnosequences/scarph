@@ -10,8 +10,8 @@ object edge {
   // /* Getting a property from any TitanEdge */
   implicit def unsafeGetEdgeProperty[E <: AnyTitanEdge, P <: AnyProperty]
     (implicit hasProp: P ∈ PropertiesOf[EdgeTypeOf[E]]):
-          GetProperty[E, P] = 
-      new GetProperty[E, P] {
+          GetEdgeProperty[E, P] = 
+      new GetEdgeProperty[E, P] {
 
         def apply(raw: RawOf[E], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
       }

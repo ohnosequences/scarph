@@ -11,8 +11,8 @@ object vertex {
   /* Getting a property from any TitanVertex */
   implicit def unsafeGetVertexProperty[V <: AnyTitanVertex, P <: AnyProperty]
     (implicit hasProp: P ∈ PropertiesOf[VertexTypeOf[V]]):
-          GetProperty[V, P] = 
-      new GetProperty[V, P] {
+          GetVertexProperty[V, P] = 
+      new GetVertexProperty[V, P] {
 
         def apply(raw: RawOf[V], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
       }

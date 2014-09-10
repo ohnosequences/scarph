@@ -11,7 +11,7 @@ object vertex {
   trait GetInEdge[E <: AnyEdge]
     extends Fn2[RawOf[TargetOf[E]], E] with Out[EdgeTypeOf[E]#In[ValueOf[E]]]
 
-  trait GetProperty[V <: AnyVertex, P <: AnyProperty]
+  trait GetVertexProperty[V <: AnyVertex, P <: AnyProperty]
     extends Fn2[RawOf[V], P] with Out[ValueOf[P]]
 
 }

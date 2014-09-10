@@ -13,10 +13,29 @@ object TwitterSchema {
   // case class Date(day: Integer, month: Integer, year: Integer)
   case object time extends Property[String]
 
-  case object User extends VertexType("user", name :~: age :~: ∅)
+  case object User  extends VertexType("user", name :~: age :~: ∅)
   case object Tweet extends VertexType("tweet", text :~: ∅)
 
-  case object Posted extends EdgeType(User, "posted", Tweet, time :~: url :~: ∅) with OneIn with ManyOut
+  case object Posted  extends EdgeType(User, "posted", Tweet, time :~: url :~: ∅) with OneIn with ManyOut
   case object Follows extends EdgeType(User, "follows", User, ∅) with ManyIn with ManyOut
+
+  val schema = GraphSchema("twitter",
+    vertexTypes = User :~: Tweet :~: ∅,
+    edgeTypes = Posted :~: Follows :~: ∅
+  )
+
+  val props = schema.properties
+
+  // import ohnosequences.pointless.ops.typeSet._
+  // val aggrVProps = AggregateProperties[schema.VertexTypes]
+  // // (AggregateProperties.cons[](
+  // //   AggregateProperties.cons,
+  // //   Uni.sHead[
+  // //     name.type, age.type :~: ∅,
+  // //     text.type :~: ∅,
+  // //     age.type :~: text.type :~: ∅
+  // //   ]
+  // // ))
+  // val vprops = aggrVProps(schema.vertexTypes)
 
 }
