@@ -3,6 +3,7 @@
 package ohnosequences.scarph.ops
 
 import  ohnosequences.scarph._
+import ohnosequences.typesets._
 
 object default {
 ```
@@ -10,14 +11,15 @@ object default {
 Common ops for getting properties
 
 ```scala
-  implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
-               PropertyGetterOps[T] = PropertyGetterOps[T](rep)
-  case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
+  // implicit def propertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]): 
+  //              PropertyGetterOps[T] = PropertyGetterOps[T](rep)
+  // case class   PropertyGetterOps[T <: Singleton with AnyDenotation with CanGetProperties](rep: AnyTag.TaggedWith[T]) {
 
-    def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
-      (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
-        mkGetter(p).apply(rep)
-  }
+  //   def get[P <: Singleton with AnyProperty: Property.Of[T#Tpe]#is](p: P)
+  //     (implicit mkGetter: p.type => T#PropertyGetter[p.type]): p.Raw = 
+  //       mkGetter(p).apply(rep)
+  // }
+
 ```
 
 Vertex representation ops
@@ -44,7 +46,7 @@ OUT vertices
       (e: E)(implicit mkGetter: E => V#GetOutEdge[E],
                       getTarget: E#GetTarget): E#Tpe#Out[getTarget.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.outFunctor
+        val f = getter.edge.tpe.outFunctor
         f.map(getter(rep))(getTarget(_))
       }
 ```
@@ -66,7 +68,7 @@ IN vertices
       (e: E)(implicit mkGetter: E => V#GetInEdge[E],
                       getSource: E#GetSource): E#Tpe#In[getSource.Out] = {
         val getter = mkGetter(e)
-        val f = getter.e.tpe.inFunctor
+        val f = getter.edge.tpe.inFunctor
         f.map(getter(rep))(getSource(_))
       }
   }
@@ -78,10 +80,10 @@ Edge representation ops
   implicit def edgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]): EdgeRepOps[E] = EdgeRepOps(rep)
   case class   EdgeRepOps[E <: Singleton with AnyEdge](rep: Edge.RepOf[E]) {
 
-    def source[S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType]]
+    def src[S <: Singleton with AnyVertex.ofType[E#Tpe#SourceType]]
       (implicit getter: E#GetSource) = getter(rep)
 
-    def target[T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType]]
+    def tgt[T <: Singleton with AnyVertex.ofType[E#Tpe#TargetType]]
       (implicit getter: E#GetTarget) = getter(rep)
 
   }
@@ -100,7 +102,6 @@ Edge representation ops
     + scala
       + ohnosequences
         + scarph
-          + [Denotation.scala][main/scala/ohnosequences/scarph/Denotation.scala]
           + [Edge.scala][main/scala/ohnosequences/scarph/Edge.scala]
           + [EdgeType.scala][main/scala/ohnosequences/scarph/EdgeType.scala]
           + [Expressions.scala][main/scala/ohnosequences/scarph/Expressions.scala]
@@ -108,7 +109,6 @@ Edge representation ops
           + ops
             + [default.scala][main/scala/ohnosequences/scarph/ops/default.scala]
             + [typelevel.scala][main/scala/ohnosequences/scarph/ops/typelevel.scala]
-          + [Property.scala][main/scala/ohnosequences/scarph/Property.scala]
           + titan
             + [TitanEdge.scala][main/scala/ohnosequences/scarph/titan/TitanEdge.scala]
             + [TitanGraphSchema.scala][main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]
@@ -119,6 +119,7 @@ Edge representation ops
     + scala
       + ohnosequences
         + scarph
+          + [sealedStuff.scala][test/scala/ohnosequences/scarph/sealedStuff.scala]
           + titan
             + [expressions.scala][test/scala/ohnosequences/scarph/titan/expressions.scala]
             + [godsImplementation.scala][test/scala/ohnosequences/scarph/titan/godsImplementation.scala]
@@ -126,19 +127,18 @@ Edge representation ops
             + [TitanGodsTest.scala][test/scala/ohnosequences/scarph/titan/TitanGodsTest.scala]
             + [TitanSchemaTest.scala][test/scala/ohnosequences/scarph/titan/TitanSchemaTest.scala]
 
-[main/scala/ohnosequences/scarph/Denotation.scala]: ../Denotation.scala.md
 [main/scala/ohnosequences/scarph/Edge.scala]: ../Edge.scala.md
 [main/scala/ohnosequences/scarph/EdgeType.scala]: ../EdgeType.scala.md
 [main/scala/ohnosequences/scarph/Expressions.scala]: ../Expressions.scala.md
 [main/scala/ohnosequences/scarph/GraphSchema.scala]: ../GraphSchema.scala.md
 [main/scala/ohnosequences/scarph/ops/default.scala]: default.scala.md
 [main/scala/ohnosequences/scarph/ops/typelevel.scala]: typelevel.scala.md
-[main/scala/ohnosequences/scarph/Property.scala]: ../Property.scala.md
 [main/scala/ohnosequences/scarph/titan/TitanEdge.scala]: ../titan/TitanEdge.scala.md
 [main/scala/ohnosequences/scarph/titan/TitanGraphSchema.scala]: ../titan/TitanGraphSchema.scala.md
 [main/scala/ohnosequences/scarph/titan/TitanVertex.scala]: ../titan/TitanVertex.scala.md
 [main/scala/ohnosequences/scarph/Vertex.scala]: ../Vertex.scala.md
 [main/scala/ohnosequences/scarph/VertexType.scala]: ../VertexType.scala.md
+[test/scala/ohnosequences/scarph/sealedStuff.scala]: ../../../../../test/scala/ohnosequences/scarph/sealedStuff.scala.md
 [test/scala/ohnosequences/scarph/titan/expressions.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/expressions.scala.md
 [test/scala/ohnosequences/scarph/titan/godsImplementation.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/godsImplementation.scala.md
 [test/scala/ohnosequences/scarph/titan/godsSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/godsSchema.scala.md

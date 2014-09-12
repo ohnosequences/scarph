@@ -28,8 +28,3 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.1.0",
   "org.scalatest" %% "scalatest" % "2.2.2" % "test"
 )
-
-// dependencyOverrides ++= Set(
-//   "tomcat" % "jasper-compiler" % "5.5.23",
-//   "tomcat" % "jasper-runtime"  % "5.5.23"
-// )
