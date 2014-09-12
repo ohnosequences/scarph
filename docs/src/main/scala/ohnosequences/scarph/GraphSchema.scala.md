@@ -2,7 +2,7 @@
 ```scala
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 trait AnyGraphSchema {
 

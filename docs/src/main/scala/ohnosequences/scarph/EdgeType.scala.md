@@ -2,7 +2,7 @@
 ```scala
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 import scalaz._, std.option._, std.list._
 ```
 

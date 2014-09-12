@@ -20,14 +20,11 @@ libraryDependencies += {
   }
 }
 
+resolvers += "restlet-releases" at "http://maven.restlet.org/"
+
 libraryDependencies ++= Seq(
-  "com.thinkaurelius.titan" % "titan-all" % "0.4.4",
-  "ohnosequences" %% "type-sets" % "0.5.0",
+  "ohnosequences" %% "pointless" % "0.6.0-SNAPSHOT",
+  "com.thinkaurelius.titan" % "titan-all" % "0.5.0",
   "org.scalaz" %% "scalaz-core" % "7.1.0",
   "org.scalatest" %% "scalatest" % "2.2.2" % "test"
-)
-
-dependencyOverrides ++= Set(
-  "tomcat" % "jasper-compiler" % "5.5.23",
-  "tomcat" % "jasper-runtime"  % "5.5.23"
 )

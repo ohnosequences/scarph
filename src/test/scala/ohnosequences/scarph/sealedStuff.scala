@@ -1,122 +1,120 @@
-package ohnosequences.scarph.test
+// package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, ops.typelevel._
-import ohnosequences.typesets._
+// import ohnosequences.scarph._, ops.typelevel._
+// import ohnosequences.pointless._
 
-object StupidSealedStuff {
+// object StupidSealedStuff {
   
-  case object name extends Property[String]
-  case object age extends Property[Integer]
-  case object happiness extends Property[Long]
-  case object id extends Property[Int]
+//   case object name extends Property[String]
+//   case object age extends Property[Integer]
+//   case object happiness extends Property[Long]
+//   case object id extends Property[Int]
 
-  // records
-  case object record extends Record(name :~: age :~: ∅)
-  case object anotherRecord extends Record(age :~: happiness :~: ∅)
-  case object myFavRecord extends Record(id :~: happiness :~: name :~: ∅)
+//   // records
+//   case object record extends Record(name :~: age :~: ∅)
+//   case object anotherRecord extends Record(age :~: happiness :~: ∅)
+//   case object myFavRecord extends Record(id :~: happiness :~: name :~: ∅)
 
-  // types
-  object Types {
-    case object Yuhu extends SealedVertexType("yuhu", record)
-    case object OhNo extends SealedVertexType("ohno", anotherRecord)  
-    case object SayItTo extends SealedEdgeType(Yuhu, "sayitto", myFavRecord, OhNo) with ManyIn with OneOut
-  }
+//   // types
+//   case object Yuhu extends SealedVertexType("yuhu", record)
+//   case object OhNo extends SealedVertexType("ohno", anotherRecord)  
+//   case object SayItTo extends SealedEdgeType(Yuhu, "sayitto", myFavRecord, OhNo) with ManyIn with OneOut
 
-  case object yuhu extends SealedVertex(Types.Yuhu) {
+//   case object yuhu extends SealedVertex(Yuhu) {
 
-    type Other = String
-  }
+//     type Other = String
+//   }
 
-  case object ohNo extends SealedVertex(Types.OhNo) {
+//   case object ohNo extends SealedVertex(OhNo) {
 
-    // why not?
-    type Other = Integer
-  }
+//     // why not?
+//     type Other = Integer
+//   }
 
-  case object sayItTo extends SealedEdge(yuhu, Types.SayItTo, ohNo) { sayItTo =>
+//   case object sayItTo extends SealedEdge(yuhu, SayItTo, ohNo) { sayItTo =>
 
-    type Other = (source.Rep, target.Rep)
+//     type Other = (source.Rep, target.Rep)
 
-    implicit val s: GetSource = new GetSource { def apply(edge: sayItTo.Rep) = edge.other._1 }
-    implicit val t: GetTarget = new GetTarget { def apply(edge: sayItTo.Rep) = edge.other._2 } 
-  }
+//     implicit val s: GetSource = new GetSource { def apply(edge: sayItTo.Rep) = edge.other._1 }
+//     implicit val t: GetTarget = new GetTarget { def apply(edge: sayItTo.Rep) = edge.other._2 } 
+//   }
 
-  val y1 = yuhu ->> (
+//   val y1 = yuhu ->> (
 
-    yuhu.raw (
+//     yuhu.raw (
 
-      yuhu fields (
-        (name is "lalala") :~:
-        (age is 12) :~: ∅
-      ),
-      "rubbish"
-    )
-  )
+//       yuhu fields (
+//         (name is "lalala") :~:
+//         (age is 12) :~: ∅
+//       ),
+//       "rubbish"
+//     )
+//   )
 
-  val o1 = ohNo ->> {
+//   val o1 = ohNo ->> {
 
-    ohNo.raw (
+//     ohNo.raw (
 
-      ohNo fields (
-        (age is 1231231)      :~:
-        (happiness is 111111) :~: ∅
-      ),
-      234234
-    )
-  }
+//       ohNo fields (
+//         (age is 1231231)      :~:
+//         (happiness is 111111) :~: ∅
+//       ),
+//       234234
+//     )
+//   }
 
-  val s1 = sayItTo ->> {
+//   val s1 = sayItTo ->> {
 
-    sayItTo.raw (
+//     sayItTo.raw (
 
-      sayItTo fields (
+//       sayItTo fields (
 
-        (id is 12312)       :~: 
-        (happiness is 23423) :~: 
-        (name is "dfadfww")  :~: ∅
-      ),
-      (y1, o1)
-    )
-  }
+//         (id is 12312)       :~: 
+//         (happiness is 23423) :~: 
+//         (name is "dfadfww")  :~: ∅
+//       ),
+//       (y1, o1)
+//     )
+//   }
 
 
-}
+// }
 
-class CheckSealedTypes extends org.scalatest.FunSuite {
+// class CheckSealedTypes extends org.scalatest.FunSuite {
 
-  import StupidSealedStuff._
+//   import StupidSealedStuff._
 
-  test("getting properties from sealed vertex instances") {
+//   test("getting properties from sealed vertex instances") {
 
-    assert (
+//     assert (
 
-      (y1 get name) === "lalala"
-    )
+//       (y1 get name) === "lalala"
+//     )
 
-    assert (
+//     assert (
 
-      (o1 get happiness) === 111111
-    )
-  }
+//       (o1 get happiness) === 111111
+//     )
+//   }
 
-  test("getting properties from sealed edge instances") {
+//   test("getting properties from sealed edge instances") {
 
-    assert (
+//     assert (
 
-      (s1 get happiness) === 23423
-    )
-  }
+//       (s1 get happiness) === 23423
+//     )
+//   }
 
-  test ("naive source and target from sealed edge instances") {
+//   test ("naive source and target from sealed edge instances") {
 
-    assert (
+//     assert (
 
-      (s1 src) === y1
-    )
+//       (s1 src) === y1
+//     )
 
-    assert (
+//     assert (
 
-      (s1 tgt) === o1
-    )
-  }
-}
+//       (s1 tgt) === o1
+//     )
+//   }
+// }

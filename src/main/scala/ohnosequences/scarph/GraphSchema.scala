@@ -1,81 +1,73 @@
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._, AnyTypeSet._, AnyFn._
+import ohnosequences.pointless.ops.typeSet._
 
 trait AnyGraphSchema {
 
   val label: String
 
-  type Dependencies <: TypeSet
+  type Dependencies <: AnyTypeSet.Of[AnyGraphSchema]
   val  dependencies: Dependencies
 
-  type Properties <: TypeSet
-  val  properties: Properties
-
-  type VertexTypes <: TypeSet
+  type VertexTypes <: AnyTypeSet.Of[AnyVertexType]
   val  vertexTypes: VertexTypes
 
-  type EdgeTypes <: TypeSet
+  type EdgeTypes <: AnyTypeSet.Of[AnyEdgeType]
   val  edgeTypes: EdgeTypes
+}
 
-  /* These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)` */
-  type VerticesWithProperties <: TypeSet
-  val  verticesWithProperties: VerticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+case class GraphSchema[
+    Ds <: AnyTypeSet.Of[AnyGraphSchema],
+    Vs <: AnyTypeSet.Of[AnyVertexType],
+    Es <: AnyTypeSet.Of[AnyEdgeType]
+  ](val label: String,
+    val dependencies: Ds = ∅,
+    val vertexTypes:  Vs = ∅,
+    val edgeTypes:    Es = ∅
+  ) extends AnyGraphSchema {
 
-  type EdgesWithProperties <: TypeSet
-  val  edgesWithProperties: EdgesWithProperties = edgePropertyAssoc(edgeTypes, properties)
-
-  val vertexPropertyAssoc: ZipWithProps.Aux[VertexTypes, Properties, VerticesWithProperties]
-  val   edgePropertyAssoc: ZipWithProps.Aux[EdgeTypes, Properties, EdgesWithProperties]
-
-  override def toString = s"""${label} schema:
-  vertexTypes: ${verticesWithProperties}
-    edgeTypes: ${edgesWithProperties}"""
-
+  type Dependencies = Ds
+  type VertexTypes  = Vs
+  type EdgeTypes    = Es
 }
 
 object AnyGraphSchema {
 
-  /* Additional methods */
-  implicit def schemaOps[S <: AnyGraphSchema](sch: S): GraphSchemaOps[S] = GraphSchemaOps[S](sch)
-  case class   GraphSchemaOps[S <: AnyGraphSchema](schema: S) {
+  type DependenciesOf[GS <: AnyGraphSchema] = GS#Dependencies
+  type VertexTypesOf[GS <: AnyGraphSchema] = GS#VertexTypes
+  type EdgeTypesOf[GS <: AnyGraphSchema] = GS#EdgeTypes
 
-    /* This method returns properties that are associated with the given **vertex** type */
-    def vertexProperties[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
-      e: VT ∈ schema.VertexTypes,
-      f: FilterProps[VT, schema.Properties]
-    ): f.Out = f(schema.properties)
+  implicit def graphSchemaOps[GS <: AnyGraphSchema](gs: GS):
+        GraphSchemaOps[GS] =
+    new GraphSchemaOps[GS](gs)
+}
+import AnyGraphSchema._
 
-    /* This method returns properties that are associated with the given **edge** type */
-    def edgeProperties[ET <: Singleton with AnyEdgeType](edgeType: ET)(implicit
-      e: ET ∈ schema.EdgeTypes,
-      f: FilterProps[ET, schema.Properties]
-    ): f.Out = f(schema.properties)
-  }
+class GraphSchemaOps[GS <: AnyGraphSchema](gs: GS) {
+
+  def properties(implicit props: SchemaProperties[GS]): props.Out = props(gs)
 }
 
-case class GraphSchema[
-    Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
-    Ps <: TypeSet : boundedBy[AnyProperty]#is,
-    Vs <: TypeSet : boundedBy[AnyVertexType]#is,
-    Es <: TypeSet : boundedBy[AnyEdgeType]#is,
-    VP <: TypeSet,
-    EP <: TypeSet
-  ](val label: String,
-    val dependencies: Ds = ∅,
-    val properties:   Ps = ∅,
-    val vertexTypes:  Vs = ∅,
-    val edgeTypes:    Es = ∅
-  )(implicit
-    val vertexPropertyAssoc: ZipWithProps.Aux[Vs, Ps, VP],
-    val   edgePropertyAssoc: ZipWithProps.Aux[Es, Ps, EP]
-  ) extends AnyGraphSchema {
 
-  type Dependencies = Ds
-  type Properties   = Ps
-  type VertexTypes  = Vs
-  type EdgeTypes    = Es
-  type VerticesWithProperties = VP
-  type    EdgesWithProperties = EP
+// TODO: move it somewhere?
+/* This op aggregates properties of vertex types and edge types and unites them */
+trait SchemaProperties[S <: AnyGraphSchema] extends Fn1[S] with OutBound[AnyTypeSet]
 
+object SchemaProperties {
+
+  implicit def aggregate[
+      GS <: AnyGraphSchema,
+      VP <: AnyTypeSet, 
+      EP <: AnyTypeSet, 
+      U <: AnyTypeSet
+    ](implicit
+      vp: AggregateProperties[VertexTypesOf[GS]] { type Out = VP },
+      ep: AggregateProperties[EdgeTypesOf[GS]]   { type Out = EP },
+      u: (VP ∪ EP) { type Out = U }
+    ):  SchemaProperties[GS] with Out[U] =
+    new SchemaProperties[GS] with Out[U] {
+
+      def apply(gs: GS): Out = u( vp(gs.vertexTypes), ep(gs.edgeTypes) )
+    }
 }

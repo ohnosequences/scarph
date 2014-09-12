@@ -1,6 +1,7 @@
 package ohnosequences.scarph
 
-import ohnosequences.typesets._, AnyTag._
+import ohnosequences.pointless._, AnyDenotation._, AnyWrap._
+import AnyEdge._
 
 /*
   `AnyVertex` defines a denotation of the corresponding `VertexType`.
@@ -10,51 +11,14 @@ import ohnosequences.typesets._, AnyTag._
   They are designed to be compatible with shapeless records (maybe, we'll see).
 */
 
-trait AnyVertex extends Denotation[AnyVertexType] with CanGetProperties { vertex =>
+trait AnyVertex extends Denotation[AnyVertexType]
 
-  /* Getters for incoming/outgoing edges */
-  // abstract class GetOutEdge[E <: Singleton with AnyEdge](val e: E) {
-  abstract class GetOutEdge[OE <: AnyEdge](val edge: OE) {
-
-    // def apply(rep: vertex.Rep): e.tpe.Out[E#Rep]
-    def apply(rep: vertex.Rep): edge.tpe.Out[TaggedWith[OE]]
-  }
-  abstract class GetInEdge[IE <: AnyEdge](val edge: IE) {
-
-    def apply(rep: vertex.Rep): edge.tpe.In[TaggedWith[IE]]
-  }
-
-}
-
-abstract class Vertex[VT <: AnyVertexType](val tpe: VT) 
-    extends AnyVertex { type Tpe = VT }
+abstract class Vertex[VT <: AnyVertexType](val denotedType: VT) 
+  extends AnyVertex { type DenotedType = VT }
 
 object AnyVertex {
-  type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
-}
 
-object Vertex {
-  type RepOf[V <: Singleton with AnyVertex] = AnyTag.TaggedWith[V]
-}
+  type ofType[VT <: AnyVertexType] = AnyVertex { type DenotedType = VT }
 
-// this denotation stuff is weird
-trait AnySealedVertex extends AnyVertex { sealedVertex =>
-
-  type Tpe <: AnySealedVertexType
-
-  final type Raw = raw
-
-  type Other
-  case class raw(val fields: tpe.record.Rep, val other: Other)
-  // double tagging FTW!
-  final def fields[R <: TypeSet](r: R)(implicit 
-    p: R ~> tpe.record.Raw
-  ): tpe.record.Rep = (tpe.record ->> p(r))
-
-  implicit def propertyOps(rep: sealedVertex.Rep): tpe.record.PropertyOps = tpe.record.PropertyOps(rep.fields)
-}
-
-abstract class SealedVertex[VT <: AnySealedVertexType](val tpe: VT) extends AnySealedVertex { 
-
-  type Tpe = VT
+  type VertexTypeOf[V <: AnyVertex] = V#DenotedType
 }
