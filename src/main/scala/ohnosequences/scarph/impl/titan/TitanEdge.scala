@@ -1,8 +1,7 @@
 package ohnosequences.scarph.impl.titan
 
-import ohnosequences.scarph._, AnyEdgeType._
-import AnyTitanVertex._
-import ohnosequences.pointless._, AnyProperty._, AnyRecord._
+import ohnosequences.scarph._, AnyEdgeType._, AnyTitanVertex._
+import ohnosequences.pointless._
 
 trait AnyTitanEdge extends AnyEdge {
 

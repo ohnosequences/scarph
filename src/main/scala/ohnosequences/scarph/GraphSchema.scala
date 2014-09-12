@@ -1,6 +1,7 @@
 package ohnosequences.scarph
 
 import ohnosequences.pointless._, AnyTypeSet._, AnyFn._
+import ohnosequences.pointless.ops.typeSet._
 
 trait AnyGraphSchema {
 
@@ -14,7 +15,6 @@ trait AnyGraphSchema {
 
   type EdgeTypes <: AnyTypeSet.Of[AnyEdgeType]
   val  edgeTypes: EdgeTypes
-
 }
 
 case class GraphSchema[

@@ -24,18 +24,4 @@ object TwitterSchema {
     edgeTypes = Posted :~: Follows :~: ∅
   )
 
-  val props = schema.properties
-
-  // import ohnosequences.pointless.ops.typeSet._
-  // val aggrVProps = AggregateProperties[schema.VertexTypes]
-  // // (AggregateProperties.cons[](
-  // //   AggregateProperties.cons,
-  // //   Uni.sHead[
-  // //     name.type, age.type :~: ∅,
-  // //     text.type :~: ∅,
-  // //     age.type :~: text.type :~: ∅
-  // //   ]
-  // // ))
-  // val vprops = aggrVProps(schema.vertexTypes)
-
 }

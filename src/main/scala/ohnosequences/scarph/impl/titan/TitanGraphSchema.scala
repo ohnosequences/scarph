@@ -53,7 +53,7 @@ object TitanGraphSchema {
         edgeTypeList: ToList[gs.EdgeTypes] with InContainer[AnyEdgeType],
         vertexTypeList: ToList[gs.VertexTypes] with InContainer[AnyVertexType]
       ) = {
-        // we want all this be a one transaction
+        // we want all this happen in a one transaction
         val mgmt = g.getManagementSystem
 
         propsList(props(gs)).map{ mgmt.addPropertyKey(_) }

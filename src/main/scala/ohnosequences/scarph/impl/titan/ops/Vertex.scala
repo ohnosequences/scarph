@@ -10,7 +10,7 @@ object vertex {
 
   /* Getting a property from any TitanVertex */
   implicit def unsafeGetVertexProperty[V <: AnyTitanVertex, P <: AnyProperty]
-    (implicit hasProp: P ∈ PropertiesOf[VertexTypeOf[V]]):
+    (implicit hasProp: VertexTypeOf[V] HasProperty P):
           GetVertexProperty[V, P] = 
       new GetVertexProperty[V, P] {
 
