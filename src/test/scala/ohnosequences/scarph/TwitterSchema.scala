@@ -19,9 +19,12 @@ object TwitterSchema {
   case object Posted  extends EdgeType(User, "posted", Tweet, time :~: url :~: ∅) with OneIn with ManyOut
   case object Follows extends EdgeType(User, "follows", User, ∅) with ManyIn with ManyOut
 
+  implicit case object UserNameIndex extends StandardIndex(User, name)
+
   val schema = GraphSchema("twitter",
     vertexTypes = User :~: Tweet :~: ∅,
-    edgeTypes = Posted :~: Follows :~: ∅
+    edgeTypes = Posted :~: Follows :~: ∅,
+    indexes = UserNameIndex :~: ∅
   )
 
 }

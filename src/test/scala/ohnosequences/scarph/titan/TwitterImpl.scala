@@ -13,6 +13,4 @@ case class TwitterImpl(graph: TGraph) {
   case object posted extends TitanEdge(graph, user, Posted, tweet)
   case object follows extends TitanEdge(graph, user, Follows, user)
 
-  implicit case object UserNameIndex extends StandardIndex(User, name)
-
 }

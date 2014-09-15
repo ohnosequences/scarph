@@ -39,6 +39,16 @@ object TitanGraphSchema {
     def addVertexLabel[VT <: AnyVertexType](vt: VT) = {
       mgmt.makeVertexLabel(vt.label).make()
     }
+
+    // TODO: for all titan index types
+    def addIndex[Ix <: AnyIndex](ix: Ix) = {
+      // TODO: now only for vertices, add a classTag for IndexedType
+      // val clazz = ???.classTag.runtimeClass.asInstanceOf[Class[Ix#IndexedType#Raw]]
+      val propertyKey = mgmt.getPropertyKey(ix.property.label)
+      mgmt.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
+        .addKey(propertyKey)
+        .buildCompositeIndex()
+    }
   }
 
   implicit def titanGraphOps(g: TitanGraph): 
@@ -51,7 +61,8 @@ object TitanGraphSchema {
         props: SchemaProperties[GS] { type Out = Ps },
         propsList: ToList[Ps] with InContainer[AnyProperty],
         edgeTypeList: ToList[gs.EdgeTypes] with InContainer[AnyEdgeType],
-        vertexTypeList: ToList[gs.VertexTypes] with InContainer[AnyVertexType]
+        vertexTypeList: ToList[gs.VertexTypes] with InContainer[AnyVertexType],
+        indexList: ToList[gs.Indexes] with InContainer[AnyIndex]
       ) = {
         // we want all this happen in a one transaction
         val mgmt = g.getManagementSystem
@@ -59,6 +70,7 @@ object TitanGraphSchema {
         propsList(props(gs)).map{ mgmt.addPropertyKey(_) }
         edgeTypeList(gs.edgeTypes).map{ mgmt.addEdgeLabel(_) }
         vertexTypeList(gs.vertexTypes).map{ mgmt.addVertexLabel(_) }
+        indexList(gs.indexes).map{ mgmt.addIndex(_) }
 
         mgmt.commit
       }
