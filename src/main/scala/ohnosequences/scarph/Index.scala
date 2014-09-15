@@ -14,7 +14,7 @@ trait AnyIndex {
 
   val label: String
 
-  type IndexedType <: AnyType
+  type IndexedType <: AnyElementType
   val  indexedType: IndexedType
 
   type Property <: AnyProperty
@@ -31,7 +31,7 @@ trait AnyIndex {
   type Out[X]
 }
 
-abstract class Index[IT <: AnyType, P <: AnyProperty](
+abstract class Index[IT <: AnyElementType, P <: AnyProperty](
   val label: String,
   val indexedType: IT, 
   val property: P
@@ -47,23 +47,31 @@ object AnyIndex {
 }
 
 // Simple index type, which can be only queried for an exact property match
-trait AnyStandardIndex extends AnyIndex { indexType =>
+trait AnyStandardIndex extends AnyIndex {
 
   override val label = "standard"
 
   type Out[X] = List[X]
 
   type QueryType = AnySimpleQuery {
-    type ElementType = indexType.IndexedType
-    type Head = EQ[indexType.Property]
+    type ElementType = IndexedType
+    type Head = EQ[Property]
   }
 }
 
-class StandardIndex[IT <: AnyType, P <: AnyProperty](
-  val indexedType: IT, 
+class StandardIndex[ET <: AnyElementType, P <: AnyProperty](
+  val indexedType: ET, 
   val property: P
-)(implicit val indexedTypeHasProperty: IT HasProperty P) extends AnyStandardIndex {
+)(implicit val indexedTypeHasProperty: ET HasProperty P) extends AnyStandardIndex {
 
-  type IndexedType = IT
+  type IndexedType = ET
   type Property = P
+}
+
+object AnyStandardIndex {
+
+  type For[ET <: AnyElementType, P <: AnyProperty] = AnyStandardIndex {
+    type IndexedType = ET
+    type Property = P
+  }
 }

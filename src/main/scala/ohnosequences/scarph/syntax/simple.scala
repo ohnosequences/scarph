@@ -16,6 +16,17 @@ object simple {
       (implicit getter: GetProperty[E, P]): ValueOf[P] = getter(raw, prop)
   }
 
+  implicit def elementOps[E <: AnyElement](e: E): 
+        ElementOps[E] = 
+    new ElementOps[E](e)
+
+  class ElementOps[E <: AnyElement](val e: E) extends AnyVal {
+    import ohnosequences.scarph.ops.element._
+
+    def query[Q <: AnyQuery.On[E#DenotedType]](q: Q)
+      (implicit eval: EvalQuery[E, Q]): Q#Out[ValueOf[E]] = eval(e, q)
+  }
+
 
   implicit def vertexRawOps[V <: AnyVertex](rep: ValueOf[V]): 
         VertexRawOps[V] = 

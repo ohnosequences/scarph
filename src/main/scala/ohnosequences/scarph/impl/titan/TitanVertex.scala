@@ -7,7 +7,6 @@ import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 trait AnyTitanVertex extends AnyVertex with AnyTitanElement {
 
   type Raw = com.thinkaurelius.titan.core.TitanVertex
-  // type Graph = TGraph
 }
 
 class TitanVertex[VT <: AnyVertexType](val graph: TGraph, vt: VT) 

@@ -3,15 +3,18 @@ package ohnosequences.scarph.test.titan
 import com.thinkaurelius.titan.core._
 import com.thinkaurelius.titan.core.Multiplicity._
 import com.thinkaurelius.titan.core.schema._
+
 import com.tinkerpop.blueprints.Edge
 import com.tinkerpop.blueprints.Vertex
+
 import java.io.File
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._, AnyTypeSet._
-import ohnosequences.pointless.ops.typeSet._
-import ohnosequences.scarph._, impl.titan._, TitanGraphSchema._
+import ohnosequences.pointless._
+
+import ohnosequences.scarph._, AnyQuery._, AnyCondition._
 import ohnosequences.scarph.syntax.simple._
 import ohnosequences.scarph.test._, TwitterSchema._
+import ohnosequences.scarph.impl.titan._, TitanGraphSchema._
 import ohnosequences.scarph.impl.titan.ops._, element._, vertex._, edge._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
@@ -150,26 +153,23 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     }
   }
 
-  val impl = TwitterImpl(g)
-  import impl._
-
   object TestContext {
+    val impl = TwitterImpl(g); import impl._
 
     implicit class graphOps(tg: TitanGraph) {
       // just a shortcut
-      def retrieve[V <: AnyTitanVertex, P <: AnyProperty](v: V)(p: P)(pval: RawOf[P]): ValueOf[V] = {
+      def retrieve[V <: AnyTitanVertex, P <: AnyProperty](v: V)(p: P)(pval: P#Raw): ValueOf[V] = {
         v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[com.thinkaurelius.titan.core.TitanVertex] )
       }
     } 
 
-    val edu = g.retrieve(user)(name)("@eparejatobes")
-    val laughedelic = g.retrieve(user)(name)("@laughedelic")
-    val kim = g.retrieve(user)(name)("@evdokim")
+    val edu = graph.retrieve(user)(name)("@eparejatobes")
+    val laughedelic = graph.retrieve(user)(name)("@laughedelic")
+    val kim = graph.retrieve(user)(name)("@evdokim")
 
-    val twt = g.retrieve(tweet)(text)("back to twitter :)")
+    val twt = graph.retrieve(tweet)(text)("back to twitter :)")
 
   }
-  import TestContext._
 
   // checks existence and arity
   def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET) = {
@@ -187,13 +187,15 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ mgmt.containsRelationType(p.label) }
 
     import scala.reflect._
-    assertResult(p.classTag.runtimeClass.asInstanceOf[Class[RawOf[P]]]) {
+    assertResult(p.classTag.runtimeClass.asInstanceOf[Class[P#Raw]]) {
       mgmt.getPropertyKey(p.label).getDataType
     }
   }
 
   test("check schema keys/labels") {
-    val mgmt = g.getManagementSystem
+    import TestContext._, impl._
+
+    val mgmt = graph.getManagementSystem
 
     checkPropertyKey(mgmt, name)
     checkPropertyKey(mgmt, age)
@@ -210,20 +212,23 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     mgmt.commit
   }
 
-  // test("get vertex from an index") {
-  //   val impl = GodsImplementation(g); import impl._
+  test("get vertex from an index") {
+    import TestContext._, impl._
 
-  //   // getting saturn directly
-  //   val saturn = g.getTagged(titan)(name.label, "saturn")
-  //   // getting it through a query to the standard index over the name property
-  //   val sat = titan.query(Titan ? (name === "saturn"))
-  //   assert(sat.nonEmpty)
+    // getting saturn directly
+    val eduQuery = User ? (name === "@eparejatobes")
 
-  //   // check the they are the same
-  //   assert(sat.head === saturn)
-  // }
+    val edus = user.query(eduQuery) //(simpleQueryEval(UserNameIndex))
+
+    // getting it through a query to the standard index over the name property
+    assert(edus.nonEmpty)
+
+    // check that they are the same
+    assert(edus.head == edu)
+  }
 
   test("get vertex property") {
+    import TestContext._, impl._
 
     // pure blueprints with string keys and casting: 
     assert(edu.raw.getProperty[Int]("age") == 95)
@@ -234,6 +239,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("get OUTgoing edges and their property") {
+    import TestContext._, impl._
 
     assertResult(List(time("15.2.2014"), time("7.2.2014"))) {
       laughedelic out posted map { _ get time }
@@ -242,6 +248,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("get INcoming edges and their property") {
+    import TestContext._, impl._
 
     assertResult(Some(time("13.11.2012"))) {
       twt in posted map { _ get time }
@@ -249,6 +256,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("get target/source vertices of incoming/outgoing edges") {
+    import TestContext._, impl._
 
     assertResult( Some(name("@eparejatobes")) ) {
       twt in posted map { _.src } map { _ get name }

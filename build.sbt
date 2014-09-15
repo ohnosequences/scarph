@@ -20,16 +20,7 @@ libraryDependencies += {
   }
 }
 
-<<<<<<< HEAD
-libraryDependencies ++= Seq(
-  "ohnosequences" %% "type-sets" % "0.5.0-SNAPSHOT",
-  "com.thinkaurelius.titan" % "titan-all" % "0.4.4",
-  "org.scalaz" %% "scalaz-core" % "7.0.6",
-  "org.scalatest" %% "scalatest" % "2.2.0" % "test"
-)
-=======
 resolvers += "restlet-releases" at "http://maven.restlet.org/"
->>>>>>> master
 
 libraryDependencies ++= Seq(
   "ohnosequences" %% "pointless" % "0.6.0-SNAPSHOT",
