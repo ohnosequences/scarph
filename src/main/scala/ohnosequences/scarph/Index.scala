@@ -1,15 +1,9 @@
 package ohnosequences.scarph
 
 import ohnosequences.pointless._
+import scala.reflect.ClassTag
 
-/*
-  ## Indexes, predicates and queries
-
-  
-  Let's try to map this to DynamoDB. There, predicates are over items, and consist in combinations of conditions over properties, using combinators (`and`, `or`). All this can be defined statically and without any reference to implementations. Given that, an index is something that can help you evaluate those predicates.
-
-*/
-
+/* ## Indexes */
 trait AnyIndex {
 
   val label: String
@@ -17,39 +11,35 @@ trait AnyIndex {
   type IndexedType <: AnyElementType
   val  indexedType: IndexedType
 
-  type Property <: AnyProperty
-  val  property: Property
-
-  // should be provided implicitly:
-  val indexedTypeHasProperty: IndexedType HasProperty Property
-
-  /*
-    The type of predicates that this index can be queried for
-  */
+  /* The type of predicates that this index can be queried for */
   type QueryType <: AnyQuery.On[IndexedType]
 
   type Out[X]
 }
 
-abstract class Index[IT <: AnyElementType, P <: AnyProperty](
-  val label: String,
-  val indexedType: IT, 
-  val property: P
-  )(implicit val indexedTypeHasProperty: IT HasProperty P) extends AnyIndex {
-
-    type IndexedType = IT
-    type Property = P
-  }
-
 object AnyIndex {
+
   type Over[IT] = AnyIndex { type IndexedType = IT }
   type WithQuery[P] = AnyIndex { type QueryType = P }
 }
 
-// Simple index type, which can be only queried for an exact property match
-trait AnyStandardIndex extends AnyIndex {
 
-  override val label = "standard"
+
+/* This reflects [TitanDB Composite Index](http://s3.thinkaurelius.com/docs/titan/0.5.0/indexes.html#_composite_index)
+   
+   > Composite indexes retrieve vertices or edges by one or a (fixed) composition of multiple keys
+   > Note, that all keys of a composite graph index must be found in the query’s equality conditions 
+     for this index to be used.
+   > Also note, that composite graph indexes can only be used for equality constraints.
+*/
+// TODO: so far implemented only for one property
+trait AnyCompositeIndex extends AnyIndex {
+
+  type Property <: AnyProperty
+  val  property: Property
+
+  // should be provided implicitly:
+  val indexedTypeHasProperty: IndexedType HasProperty Property
 
   type Out[X] = List[X]
 
@@ -59,19 +49,24 @@ trait AnyStandardIndex extends AnyIndex {
   }
 }
 
-class StandardIndex[ET <: AnyElementType, P <: AnyProperty](
+class CompositeIndex[ET <: AnyElementType, P <: AnyProperty](
   val indexedType: ET, 
   val property: P
-)(implicit val indexedTypeHasProperty: ET HasProperty P) extends AnyStandardIndex {
+)(implicit 
+  val indexedTypeHasProperty: ET HasProperty P
+) extends AnyCompositeIndex {
+
+  // NOTE: normally, you don't care about the index name, but it has to be unique
+  val label = this.toString
 
   type IndexedType = ET
   type Property = P
 }
 
-object AnyStandardIndex {
+// object AnyCompositeIndex {
 
-  type For[ET <: AnyElementType, P <: AnyProperty] = AnyStandardIndex {
-    type IndexedType = ET
-    type Property = P
-  }
-}
+//   type For[ET <: AnyElementType, P <: AnyProperty] = AnyCompositeIndex {
+//     type IndexedType = ET
+//     type Property = P
+//   }
+// }

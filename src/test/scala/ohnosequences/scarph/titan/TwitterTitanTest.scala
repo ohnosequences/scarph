@@ -156,19 +156,14 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   object TestContext {
     val impl = TwitterImpl(g); import impl._
 
-    implicit class graphOps(tg: TitanGraph) {
-      // just a shortcut
-      def retrieve[V <: AnyTitanVertex, P <: AnyProperty](v: V)(p: P)(pval: P#Raw): ValueOf[V] = {
-        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[com.thinkaurelius.titan.core.TitanVertex] )
-      }
-    } 
+    // quering vertices
+    val edu = user.query(User ? (name === "@eparejatobes")).head
+    val alexey = user.query(User ? (name === "@laughedelic")).head
+    val kim = user.query(User ? (name === "@evdokim")).head
+    val twt = tweet.query(Tweet ? (text === "back to twitter :)")).head
 
-    val edu = graph.retrieve(user)(name)("@eparejatobes")
-    val laughedelic = graph.retrieve(user)(name)("@laughedelic")
-    val kim = graph.retrieve(user)(name)("@evdokim")
-
-    val twt = graph.retrieve(tweet)(text)("back to twitter :)")
-
+    // quering edges
+    val post = posted.query(Posted ? (time === "13.11.2012")).head
   }
 
   // checks existence and arity
@@ -209,22 +204,30 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ mgmt.containsVertexLabel(User.label) }
     assert{ mgmt.containsVertexLabel(Tweet.label) }
 
+    // TODO: check indexes
+
     mgmt.commit
   }
 
-  test("get vertex from an index") {
+  test("check what we got from the index queries") {
     import TestContext._, impl._
 
-    // getting saturn directly
-    val eduQuery = User ? (name === "@eparejatobes")
+    // just shortcuts
+    implicit class graphOps(tg: TitanGraph) {
+      def vertex[V <: AnyTitanVertex, P <: AnyProperty](v: V)(p: P)(pval: P#Raw): ValueOf[V] = {
+        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[V#Raw] )
+      }
+      def edge[E <: AnyTitanEdge, P <: AnyProperty](e: E)(p: P)(pval: P#Raw): ValueOf[E] = {
+        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[E#Raw] )
+      }
+    } 
 
-    val edus = user.query(eduQuery) //(simpleQueryEval(UserNameIndex))
+    assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
+    assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
+    assert{ kim == graph.vertex(user)(name)("@evdokim") }
+    assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
 
-    // getting it through a query to the standard index over the name property
-    assert(edus.nonEmpty)
-
-    // check that they are the same
-    assert(edus.head == edu)
+    assert{ post == graph.edge(posted)(time)("13.11.2012") }
   }
 
   test("get vertex property") {
@@ -242,7 +245,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     import TestContext._, impl._
 
     assertResult(List(time("15.2.2014"), time("7.2.2014"))) {
-      laughedelic out posted map { _ get time }
+      alexey out posted map { _ get time }
     }
 
   }
@@ -257,6 +260,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   test("get target/source vertices of incoming/outgoing edges") {
     import TestContext._, impl._
+
+    assert{ post.src == edu }
+    assert{ post.tgt == twt }
 
     assertResult( Some(name("@eparejatobes")) ) {
       twt in posted map { _.src } map { _ get name }

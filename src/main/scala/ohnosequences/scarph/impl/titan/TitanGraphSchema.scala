@@ -41,9 +41,8 @@ object TitanGraphSchema {
     }
 
     // TODO: for all titan index types
-    def addIndex[Ix <: AnyIndex](ix: Ix) = {
-      // TODO: now only for vertices, add a classTag for IndexedType
-      // val clazz = ???.classTag.runtimeClass.asInstanceOf[Class[Ix#IndexedType#Raw]]
+    def addIndex[Ix <: AnyCompositeIndex](ix: Ix) = {
+      // TODO: try a Poly1 mapping for normal determining if it's a vertex or an edge index
       val propertyKey = mgmt.getPropertyKey(ix.property.label)
       mgmt.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
         .addKey(propertyKey)
@@ -62,7 +61,7 @@ object TitanGraphSchema {
         propsList: ToList[Ps] with InContainer[AnyProperty],
         edgeTypeList: ToList[gs.EdgeTypes] with InContainer[AnyEdgeType],
         vertexTypeList: ToList[gs.VertexTypes] with InContainer[AnyVertexType],
-        indexList: ToList[gs.Indexes] with InContainer[AnyIndex]
+        indexList: ToList[gs.Indexes] with InContainer[AnyCompositeIndex]
       ) = {
         // we want all this happen in a one transaction
         val mgmt = g.getManagementSystem
