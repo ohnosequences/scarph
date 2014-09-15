@@ -1,15 +1,13 @@
 package ohnosequences.scarph
 
+import ohnosequences.pointless._, AnyTypeSet._
+
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.
 */
-trait AnyVertexType extends AnyItemType
-class    VertexType ( val label: String ) extends AnyVertexType
+trait AnyVertexType extends AnyType with AnyPropertiesHolder
 
-object AnyVertexType {
-  /* Additional methods */
-  implicit def vertexTypeOps[VT <: AnyVertexType](vt: VT) = VertexTypeOps(vt)
-  case class   VertexTypeOps[VT <: AnyVertexType](val vt: VT) 
-    extends HasPropertiesOps(vt) {}
-}
-
+class VertexType[Props <: AnyTypeSet.Of[AnyProperty]](
+  val label: String,
+  val properties: Props
+) extends AnyVertexType { type Properties = Props }

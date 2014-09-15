@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
 /*
   ## Queries
@@ -16,8 +16,8 @@ trait AnyQuery {
   type Head <: AnyCondition
   val  head: Head
 
-  type TYPE <: AnyItemType
-  type ItemType <: Singleton with TYPE
+  type TYPE <: AnyType
+  type ItemType <: TYPE
   val  itemType: ItemType
 
   type Out[X] = List[X]
@@ -83,7 +83,7 @@ trait AnyVertexQuery extends AnySimpleQuery {
  type TYPE = AnyVertexType
 }
 
-case class VertexQuery[I <: Singleton with AnyVertexType, C <: AnyCondition]
+case class VertexQuery[I <: AnyVertexType, C <: AnyCondition]
   (val itemType : I,  val head : C) extends AnyVertexQuery {
   type ItemType = I; type Head = C
 }
@@ -93,7 +93,7 @@ trait AnyEdgeQuery extends AnySimpleQuery {
   type TYPE = AnyEdgeType
 }
 
-case class EdgeQuery[I <: Singleton with AnyEdgeType, C <: AnyCondition]
+case class EdgeQuery[I <: AnyEdgeType, C <: AnyCondition]
   (val itemType : I,  val head : C) extends AnyEdgeQuery {
   type ItemType = I; type Head = C
 }
@@ -108,15 +108,15 @@ object AnyQuery {
   /* 
     With this you can write `item ? condition` which means `SimpleQuery(item, condition)`
   */
-  implicit def vertexQueryOps[VT <: Singleton with AnyVertexType](vt: VT): VertexQueryOps[VT] = VertexQueryOps(vt)
-  case class   VertexQueryOps[VT <: Singleton with AnyVertexType](vt: VT) {
+  implicit def vertexQueryOps[VT <: AnyVertexType](vt: VT): VertexQueryOps[VT] = VertexQueryOps(vt)
+  case class   VertexQueryOps[VT <: AnyVertexType](vt: VT) {
     def ?[C <: AnyCondition](c: C)(implicit 
         ev: VT HasProperty c.Property
       ): VertexQuery[VT, C] = VertexQuery(vt, c)
   }
 
-  implicit def edgeQueryOps[ET <: Singleton with AnyEdgeType](et: ET): EdgeQueryOps[ET] = EdgeQueryOps(et)
-  case class   EdgeQueryOps[ET <: Singleton with AnyEdgeType](et: ET) {
+  implicit def edgeQueryOps[ET <: AnyEdgeType](et: ET): EdgeQueryOps[ET] = EdgeQueryOps(et)
+  case class   EdgeQueryOps[ET <: AnyEdgeType](et: ET) {
     def ?[C <: AnyCondition](c: C)(implicit 
         ev: ET HasProperty c.Property
       ): EdgeQuery[ET, C] = EdgeQuery(et, c)

@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.pointless._
+
 /*
   ## Indexes, predicates and queries
 
@@ -12,10 +14,10 @@ trait AnyIndex {
 
   val label: String
 
-  type IndexedType <: Singleton with AnyItemType
+  type IndexedType <: AnyType
   val  indexedType: IndexedType
 
-  type Property <: Singleton with AnyProperty
+  type Property <: AnyProperty
   val  property: Property
 
   // should be provided implicitly:
@@ -29,7 +31,7 @@ trait AnyIndex {
   type Out[X]
 }
 
-abstract class Index[IT <: Singleton with AnyItemType, P <: Singleton with AnyProperty](
+abstract class Index[IT <: AnyType, P <: AnyProperty](
   val label: String,
   val indexedType: IT, 
   val property: P
@@ -57,7 +59,7 @@ trait AnyStandardIndex extends AnyIndex { indexType =>
   }
 }
 
-class StandardIndex[IT <: Singleton with AnyItemType, P <: Singleton with AnyProperty](
+class StandardIndex[IT <: AnyType, P <: AnyProperty](
   val indexedType: IT, 
   val property: P
 )(implicit val indexedTypeHasProperty: IT HasProperty P) extends AnyStandardIndex {

@@ -1,44 +1,40 @@
 package ohnosequences.scarph
 
-trait AnyEdge extends Item[AnyEdgeType] { edge =>
+import ohnosequences.pointless._, AnyWrap._, AnyTypeSet._, AnyFn._
+import AnyEdgeType._, AnyEdge._
+
+trait AnyEdge extends Denotation[AnyEdgeType] {
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
-  type Tpe <: AnyEdgeType
+  type DenotedType <: AnyEdgeType
 
-  type Source <: AnyVertex.ofType[Tpe#SourceType]
+  type Source <: AnyVertex.ofType[SourceTypeOf[DenotedType]]
   val  source: Source
 
-  type Target <: AnyVertex.ofType[Tpe#TargetType]
+  type Target <: AnyVertex.ofType[TargetTypeOf[DenotedType]]
   val  target: Target
-
-  /* Get source/target from this representation */
-  abstract class GetSource {
-    type Out = source.Rep
-    def apply(edgeRep: edge.Rep): Out
-  }
-  abstract class GetTarget { 
-    type Out = target.Rep 
-    def apply(edgeRep: edge.Rep): Out
-  }
-
 }
 
-class Edge[G,
-    S <: AnyVertex.ofType[ET#SourceType],
-    ET <: AnyEdgeType, 
-    T <: AnyVertex.ofType[ET#TargetType]
-  ](val  graph : G, val  source : S, val  tpe : ET, val  target : T) extends AnyEdge { 
-    type Graph = G; type Source = S; type Tpe = ET; type Target = T
-  }
+abstract class Edge[
+  S <: AnyVertex.ofType[SourceTypeOf[ET]],
+  ET <: AnyEdgeType, 
+  T <: AnyVertex.ofType[TargetTypeOf[ET]]
+](val  source : S, val  denotedType : ET, val  target : T) extends AnyEdge { 
+  type Source = S; type DenotedType = ET; type Target = T
+}
 
 object AnyEdge {
+
   import AnyEdgeType._
 
-  type ofType[ET <: AnyEdgeType] = AnyEdge { type Tpe = ET }
+  type withSource[S <: AnyVertex] = AnyEdge { type Source = S }
+  type withTarget[T <: AnyVertex] = AnyEdge { type Target = T }
 
-  type -->[S <: Singleton with AnyVertexType, T <: AnyVertexType] = AnyEdge { type Tpe <: S ==> T }
-}
+  type ofType[ET <: AnyEdgeType] = AnyEdge { type DenotedType = ET }
 
-object Edge {
-  type RepOf[E <: Singleton with AnyEdge] = AnyTag.TaggedWith[E]
+  type EdgeTypeOf[E <: AnyEdge] = E#DenotedType
+  type SourceOf[E <: AnyEdge] = E#Source
+  type TargetOf[E <: AnyEdge] = E#Target
+
+  type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type DenotedType <: S ==> T }
 }

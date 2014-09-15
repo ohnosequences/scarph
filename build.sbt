@@ -8,9 +8,9 @@ organization := "ohnosequences"
 
 bucketSuffix := "era7.com"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.2"
 
-crossScalaVersions := Seq("2.10.4", "2.11.1")
+crossScalaVersions := Seq("2.10.4")
 
 libraryDependencies += {
   CrossVersion.partialVersion(scalaVersion.value) match {
@@ -20,14 +20,20 @@ libraryDependencies += {
   }
 }
 
+<<<<<<< HEAD
 libraryDependencies ++= Seq(
   "ohnosequences" %% "type-sets" % "0.5.0-SNAPSHOT",
   "com.thinkaurelius.titan" % "titan-all" % "0.4.4",
   "org.scalaz" %% "scalaz-core" % "7.0.6",
   "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 )
+=======
+resolvers += "restlet-releases" at "http://maven.restlet.org/"
+>>>>>>> master
 
-dependencyOverrides ++= Set(
-  "tomcat" % "jasper-compiler" % "5.5.23",
-  "tomcat" % "jasper-runtime"  % "5.5.23"
+libraryDependencies ++= Seq(
+  "ohnosequences" %% "pointless" % "0.6.0-SNAPSHOT",
+  "com.thinkaurelius.titan" % "titan-all" % "0.5.0",
+  "org.scalaz" %% "scalaz-core" % "7.1.0",
+  "org.scalatest" %% "scalatest" % "2.2.2" % "test"
 )
