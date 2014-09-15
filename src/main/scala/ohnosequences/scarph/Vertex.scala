@@ -25,10 +25,12 @@ import AnyEdge._
   //   // evaluate the query at the vertex rep
   //   def apply(rep: vertex.Rep): e.tpe.In[E#Rep]
   // }
-trait AnyVertex extends Denotation[AnyVertexType]
+trait AnyVertex extends AnyElementOf[AnyVertexType]
 
-abstract class Vertex[VT <: AnyVertexType](val denotedType: VT) 
-  extends AnyVertex { type DenotedType = VT }
+abstract class Vertex[VT <: AnyVertexType]
+  (val  denotedType : VT) extends AnyVertex { 
+   type DenotedType = VT
+}
 
 object AnyVertex {
 

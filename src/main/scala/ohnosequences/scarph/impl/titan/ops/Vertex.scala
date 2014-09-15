@@ -8,14 +8,14 @@ import scalaz._
 object vertex {
   import ohnosequences.scarph.ops.vertex._
 
-  /* Getting a property from any TitanVertex */
-  implicit def unsafeGetVertexProperty[V <: AnyTitanVertex, P <: AnyProperty]
-    (implicit hasProp: VertexTypeOf[V] HasProperty P):
-          GetVertexProperty[V, P] = 
-      new GetVertexProperty[V, P] {
+  // /* Getting a property from any TitanVertex */
+  // implicit def unsafeGetVertexProperty[V <: AnyTitanVertex, P <: AnyProperty]
+  //   (implicit hasProp: VertexTypeOf[V] HasProperty P):
+  //         GetVertexProperty[V, P] = 
+  //     new GetVertexProperty[V, P] {
 
-        def apply(raw: RawOf[V], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
-      }
+  //       def apply(raw: RawOf[V], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
+  //     }
 
   /* Retrieving edges */
   import com.tinkerpop.blueprints.Direction

@@ -54,7 +54,7 @@ trait AnyStandardIndex extends AnyIndex { indexType =>
   type Out[X] = List[X]
 
   type QueryType = AnySimpleQuery {
-    type ItemType = indexType.IndexedType
+    type ElementType = indexType.IndexedType
     type Head = EQ[indexType.Property]
   }
 }

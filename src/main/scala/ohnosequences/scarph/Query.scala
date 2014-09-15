@@ -17,8 +17,8 @@ trait AnyQuery {
   val  head: Head
 
   type TYPE <: AnyType
-  type ItemType <: TYPE
-  val  itemType: ItemType
+  type ElementType <: TYPE
+  val  itemType: ElementType
 
   type Out[X] = List[X]
 }
@@ -31,7 +31,7 @@ trait AnyOrQuery extends AnyQuery {
   type Body <: AnyOrQuery
 
   def or[Head <: AnyCondition](other: Head)(implicit 
-    ev: ItemType HasProperty other.Property
+    ev: ElementType HasProperty other.Property
   ): OR[Body, Head] = 
      OR(body, other)
 }
@@ -41,7 +41,7 @@ case class OR[B <: AnyOrQuery, H <: AnyCondition]
   type Body = B; type Head = H
 
   type TYPE = body.TYPE
-  type ItemType = body.ItemType
+  type ElementType = body.ElementType
   val  itemType = body.itemType
 } 
 
@@ -54,7 +54,7 @@ trait AnyAndQuery extends AnyQuery {
   type Body <: AnyAndQuery
 
   def and[Head <: AnyCondition](other: Head)(implicit 
-    ev: ItemType HasProperty other.Property
+    ev: ElementType HasProperty other.Property
   ): AND[Body, Head] = 
      AND(body, other)
 }
@@ -64,7 +64,7 @@ case class AND[B <: AnyAndQuery, H <: AnyCondition]
   type Body = B; type Head = H
 
   type TYPE = body.TYPE
-  type ItemType = body.ItemType
+  type ElementType = body.ElementType
   val  itemType = body.itemType 
 }
 
@@ -85,7 +85,7 @@ trait AnyVertexQuery extends AnySimpleQuery {
 
 case class VertexQuery[I <: AnyVertexType, C <: AnyCondition]
   (val itemType : I,  val head : C) extends AnyVertexQuery {
-  type ItemType = I; type Head = C
+  type ElementType = I; type Head = C
 }
 
 
@@ -95,7 +95,7 @@ trait AnyEdgeQuery extends AnySimpleQuery {
 
 case class EdgeQuery[I <: AnyEdgeType, C <: AnyCondition]
   (val itemType : I,  val head : C) extends AnyEdgeQuery {
-  type ItemType = I; type Head = C
+  type ElementType = I; type Head = C
 }
 
 
@@ -103,7 +103,7 @@ object AnyQuery {
 
   type HeadedBy[C <: AnyCondition] = AnyQuery { type Head <: C }
 
-  type On[I] = AnyQuery { type ItemType = I }
+  type On[I] = AnyQuery { type ElementType = I }
 
   /* 
     With this you can write `item ? condition` which means `SimpleQuery(item, condition)`

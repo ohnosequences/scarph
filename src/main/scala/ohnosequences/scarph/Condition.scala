@@ -8,7 +8,7 @@ import ohnosequences.pointless._, AnyTypeUnion._
   Conditions represent the selection criteria for a Query or Scan operation. See
 
   - [Conditions API Reference](http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Condition.html)
-  - [Simple Conditions Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithItems.html#Conditions.SimpleConditions)
+  - [Simple Conditions Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithElements.html#Conditions.SimpleConditions)
 
   * Comparison Operators with **No** Property Values:
     `NOT_NULL | NULL`

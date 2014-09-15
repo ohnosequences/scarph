@@ -9,7 +9,4 @@ object edge {
 
   trait GetTarget[E <: AnyEdge] extends Fn1[RawOf[E]] with Out[ValueOf[TargetOf[E]]]
 
-  trait GetEdgeProperty[E <: AnyEdge, P <: AnyProperty]
-    extends Fn2[RawOf[E], P] with Out[ValueOf[P]]
-
 }

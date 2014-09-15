@@ -11,9 +11,8 @@ import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._, AnyTypeSet._
 import ohnosequences.pointless.ops.typeSet._
 import ohnosequences.scarph._, impl.titan._, TitanGraphSchema._
 import ohnosequences.scarph.syntax.simple._
-import ohnosequences.scarph.test._, TwitterSchema._, TwitterImpl._
-import ohnosequences.scarph.impl.titan.ops.vertex._
-import ohnosequences.scarph.impl.titan.ops.edge._
+import ohnosequences.scarph.test._, TwitterSchema._
+import ohnosequences.scarph.impl.titan.ops._, element._, vertex._, edge._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -150,6 +149,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       println("Shutdown Titan graph")
     }
   }
+
+  val impl = TwitterImpl(g)
+  import impl._
 
   object TestContext {
 

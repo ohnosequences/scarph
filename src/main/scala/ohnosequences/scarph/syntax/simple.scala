@@ -5,6 +5,18 @@ import ohnosequences.scarph._, AnyEdge._
 
 object simple {
 
+  implicit def elementRawOps[E <: AnyElement](rep: ValueOf[E]): 
+        ElementRawOps[E] = 
+    new ElementRawOps[E](rep.raw)
+
+  class ElementRawOps[E <: AnyElement](val raw: RawOf[E]) extends AnyVal {
+    import ohnosequences.scarph.ops.element._
+
+    def get[P <: AnyProperty](prop: P)
+      (implicit getter: GetProperty[E, P]): ValueOf[P] = getter(raw, prop)
+  }
+
+
   implicit def vertexRawOps[V <: AnyVertex](rep: ValueOf[V]): 
         VertexRawOps[V] = 
     new VertexRawOps[V](rep.raw)
@@ -12,9 +24,6 @@ object simple {
   class VertexRawOps[V <: AnyVertex](val raw: RawOf[V]) extends AnyVal {
     import ohnosequences.scarph.ops.vertex._
     import ohnosequences.scarph.ops.edge._
-
-    def get[P <: AnyProperty](prop: P)
-      (implicit getter: GetVertexProperty[V, P]): ValueOf[P] = getter(raw, prop)
 
     def in[E <: AnyEdge.withTarget[V]](e: E)
       (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
@@ -44,9 +53,6 @@ object simple {
 
   class EdgeRawOps[E <: AnyEdge](val raw: RawOf[E]) extends AnyVal {
     import ohnosequences.scarph.ops.edge._
-
-    def get[P <: AnyProperty](prop: P)
-      (implicit getter: GetEdgeProperty[E, P]): ValueOf[P] = getter(raw, prop)
 
     def src(implicit src: GetSource[E]): ValueOf[SourceOf[E]] = src(raw)
 

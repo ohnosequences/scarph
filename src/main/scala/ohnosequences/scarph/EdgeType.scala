@@ -6,7 +6,7 @@ import scalaz._, std.option._, std.list._
 /*
   Declares an edge type. it is determined by source/target vertex types and in/out arities
 */
-trait AnyEdgeType extends AnyType with AnyPropertiesHolder {
+trait AnyEdgeType extends AnyElementType {
 
   type In[X]
   type Out[X]

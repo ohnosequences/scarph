@@ -3,7 +3,7 @@ package ohnosequences.scarph
 import ohnosequences.pointless._, AnyWrap._, AnyTypeSet._, AnyFn._
 import AnyEdgeType._, AnyEdge._
 
-trait AnyEdge extends Denotation[AnyEdgeType] {
+trait AnyEdge extends AnyElementOf[AnyEdgeType] {
 
   // NOTE: if I remove this from here type inference fails. Most likely a bug
   type DenotedType <: AnyEdgeType
