@@ -21,12 +21,12 @@ object TwitterSchema {
 
   case object UserNameIx extends CompositeIndex(User, name)
   case object TweetTextIx extends CompositeIndex(Tweet, text)
-  // case object PostedTimeIx extends CompositeIndex(Posted, time)
+  case object PostedTimeIx extends CompositeIndex(Posted, time)
 
   val schema = GraphSchema("twitter",
     vertexTypes = User :~: Tweet :~: ∅,
     edgeTypes = Posted :~: Follows :~: ∅,
-    indexes = UserNameIx :~: TweetTextIx :~: ∅
+    indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅
   )
 
 }

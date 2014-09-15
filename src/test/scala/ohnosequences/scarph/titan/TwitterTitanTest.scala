@@ -187,6 +187,18 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     }
   }
 
+  // checks existence, type and the indexed property
+  def checkIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix) = {
+
+    assert{ mgmt.containsGraphIndex(ix.label) }
+
+    val index = mgmt.getGraphIndex(ix.label)
+    // TODO: check for mixed indexes and any other stuff
+    assert{ index.isCompositeIndex }
+    assert{ index.getFieldKeys.toSet == Set(mgmt.getPropertyKey(ix.property.label)) }
+  }
+
+  // TODO: make it a graph op: checkSchema
   test("check schema keys/labels") {
     import TestContext._, impl._
 
@@ -204,7 +216,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ mgmt.containsVertexLabel(User.label) }
     assert{ mgmt.containsVertexLabel(Tweet.label) }
 
-    // TODO: check indexes
+    checkIndex(mgmt, UserNameIx)
+    checkIndex(mgmt, TweetTextIx)
+    checkIndex(mgmt, PostedTimeIx)
 
     mgmt.commit
   }

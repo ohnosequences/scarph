@@ -62,11 +62,3 @@ class CompositeIndex[ET <: AnyElementType, P <: AnyProperty](
   type IndexedType = ET
   type Property = P
 }
-
-// object AnyCompositeIndex {
-
-//   type For[ET <: AnyElementType, P <: AnyProperty] = AnyCompositeIndex {
-//     type IndexedType = ET
-//     type Property = P
-//   }
-// }
