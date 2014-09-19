@@ -45,18 +45,22 @@ object TitanGraphSchema {
 
   object addIndex extends Poly1 {
     implicit def vertexIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyVertexType }] = 
-      at[Ix]{ addIt(classOf[com.tinkerpop.blueprints.Vertex], _) }
+      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+          m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
+            .indexOnly(m.getVertexLabel(ix.indexedType.label))
+            .addKey(m.getPropertyKey(ix.property.label))
+            .buildCompositeIndex()
+        }
+      }
 
     implicit def edgeIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyEdgeType }] = 
-      at[Ix]{ addIt(classOf[com.tinkerpop.blueprints.Edge], _) }
-
-    def addIt[E <: com.tinkerpop.blueprints.Element, Ix <: AnyCompositeIndex](cl: Class[E], ix: Ix) = { 
-      (m: TitanManagement) =>
-        val propertyKey = m.getPropertyKey(ix.property.label)
-        m.buildIndex(ix.label, cl)
-          .addKey(propertyKey)
-          .buildCompositeIndex()
-    }
+      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+          m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])
+            .indexOnly(m.getEdgeLabel(ix.indexedType.label))
+            .addKey(m.getPropertyKey(ix.property.label))
+            .buildCompositeIndex()
+        }
+      }
   }
 
   implicit def titanGraphOps(g: TitanGraph): 
