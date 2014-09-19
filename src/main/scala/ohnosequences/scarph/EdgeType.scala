@@ -3,11 +3,10 @@ package ohnosequences.scarph
 import ohnosequences.pointless._
 import scalaz._, std.option._, std.list._
 
-// TODO: Add AnyRecord here
 /*
   Declares an edge type. it is determined by source/target vertex types and in/out arities
 */
-trait AnyEdgeType extends AnyType with AnyPropertiesHolder {
+trait AnyEdgeType extends AnyElementType {
 
   type In[X]
   type Out[X]
@@ -56,19 +55,3 @@ trait  OneIn  extends AnyEdgeType { type  In[X] = Option[X]; val  in = One;  val
 abstract class EdgeType[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
     extends From[S] with To[T] with Properties[Props]
-
-// class ManyToMany[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
-//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
-//     extends From[S] with To[T] with ManyIn with ManyOut with Properties[Props]
-
-// class OneToMany[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
-//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
-//     extends From[S] with To[T] with OneIn with ManyOut with Properties[Props]
-
-// class ManyToOne[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
-//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
-//     extends From[S] with To[T] with ManyIn with OneOut with Properties[Props]
-
-// class OneToOne[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
-//   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 
-//     extends From[S] with To[T] with OneIn with OneOut with Properties[Props]

@@ -7,36 +7,43 @@ trait AnyGraphSchema {
 
   val label: String
 
-  type Dependencies <: AnyTypeSet.Of[AnyGraphSchema]
-  val  dependencies: Dependencies
+  // type Dependencies <: AnyTypeSet.Of[AnyGraphSchema]
+  // val  dependencies: Dependencies
 
   type VertexTypes <: AnyTypeSet.Of[AnyVertexType]
   val  vertexTypes: VertexTypes
 
   type EdgeTypes <: AnyTypeSet.Of[AnyEdgeType]
   val  edgeTypes: EdgeTypes
+
+  type Indexes <: AnyTypeSet.Of[AnyIndex]
+  val  indexes: Indexes
 }
 
 case class GraphSchema[
-    Ds <: AnyTypeSet.Of[AnyGraphSchema],
+    // Ds <: AnyTypeSet.Of[AnyGraphSchema],
     Vs <: AnyTypeSet.Of[AnyVertexType],
-    Es <: AnyTypeSet.Of[AnyEdgeType]
+    Es <: AnyTypeSet.Of[AnyEdgeType],
+    Is <: AnyTypeSet.Of[AnyIndex]
   ](val label: String,
-    val dependencies: Ds = ∅,
+    // val dependencies: Ds = ∅,
     val vertexTypes:  Vs = ∅,
-    val edgeTypes:    Es = ∅
+    val edgeTypes: Es    = ∅,
+    val indexes: Is      = ∅
   ) extends AnyGraphSchema {
 
-  type Dependencies = Ds
+  // type Dependencies = Ds
   type VertexTypes  = Vs
   type EdgeTypes    = Es
+  type Indexes      = Is
 }
 
 object AnyGraphSchema {
 
-  type DependenciesOf[GS <: AnyGraphSchema] = GS#Dependencies
+  // type DependenciesOf[GS <: AnyGraphSchema] = GS#Dependencies
   type VertexTypesOf[GS <: AnyGraphSchema] = GS#VertexTypes
   type EdgeTypesOf[GS <: AnyGraphSchema] = GS#EdgeTypes
+  type IndexesOf[GS <: AnyGraphSchema] = GS#Indexes
 
   implicit def graphSchemaOps[GS <: AnyGraphSchema](gs: GS):
         GraphSchemaOps[GS] =

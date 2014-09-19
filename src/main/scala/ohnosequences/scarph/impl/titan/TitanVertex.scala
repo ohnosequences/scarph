@@ -2,13 +2,14 @@ package ohnosequences.scarph.impl.titan
 
 import ohnosequences.scarph._
 import ohnosequences.pointless._
+import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 
-trait AnyTitanVertex extends AnyVertex {
+trait AnyTitanVertex extends AnyVertex with AnyTitanElement {
 
   type Raw = com.thinkaurelius.titan.core.TitanVertex
 }
 
-class TitanVertex[VT <: AnyVertexType](vt: VT) 
+class TitanVertex[VT <: AnyVertexType](val graph: TGraph, vt: VT) 
   extends Vertex[VT](vt) with AnyTitanVertex
 
 object AnyTitanVertex {

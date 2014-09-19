@@ -5,7 +5,7 @@ import ohnosequences.pointless._, AnyTypeSet._
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.
 */
-trait AnyVertexType extends AnyType with AnyPropertiesHolder
+trait AnyVertexType extends AnyElementType
 
 class VertexType[Props <: AnyTypeSet.Of[AnyProperty]](
   val label: String,

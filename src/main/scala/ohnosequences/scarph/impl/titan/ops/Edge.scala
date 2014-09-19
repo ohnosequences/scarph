@@ -8,13 +8,13 @@ object edge {
   import ohnosequences.scarph.ops.edge._
 
   // /* Getting a property from any TitanEdge */
-  implicit def unsafeGetEdgeProperty[E <: AnyTitanEdge, P <: AnyProperty]
-    (implicit hasProp: EdgeTypeOf[E] HasProperty P):
-          GetEdgeProperty[E, P] = 
-      new GetEdgeProperty[E, P] {
+  // implicit def unsafeGetEdgeProperty[E <: AnyTitanEdge, P <: AnyProperty]
+  //   (implicit hasProp: EdgeTypeOf[E] HasProperty P):
+  //         GetEdgeProperty[E, P] = 
+  //     new GetEdgeProperty[E, P] {
 
-        def apply(raw: RawOf[E], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
-      }
+  //       def apply(raw: RawOf[E], prop: P): Out = prop(raw.getProperty[RawOf[P]](prop.label))
+  //     }
 
   import com.tinkerpop.blueprints.Direction
 

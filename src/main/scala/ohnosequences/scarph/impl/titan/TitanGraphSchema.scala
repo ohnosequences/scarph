@@ -21,24 +21,46 @@ object TitanGraphSchema {
     }
   }
 
-  implicit def titanManagementOps(mgmt: TitanManagement): 
-    TitanManagementOps = 
-    TitanManagementOps(mgmt)
+  object addPropertyKey extends Poly1 {
+    implicit def default[P <: AnyProperty](implicit cc: ClassTag[P#Raw]) = 
+      at[P]{ (prop: P) =>
+        { (m: TitanManagement) =>
+          val clazz = cc.runtimeClass.asInstanceOf[Class[P#Raw]]
+          m.makePropertyKey(prop.label).dataType(clazz).make
+        }
+      }
+  }
 
-  case class TitanManagementOps(mgmt: TitanManagement) {
-
-    def addPropertyKey[P <: AnyProperty](prop: P) = {
-      val clazz = prop.classTag.runtimeClass.asInstanceOf[Class[RawOf[P]]]
-      mgmt.makePropertyKey(prop.label).dataType(clazz).make
+  object addVertexLabel extends Poly1 {
+    implicit def default[VT <: AnyVertexType] = at[VT]{ (vt: VT) =>
+      { (m: TitanManagement) => m.makeVertexLabel(vt.label).make }
     }
+  }
 
-    def addEdgeLabel[ET <: AnyEdgeType](et: ET) = {
-      mgmt.makeEdgeLabel(et.label).multiplicity(multiplicity(et)).make()
+  object addEdgeLabel extends Poly1 {
+    implicit def default[ET <: AnyEdgeType] = at[ET]{ (et: ET) =>
+      { (m: TitanManagement) => m.makeEdgeLabel(et.label).multiplicity(multiplicity(et)).make }
     }
+  }
 
-    def addVertexLabel[VT <: AnyVertexType](vt: VT) = {
-      mgmt.makeVertexLabel(vt.label).make()
-    }
+  object addIndex extends Poly1 {
+    implicit def vertexIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyVertexType }] = 
+      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+          m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
+            .indexOnly(m.getVertexLabel(ix.indexedType.label))
+            .addKey(m.getPropertyKey(ix.property.label))
+            .buildCompositeIndex()
+        }
+      }
+
+    implicit def edgeIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyEdgeType }] = 
+      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+          m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])
+            .indexOnly(m.getEdgeLabel(ix.indexedType.label))
+            .addKey(m.getPropertyKey(ix.property.label))
+            .buildCompositeIndex()
+        }
+      }
   }
 
   implicit def titanGraphOps(g: TitanGraph): 
@@ -48,17 +70,27 @@ object TitanGraphSchema {
   case class TitanGraphOps(g: TitanGraph) {
 
     def createSchema[GS <: AnyGraphSchema, Ps <: AnyTypeSet](gs: GS)(implicit
-        props: SchemaProperties[GS] { type Out = Ps },
-        propsList: ToList[Ps] with InContainer[AnyProperty],
-        edgeTypeList: ToList[gs.EdgeTypes] with InContainer[AnyEdgeType],
-        vertexTypeList: ToList[gs.VertexTypes] with InContainer[AnyVertexType]
+        aggregateProps: SchemaProperties[GS] { type Out = Ps },
+        propertiesMapper: MapToList[addPropertyKey.type, Ps] with 
+                          InContainer[TitanManagement => PropertyKey],
+        edgeTypesMapper: MapToList[addEdgeLabel.type, gs.EdgeTypes] with 
+                         InContainer[TitanManagement => EdgeLabel],
+        vertexTypesMapper: MapToList[addVertexLabel.type, gs.VertexTypes] with 
+                           InContainer[TitanManagement => VertexLabel],
+        indexMapper: MapToList[addIndex.type, gs.Indexes] with 
+                     InContainer[TitanManagement => TitanGraphIndex]
       ) = {
         // we want all this happen in a one transaction
         val mgmt = g.getManagementSystem
-
-        propsList(props(gs)).map{ mgmt.addPropertyKey(_) }
-        edgeTypeList(gs.edgeTypes).map{ mgmt.addEdgeLabel(_) }
-        vertexTypeList(gs.vertexTypes).map{ mgmt.addVertexLabel(_) }
+        // property keys
+        val props = aggregateProps(gs)
+        propertiesMapper(props).map{ _.apply(mgmt) }
+        // edge labels
+        edgeTypesMapper(gs.edgeTypes).map{ _.apply(mgmt) }
+        // vertex labels
+        vertexTypesMapper(gs.vertexTypes).map{ _.apply(mgmt) }
+        // indexes
+        indexMapper(gs.indexes).map{ _.apply(mgmt) }
 
         mgmt.commit
       }
