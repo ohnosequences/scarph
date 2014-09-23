@@ -23,7 +23,7 @@ object TwitterSchema {
   case object TweetTextIx extends CompositeIndex(Tweet, text)
   case object PostedTimeIx extends CompositeIndex(Posted, time)
 
-  val schema = SchemaType("twitter",
+  val schemaType = SchemaType("twitter",
     vertexTypes = User :~: Tweet :~: ∅,
     edgeTypes = Posted :~: Follows :~: ∅,
     indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅

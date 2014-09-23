@@ -19,40 +19,53 @@ object DenoteTypes {
     ):  DenoteTypes[H :~: T] with Out[H#Tpe :~: TR] =
     new DenoteTypes[H :~: T] with Out[H#Tpe :~: TR]
 }
+import DenoteTypes.denoteTypes
 
 trait AnySchema extends Denotation[AnySchemaType] {
-  import DenoteTypes.denoteTypes
 
   type Vertices <: AnyTypeSet.Of[AnyVertex]
   val  vertices: Vertices
 
-  val vertexTypesCorrespond: Vertices denoteTypes Tpe#VertexTypes
+  // val vertexTypesCorrespond: Vertices denoteTypes Tpe#VertexTypes
 
   type Edges <: AnyTypeSet.Of[AnyEdge]
   val  edges: Edges
 
-  val edgeTypesCorrespond: Edges denoteTypes Tpe#EdgeTypes
+  // val edgeTypesCorrespond: Edges denoteTypes Tpe#EdgeTypes
 }
 
+case class Schema[Vs <: AnyTypeSet.Of[AnyVertex], Es <: AnyTypeSet.Of[AnyEdge], ST <: AnySchemaType]
+  (val tpe: ST,
+   val vertices: Vs,
+   val edges: Es
+  // )(implicit 
+  //   val vertexTypesCorrespond: Vs denoteTypes ST#VertexTypes,
+  //   val edgeTypesCorrespond: Es denoteTypes ST#EdgeTypes
+  ) extends AnySchema {
 
-trait GetVertex[Vs <: AnyTypeSet, VT <: AnyVertexType] extends Fn1[Vs] with OutBound[AnyVertex]
+    type Tpe = ST
+    type Vertices = Vs
+    type Edges = Es
+  }
 
-object GetVertex extends GetVertex_2 {
+trait GetElement[Es <: AnyTypeSet, ET <: AnyElementType] extends Fn1[Es] with OutBound[AnyElement]
 
-  implicit def foundInHead[H <: AnyVertex, T <: AnyTypeSet]:
-        GetVertex[H :~: T, H#Tpe] with Out[H] =
-    new GetVertex[H :~: T, H#Tpe] with Out[H] {
+object GetElement extends GetElement_2 {
+
+  implicit def foundInHead[HT <: AnyElementType, H <: AnyElement.ofType[HT], T <: AnyTypeSet]:
+        GetElement[H :~: T, HT] with Out[H] =
+    new GetElement[H :~: T, HT] with Out[H] {
       def apply(vs: In1): Out = vs.head
     }
 }
 
-trait GetVertex_2 {
+trait GetElement_2 {
 
-  implicit def foundInTail[H <: AnyVertex, T <: AnyTypeSet, V <: AnyVertex]
+  implicit def foundInTail[ET <: AnyElementType, H <: AnyElement, T <: AnyTypeSet, E <: AnyElement]
     (implicit 
-      intail: GetVertex[T, V#Tpe] { type Out = V }
-    ):  GetVertex[H :~: T, V#Tpe] with Out[V] =
-    new GetVertex[H :~: T, V#Tpe] with Out[V] {
+      intail: GetElement[T, ET] { type Out = E }
+    ):  GetElement[H :~: T, ET] with Out[E] =
+    new GetElement[H :~: T, ET] with Out[E] {
       def apply(vs: In1): Out = intail(vs.tail)
     }
 }
@@ -66,15 +79,23 @@ object AnySchema {
 
 class SchemaOps[S <: AnySchema](s: S) {
 
-  def eval[
-    I <: AnyVertex,
-    O <: AnyVertex,
-    Q <: Query[I#Tpe, O#Tpe]
-  ](q: Q)(implicit
-    in: GetVertex[S#Vertices, Q#InT] { type Out = I },
-    out: GetVertex[S#Vertices, Q#OutT] { type Out = O },
-    ev: EvalQuery[Q, I, O]
-  ): O = ev(q, in(s.vertices))
+  def elementOfType[ET <: AnyElementType, Es <: AnyTypeSet](et: ET)
+    (implicit 
+      es: (S#Vertices ∪ S#Edges) { type Out = Es },
+      get: GetElement[Es, ET]
+    ): get.Out = get(es(s.vertices, s.edges))
+
+  // def eval[
+  //   I <: AnyElement,
+  //   O <: AnyElement,
+  //   Q <: Query[I#Tpe, O#Tpe],
+  //   Es <: AnyTypeSet
+  // ](q: Q, in: ValueOf[I])(implicit
+  //   u: (S#Vertices ∪ S#Edges) { type Out = Es },
+  //   i: GetElement[Es, Q#InT] { type Out = I },
+  //   o: GetElement[Es, Q#OutT] { type Out = O },
+  //   ev: EvalQuery[Q, I, O]
+  // ): ValueOf[O] = ev(in.raw)
 }
 
 
@@ -82,4 +103,4 @@ trait EvalQuery[
   Q <: Query[I#Tpe, O#Tpe],
   I <: AnyDenotation,
   O <: AnyDenotation
-] extends Fn2[Q, I] with Out[O]
+] extends Fn1[I#Raw] with Out[ValueOf[O]]
