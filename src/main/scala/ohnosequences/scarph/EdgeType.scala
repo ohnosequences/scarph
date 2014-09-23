@@ -3,19 +3,27 @@ package ohnosequences.scarph
 import ohnosequences.pointless._
 import scalaz._, std.option._, std.list._
 
+/* Arities */
+sealed trait Arity
+trait One  extends Arity
+trait Many extends Arity
+
+/* Arities */
+sealed trait IsDefined
+trait Always    extends IsDefined
+trait Sometimes extends IsDefined
+
 /*
   Declares an edge type. it is determined by source/target vertex types and in/out arities
 */
 trait AnyEdgeType extends AnyElementType {
 
-  type In[X]
-  type Out[X]
+  type Container[X] = List[X]
 
-  val  in: Arity
-  val  out: Arity
+  type  InArity <: Arity
+  type OutArity <: Arity
 
-  val inFunctor: Functor[In]
-  val outFunctor: Functor[Out]
+  type Defined <: IsDefined
 
   type SourceType <: AnyVertexType
   val  sourceType: SourceType
@@ -42,15 +50,13 @@ object AnyEdgeType {
 trait From[S <: AnyVertexType] extends AnyEdgeType { type SourceType = S }
 trait   To[T <: AnyVertexType] extends AnyEdgeType { type TargetType = T }
 
-/* Arities */
-sealed trait Arity
-case object One  extends Arity
-case object Many extends Arity
+trait ManyOut extends AnyEdgeType { type OutArity = Many }
+trait  OneOut extends AnyEdgeType { type OutArity =  One }
+trait ManyIn  extends AnyEdgeType { type  InArity = Many }
+trait  OneIn  extends AnyEdgeType { type  InArity =  One }
 
-trait ManyOut extends AnyEdgeType { type Out[X] =   List[X]; val out = Many; val outFunctor = implicitly[Functor[Out]] }
-trait  OneOut extends AnyEdgeType { type Out[X] = Option[X]; val out = One;  val outFunctor = implicitly[Functor[Out]] }
-trait ManyIn  extends AnyEdgeType { type  In[X] =   List[X]; val  in = Many; val  inFunctor = implicitly[Functor[In]] }
-trait  OneIn  extends AnyEdgeType { type  In[X] = Option[X]; val  in = One;  val  inFunctor = implicitly[Functor[In]] }
+trait AlwaysDefined extends AnyEdgeType { type Defined = Always }
+trait SometimesDefined extends AnyEdgeType { type Defined = Sometimes }
 
 abstract class EdgeType[S <: AnyVertexType, T <: AnyVertexType, Props <: AnyTypeSet.Of[AnyProperty]]
   (val sourceType: S, val label: String, val targetType: T, val properties: Props) 

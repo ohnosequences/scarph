@@ -14,5 +14,5 @@ class TitanVertex[VT <: AnyVertexType](val graph: TGraph, vt: VT)
 
 object AnyTitanVertex {
 
-  type ofType[VT <: AnyVertexType] = AnyTitanVertex { type DenotedType = VT }
+  type ofType[VT <: AnyVertexType] = AnyTitanVertex { type Tpe = VT }
 }

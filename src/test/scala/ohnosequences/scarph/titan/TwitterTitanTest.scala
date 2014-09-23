@@ -14,7 +14,7 @@ import ohnosequences.pointless._
 import ohnosequences.scarph._, AnyQuery._, AnyCondition._
 import ohnosequences.scarph.syntax.simple._
 import ohnosequences.scarph.test._, TwitterSchema._
-import ohnosequences.scarph.impl.titan._, TitanGraphSchema._
+import ohnosequences.scarph.impl.titan._, TitanSchemaType._
 import ohnosequences.scarph.impl.titan.ops._, element._, vertex._, edge._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {

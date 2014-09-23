@@ -18,6 +18,16 @@ object edge {
 
   import com.tinkerpop.blueprints.Direction
 
+  implicit def getSource[ET <: AnyEdgeType]:
+        Source[ET] =
+    new Source[ET] {
+      type In = AnyTitanEdge with AnyEdge.ofType[ET]
+      type Out = AnyTitanVertex with AnyVertex.ofType[ET#SourceType]
+
+      def eval[I <: In, O <: Out](e: ValueOf[I]): ValueOf[O] = 
+        valueOf[O](e.raw.getVertex(Direction.OUT))
+    }
+
   /* Getting source vertex */
   implicit def sourceGetter[E <: AnyTitanEdge]:
         GetSource[E] =

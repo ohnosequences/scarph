@@ -12,15 +12,15 @@ trait AnyIndex {
   val  indexedType: IndexedType
 
   /* The type of predicates that this index can be queried for */
-  type QueryType <: AnyQuery.On[IndexedType]
+  // type QueryType <: AnyQuery.On[IndexedType]
 
-  type Out[X]
+  // type Out[X]
 }
 
 object AnyIndex {
 
   type Over[IT] = AnyIndex { type IndexedType = IT }
-  type WithQuery[P] = AnyIndex { type QueryType = P }
+  // type WithQuery[P] = AnyIndex { type QueryType = P }
 }
 
 
@@ -41,12 +41,12 @@ trait AnyCompositeIndex extends AnyIndex {
   // should be provided implicitly:
   val indexedTypeHasProperty: IndexedType HasProperty Property
 
-  type Out[X] = List[X]
+  // type Out[X] = List[X]
 
-  type QueryType = AnySimpleQuery {
-    type ElementType = IndexedType
-    type Head = EQ[Property]
-  }
+  // type QueryType = AnySimpleQuery {
+  //   type ElementType = IndexedType
+  //   type Head = EQ[Property]
+  // }
 }
 
 class CompositeIndex[ET <: AnyElementType, P <: AnyProperty](

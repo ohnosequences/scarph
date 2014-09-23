@@ -3,12 +3,7 @@ package ohnosequences.scarph
 import ohnosequences.pointless._, AnyTypeSet._, AnyFn._
 import ohnosequences.pointless.ops.typeSet._
 
-trait AnyGraphSchema {
-
-  val label: String
-
-  // type Dependencies <: AnyTypeSet.Of[AnyGraphSchema]
-  // val  dependencies: Dependencies
+trait AnySchemaType extends AnyType {
 
   type VertexTypes <: AnyTypeSet.Of[AnyVertexType]
   val  vertexTypes: VertexTypes
@@ -20,38 +15,34 @@ trait AnyGraphSchema {
   val  indexes: Indexes
 }
 
-case class GraphSchema[
-    // Ds <: AnyTypeSet.Of[AnyGraphSchema],
+case class SchemaType[
     Vs <: AnyTypeSet.Of[AnyVertexType],
     Es <: AnyTypeSet.Of[AnyEdgeType],
     Is <: AnyTypeSet.Of[AnyIndex]
   ](val label: String,
-    // val dependencies: Ds = ∅,
     val vertexTypes:  Vs = ∅,
     val edgeTypes: Es    = ∅,
     val indexes: Is      = ∅
-  ) extends AnyGraphSchema {
+  ) extends AnySchemaType {
 
-  // type Dependencies = Ds
   type VertexTypes  = Vs
   type EdgeTypes    = Es
   type Indexes      = Is
 }
 
-object AnyGraphSchema {
+object AnySchemaType {
 
-  // type DependenciesOf[GS <: AnyGraphSchema] = GS#Dependencies
-  type VertexTypesOf[GS <: AnyGraphSchema] = GS#VertexTypes
-  type EdgeTypesOf[GS <: AnyGraphSchema] = GS#EdgeTypes
-  type IndexesOf[GS <: AnyGraphSchema] = GS#Indexes
+  type VertexTypesOf[GS <: AnySchemaType] = GS#VertexTypes
+  type EdgeTypesOf[GS <: AnySchemaType] = GS#EdgeTypes
+  type IndexesOf[GS <: AnySchemaType] = GS#Indexes
 
-  implicit def graphSchemaOps[GS <: AnyGraphSchema](gs: GS):
-        GraphSchemaOps[GS] =
-    new GraphSchemaOps[GS](gs)
+  implicit def schemaTypeOps[GS <: AnySchemaType](gs: GS):
+        SchemaTypeOps[GS] =
+    new SchemaTypeOps[GS](gs)
 }
-import AnyGraphSchema._
+import AnySchemaType._
 
-class GraphSchemaOps[GS <: AnyGraphSchema](gs: GS) {
+class SchemaTypeOps[GS <: AnySchemaType](gs: GS) {
 
   def properties(implicit props: SchemaProperties[GS]): props.Out = props(gs)
 }
@@ -59,12 +50,12 @@ class GraphSchemaOps[GS <: AnyGraphSchema](gs: GS) {
 
 // TODO: move it somewhere?
 /* This op aggregates properties of vertex types and edge types and unites them */
-trait SchemaProperties[S <: AnyGraphSchema] extends Fn1[S] with OutBound[AnyTypeSet]
+trait SchemaProperties[S <: AnySchemaType] extends Fn1[S] with OutBound[AnyTypeSet]
 
 object SchemaProperties {
 
   implicit def aggregate[
-      GS <: AnyGraphSchema,
+      GS <: AnySchemaType,
       VP <: AnyTypeSet, 
       EP <: AnyTypeSet, 
       U <: AnyTypeSet

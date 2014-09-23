@@ -2,127 +2,153 @@ package ohnosequences.scarph
 
 import ohnosequences.pointless._
 
-/*
-  ## Queries
+trait AnyQuery extends AnyFn{
 
-  Queries represent expressions combining several conditions for a particular item.
-  You can combine conditions **either** by `OR` or by `AND` conditional operator (_you can't mix them_).
-  Query constructors check that the item has the attribute used in the applied condition.
-*/
-trait AnyQuery {
-  type Body <: AnyQuery
-  val  body: Body
-
-  type Head <: AnyCondition
-  val  head: Head
-
-  type ElementType <: AnyElementType
-  val  elementType: ElementType
-
-  type Out[X] = List[X]
+  type InT  <: AnyType
+  type OutT <: AnyType
 }
 
-/*
-  ### OR Queries
-*/
-trait AnyOrQuery extends AnyQuery {
+trait Query[I <: AnyType, O <: AnyType] extends AnyQuery {
 
-  type Body <: AnyOrQuery
-
-  def or[Head <: AnyCondition](other: Head)(implicit 
-    ev: ElementType HasProperty other.Property
-  ): OR[Body, Head] = 
-     OR(body, other)
+  type InT = I
+  type OutT = O
 }
 
-case class OR[B <: AnyOrQuery, H <: AnyCondition]
-  (val body : B,  val head : H) extends AnyOrQuery {
-  type Body = B; type Head = H
+trait GetProp[T <: AnyElementType, P <: AnyProperty] extends Query[T, P]
 
-  type ElementType = body.ElementType
-  val  elementType = body.elementType
-} 
+trait Source[ET <: AnyEdgeType] extends Query[ET, ET#SourceType]
+trait Target[ET <: AnyEdgeType] extends Query[ET, ET#TargetType]
 
+trait  InEdges[ET <: AnyEdgeType] extends Query[ET#TargetType, ET]
+trait OutEdges[ET <: AnyEdgeType] extends Query[ET#SourceType, ET]
 
-/* 
-  ### AND Queries
-*/
-trait AnyAndQuery extends AnyQuery {
-
-  type Body <: AnyAndQuery
-
-  def and[Head <: AnyCondition](other: Head)(implicit 
-    ev: ElementType HasProperty other.Property
-  ): AND[Body, Head] = 
-     AND(body, other)
-}
-
-case class AND[B <: AnyAndQuery, H <: AnyCondition]
-  (val body : B,  val head : H) extends AnyAndQuery {
-  type Body = B; type Head = H
-
-  type ElementType = body.ElementType
-  val  elementType = body.elementType 
-}
+trait  InVertices[ET <: AnyEdgeType] extends Query[ET#TargetType, ET#SourceType]
+trait OutVertices[ET <: AnyEdgeType] extends Query[ET#SourceType, ET#TargetType]
 
 
-/* 
-  ### Simple Queries
+trait Compose[Q1 <: AnyQuery { type OutT <: Q2#InT }, Q2 <: AnyQuery] extends Query[Q1#InT, Q2#OutT]
 
-  It contains only one condition and can be extended either to `OR` or `AND` predicate
-*/
-trait AnySimpleQuery extends AnyOrQuery with AnyAndQuery {
-  type Body = this.type
-  val  body = this: this.type
-}
+// /*
+//   ## Queries
 
-case class SimpleQuery[E <: AnyElementType, C <: AnyCondition]
-  (val elementType : E,  val head : C) extends AnySimpleQuery {
-  type ElementType = E; type Head = C
-}
+//   Queries represent expressions combining several conditions for a particular item.
+//   You can combine conditions **either** by `OR` or by `AND` conditional operator (_you can't mix them_).
+//   Query constructors check that the item has the attribute used in the applied condition.
+// */
+// trait AnyQuery {
+//   type Body <: AnyQuery
+//   val  body: Body
 
-// trait AnyVertexQuery extends AnySimpleQuery {
-//  type TYPE = AnyVertexType
+//   type Head <: AnyCondition
+//   val  head: Head
+
+//   type ElementType <: AnyElementType
+//   val  elementType: ElementType
+
+//   type Out[X] = List[X]
 // }
 
-// case class VertexQuery[I <: AnyVertexType, C <: AnyCondition]
-//   (val elementType : I,  val head : C) extends AnyVertexQuery {
-//   type ElementType = I; type Head = C
+// /*
+//   ### OR Queries
+// */
+// trait AnyOrQuery extends AnyQuery {
+
+//   type Body <: AnyOrQuery
+
+//   def or[Head <: AnyCondition](other: Head)(implicit 
+//     ev: ElementType HasProperty other.Property
+//   ): OR[Body, Head] = 
+//      OR(body, other)
 // }
 
+// case class OR[B <: AnyOrQuery, H <: AnyCondition]
+//   (val body : B,  val head : H) extends AnyOrQuery {
+//   type Body = B; type Head = H
 
-// trait AnyEdgeQuery extends AnySimpleQuery {
-//   type TYPE = AnyEdgeType
+//   type ElementType = body.ElementType
+//   val  elementType = body.elementType
+// } 
+
+
+// /* 
+//   ### AND Queries
+// */
+// trait AnyAndQuery extends AnyQuery {
+
+//   type Body <: AnyAndQuery
+
+//   def and[Head <: AnyCondition](other: Head)(implicit 
+//     ev: ElementType HasProperty other.Property
+//   ): AND[Body, Head] = 
+//      AND(body, other)
 // }
 
-// case class EdgeQuery[I <: AnyEdgeType, C <: AnyCondition]
-//   (val elementType : I,  val head : C) extends AnyEdgeQuery {
-//   type ElementType = I; type Head = C
+// case class AND[B <: AnyAndQuery, H <: AnyCondition]
+//   (val body : B,  val head : H) extends AnyAndQuery {
+//   type Body = B; type Head = H
+
+//   type ElementType = body.ElementType
+//   val  elementType = body.elementType 
 // }
 
 
-object AnyQuery {
+// /* 
+//   ### Simple Queries
 
-  type HeadedBy[C <: AnyCondition] = AnyQuery { type Head <: C }
+//   It contains only one condition and can be extended either to `OR` or `AND` predicate
+// */
+// trait AnySimpleQuery extends AnyOrQuery with AnyAndQuery {
+//   type Body = this.type
+//   val  body = this: this.type
+// }
 
-  type On[I] = AnyQuery { type ElementType = I }
+// case class SimpleQuery[E <: AnyElementType, C <: AnyCondition]
+//   (val elementType : E,  val head : C) extends AnySimpleQuery {
+//   type ElementType = E; type Head = C
+// }
 
-  /* 
-    With this you can write `item ? condition` which means `SimpleQuery(item, condition)`
-  */
-  implicit def elementQueryOps[ET <: AnyElementType](et: ET): ElementQueryOps[ET] = ElementQueryOps(et)
-  case class   ElementQueryOps[ET <: AnyElementType](et: ET) {
-    def ?[C <: AnyCondition](c: C)(implicit 
-        ev: ET HasProperty c.Property
-      ): SimpleQuery[ET, C] = SimpleQuery(et, c)
-  }
+// // trait AnyVertexQuery extends AnySimpleQuery {
+// //  type TYPE = AnyVertexType
+// // }
 
-  // implicit def edgeQueryOps[ET <: AnyEdgeType](et: ET): EdgeQueryOps[ET] = EdgeQueryOps(et)
-  // case class   EdgeQueryOps[ET <: AnyEdgeType](et: ET) {
-  //   def ?[C <: AnyCondition](c: C)(implicit 
-  //       ev: ET HasProperty c.Property
-  //     ): EdgeQuery[ET, C] = EdgeQuery(et, c)
-  // }
+// // case class VertexQuery[I <: AnyVertexType, C <: AnyCondition]
+// //   (val elementType : I,  val head : C) extends AnyVertexQuery {
+// //   type ElementType = I; type Head = C
+// // }
+
+
+// // trait AnyEdgeQuery extends AnySimpleQuery {
+// //   type TYPE = AnyEdgeType
+// // }
+
+// // case class EdgeQuery[I <: AnyEdgeType, C <: AnyCondition]
+// //   (val elementType : I,  val head : C) extends AnyEdgeQuery {
+// //   type ElementType = I; type Head = C
+// // }
+
+
+// object AnyQuery {
+
+//   type HeadedBy[C <: AnyCondition] = AnyQuery { type Head <: C }
+
+//   type On[I] = AnyQuery { type ElementType = I }
+
+//   /* 
+//     With this you can write `item ? condition` which means `SimpleQuery(item, condition)`
+//   */
+//   implicit def elementQueryOps[ET <: AnyElementType](et: ET): ElementQueryOps[ET] = ElementQueryOps(et)
+//   case class   ElementQueryOps[ET <: AnyElementType](et: ET) {
+//     def ?[C <: AnyCondition](c: C)(implicit 
+//         ev: ET HasProperty c.Property
+//       ): SimpleQuery[ET, C] = SimpleQuery(et, c)
+//   }
+
+//   // implicit def edgeQueryOps[ET <: AnyEdgeType](et: ET): EdgeQueryOps[ET] = EdgeQueryOps(et)
+//   // case class   EdgeQueryOps[ET <: AnyEdgeType](et: ET) {
+//   //   def ?[C <: AnyCondition](c: C)(implicit 
+//   //       ev: ET HasProperty c.Property
+//   //     ): EdgeQuery[ET, C] = EdgeQuery(et, c)
+//   // }
 
   
-}
+// }

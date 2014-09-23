@@ -10,16 +10,12 @@ import shapeless._, poly._
 import scala.reflect._
 
 
-object TitanGraphSchema {
+object TitanSchemaType {
 
-  implicit def multiplicity[ET <: AnyEdgeType](et: ET): Multiplicity = {
-    (et.in, et.out) match {
-      case (One, One)  => Multiplicity.ONE2ONE
-      case (One, Many) => Multiplicity.ONE2MANY
-      case (Many, One) => Multiplicity.MANY2ONE
-      case           _ => Multiplicity.MULTI
-    }
-  }
+  implicit def one2one[ET <: AnyEdgeType with OneIn with OneOut](et: ET): Multiplicity = Multiplicity.ONE2ONE
+  implicit def one2many[ET <: AnyEdgeType with OneIn with ManyOut](et: ET): Multiplicity = Multiplicity.ONE2MANY
+  implicit def many2one[ET <: AnyEdgeType with ManyIn with OneOut](et: ET): Multiplicity = Multiplicity.MANY2ONE
+  implicit def many2many[ET <: AnyEdgeType with ManyIn with ManyOut](et: ET): Multiplicity = Multiplicity.MULTI
 
   object addPropertyKey extends Poly1 {
     implicit def default[P <: AnyProperty](implicit cc: ClassTag[P#Raw]) = 
@@ -38,8 +34,8 @@ object TitanGraphSchema {
   }
 
   object addEdgeLabel extends Poly1 {
-    implicit def default[ET <: AnyEdgeType] = at[ET]{ (et: ET) =>
-      { (m: TitanManagement) => m.makeEdgeLabel(et.label).multiplicity(multiplicity(et)).make }
+    implicit def default[ET <: AnyEdgeType](implicit multi: ET => Multiplicity) = at[ET]{ (et: ET) =>
+      { (m: TitanManagement) => m.makeEdgeLabel(et.label).multiplicity(multi(et)).make }
     }
   }
 
@@ -69,7 +65,7 @@ object TitanGraphSchema {
 
   case class TitanGraphOps(g: TitanGraph) {
 
-    def createSchema[GS <: AnyGraphSchema, Ps <: AnyTypeSet](gs: GS)(implicit
+    def createSchema[GS <: AnySchemaType, Ps <: AnyTypeSet](gs: GS)(implicit
         aggregateProps: SchemaProperties[GS] { type Out = Ps },
         propertiesMapper: MapToList[addPropertyKey.type, Ps] with 
                           InContainer[TitanManagement => PropertyKey],

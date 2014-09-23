@@ -23,8 +23,8 @@ object simple {
   class ElementOps[E <: AnyElement](val e: E) extends AnyVal {
     import ohnosequences.scarph.ops.element._
 
-    def query[Q <: AnyQuery.On[E#DenotedType]](q: Q)
-      (implicit eval: EvalQuery[E, Q]): Q#Out[ValueOf[E]] = eval(e, q)
+    // def query[Q <: AnyQuery.On[E#Tpe]](q: Q)
+    //   (implicit eval: EvalQuery[E, Q]): Q#Out[ValueOf[E]] = eval(e, q)
   }
 
 
@@ -36,11 +36,11 @@ object simple {
     import ohnosequences.scarph.ops.vertex._
     import ohnosequences.scarph.ops.edge._
 
-    def in[E <: AnyEdge.withTarget[V]](e: E)
-      (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
+    // def in[E <: AnyEdge.withTarget[V]](e: E)
+    //   (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
 
-    def out[E <: AnyEdge.withSource[V]](e: E)
-      (implicit out: GetOutEdge[E]): EdgeTypeOf[E]#Out[ValueOf[E]] = out(raw, e)
+    // def out[E <: AnyEdge.withSource[V]](e: E)
+    //   (implicit out: GetOutEdge[E]): EdgeTypeOf[E]#Out[ValueOf[E]] = out(raw, e)
 
     // def outV[E <: AnyEdge.withSource[V]](e: E)
     //   (implicit 
@@ -50,8 +50,8 @@ object simple {
     //   ): EdgeTypeOf[E]#Out[ValueOf[TargetOf[E]]] = {
 
     //     val edges = out(raw, e)
-    //     val eT: E#DenotedType = e.denotedType
-    //     val eTF: scalaz.Functor[E#DenotedType#Out]= eT.outFunctor
+    //     val eT: E#Tpe = e.tpe
+    //     val eTF: scalaz.Functor[E#Tpe#Out]= eT.outFunctor
     //     eTF.map(edges){ eVal => tgts(eVal.raw) }
     //   }
 

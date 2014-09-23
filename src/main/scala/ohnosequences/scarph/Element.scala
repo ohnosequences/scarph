@@ -6,17 +6,12 @@ import ohnosequences.pointless._
 
 trait AnyElementType extends AnyType with AnyPropertiesHolder
 
-trait AnyElement extends AnyDenotation {
+trait AnyElement extends Denotation[AnyElementType]
 
-  type TypeBound <: AnyElementType
 
-  type Graph
-  val  graph: Graph
-}
-
-trait AnyElementOf[T <: AnyElementType] extends AnyElement { type TypeBound = T }
+trait AnyElementOf[T <: AnyElementType] extends AnyElement { type Tpe <: T }
 
 object AnyElement {
 
-  type ofType[T <: AnyElementType] = AnyElement { type DenotedType = T }
+  type ofType[T <: AnyElementType] = AnyElement { type Tpe = T }
 }

@@ -12,5 +12,5 @@ trait AnyTitanElement extends AnyElement {
 
 object AnyTitanElement {
 
-  type ofType[ET <: AnyElementType] = AnyTitanElement { type DenotedType = ET }
+  type ofType[ET <: AnyElementType] = AnyTitanElement { type Tpe = ET }
 }
