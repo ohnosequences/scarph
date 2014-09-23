@@ -14,19 +14,26 @@ trait Query[I <: AnyType, O <: AnyType] extends AnyQuery {
   type OutT = O
 }
 
-case class GetProp[T <: AnyElementType, P <: AnyProperty](t: T, p: P) extends Query[T, P]
+case class GetProperty[T <: AnyElementType, P <: AnyProperty](t: T, p: P) extends Query[T, P]
 
-case class Source[ET <: AnyEdgeType](et: ET) extends Query[ET, ET#SourceType]
-case class Target[ET <: AnyEdgeType](et: ET) extends Query[ET, ET#TargetType]
+case class GetSource[ET <: AnyEdgeType](et: ET) extends Query[ET, ET#SourceType]
+case class GetTarget[ET <: AnyEdgeType](et: ET) extends Query[ET, ET#TargetType]
 
-case class  InEdges[ET <: AnyEdgeType](et: ET) extends Query[ET#TargetType, ET]
-case class OutEdges[ET <: AnyEdgeType](et: ET) extends Query[ET#SourceType, ET]
+case class  GetInEdges[ET <: AnyEdgeType](et: ET) extends Query[ET#TargetType, ET]
+case class GetOutEdges[ET <: AnyEdgeType](et: ET) extends Query[ET#SourceType, ET]
 
-case class  InVertices[ET <: AnyEdgeType](et: ET) extends Query[ET#TargetType, ET#SourceType]
-case class OutVertices[ET <: AnyEdgeType](et: ET) extends Query[ET#SourceType, ET#TargetType]
+case class  GetInVertices[ET <: AnyEdgeType](et: ET) extends Query[ET#TargetType, ET#SourceType]
+case class GetOutVertices[ET <: AnyEdgeType](et: ET) extends Query[ET#SourceType, ET#TargetType]
 
 
 case class Compose[Q1 <: AnyQuery { type OutT <: Q2#InT }, Q2 <: AnyQuery](q1: Q1, q2: Q2) extends Query[Q1#InT, Q2#OutT]
+
+
+trait EvalQuery[
+  Q <: AnyQuery,
+  I <: AnyDenotation { type Tpe <: Q#InT },
+  O <: AnyDenotation { type Tpe <: Q#OutT }
+] extends Fn1[I#Raw] with Out[ValueOf[O]]
 
 // /*
 //   ## Queries

@@ -7,16 +7,10 @@ import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 trait AnyTitanEdge extends AnyEdge with AnyTitanElement {
 
   type Raw = com.thinkaurelius.titan.core.TitanEdge
-
-  type Source <: AnyVertex.ofType[SourceTypeOf[Tpe]] with AnyTitanVertex
-  type Target <: AnyVertex.ofType[TargetTypeOf[Tpe]] with AnyTitanVertex
 }
 
-class TitanEdge[
-    S <: AnyVertex.ofType[ET#SourceType] with AnyTitanVertex, 
-    ET <: AnyEdgeType, 
-    T <: AnyVertex.ofType[ET#TargetType] with AnyTitanVertex
-  ](val graph: TGraph, s: S, et: ET, t: T) extends Edge(s, et, t) with AnyTitanEdge 
+case class TitanEdge[ET <: AnyEdgeType](val tpe: ET) 
+  extends AnyTitanEdge { type Tpe = ET }
 
 object AnyTitanEdge {
 

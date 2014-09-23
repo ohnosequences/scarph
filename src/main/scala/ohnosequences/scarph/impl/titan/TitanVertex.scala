@@ -9,8 +9,8 @@ trait AnyTitanVertex extends AnyVertex with AnyTitanElement {
   type Raw = com.thinkaurelius.titan.core.TitanVertex
 }
 
-class TitanVertex[VT <: AnyVertexType](val graph: TGraph, vt: VT) 
-  extends Vertex[VT](vt) with AnyTitanVertex
+case class TitanVertex[VT <: AnyVertexType](val tpe: VT) 
+  extends AnyTitanVertex { type Tpe = VT }
 
 object AnyTitanVertex {
 

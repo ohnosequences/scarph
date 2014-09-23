@@ -27,10 +27,10 @@ import AnyEdge._
   // }
 trait AnyVertex extends AnyElementOf[AnyVertexType]
 
-abstract class Vertex[VT <: AnyVertexType]
-  (val  tpe : VT) extends AnyVertex { 
-   type Tpe = VT
-}
+// abstract class Vertex[VT <: AnyVertexType]
+//   (val  tpe : VT) extends AnyVertex { 
+//    type Tpe = VT
+// }
 
 object AnyVertex {
 

@@ -10,7 +10,8 @@ object query {
   import com.tinkerpop.blueprints.Direction
 
   /* Getting source vertex */
-  implicit def getSource[E <: AnyTitanEdge, Q <: Source[E#Tpe], S <: AnyTitanVertex with AnyVertex.ofType[E#Tpe#SourceType]]:
+  // implicit def getSource[ET <: AnyEdgeType, Q <: GetSource[ET], E <: AnyTitanEdge { type Tpe = ET },  S <: AnyTitanVertex with AnyVertex.ofType[ET#SourceType]]:
+  implicit def getSource[E <: AnyTitanEdge, Q <: GetSource[E#Tpe], S <: AnyTitanVertex with AnyVertex.ofType[E#Tpe#SourceType]]:
         EvalQuery[Q, E, S] =
     new EvalQuery[Q, E, S] {
 

@@ -5,16 +5,12 @@ import ohnosequences.scarph._, impl.titan._
 import ohnosequences.scarph.test._, TwitterSchema._
 import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 
-case class TwitterImpl(graph: TGraph) {
+case object TitanTwitter extends Schema(TwitterSchema.schemaType) {
 
-  case object user extends TitanVertex(graph, User)
-  case object tweet extends TitanVertex(graph, Tweet)
+  implicit val user = this.implements(TitanVertex(User))
+  implicit val tweet = this.implements(TitanVertex(Tweet))
 
-  case object posted extends TitanEdge(graph, user, Posted, tweet)
-  case object follows extends TitanEdge(graph, user, Follows, user)
+  implicit val posted = this.implements(TitanEdge(Posted))
+  implicit val follows = this.implements(TitanEdge(Follows))
 
-  val schema = Schema(TwitterSchema.schemaType,
-    vertices = user :~: tweet :~: ∅,
-    edges = posted :~: follows :~: ∅
-  )
 }

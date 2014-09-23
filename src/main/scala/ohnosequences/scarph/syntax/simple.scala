@@ -5,23 +5,13 @@ import ohnosequences.scarph._, AnyEdge._
 
 object simple {
 
-  implicit def elementRawOps[E <: AnyElement](rep: ValueOf[E]): 
-        ElementRawOps[E] = 
-    new ElementRawOps[E](rep.raw)
+  implicit def elementTypeOps[ET <: AnyElementType](et: ET): 
+        ElementTypeOps[ET] = 
+    new ElementTypeOps[ET](et)
 
-  class ElementRawOps[E <: AnyElement](val raw: RawOf[E]) extends AnyVal {
-    import ohnosequences.scarph.ops.element._
+  class ElementTypeOps[ET <: AnyElementType](val et: ET) extends AnyVal {
 
-    def get[P <: AnyProperty](prop: P)
-      (implicit getter: GetProperty[E, P]): ValueOf[P] = getter(raw, prop)
-  }
-
-  implicit def elementOps[E <: AnyElement](e: E): 
-        ElementOps[E] = 
-    new ElementOps[E](e)
-
-  class ElementOps[E <: AnyElement](val e: E) extends AnyVal {
-    import ohnosequences.scarph.ops.element._
+    def get[P <: AnyProperty](p: P): GetProperty[ET, P] = GetProperty(et, p)
 
     // def query[Q <: AnyQuery.On[E#Tpe]](q: Q)
     //   (implicit eval: EvalQuery[E, Q]): Q#Out[ValueOf[E]] = eval(e, q)
@@ -33,8 +23,6 @@ object simple {
     new VertexRawOps[V](rep.raw)
 
   class VertexRawOps[V <: AnyVertex](val raw: RawOf[V]) extends AnyVal {
-    import ohnosequences.scarph.ops.vertex._
-    import ohnosequences.scarph.ops.edge._
 
     // def in[E <: AnyEdge.withTarget[V]](e: E)
     //   (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
@@ -58,17 +46,14 @@ object simple {
   }
 
 
-  implicit def edgeRawOps[E <: AnyEdge](rep: ValueOf[E]): 
-        EdgeRawOps[E] = 
-    new EdgeRawOps[E](rep.raw)
+  implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET): 
+        EdgeTypeOps[ET] = 
+    new EdgeTypeOps[ET](et)
 
-  class EdgeRawOps[E <: AnyEdge](val raw: RawOf[E]) extends AnyVal {
-    import ohnosequences.scarph.ops.edge._
+  class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {
 
-    def src(implicit src: GetSource[E]): ValueOf[SourceOf[E]] = src(raw)
-
-    def tgt(implicit tgt: GetTarget[E]): ValueOf[TargetOf[E]] = tgt(raw)
-
+    def src: GetSource[ET] = GetSource(et)
+    def tgt: GetTarget[ET] = GetTarget(et)
   }
 
 }

@@ -155,7 +155,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   object TestContext {
-    val impl = TwitterImpl(g); import impl._
+    // val impl = TwitterImpl(g); import impl._
 
     // quering vertices
     // val edu = user.query(User ? (name === "@eparejatobes")).head
@@ -201,9 +201,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   // TODO: make it a graph op: checkSchema
   test("check schema keys/labels") {
-    import TestContext._, impl._
+    // import TestContext._, impl._
 
-    val mgmt = graph.getManagementSystem
+    val mgmt = g.getManagementSystem
 
     checkPropertyKey(mgmt, name)
     checkPropertyKey(mgmt, age)
@@ -244,23 +244,25 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
-    val edu = graph.vertex(user)(name)("@eparejatobes")
-    val alexey = graph.vertex(user)(name)("@laughedelic")
-    val kim = graph.vertex(user)(name)("@evdokim")
-    val twt = graph.vertex(tweet)(text)("back to twitter :)")
-    val post = graph.edge(posted)(time)("13.11.2012")
+    val user = TitanTwitter.implementationOf(User)
+    val tweet = TitanTwitter.implementationOf(Tweet)
+    val posted = TitanTwitter.implementationOf(Posted)
 
-    val q = Source(Posted)
+    val edu = g.vertex(user)(name)("@eparejatobes")
+    val alexey = g.vertex(user)(name)("@laughedelic")
+    val kim = g.vertex(user)(name)("@evdokim")
+    val twt = g.vertex(tweet)(text)("back to twitter :)")
+    val post = g.edge(posted)(time)("13.11.2012")
 
-    implicitly[GetElement[impl.schema.Edges, Posted.type]]
+    val q = Posted.src
 
-    val postedE = impl.schema.elementOfType(Posted)
-    val userV = impl.schema.elementOfType(User)
-    val ev = implicitly[EvalQuery[q.type, postedE.type, userV.type]]
+    val ev = implicitly[EvalQuery[q.type, posted.type, user.type]]
 
     assert{ ev(post.raw) == edu }
 
-    // assert{ impl.schema.eval(q, post) == edu }
+    val ev2 = TitanTwitter.eval(q)
+
+    assert{ ev2(post.raw) == edu }
 
   }
 
