@@ -26,14 +26,57 @@ case class  GetInVertices[ET <: AnyEdgeType](et: ET) extends Query[ET#TargetType
 case class GetOutVertices[ET <: AnyEdgeType](et: ET) extends Query[ET#SourceType, ET#TargetType]
 
 
-case class Compose[Q1 <: AnyQuery { type OutT <: Q2#InT }, Q2 <: AnyQuery](q1: Q1, q2: Q2) extends Query[Q1#InT, Q2#OutT]
+trait AnyCompose extends AnyQuery {
+  type MidT <: AnyType
 
+  type Query1 <: Query[InT, MidT]
+  val  query1: Query1
+
+  type Query2 <: Query[MidT, OutT]
+  val  query2: Query2
+}
+
+class Compose[
+  IT <: AnyType, MT <: AnyType, OT <: AnyType,
+  Q1 <: Query[IT, MT], Q2 <: Query[MT, OT]
+](it: IT, val query1: Q1, mt: MT, val query2: Q2, ot: OT)
+  extends AnyCompose with Query[IT, OT] {
+    type MidT = MT
+    type Query1 = Q1
+    type Query2 = Q2
+  }
+
+// trait AnyEvalQuery[Q <:AnyQuery] {
+//   type I
+//   type O
+// }
 
 trait EvalQuery[
   Q <: AnyQuery,
-  I <: AnyDenotation { type Tpe <: Q#InT },
-  O <: AnyDenotation { type Tpe <: Q#OutT }
-] extends Fn1[I#Raw] with Out[ValueOf[O]]
+  I <: AnyDenotation, //{ type Tpe <: Q#InT },
+  O <: AnyDenotation //{ type Tpe <: Q#OutT }
+] extends Fn2[Q, I#Raw] with Out[ValueOf[O]]
+
+object EvalQuery {
+
+  implicit def compose[
+      C <: AnyCompose,
+      I <: AnyDenotation, // { type Tpe <: C#InT },
+      M <: AnyDenotation, // { type Tpe <: C#MidT },
+      O <: AnyDenotation  // { type Tpe <: C#OutT }
+    ](implicit
+      eval1: EvalQuery[C#Query1, I, M],
+      eval2: EvalQuery[C#Query2, M, O]
+    ):  EvalQuery[C, I, O] =
+    new EvalQuery[C, I, O] {
+
+      def apply(comp: In1, iraw: In2): Out = {
+        val o1 = eval1(comp.query1, iraw)
+        eval2(comp.query2, o1.raw)
+      }
+    }
+
+}
 
 // /*
 //   ## Queries

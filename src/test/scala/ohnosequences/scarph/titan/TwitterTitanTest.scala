@@ -258,11 +258,21 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     val ev = implicitly[EvalQuery[q.type, posted.type, user.type]]
 
-    assert{ ev(post.raw) == edu }
+    assert{ ev(q, post.raw) == edu }
 
-    val ev2 = TitanTwitter.eval(q)
+    assert{ TitanTwitter.eval(Posted.src, post) == edu }
 
-    assert{ ev2(post.raw) == edu }
+    assert{ TitanTwitter.eval(User.get(name), kim) == name("@evdokim") }
+
+    object comp extends Compose(Posted, Posted.src, User, User.get(name), name)
+    val e1 = implicitly[EvalQuery[comp.Query1, posted.type, user.type]]
+    val e2 = implicitly[EvalQuery[comp.Query2, user.type, name.type]]
+
+    val evcomp = implicitly[EvalQuery[comp.type, posted.type, name.type]](
+      EvalQuery.compose[comp.type, posted.type, user.type, name.type]
+    )
+    assert{ evcomp(comp, post.raw) == name("@eparejatobes") }
+    // assert{ TitanTwitter.eval(comp, post) == name("@evdokim") }
 
   }
 
