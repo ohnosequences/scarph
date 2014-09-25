@@ -264,15 +264,21 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     assert{ TitanTwitter.eval(User.get(name), kim) == name("@evdokim") }
 
-    object comp extends Compose(Posted, Posted.src, User, User.get(name), name)
-    val e1 = implicitly[EvalQuery[comp.Query1, posted.type, user.type]]
-    val e2 = implicitly[EvalQuery[comp.Query2, user.type, name.type]]
+    // object comp extends Compose(Posted, Posted.src, User, User.get(name), name)
+    // val comp = Compose(Posted.src, User.get(name))
+    val comp = Posted.src.get(name)
+    // val e1 = implicitly[EvalQuery[comp.Query1, posted.type, user.type]]
+    // val e2 = implicitly[EvalQuery[comp.Query2, user.type, name.type]]
 
-    val evcomp = implicitly[EvalQuery[comp.type, posted.type, name.type]](
-      EvalQuery.compose[comp.type, posted.type, user.type, name.type]
-    )
-    assert{ evcomp(comp, post.raw) == name("@eparejatobes") }
-    // assert{ TitanTwitter.eval(comp, post) == name("@evdokim") }
+    // import TitanTwitter._
+    // val p = implicitly[Implements[TitanTwitter.type, comp.InT]]
+    // val n = implicitly[Implements[TitanTwitter.type, comp.OutT]]
+
+    // val evcomp = implicitly[EvalQuery[comp.type, p.Out, n.Out]](
+    //   EvalQuery.compose(comp, TitanTwitter) //[comp.type, TitanTwitter.type, posted.type, user.type, name.type]
+    // )
+    // assert{ evcomp(comp, post.raw) == name("@eparejatobes") }
+    assert{ TitanTwitter.eval(comp, post) == name("@eparejatobes") }
 
   }
 

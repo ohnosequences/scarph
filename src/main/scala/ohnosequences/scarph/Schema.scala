@@ -41,6 +41,23 @@ class SchemaOps[S <: AnySchema](s: S) {
     (implicit impl: Implements[S, ET] { type Out = E }): E = impl.apply(s)
 
   def eval[
+      C <: AnyCompose,
+      I <: AnyDenotation { type Tpe = C#InT },
+      M <: AnyDenotation { type Tpe = C#MidT },
+      O <: AnyDenotation { type Tpe = C#OutT }
+    ](c: C, in: ValueOf[I])(implicit
+      i: Implements[S, C#InT]  { type Out = I },
+      m: Implements[S, C#MidT] { type Out = M },
+      o: Implements[S, C#OutT] { type Out = O },
+      eval1: AnyEvalQuery[C#Query1] { type InW = I; type OutW = M },
+      eval2: AnyEvalQuery[C#Query2] { type InW = M; type OutW = O }
+    ):  ValueOf[O] = {
+
+        val o1 = eval1(c.query1, in.raw)
+        eval2(c.query2, o1.raw)
+    }
+
+  def eval[
     Q <: AnyQuery,
     I <: AnyDenotation { type Tpe = Q#InT },
     O <: AnyDenotation { type Tpe = Q#OutT }
