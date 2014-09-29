@@ -4,7 +4,9 @@ import ohnosequences.pointless._
 
 // in package object only type-aliases
 package object scarph {
-  
+
+  type Container[X] = List[X]
+
   type Bytes = Array[Byte]
   type Num   = Int
   // not documented; the API informs you about it if you try not to adhere to it

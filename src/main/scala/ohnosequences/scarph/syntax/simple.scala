@@ -5,11 +5,11 @@ import ohnosequences.scarph._, AnyEdge._
 
 object simple {
 
-  implicit def elementTypeOps[ET <: AnyElementType](et: ET): 
-        ElementTypeOps[ET] = 
+  implicit def elementTypeOps[ET <: AnyElementType](et: ET):
+        ElementTypeOps[ET] =
     new ElementTypeOps[ET](et)
 
-  class ElementTypeOps[ET <: AnyElementType](val et: ET) extends AnyVal {
+  class ElementTypeOps[ET <: AnyElementType](val et: ET) {
 
     def get[P <: AnyProperty](p: P): GetProperty[ET, P] = GetProperty(et, p)
 
@@ -18,20 +18,20 @@ object simple {
   }
 
 
-  implicit def vertexRawOps[V <: AnyVertex](rep: ValueOf[V]): 
-        VertexRawOps[V] = 
-    new VertexRawOps[V](rep.raw)
+  implicit def vertexTypeOps[VT <: AnyVertexType](vt: VT):
+        VertexTypeOps[VT] =
+    new VertexTypeOps[VT](vt)
 
-  class VertexRawOps[V <: AnyVertex](val raw: RawOf[V]) extends AnyVal {
+  class VertexTypeOps[VT <: AnyVertexType](val vt: VT) {
 
-    // def in[E <: AnyEdge.withTarget[V]](e: E)
+    // def in[E <: AnyEdge.withTarget[VT]](e: E)
     //   (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
 
-    // def out[E <: AnyEdge.withSource[V]](e: E)
-    //   (implicit out: GetOutEdge[E]): EdgeTypeOf[E]#Out[ValueOf[E]] = out(raw, e)
+    def outE[ET <: AnyEdgeType { type SourceType = VT }](et: ET):
+      GetOutEdges[ET] = GetOutEdges[ET](et)
 
     // def outV[E <: AnyEdge.withSource[V]](e: E)
-    //   (implicit 
+    //   (implicit
     //     // NOTE: Functor is invariant so don't know how to do this without dots
     //     out: GetOutEdge[E],
     //     tgts: GetTarget[E]
@@ -46,8 +46,8 @@ object simple {
   }
 
 
-  implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET): 
-        EdgeTypeOps[ET] = 
+  implicit def edgeTypeOps[ET <: AnyEdgeType](et: ET):
+        EdgeTypeOps[ET] =
     new EdgeTypeOps[ET](et)
 
   class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {

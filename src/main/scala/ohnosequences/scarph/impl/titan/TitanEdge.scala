@@ -9,8 +9,8 @@ trait AnyTitanEdge extends AnyEdge with AnyTitanElement {
   type Raw = com.thinkaurelius.titan.core.TitanEdge
 }
 
-case class TitanEdge[ET <: AnyEdgeType](val tpe: ET) 
-  extends AnyTitanEdge { type Tpe = ET }
+class TitanEdge[ET <: AnyEdgeType, S <: AnySchema](val s: S, val tpe: ET)
+  extends AnyTitanEdge with Implementation[S, ET]
 
 object AnyTitanEdge {
 

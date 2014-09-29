@@ -52,32 +52,32 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     kim.addEdge(Follows.label, edu)
 
 
-    val eduTweet1 = g.addVertexWithLabel(Tweet.label) 
-    eduTweet1.setProperty(text.label, 
+    val eduTweet1 = g.addVertexWithLabel(Tweet.label)
+    eduTweet1.setProperty(text.label,
       """#programming languages should be explicit (= code) about what they are and their needs: syntax, underlying platform, semantics""")
 
     val eduPosted1 = edu.addEdge(Posted.label, eduTweet1)
     eduPosted1.setProperty(time.label, "27.10.2013")
     eduPosted1.setProperty(url.label, "https://twitter.com/eparejatobes/status/394430900051927041")
 
-    val eduTweet2 = g.addVertexWithLabel(Tweet.label) 
-    eduTweet2.setProperty(text.label, 
+    val eduTweet2 = g.addVertexWithLabel(Tweet.label)
+    eduTweet2.setProperty(text.label,
       """type definitions in titan #graphdb https://github.com/thinkaurelius/titan/wiki/Type-Definition-Overview … killer feature! example of how type info can be used to get better performance""")
 
     val eduPosted2 = edu.addEdge(Posted.label, eduTweet2)
     eduPosted2.setProperty(time.label, "20.3.2013")
     eduPosted2.setProperty(url.label, "https://twitter.com/eparejatobes/status/314353912276738048")
 
-    val eduTweet3 = g.addVertexWithLabel(Tweet.label) 
-    eduTweet3.setProperty(text.label, 
+    val eduTweet3 = g.addVertexWithLabel(Tweet.label)
+    eduTweet3.setProperty(text.label,
       """just read "Categories for synchrony and asynchrony" http://bit.ly/15sBf22  nice paper with conditions for completeness of Kleisli cats""")
 
     val eduPosted3 = edu.addEdge(Posted.label, eduTweet3)
     eduPosted3.setProperty(time.label, "19.2.2013")
     eduPosted3.setProperty(url.label, "https://twitter.com/eparejatobes/status/303939214423236608")
 
-    val eduTweet4 = g.addVertexWithLabel(Tweet.label) 
-    eduTweet4.setProperty(text.label, 
+    val eduTweet4 = g.addVertexWithLabel(Tweet.label)
+    eduTweet4.setProperty(text.label,
       """back to twitter :)""")
 
     val eduPosted4 = edu.addEdge(Posted.label, eduTweet4)
@@ -85,16 +85,16 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     eduPosted4.setProperty(url.label, "https://twitter.com/eparejatobes/status/268324310614167552")
 
 
-    val alexeyTweet1 = g.addVertexWithLabel(Tweet.label) 
-    alexeyTweet1.setProperty(text.label, 
+    val alexeyTweet1 = g.addVertexWithLabel(Tweet.label)
+    alexeyTweet1.setProperty(text.label,
       """Spend the whole night trying to build Idris from sources. I lost any hope. Cabal is hell "(""")
 
     val alexeyPosted1 = alexey.addEdge(Posted.label, alexeyTweet1)
     alexeyPosted1.setProperty(time.label, "15.2.2014")
     alexeyPosted1.setProperty(url.label, "https://twitter.com/laughedelic/status/444717461150388224")
 
-    val alexeyTweet2 = g.addVertexWithLabel(Tweet.label) 
-    alexeyTweet2.setProperty(text.label, 
+    val alexeyTweet2 = g.addVertexWithLabel(Tweet.label)
+    alexeyTweet2.setProperty(text.label,
       """What I don’t like about going to bed at 8am is that the next morning there are no interesting news/notifications anywhere "/ boring morning""")
 
     val alexeyPosted2 = alexey.addEdge(Posted.label, alexeyTweet2)
@@ -102,24 +102,24 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     alexeyPosted2.setProperty(url.label, "https://twitter.com/laughedelic/status/441939905963622400")
 
 
-    val kimTweet1 = g.addVertexWithLabel(Tweet.label) 
-    kimTweet1.setProperty(text.label, 
+    val kimTweet1 = g.addVertexWithLabel(Tweet.label)
+    kimTweet1.setProperty(text.label,
       """больше недели искал нормальную jQuery-библиотеку для галереи - в итоге написал свою""")
 
     val kimPosted1 = kim.addEdge(Posted.label, kimTweet1)
     kimPosted1.setProperty(time.label, "23.2.2012")
     kimPosted1.setProperty(url.label, "https://twitter.com/evdokim/status/172712624931348480")
 
-    val kimTweet2 = g.addVertexWithLabel(Tweet.label) 
-    kimTweet2.setProperty(text.label, 
+    val kimTweet2 = g.addVertexWithLabel(Tweet.label)
+    kimTweet2.setProperty(text.label,
       """java.util.concurrent вообще круть!)))""")
 
     val kimPosted2 = kim.addEdge(Posted.label, kimTweet2)
     kimPosted2.setProperty(time.label, "7.7.2011")
     kimPosted2.setProperty(url.label, "https://twitter.com/evdokim/status/88926033750929409")
 
-    val kimTweet3 = g.addVertexWithLabel(Tweet.label) 
-    kimTweet3.setProperty(text.label, 
+    val kimTweet3 = g.addVertexWithLabel(Tweet.label)
+    kimTweet3.setProperty(text.label,
       """в раю все ездят на фиксах и смотрят арт-хаус @ ЛХ""")
 
     val kimPosted3 = kim.addEdge(Posted.label, kimTweet3)
@@ -133,7 +133,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
     // checking that the graph is there:
     // FIXME: it doesn't reuse the graph
-    if (g.getManagementSystem.containsRelationType("posted")) { 
+    if (g.getManagementSystem.containsRelationType("posted")) {
       println("Reusing Titan graph")
     } else {
       def cleanDir(f: File) {
@@ -235,7 +235,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       def edge[E <: AnyTitanEdge, P <: AnyProperty](e: E)(p: P)(pval: P#Raw): ValueOf[E] = {
         e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[E#Raw] )
       }
-    } 
+    }
 
     // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
     // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
@@ -244,9 +244,10 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
-    val user = TitanTwitter.implementationOf(User)
-    val tweet = TitanTwitter.implementationOf(Tweet)
-    val posted = TitanTwitter.implementationOf(Posted)
+    import TitanTwitter._
+    // val user = TitanTwitter.user //implementationOf(User)
+    // val tweet = TitanTwitter.tweet //implementationOf(Tweet)
+    // val posted = TitanTwitter.posted //implementationOf(Posted)
 
     val edu = g.vertex(user)(name)("@eparejatobes")
     val alexey = g.vertex(user)(name)("@laughedelic")
@@ -254,40 +255,38 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val twt = g.vertex(tweet)(text)("back to twitter :)")
     val post = g.edge(posted)(time)("13.11.2012")
 
-    val q = Posted.src
 
-    val ev = implicitly[EvalQuery[q.type, posted.type, user.type]]
+    /*assert{ TitanTwitter.eval(GetSource(Posted), List(post)) == List(edu) }*/
 
-    assert{ ev(q, post.raw) == edu }
+    import AnyQuery._
+    import AnyEvalQuery._
 
-    assert{ TitanTwitter.eval(Posted.src, post) == edu }
+    val ev = TitanTwitter.eval(Posted.src)(EvalOnSchema.simple)
 
-    assert{ TitanTwitter.eval(User.get(name), kim) == name("@evdokim") }
+    assert{ ev.apply(Posted.src, List(post)) == List(edu) }
 
-    // object comp extends Compose(Posted, Posted.src, User, User.get(name), name)
-    // val comp = Compose(Posted.src, User.get(name))
-    val comp = Posted.src.get(name)
-    // val e1 = implicitly[EvalQuery[comp.Query1, posted.type, user.type]]
-    // val e2 = implicitly[EvalQuery[comp.Query2, user.type, name.type]]
+    /*assert{ TitanTwitter.eval(User.get(name), List(kim, alexey)) == List(name("@evdokim"), name("@laughedelic")) }*/
 
-    // import TitanTwitter._
-    // val p = implicitly[Implements[TitanTwitter.type, comp.InT]]
-    // val n = implicitly[Implements[TitanTwitter.type, comp.OutT]]
+    /*val comp = Compose(Posted.src, User.get(name))*/
+    /*val comp = IdQuery(Posted).source.get(name)
 
-    // val evcomp = implicitly[EvalQuery[comp.type, p.Out, n.Out]](
-    //   EvalQuery.compose(comp, TitanTwitter) //[comp.type, TitanTwitter.type, posted.type, user.type, name.type]
-    // )
-    // assert{ evcomp(comp, post.raw) == name("@eparejatobes") }
-    assert{ TitanTwitter.eval(comp, post) == name("@eparejatobes") }
+    assertResult(List(name("@eparejatobes"))){
+      TitanTwitter.eval(comp).apply(comp, List(post))
+    }*/
 
+    /*assertResult(List()){
+      TitanTwitter.eval(User.outE(Posted), List(edu))
+    }*/
+
+    val query = Posted.source.outE(Posted)
   }
 
   // test("get vertex property") {
   //   import TestContext._, impl._
 
-  //   // pure blueprints with string keys and casting: 
+  //   // pure blueprints with string keys and casting:
   //   assert(edu.raw.getProperty[Int]("age") == 95)
-  //   // safe and nifty: 
+  //   // safe and nifty:
   //   assert(edu.get(age).raw == 95)
   //   // and it's the same thing
   //   assert(edu.raw.getProperty[Int]("age") == edu.get(age).raw)
@@ -326,10 +325,10 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   //   }
 
   //   assertResult( Set(name("@eparejatobes"), name("@laughedelic"), name("@evdokim")) ) {
-  //     (edu out follows 
-  //       map { _.tgt } 
-  //       flatMap { _ out follows } 
-  //       map { _.tgt } 
+  //     (edu out follows
+  //       map { _.tgt }
+  //       flatMap { _ out follows }
+  //       map { _.tgt }
   //       map { _ get name }
   //     ).toSet
   //   }

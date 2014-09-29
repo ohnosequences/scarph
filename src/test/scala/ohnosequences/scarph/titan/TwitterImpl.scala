@@ -7,10 +7,10 @@ import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 
 case object TitanTwitter extends Schema(TwitterSchema.schemaType) {
 
-  implicit val user = this.implements(TitanVertex(User))
-  implicit val tweet = this.implements(TitanVertex(Tweet))
+  implicit case object user extends TitanVertex(this, User)
+  implicit case object tweet extends TitanVertex(this, Tweet)
 
-  implicit val posted = this.implements(TitanEdge(Posted))
-  implicit val follows = this.implements(TitanEdge(Follows))
+  implicit case object posted extends TitanEdge(this, Posted)
+  implicit case object follows extends TitanEdge(this, Follows)
 
 }
