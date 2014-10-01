@@ -1,7 +1,7 @@
 package ohnosequences.scarph.ops
 
 import ohnosequences.scarph._, AnyEdge._
-import ohnosequences.pointless._, AnyWrap._
+import ohnosequences.cosas._, AnyWrap._
 
 object edge {
 

@@ -1,6 +1,6 @@
 package ohnosequences.scarph.impl.titan.ops
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._
+import ohnosequences.cosas._, AnyTypeSet._, AnyWrap._
 import ohnosequences.scarph._, AnyPropertiesHolder._
 import ohnosequences.scarph.impl.titan._, AnyTitanVertex._
 import com.thinkaurelius.titan.core.attribute.Cmp.EQUAL
@@ -11,7 +11,7 @@ object element {
 
   /* Getting a property from any TitanElement (it works the same for vertex and edge) */
   implicit def unsafeGetProperty[E <: AnyTitanElement, P <: AnyProperty]
-    (implicit hasProp: E#DenotedType HasProperty P):
+    (implicit hasProp: E#Tpe HasProperty P):
           GetProperty[E, P] = 
       new GetProperty[E, P] {
 
@@ -21,7 +21,7 @@ object element {
   implicit def simpleVertexQueryEval[
     V <: AnyTitanVertex,
     Q <: AnySimpleQuery with 
-         AnyQuery.On[V#DenotedType] with 
+         AnyQuery.On[V#Tpe] with 
          AnyQuery.HeadedBy[AnyEQ]
   ]: EvalQuery[V, Q] = new EvalQuery[V, Q] {
 
@@ -36,7 +36,7 @@ object element {
   implicit def simpleEdgeQueryEval[
     E <: AnyTitanEdge,
     Q <: AnySimpleQuery with 
-         AnyQuery.On[E#DenotedType] with 
+         AnyQuery.On[E#Tpe] with 
          AnyQuery.HeadedBy[AnyEQ]
   ]: EvalQuery[E, Q] = new EvalQuery[E, Q] {
 

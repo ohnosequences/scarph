@@ -1,7 +1,7 @@
 package ohnosequences.scarph.impl.titan
 
 import ohnosequences.scarph._
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 
 trait AnyTitanElement extends AnyElement {
 
@@ -12,5 +12,5 @@ trait AnyTitanElement extends AnyElement {
 
 object AnyTitanElement {
 
-  type ofType[ET <: AnyElementType] = AnyTitanElement { type DenotedType = ET }
+  type ofType[ET <: AnyElementType] = AnyTitanElement { type Tpe = ET }
 }

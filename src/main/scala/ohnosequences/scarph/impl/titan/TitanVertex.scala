@@ -1,7 +1,7 @@
 package ohnosequences.scarph.impl.titan
 
 import ohnosequences.scarph._
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 
 trait AnyTitanVertex extends AnyVertex with AnyTitanElement {
@@ -14,5 +14,5 @@ class TitanVertex[VT <: AnyVertexType](val graph: TGraph, vt: VT)
 
 object AnyTitanVertex {
 
-  type ofType[VT <: AnyVertexType] = AnyTitanVertex { type DenotedType = VT }
+  type ofType[VT <: AnyVertexType] = AnyTitanVertex { type Tpe = VT }
 }

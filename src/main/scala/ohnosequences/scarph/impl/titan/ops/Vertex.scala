@@ -1,6 +1,6 @@
 package ohnosequences.scarph.impl.titan.ops
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._
+import ohnosequences.cosas._, AnyTypeSet._, AnyWrap._
 import ohnosequences.scarph._, AnyPropertiesHolder._, AnyVertex._, AnyEdge._
 import ohnosequences.scarph.impl.titan._, AnyTitanVertex._
 import scalaz._
@@ -27,7 +27,7 @@ object vertex {
 
       def apply(raw: RawOf[SourceOf[E]], e: E): Out = {
         
-        val it = raw.getEdges(Direction.OUT, e.denotedType.label)
+        val it = raw.getEdges(Direction.OUT, e.tpe.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.headOption.map{ e.apply(_) }
@@ -40,7 +40,7 @@ object vertex {
 
       def apply(raw: RawOf[SourceOf[E]], e: E): Out = {
         
-        val it = raw.getEdges(Direction.OUT, e.denotedType.label)
+        val it = raw.getEdges(Direction.OUT, e.tpe.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.toList.map{ e.apply(_) }
@@ -54,7 +54,7 @@ object vertex {
 
       def apply(raw: RawOf[TargetOf[E]], e: E): Out = {
         
-        val it = raw.getEdges(Direction.IN, e.denotedType.label)
+        val it = raw.getEdges(Direction.IN, e.tpe.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.headOption.map{ e.apply(_) }
@@ -67,7 +67,7 @@ object vertex {
 
       def apply(raw: RawOf[TargetOf[E]], e: E): Out = {
         
-        val it = raw.getEdges(Direction.IN, e.denotedType.label)
+        val it = raw.getEdges(Direction.IN, e.tpe.label)
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
 
         it.toList.map{ e.apply(_) }

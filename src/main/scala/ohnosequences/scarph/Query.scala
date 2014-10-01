@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 
 /*
   ## Queries

@@ -1,7 +1,7 @@
 package ohnosequences.scarph.test
 
 import ohnosequences.scarph._
-import ohnosequences.pointless._, AnyTypeSet._
+import ohnosequences.cosas._, AnyTypeSet._
 
 object TwitterSchema {
 

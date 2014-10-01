@@ -1,7 +1,7 @@
 package ohnosequences.scarph.impl.titan
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyFn._, AnyWrap._
-import ohnosequences.pointless.ops.typeSet._
+import ohnosequences.cosas._, AnyTypeSet._, AnyFn._, AnyWrap._
+import ohnosequences.cosas.ops.typeSet._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
 import com.thinkaurelius.titan.core.Multiplicity

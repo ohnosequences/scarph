@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test.titan
 
-import ohnosequences.pointless._, AnyTypeSet._
+import ohnosequences.cosas._, AnyTypeSet._
 import ohnosequences.scarph._, impl.titan._
 import ohnosequences.scarph.test._, TwitterSchema._
 import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }

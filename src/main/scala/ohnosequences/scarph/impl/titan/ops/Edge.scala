@@ -1,6 +1,6 @@
 package ohnosequences.scarph.impl.titan.ops
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyWrap._
+import ohnosequences.cosas._, AnyTypeSet._, AnyWrap._
 import ohnosequences.scarph._, AnyPropertiesHolder._, AnyEdge._
 import ohnosequences.scarph.impl.titan._, AnyTitanVertex._
 

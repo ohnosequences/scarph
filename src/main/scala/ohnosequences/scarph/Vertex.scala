@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyDenotation._, AnyWrap._
+import ohnosequences.cosas._, AnyDenotation._, AnyWrap._
 import AnyEdge._
 
 /*
@@ -28,13 +28,13 @@ import AnyEdge._
 trait AnyVertex extends AnyElementOf[AnyVertexType]
 
 abstract class Vertex[VT <: AnyVertexType]
-  (val  denotedType : VT) extends AnyVertex { 
-   type DenotedType = VT
+  (val  tpe : VT) extends AnyVertex { 
+   type Tpe = VT
 }
 
 object AnyVertex {
 
-  type ofType[VT <: AnyVertexType] = AnyVertex { type DenotedType = VT }
+  type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
 
-  type VertexTypeOf[V <: AnyVertex] = V#DenotedType
+  type VertexTypeOf[V <: AnyVertex] = V#Tpe
 }

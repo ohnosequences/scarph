@@ -1,6 +1,6 @@
 package ohnosequences.scarph.syntax
 
-import ohnosequences.pointless._, AnyDenotation._, AnyWrap._, AnyFn._
+import ohnosequences.cosas._, AnyDenotation._, AnyWrap._, AnyFn._
 import ohnosequences.scarph._, AnyEdge._
 
 object simple {
@@ -23,7 +23,7 @@ object simple {
   class ElementOps[E <: AnyElement](val e: E) extends AnyVal {
     import ohnosequences.scarph.ops.element._
 
-    def query[Q <: AnyQuery.On[E#DenotedType]](q: Q)
+    def query[Q <: AnyQuery.On[E#Tpe]](q: Q)
       (implicit eval: EvalQuery[E, Q]): Q#Out[ValueOf[E]] = eval(e, q)
   }
 
@@ -50,8 +50,8 @@ object simple {
     //   ): EdgeTypeOf[E]#Out[ValueOf[TargetOf[E]]] = {
 
     //     val edges = out(raw, e)
-    //     val eT: E#DenotedType = e.denotedType
-    //     val eTF: scalaz.Functor[E#DenotedType#Out]= eT.outFunctor
+    //     val eT: E#Tpe = e.tpe
+    //     val eTF: scalaz.Functor[E#Tpe#Out]= eT.outFunctor
     //     eTF.map(edges){ eVal => tgts(eVal.raw) }
     //   }
 

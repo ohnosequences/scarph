@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyTypeSet._
+import ohnosequences.cosas._, AnyTypeSet._
 
 /*
   Declares a Vertex type. They are essentially classified by its label, a `String`.

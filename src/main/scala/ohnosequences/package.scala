@@ -1,6 +1,6 @@
 package ohnosequences
 
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 
 // in package object only type-aliases
 package object scarph {

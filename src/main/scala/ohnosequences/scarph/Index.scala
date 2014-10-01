@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 import scala.reflect.ClassTag
 
 /* ## Indexes */

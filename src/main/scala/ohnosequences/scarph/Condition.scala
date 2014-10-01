@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyTypeUnion._
+import ohnosequences.cosas._, AnyTypeUnion._
 
 /*
   ## Conditions

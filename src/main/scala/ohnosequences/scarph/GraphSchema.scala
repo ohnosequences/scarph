@@ -1,14 +1,14 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._, AnyTypeSet._, AnyFn._
-import ohnosequences.pointless.ops.typeSet._
+import ohnosequences.cosas._, AnyTypeSet._, AnyFn._
+import ohnosequences.cosas.ops.typeSet._
 
 trait AnyGraphSchema {
 
   val label: String
 
-  // type Dependencies <: AnyTypeSet.Of[AnyGraphSchema]
-  // val  dependencies: Dependencies
+  type Dependencies <: AnyTypeSet.Of[AnyGraphSchema]
+  val  dependencies: Dependencies
 
   type VertexTypes <: AnyTypeSet.Of[AnyVertexType]
   val  vertexTypes: VertexTypes
@@ -21,18 +21,18 @@ trait AnyGraphSchema {
 }
 
 case class GraphSchema[
-    // Ds <: AnyTypeSet.Of[AnyGraphSchema],
+    Ds <: AnyTypeSet.Of[AnyGraphSchema],
     Vs <: AnyTypeSet.Of[AnyVertexType],
     Es <: AnyTypeSet.Of[AnyEdgeType],
     Is <: AnyTypeSet.Of[AnyIndex]
   ](val label: String,
-    // val dependencies: Ds = ∅,
+    val dependencies: Ds = ∅,
     val vertexTypes:  Vs = ∅,
     val edgeTypes: Es    = ∅,
     val indexes: Is      = ∅
   ) extends AnyGraphSchema {
 
-  // type Dependencies = Ds
+  type Dependencies = Ds
   type VertexTypes  = Vs
   type EdgeTypes    = Es
   type Indexes      = Is

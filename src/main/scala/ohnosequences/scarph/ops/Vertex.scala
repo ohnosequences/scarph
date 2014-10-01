@@ -1,6 +1,6 @@
 package ohnosequences.scarph.ops
 
-import ohnosequences.pointless._, AnyWrap._
+import ohnosequences.cosas._, AnyWrap._
 import ohnosequences.scarph._, AnyEdge._
 
 object vertex {

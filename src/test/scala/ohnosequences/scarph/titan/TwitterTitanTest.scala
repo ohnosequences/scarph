@@ -9,7 +9,7 @@ import com.tinkerpop.blueprints.Vertex
 
 import java.io.File
 
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 
 import ohnosequences.scarph._, AnyQuery._, AnyCondition._
 import ohnosequences.scarph.syntax.simple._
@@ -177,12 +177,12 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   // checks existence and dataType
-  def checkPropertyKey[P <: AnyProperty](mgmt: TitanManagement, p: P) = {
+  import scala.reflect._
+  def checkPropertyKey[P <: AnyProperty](mgmt: TitanManagement, p: P)(implicit ct: ClassTag[P#Raw]) = {
 
     assert{ mgmt.containsRelationType(p.label) }
 
-    import scala.reflect._
-    assertResult(p.classTag.runtimeClass.asInstanceOf[Class[P#Raw]]) {
+    assertResult(ct.runtimeClass.asInstanceOf[Class[P#Raw]]) {
       mgmt.getPropertyKey(p.label).getDataType
     }
   }

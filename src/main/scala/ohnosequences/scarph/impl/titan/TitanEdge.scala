@@ -1,15 +1,15 @@
 package ohnosequences.scarph.impl.titan
 
 import ohnosequences.scarph._, AnyEdgeType._, AnyTitanVertex._
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 import com.thinkaurelius.titan.core.{ TitanGraph => TGraph }
 
 trait AnyTitanEdge extends AnyEdge with AnyTitanElement {
 
   type Raw = com.thinkaurelius.titan.core.TitanEdge
 
-  type Source <: AnyVertex.ofType[SourceTypeOf[DenotedType]] with AnyTitanVertex
-  type Target <: AnyVertex.ofType[TargetTypeOf[DenotedType]] with AnyTitanVertex
+  type Source <: AnyVertex.ofType[SourceTypeOf[Tpe]] with AnyTitanVertex
+  type Target <: AnyVertex.ofType[TargetTypeOf[Tpe]] with AnyTitanVertex
 }
 
 class TitanEdge[
@@ -20,6 +20,6 @@ class TitanEdge[
 
 object AnyTitanEdge {
 
-  type ofType[ET <: AnyEdgeType] = AnyTitanEdge { type DenotedType = ET }
-  type withType[ET <: AnyEdgeType] = AnyTitanEdge { type DenotedType <: ET }
+  type ofType[ET <: AnyEdgeType] = AnyTitanEdge { type Tpe = ET }
+  type withType[ET <: AnyEdgeType] = AnyTitanEdge { type Tpe <: ET }
 }
