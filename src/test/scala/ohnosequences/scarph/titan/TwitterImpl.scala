@@ -13,4 +13,6 @@ case object TitanTwitter extends Schema(TwitterSchema.schemaType) {
   implicit case object posted extends TitanEdge(this, Posted)
   implicit case object follows extends TitanEdge(this, Follows)
 
+  // implicit case object name_ extends Implementation[this.type, name.type] { val tpe = name }
+
 }

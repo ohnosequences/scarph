@@ -255,15 +255,26 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val twt = g.vertex(tweet)(text)("back to twitter :)")
     val post = g.edge(posted)(time)("13.11.2012")
 
+    val query = GetProperty(User, name)
+
+    // val i = implicitly[Implementation[TitanTwitter.type, User.type]]
+    // val o = implicitly[Implementation[TitanTwitter.type, name.type]]
+    // // import ohnosequences.scarph.impl.titan.ops.query._
+    // val e = implicitly[EvalStep[query.type, i.type, o.type]](evalGetProperty)
+
+    import EvalOnSchema._
+    val evaluator = TitanTwitter.eval(query)(simple)
+
+    // assert{ evaluator(query, List(kim, alexey)) == List(name("@evdokim"), name("@laughedelic")) }
 
     /*assert{ TitanTwitter.eval(GetSource(Posted), List(post)) == List(edu) }*/
 
-    import AnyQuery._
-    import AnyEvalQuery._
+    // import AnyQuery._
+    // import AnyEvalQuery._
 
-    val ev = TitanTwitter.eval(Posted.src)(EvalOnSchema.simple)
+    // val ev = TitanTwitter.eval(Posted.src)(EvalOnSchema.simple)
 
-    assert{ ev.apply(Posted.src, List(post)) == List(edu) }
+    // assert{ ev.apply(Posted.src, List(post)) == List(edu) }
 
     /*assert{ TitanTwitter.eval(User.get(name), List(kim, alexey)) == List(name("@evdokim"), name("@laughedelic")) }*/
 
@@ -278,7 +289,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       TitanTwitter.eval(User.outE(Posted), List(edu))
     }*/
 
-    val query = Posted.source.outE(Posted)
+    // val query = Posted.source.outE(Posted)
   }
 
   // test("get vertex property") {

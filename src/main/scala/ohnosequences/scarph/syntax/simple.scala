@@ -11,7 +11,7 @@ object simple {
 
   class ElementTypeOps[ET <: AnyElementType](val et: ET) {
 
-    def get[P <: AnyProperty](p: P): GetProperty[ET, P] = GetProperty(et, p)
+    // def get[P <: AnyProperty](p: P): GetProperty[ET, P] = GetProperty(et, p)
 
     // def query[Q <: AnyQuery.On[E#Tpe]](q: Q)
     //   (implicit eval: EvalQuery[E, Q]): Q#Out[ValueOf[E]] = eval(e, q)
@@ -27,8 +27,8 @@ object simple {
     // def in[E <: AnyEdge.withTarget[VT]](e: E)
     //   (implicit in: GetInEdge[E]): EdgeTypeOf[E]#In[ValueOf[E]] = in(raw, e)
 
-    def outE[ET <: AnyEdgeType { type SourceType = VT }](et: ET):
-      GetOutEdges[ET] = GetOutEdges[ET](et)
+    // def outE[ET <: AnyEdgeType { type SourceType = VT }](et: ET):
+    //   GetOutEdges[ET] = GetOutEdges[ET](et)
 
     // def outV[E <: AnyEdge.withSource[V]](e: E)
     //   (implicit
@@ -52,8 +52,8 @@ object simple {
 
   class EdgeTypeOps[ET <: AnyEdgeType](val et: ET) {
 
-    def src: GetSource[ET] = GetSource(et)
-    def tgt: GetTarget[ET] = GetTarget(et)
+    // def src: GetSource[ET] = GetSource(et)
+    // def tgt: GetTarget[ET] = GetTarget(et)
   }
 
 }
