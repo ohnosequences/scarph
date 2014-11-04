@@ -5,28 +5,30 @@ import ohnosequences.pointless._, AnyTypeSet._
 
 object TwitterSchema {
 
-  case object name extends Property[String]
-  case object age  extends Property[Integer]
-  case object text extends Property[String]
-  case object url  extends Property[String]
+  case object user extends VertexType
+  case object name extends PropertyOf(user) { type Raw = String }
+  case object age  extends PropertyOf(user) { type Raw = Integer }
 
-  // case class Date(day: Integer, month: Integer, year: Integer)
-  case object time extends Property[String]
+  case object tweet extends VertexType
+  case object text extends PropertyOf(tweet) { type Raw = String }
 
-  case object User  extends VertexType("user", name :~: age :~: ∅)
-  case object Tweet extends VertexType("tweet", text :~: ∅)
+  case object posted extends EdgeType(One(user), Many(tweet))
+  case object time extends PropertyOf(posted) { type Raw = String }
+  case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object Posted  extends EdgeType(User, "posted", Tweet, time :~: url :~: ∅) with OneIn with ManyOut
-  case object Follows extends EdgeType(User, "follows", User, ∅) with ManyIn with ManyOut
+  case object follows extends EdgeType(Many(user), Many(user))
 
-  case object UserNameIx extends CompositeIndex(User, name)
-  case object TweetTextIx extends CompositeIndex(Tweet, text)
-  case object PostedTimeIx extends CompositeIndex(Posted, time)
-
-  val schemaType = SchemaType("twitter",
-    vertexTypes = User :~: Tweet :~: ∅,
-    edgeTypes = Posted :~: Follows :~: ∅,
-    indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅
-  )
-
+  case object liked extends EdgeType(Many(user), One(tweet))
 }
+
+//   case object UserNameIx extends CompositeIndex(User, name)
+//   case object TweetTextIx extends CompositeIndex(Tweet, text)
+//   case object PostedTimeIx extends CompositeIndex(Posted, time)
+
+//   val schemaType = SchemaType("twitter",
+//     vertexTypes = User :~: Tweet :~: ∅,
+//     edgeTypes = Posted :~: Follows :~: ∅,
+//     indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅
+//   )
+
+// }
