@@ -124,24 +124,24 @@ abstract class Step[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: 
 
 trait AnyComposition extends AnyTraversal {
 
-  type Body <: AnyTraversal
-  val  body: Body
+  type First <: AnyTraversal
+  val  first: First
 
-  type Head <: AnyStep { type InT = Body#OutT }
-  val  head: Head
+  type Second <: AnyTraversal { type InT = First#OutT }
+  val  second: Second
 
-  type InT = Body#InT
-  val  inT = body.inT
+  type InT = First#InT
+  val  inT = first.inT
 
-  type OutT = Head#OutT
-  val  outT = head.outT
+  type OutT = Second#OutT
+  val  outT = second.outT
 }
 
-case class Compose[B <: AnyTraversal, H <: AnyStep { type InT = B#OutT }]
-  (val body: B, val head: H) extends AnyComposition {
+case class Compose[F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT }]
+  (val first: F, val second: S) extends AnyComposition {
 
-  type Body = B
-  type Head = H
+  type First = F
+  type Second = S
 }
 
 
@@ -152,19 +152,19 @@ object AnyTraversal {
 
 class TraversalOps[T <: AnyTraversal](val t: T) {
 
-  def >=>[S <: AnyStep { type InT = T#OutT }](s: S): Compose[T, S] = Compose[T, S](t, s)
+  def >=>[S <: AnyTraversal { type InT = T#OutT }](s: S): Compose[T, S] = Compose[T, S](t, s)
 
   def evalOn[I, O](i: I LabeledBy T#InT)(implicit ev: EvalTraversal[I, T, O]): O LabeledBy T#OutT = ev(i, t)
 }
 
-/* Dasic steps: */
+/* Basic steps: */
 case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop)
 
-case class GetSource[E <: AnyEdgeType](edge: E) extends Step[E, E#Source#T](edge, edge.source.t)
-case class GetTarget[E <: AnyEdgeType](edge: E) extends Step[E, E#Target#T](edge, edge.target.t)
+case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source#T](edge, edge.source.t)
+case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target#T](edge, edge.target.t)
 
-case class  GetInEdges[E <: AnyEdgeType](edge: E) extends Step[E#Target#T, E](edge.target.t, edge)
-case class GetOutEdges[E <: AnyEdgeType](edge: E) extends Step[E#Source#T, E](edge.source.t, edge)
+case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target#T, E](edge.target.t, edge)
+case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source#T, E](edge.source.t, edge)
 
 
 ///////////////////////////////////////////////////////////
@@ -189,32 +189,19 @@ trait EvalTraversal[I, T <: AnyTraversal, O]
   type OutVal = O
 }
 
-trait AnyEvalStep[S <: AnyStep] extends AnyEvalTraversal[S]
-
-trait EvalStep[I, S <: AnyStep, O] extends AnyEvalStep[S] with EvalTraversal[I, S, O]
-
 object AnyEvalTraversal {
 
-  implicit def evalStep[
-    I, S <: AnyStep, O
-  ](implicit 
-    ev: EvalStep[I, S, O]
-  ):  EvalTraversal[I, S, O] =
-  new EvalTraversal[I, S, O] {
-    def apply(in: In, t: Traversal): Out = ev(in, t)
-  }
-
   implicit def evalComposition[
-    B <: AnyTraversal, H <: AnyStep { type InT = B#OutT },
+    F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT },
     I, M, O
   ](implicit
-    evalHead: EvalStep[M, H, O],
-    evalBody: EvalTraversal[I, B, M]
-  ):  EvalTraversal[I, Compose[B, H], O] =
-  new EvalTraversal[I, Compose[B, H], O] {
+    evalFirst:  EvalTraversal[I, F, M],
+    evalSecond: EvalTraversal[M, S, O]
+  ):  EvalTraversal[I, Compose[F, S], O] =
+  new EvalTraversal[I, Compose[F, S], O] {
     def apply(in: In, t: Traversal): Out = {
-      val bodyOut = evalBody(in, t.body)
-      evalHead(bodyOut, t.head)
+      val bodyOut = evalFirst(in, t.first)
+      evalSecond(bodyOut, t.second)
     }
   }
 }
