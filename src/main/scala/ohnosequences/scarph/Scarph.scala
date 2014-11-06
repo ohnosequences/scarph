@@ -81,19 +81,24 @@ sealed trait AnyArity extends AnyLabelType {
 abstract class Arity[L <: AnyLabelType](val tpe: L) extends AnyArity { type Tpe = L }
 
 // TODO: there should be 4 things: one/many x non-empty/any
+case class  One[L <: AnyLabelType](l: L) extends Arity[L](l) { val label = s"One(${l.label})" }
 case class Many[L <: AnyLabelType](l: L) extends Arity[L](l) { val label = s"Many(${l.label})" }
 
 trait AnyEdgeType extends AnyElementType {
 
   // FIXME: these types should be somehow bounded by AnyVertexType
-  type Source <: AnyLabelType
+  type Source <: AnyArity { type Tpe <: AnyVertexType }
   val  source: Source
 
-  type Target <: AnyLabelType
+  type Target <: AnyArity { type Tpe <: AnyVertexType }
   val  target: Target
 }
 
-abstract class EdgeType[I <: AnyLabelType, O <: AnyLabelType](val source: I, val target: O) extends AnyEdgeType {
+abstract class EdgeType[
+  I <: AnyArity { type Tpe <: AnyVertexType }, 
+  O <: AnyArity { type Tpe <: AnyVertexType }
+](val source: I, val target: O) extends AnyEdgeType {
+
   type Source = I
   type Target = O
 
@@ -105,14 +110,14 @@ abstract class EdgeType[I <: AnyLabelType, O <: AnyLabelType](val source: I, val
 
 trait AnyTraversal {
 
-  type InT <: AnyLabelType
+  type InT <: AnyArity
   val  inT: InT
 
-  type OutT <: AnyLabelType
+  type OutT <: AnyArity
   val  outT: OutT
 }
 
-abstract class Traversal[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyTraversal {
+abstract class Traversal[I <: AnyArity, O <: AnyArity](val inT: I, val outT: O) extends AnyTraversal {
 
   type InT = I
   type OutT = O
@@ -121,7 +126,7 @@ abstract class Traversal[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val o
 
 trait AnyStep extends AnyTraversal
 
-abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
+abstract class Step[I <: AnyArity, O <: AnyArity](i: I, o: O) 
   extends Traversal[I, O](i, o) with AnyStep
 
 
@@ -171,16 +176,16 @@ class TraversalOps[T <: AnyTraversal](val t: T) {
 }
 
 /* Basic steps: */
-case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop)
+case class GetProperty[P <: AnyProp](val prop: P) extends Step[One[P#Owner], One[P]](One(prop.owner), One(prop))
 
-case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)
-case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target)
+case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[One[E], One[E#Source#Tpe]](One(edge), One(edge.source.tpe))
+case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[One[E], One[E#Target#Tpe]](One(edge), One(edge.target.tpe))
 
 // TODO: these should actually return `E` with the corresponding arity
-case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge)
-case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge)
+case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, Many[E]](edge.target, Many(edge))
+case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, Many[E]](edge.source, Many(edge))
 
-case class Lift[T <: AnyTraversal](val traversal: T) extends Traversal[Many[T#InT], Many[T#OutT]](Many(traversal.inT), Many(traversal.outT))
+case class Lift[T <: AnyTraversal](val traversal: T) extends Traversal[Many[T#InT#Tpe], Many[T#OutT#Tpe]](Many(traversal.inT.tpe), Many(traversal.outT.tpe))
 
 case class Flatten[T <: AnyLabelType](val tpe: T) extends Step[Many[Many[T]], Many[T]](Many(Many(tpe)), Many(tpe))
 

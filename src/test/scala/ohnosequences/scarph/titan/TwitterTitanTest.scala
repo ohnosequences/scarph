@@ -226,11 +226,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // just shortcuts
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
-        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
+      def vertex[P <: AnyProp](p: P)(pval: P#Raw): TitanVertex = {
+        tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex]
       }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
-        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
+      def edge[P <: AnyProp](p: P)(pval: P#Raw): TitanEdge = {
+        tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge]
       }
     }
 
@@ -246,11 +246,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // val tweet = TitanTwitter.tweet //implementationOf(tweet)
     // val posted = TitanTwitter.posted //implementationOf(posted)
 
-    val edu = g.vertex(user)(name)("@eparejatobes")
-    val alexey = g.vertex(user)(name)("@laughedelic")
-    val kim = g.vertex(user)(name)("@evdokim")
-    val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post = g.edge(posted)(time)("13.11.2012")
+    val edu = One(user)(g.vertex(name)("@eparejatobes"))
+    val alexey = One(user)(g.vertex(name)("@laughedelic"))
+    val kim = One(user)(g.vertex(name)("@evdokim"))
+    val twt = One(tweet)(g.vertex(text)("back to twitter :)"))
+    val post = One(posted)(g.edge(time)("13.11.2012"))
 
     assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
 
@@ -258,10 +258,12 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     assert{ (GetSource(posted) >=> GetProperty(name)).evalOn(post) == name("@eparejatobes") }
 
-    assert{ (GetOutEdges(posted) >=> (GetSource(posted) >=> GetProperty(name))).evalOn(edu) == name("@eparejatobes") }
+    // TODO: write evaluation for lifts
+    assert{ (GetOutEdges(posted) >=> Lift(GetSource(posted)) >=> Lift(Lift(GetProperty(name)))).evalOn(edu) == name("@eparejatobes") }
 
     // Lifting has to be explicit
-    val testArity = GetTarget(follows) >=> Lift(GetOutEdges(posted) >=> GetTarget(posted)) >=> Lift(Lift(GetProperty(text))) >=> Flatten(text)
+    // TODO: write evaluation for flattening
+    val testArity = GetTarget(follows) >=> GetOutEdges(posted) >=> Lift(GetTarget(posted)) >=> Lift(Lift(GetProperty(text))) >=> Flatten(text)
 
     /*assert{ TitanTwitter.eval(GetSource(posted), List(post)) == List(edu) }*/
 
