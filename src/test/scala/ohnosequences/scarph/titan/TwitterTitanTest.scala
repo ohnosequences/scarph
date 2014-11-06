@@ -256,9 +256,13 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     assert{ GetSource(posted).evalOn(post) == edu }
 
-    assert{ (GetSource(posted) >=> GetProperty(name)).evalOn(post) == name("@eparejatobes") }
+    val posterNameQ = GetSource(posted) >=> GetProperty(name)
 
-    assert{ (GetOutEdges(posted) >=> (GetSource(posted) >=> GetProperty(name))).evalOn(edu) == name("@eparejatobes") }
+    assert{ posterNameQ.evalOn(post) == name("@eparejatobes") }
+
+    assert{ (GetOutEdges(posted) >=> GetSource(posted) >=> GetProperty(name)).evalOn(edu) == name("@eparejatobes") }
+
+    assert{ (GetOutEdges(posted) >=> posterNameQ).evalOn(edu) == name("@eparejatobes") }
 
     /*assert{ TitanTwitter.eval(GetSource(posted), List(post)) == List(edu) }*/
 

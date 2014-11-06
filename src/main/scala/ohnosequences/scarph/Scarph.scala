@@ -73,27 +73,53 @@ abstract class VertexType extends AnyVertexType {
 
 
 /* Edge type has in/out vertex types, arities, etc. */
-sealed trait Arity { 
+// sealed trait AnyArity extends AnyLabelType { 
 
-  type T <: AnyVertexType 
-  val  t: T
+//   type T <: AnyVertexType 
+//   val  t: T
+// }
+// abstract class Arity[V <: AnyVertexType](val t: V) extends AnyArity { type T = V }
+// case class  One[V <: AnyVertexType](v: V) extends Arity[V](v) { val label = s"$One(${v.label})" }
+// case class Many[V <: AnyVertexType](v: V) extends Arity[V](v) { val label = s"$Many(${v.label})" }
+
+sealed trait AnyArity
+trait Many extends AnyArity
+trait One extends AnyArity
+
+trait CombineArities[A <: AnyArity, B <: AnyArity] {
+  type Out <: AnyArity
 }
-abstract class AnyArity[V <: AnyVertexType](val t: V) extends Arity { type T = V }
-case class  One[V <: AnyVertexType](v: V) extends AnyArity[V](v)
-case class Many[V <: AnyVertexType](v: V) extends AnyArity[V](v)
+
+object CombineArities {
+  implicit def ManyToMany: CombineArities[Many, Many] = new CombineArities[Many, Many] { type Out = Many }
+  implicit def OneToMany: CombineArities[One, Many] = new CombineArities[One, Many] { type Out = Many }
+  implicit def ManyToOne: CombineArities[Many, One] = new CombineArities[Many, One] { type Out = One }
+  implicit def OneToOne: CombineArities[One, One] = new CombineArities[One, One] { type Out = One }
+}
+
+trait InOutArities {
+
+  type InArity <: AnyArity
+  type OutArity <: AnyArity
+}
+
+trait ManyOut extends InOutArities { type OutArity = Many }
+trait  OneOut extends InOutArities { type OutArity =  One }
+trait ManyIn  extends InOutArities { type  InArity = Many }
+trait  OneIn  extends InOutArities { type  InArity =  One }
 
 trait AnyEdgeType extends AnyElementType {
 
-  type Source <: Arity
+  type Source <: AnyVertexType
   val  source: Source
 
-  type Target <: Arity
+  type Target <: AnyVertexType
   val  target: Target
 
   // TODO: always defined
 }
 
-abstract class EdgeType[I <: Arity, O <: Arity](val source: I, val target: O) extends AnyEdgeType {
+abstract class EdgeType[I <: AnyVertexType, O <: AnyVertexType](val source: I, val target: O) extends AnyEdgeType {
   type Source = I
   type Target = O
 
@@ -103,7 +129,7 @@ abstract class EdgeType[I <: Arity, O <: Arity](val source: I, val target: O) ex
 
 ///////////////////////////////////////////////////////////
 
-trait AnyTraversal {
+trait AnyTraversal extends InOutArities {
 
   type InT <: AnyLabelType
   val  inT: InT
@@ -137,7 +163,7 @@ trait AnyComposition extends AnyTraversal {
   val  outT = second.outT
 }
 
-case class Compose[F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT }]
+class Compose[F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT }]
   (val first: F, val second: S) extends AnyComposition {
 
   type First = F
@@ -152,7 +178,7 @@ object AnyTraversal {
 
 class TraversalOps[T <: AnyTraversal](val t: T) {
 
-  def >=>[S <: AnyTraversal { type InT = T#OutT }](s: S): Compose[T, S] = Compose[T, S](t, s)
+  def >=>[S <: AnyTraversal { type InT = T#OutT }](s: S): Compose[T, S] = new Compose[T, S](t, s)
 
   def evalOn[I, O](i: I LabeledBy T#InT)(implicit ev: EvalTraversal[I, T, O]): O LabeledBy T#OutT = ev(i, t)
 }
@@ -160,12 +186,15 @@ class TraversalOps[T <: AnyTraversal](val t: T) {
 /* Basic steps: */
 case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop)
 
-case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source#T](edge, edge.source.t)
-case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target#T](edge, edge.target.t)
+case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)
+case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target)
 
-case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target#T, E](edge.target.t, edge)
-case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source#T, E](edge.source.t, edge)
+case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge)
+case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge)
 
+/* See how cool it is: you can define composed traversals and then (optionnaly) have a more effective evaluation for it */
+case class  GetInVertices[E <: AnyEdgeType](val edge: E) extends Compose(GetInEdges(edge), GetSource(edge))
+case class GetOutVertices[E <: AnyEdgeType](val edge: E) extends Compose(GetOutEdges(edge), GetTarget(edge))
 
 ///////////////////////////////////////////////////////////
 
