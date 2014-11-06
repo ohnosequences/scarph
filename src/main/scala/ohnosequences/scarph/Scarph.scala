@@ -73,27 +73,27 @@ abstract class VertexType extends AnyVertexType {
 
 
 /* Edge type has in/out vertex types, arities, etc. */
-sealed trait Arity { 
+sealed trait AnyArity extends AnyLabelType { 
 
-  type T <: AnyVertexType 
-  val  t: T
+  type Tpe <: AnyLabelType 
+  val  tpe: Tpe
 }
-abstract class AnyArity[V <: AnyVertexType](val t: V) extends Arity { type T = V }
-case class  One[V <: AnyVertexType](v: V) extends AnyArity[V](v)
-case class Many[V <: AnyVertexType](v: V) extends AnyArity[V](v)
+abstract class Arity[L <: AnyLabelType](val tpe: L) extends AnyArity { type Tpe = L }
+
+// TODO: there should be 4 things: one/many x non-empty/any
+case class Many[L <: AnyLabelType](l: L) extends Arity[L](l) { val label = s"Many(${l.label})" }
 
 trait AnyEdgeType extends AnyElementType {
 
-  type Source <: Arity
+  // FIXME: these types should be somehow bounded by AnyVertexType
+  type Source <: AnyLabelType
   val  source: Source
 
-  type Target <: Arity
+  type Target <: AnyLabelType
   val  target: Target
-
-  // TODO: always defined
 }
 
-abstract class EdgeType[I <: Arity, O <: Arity](val source: I, val target: O) extends AnyEdgeType {
+abstract class EdgeType[I <: AnyLabelType, O <: AnyLabelType](val source: I, val target: O) extends AnyEdgeType {
   type Source = I
   type Target = O
 
@@ -112,14 +112,17 @@ trait AnyTraversal {
   val  outT: OutT
 }
 
-
-trait AnyStep extends AnyTraversal
-
-abstract class Step[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyStep {
+abstract class Traversal[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyTraversal {
 
   type InT = I
   type OutT = O
 }
+
+
+trait AnyStep extends AnyTraversal
+
+abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
+  extends Traversal[I, O](i, o) with AnyStep
 
 
 trait AnyComposition extends AnyTraversal {
@@ -127,7 +130,7 @@ trait AnyComposition extends AnyTraversal {
   type First <: AnyTraversal
   val  first: First
 
-  type Second <: AnyTraversal { type InT = First#OutT }
+  type Second <: AnyTraversal //{ type InT = First#OutT }
   val  second: Second
 
   type InT = First#InT
@@ -137,8 +140,8 @@ trait AnyComposition extends AnyTraversal {
   val  outT = second.outT
 }
 
-case class Compose[F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT }]
-  (val first: F, val second: S) extends AnyComposition {
+case class Compose[F <: AnyTraversal, S <: AnyTraversal] // { type InT = F#OutT }]
+  (val first: F, val second: S)(implicit can: CanCompose[F, S]) extends AnyComposition {
 
   type First = F
   type Second = S
@@ -150,9 +153,19 @@ object AnyTraversal {
   implicit def traversalOps[T <: AnyTraversal](t: T): TraversalOps[T] = new TraversalOps(t)
 }
 
+@annotation.implicitNotFound(msg = "Can't compose ${F} with ${S}")
+trait CanCompose[F <: AnyTraversal, S <: AnyTraversal]
+
+object CanCompose {
+  implicit def can[F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT }]: 
+      CanCompose[F, S] =
+  new CanCompose[F, S] {}
+}
+
 class TraversalOps[T <: AnyTraversal](val t: T) {
 
-  def >=>[S <: AnyTraversal { type InT = T#OutT }](s: S): Compose[T, S] = Compose[T, S](t, s)
+  def >=>[S <: AnyTraversal](s: S)
+    (implicit can: CanCompose[T, S]): Compose[T, S] = Compose[T, S](t, s)(can)
 
   def evalOn[I, O](i: I LabeledBy T#InT)(implicit ev: EvalTraversal[I, T, O]): O LabeledBy T#OutT = ev(i, t)
 }
@@ -160,12 +173,16 @@ class TraversalOps[T <: AnyTraversal](val t: T) {
 /* Basic steps: */
 case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop)
 
-case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source#T](edge, edge.source.t)
-case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target#T](edge, edge.target.t)
+case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)
+case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target)
 
-case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target#T, E](edge.target.t, edge)
-case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source#T, E](edge.source.t, edge)
+// TODO: these should actually return `E` with the corresponding arity
+case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge)
+case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge)
 
+case class Lift[T <: AnyTraversal](val traversal: T) extends Traversal[Many[T#InT], Many[T#OutT]](Many(traversal.inT), Many(traversal.outT))
+
+case class Flatten[T <: AnyLabelType](val tpe: T) extends Step[Many[Many[T]], Many[T]](Many(Many(tpe)), Many(tpe))
 
 ///////////////////////////////////////////////////////////
 

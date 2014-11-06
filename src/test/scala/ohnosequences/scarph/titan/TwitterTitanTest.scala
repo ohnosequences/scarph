@@ -260,6 +260,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     assert{ (GetOutEdges(posted) >=> (GetSource(posted) >=> GetProperty(name))).evalOn(edu) == name("@eparejatobes") }
 
+    // Lifting has to be explicit
+    val testArity = GetTarget(follows) >=> Lift(GetOutEdges(posted) >=> GetTarget(posted)) >=> Lift(Lift(GetProperty(text))) >=> Flatten(text)
+
     /*assert{ TitanTwitter.eval(GetSource(posted), List(post)) == List(edu) }*/
 
     // import AnyQuery._
