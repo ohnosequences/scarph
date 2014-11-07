@@ -73,30 +73,34 @@ abstract class VertexType extends AnyVertexType {
 
 
 /* Edge type has in/out vertex types, arities, etc. */
-sealed trait AnyArity extends AnyLabelType { 
-
-  type Tpe <: AnyLabelType 
-  val  tpe: Tpe
-}
-abstract class Arity[L <: AnyLabelType](val tpe: L) extends AnyArity { type Tpe = L }
+sealed trait AnyArity 
+// abstract class Arity[L <: AnyLabelType](val tpe: L) extends AnyArity { type Tpe = L }
 
 // TODO: there should be 4 things: one/many x non-empty/any
-case class  One[L <: AnyLabelType](l: L) extends Arity[L](l) { val label = s"One(${l.label})" }
-case class Many[L <: AnyLabelType](l: L) extends Arity[L](l) { val label = s"Many(${l.label})" }
+trait One extends AnyArity
+trait Many extends AnyArity
 
-trait AnyEdgeType extends AnyElementType {
+trait HasInArity { type InArity <: AnyArity }
+trait HasOutArity { type OutArity <: AnyArity }
 
-  // FIXME: these types should be somehow bounded by AnyVertexType
-  type Source <: AnyArity { type Tpe <: AnyVertexType }
+trait ManyOut extends HasOutArity { type OutArity = Many }
+trait  OneOut extends HasOutArity { type OutArity =  One }
+trait ManyIn  extends HasInArity { type  InArity = Many }
+trait  OneIn  extends HasInArity { type  InArity =  One }
+
+
+trait AnyEdgeType extends AnyElementType with HasInArity with HasOutArity {
+
+  type Source <: AnyVertexType
   val  source: Source
 
-  type Target <: AnyArity { type Tpe <: AnyVertexType }
+  type Target <: AnyVertexType
   val  target: Target
 }
 
 abstract class EdgeType[
-  I <: AnyArity { type Tpe <: AnyVertexType }, 
-  O <: AnyArity { type Tpe <: AnyVertexType }
+  I <: AnyVertexType, 
+  O <: AnyVertexType
 ](val source: I, val target: O) extends AnyEdgeType {
 
   type Source = I
@@ -108,16 +112,16 @@ abstract class EdgeType[
 
 ///////////////////////////////////////////////////////////
 
-trait AnyTraversal {
+trait AnyTraversal extends HasOutArity {
 
-  type InT <: AnyArity
+  type InT <: AnyLabelType
   val  inT: InT
 
-  type OutT <: AnyArity
+  type OutT <: AnyLabelType
   val  outT: OutT
 }
 
-abstract class Traversal[I <: AnyArity, O <: AnyArity](val inT: I, val outT: O) extends AnyTraversal {
+abstract class Traversal[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyTraversal {
 
   type InT = I
   type OutT = O
@@ -126,7 +130,7 @@ abstract class Traversal[I <: AnyArity, O <: AnyArity](val inT: I, val outT: O) 
 
 trait AnyStep extends AnyTraversal
 
-abstract class Step[I <: AnyArity, O <: AnyArity](i: I, o: O) 
+abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
   extends Traversal[I, O](i, o) with AnyStep
 
 
@@ -176,18 +180,56 @@ class TraversalOps[T <: AnyTraversal](val t: T) {
 }
 
 /* Basic steps: */
-case class GetProperty[P <: AnyProp](val prop: P) extends Step[One[P#Owner], One[P]](One(prop.owner), One(prop))
+case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop) with OneOut
 
-case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[One[E], One[E#Source#Tpe]](One(edge), One(edge.source.tpe))
-case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[One[E], One[E#Target#Tpe]](One(edge), One(edge.target.tpe))
+case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source) with OneOut
+case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target) with OneOut
 
 // TODO: these should actually return `E` with the corresponding arity
-case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, Many[E]](edge.target, Many(edge))
-case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, Many[E]](edge.source, Many(edge))
+case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge) { type OutArity = E#InArity }
+case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge) { type OutArity = E#OutArity }
 
-case class Lift[T <: AnyTraversal](val traversal: T) extends Traversal[Many[T#InT#Tpe], Many[T#OutT#Tpe]](Many(traversal.inT.tpe), Many(traversal.outT.tpe))
+// case class Lift[T <: AnyTraversal](val traversal: T) extends Traversal[T#InT, T#OutT](traversal.inT, traversal.outT)
 
-case class Flatten[T <: AnyLabelType](val tpe: T) extends Step[Many[Many[T]], Many[T]](Many(Many(tpe)), Many(tpe))
+// case class Flatten[T <: AnyLabelType](val tpe: T) extends Step[T, T](tpe, tpe)
+
+/* 
+Maybe something that was obvious, but I just wrote it down and will leave it here.
+
+
+### 4 cases:
+
+- zero or one  (`Option[X]`)
+- just one     (`Id[X]`)
+- one or more  (`NEL[X]`)
+- zero or more (`List[X]`)
+
+
+#### Id 
+
+It's unit, so `∀A`
+
+- `A × Id → A`
+- `Id × A → A`
+
+Also, obviously `∀A,  A × A → A`
+
+#### Option:
+
+- `Option × NEL → List`  
+- `NEL × Option → List`
+- `Option × List → List`
+- `List × Option → List`
+
+#### NEL:
+
+- `NEL × List → NEL`
+- `List × NEL → NEL`
+
+So we have a commutative idempotent monoid: `{Id, Option, NEL, List}`
+
+`TODO:` write something about monoids, steps as Kleisli arrows and their fish-composition (`>=>`) :fishing_pole_and_fish:
+*/
 
 ///////////////////////////////////////////////////////////
 
