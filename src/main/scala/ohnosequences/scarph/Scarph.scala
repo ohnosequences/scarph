@@ -72,22 +72,79 @@ abstract class VertexType extends AnyVertexType {
 }
 
 
+///////////////////////////////////////////////////////////
+
 /* Edge type has in/out vertex types, arities, etc. */
 sealed trait AnyArity 
-// abstract class Arity[L <: AnyLabelType](val tpe: L) extends AnyArity { type Tpe = L }
 
-// TODO: there should be 4 things: one/many x non-empty/any
-trait One extends AnyArity
-trait Many extends AnyArity
+// 4 things: one/many x non-empty/any
+// NOTE: don't know if the values of them are needed
+trait OneOrNone extends AnyArity
+trait ExactlyOne extends AnyArity
+trait ManyOrNone extends AnyArity
+trait AtLeastOne extends AnyArity
 
-trait HasInArity { type InArity <: AnyArity }
+trait HasInArity  { type InArity  <: AnyArity }
 trait HasOutArity { type OutArity <: AnyArity }
 
-trait ManyOut extends HasOutArity { type OutArity = Many }
-trait  OneOut extends HasOutArity { type OutArity =  One }
-trait ManyIn  extends HasInArity { type  InArity = Many }
-trait  OneIn  extends HasInArity { type  InArity =  One }
+trait InArity[A <: AnyArity] extends HasInArity { type InArity = A }
+trait OutArity[A <: AnyArity] extends HasOutArity { type OutArity = A }
 
+trait ManyOut extends OutArity[ManyOrNone]
+trait  OneOut extends OutArity[OneOrNone]
+trait ManyIn  extends InArity[ManyOrNone]
+trait  OneIn  extends InArity[OneOrNone]
+
+
+/* Arities multiplication */
+// not the best name, but it may look cool: A x B
+trait x[A <: AnyArity, B <: AnyArity] extends AnyFn with OutBound[AnyArity]
+
+object x extends x_2 {
+  implicit def idemp[A <: AnyArity]: A x A = new x[A, A] { type Out = A }
+}
+
+trait x_2 extends x_3 {
+  implicit def unitL[A <: AnyArity]: ExactlyOne x A = new x[ExactlyOne, A] { type Out = A }
+  implicit def unitR[A <: AnyArity]: A x ExactlyOne = new x[A, ExactlyOne] { type Out = A }
+}
+
+trait x_3 extends x_4 {
+  implicit def oneornoneL[A <: AnyArity]: OneOrNone x A = new x[OneOrNone, A] { type Out = ManyOrNone }
+  implicit def oneornoneR[A <: AnyArity]: A x OneOrNone = new x[A, OneOrNone] { type Out = ManyOrNone }
+}
+
+trait x_4 {
+  implicit def atleastoneL[A <: AnyArity]: AtLeastOne x A = new x[AtLeastOne, A] { type Out = AtLeastOne }
+  implicit def atleastoneR[A <: AnyArity]: A x AtLeastOne = new x[A, AtLeastOne] { type Out = AtLeastOne }
+}
+
+
+trait Pack[X, A <: AnyArity] extends Fn1[List[X]]
+
+// NOTE: these are example conversions. real ones should be provided by an implementation
+object Pack {
+
+  implicit def oneornone[X]: 
+      Pack[X, OneOrNone] with Out[Option[X]] = 
+  new Pack[X, OneOrNone] with Out[Option[X]] { def apply(list: In1): Out = list.headOption }
+
+  // do we need a container here?
+  implicit def exactlynone[X]: 
+      Pack[X, ExactlyOne] with Out[X] = 
+  new Pack[X, ExactlyOne] with Out[X] { def apply(list: In1): Out = list.head }
+
+  implicit def manyornone[X]: 
+      Pack[X, ManyOrNone] with Out[List[X]] = 
+  new Pack[X, ManyOrNone] with Out[List[X]] { def apply(list: In1): Out = list }
+
+  import scalaz._
+  implicit def atleastone[X]: 
+      Pack[X, AtLeastOne] with Out[NonEmptyList[X]] = 
+  new Pack[X, AtLeastOne] with Out[NonEmptyList[X]] { def apply(list: In1): Out = NonEmptyList.nel(list.head, list.tail) }
+}
+
+///////////////////////////////////////////////////////////
 
 trait AnyEdgeType extends AnyElementType with HasInArity with HasOutArity {
 
@@ -112,7 +169,7 @@ abstract class EdgeType[
 
 ///////////////////////////////////////////////////////////
 
-trait AnyTraversal extends HasOutArity {
+trait AnyPath extends HasOutArity {
 
   type InT <: AnyLabelType
   val  inT: InT
@@ -121,25 +178,25 @@ trait AnyTraversal extends HasOutArity {
   val  outT: OutT
 }
 
-abstract class Traversal[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyTraversal {
+abstract class Path[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyPath {
 
   type InT = I
   type OutT = O
 }
 
 
-trait AnyStep extends AnyTraversal
+trait AnyStep extends AnyPath
 
 abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
-  extends Traversal[I, O](i, o) with AnyStep
+  extends Path[I, O](i, o) with AnyStep
 
 
-trait AnyComposition extends AnyTraversal {
+trait AnyComposition extends AnyPath {
 
-  type First <: AnyTraversal
+  type First <: AnyPath
   val  first: First
 
-  type Second <: AnyTraversal //{ type InT = First#OutT }
+  type Second <: AnyPath //{ type InT = First#OutT }
   val  second: Second
 
   type InT = First#InT
@@ -147,125 +204,115 @@ trait AnyComposition extends AnyTraversal {
 
   type OutT = Second#OutT
   val  outT = second.outT
+
+  // should be provided implicitly:
+  val canCompose: Composable[First, Second]
 }
 
-case class Compose[F <: AnyTraversal, S <: AnyTraversal] // { type InT = F#OutT }]
-  (val first: F, val second: S)(implicit can: CanCompose[F, S]) extends AnyComposition {
+abstract class Composition[F <: AnyPath, S <: AnyPath](val first: F, val second: S) extends AnyComposition {
 
   type First = F
   type Second = S
 }
 
+class Compose[F <: AnyPath, S <: AnyPath, OutA <: AnyArity] // { type InT = F#OutT }]
+  (f: F, s: S)(implicit val canCompose: Composable[F, S] { type OutArity = OutA })
+    extends Composition[F, S](f, s) {
 
-object AnyTraversal {
-
-  implicit def traversalOps[T <: AnyTraversal](t: T): TraversalOps[T] = new TraversalOps(t)
+  type OutArity = OutA
 }
 
+
+object AnyPath {
+
+  implicit def traversalOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
+}
+
+/* This checks that the paths are composable and multiplies their out-arities */
 @annotation.implicitNotFound(msg = "Can't compose ${F} with ${S}")
-trait CanCompose[F <: AnyTraversal, S <: AnyTraversal]
-
-object CanCompose {
-  implicit def can[F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT }]: 
-      CanCompose[F, S] =
-  new CanCompose[F, S] {}
+trait Composable[F <: AnyPath, S <: AnyPath] extends HasOutArity {
+  val mutlipliedArities: (F#OutArity x S#OutArity)
 }
 
-class TraversalOps[T <: AnyTraversal](val t: T) {
+object Composable {
+  implicit def can[F <: AnyPath, S <: AnyPath { type InT = F#OutT }, OutA <: AnyArity]
+    (implicit m: (F#OutArity x S#OutArity) { type Out = OutA }): 
+        Composable[F, S] =
+    new Composable[F, S] {
+      val mutlipliedArities = m
+      type OutArity = OutA
+    }
+}
 
-  def >=>[S <: AnyTraversal](s: S)
-    (implicit can: CanCompose[T, S]): Compose[T, S] = Compose[T, S](t, s)(can)
+class PathOps[F <: AnyPath](val t: F) {
 
-  def evalOn[I, O](i: I LabeledBy T#InT)(implicit ev: EvalTraversal[I, T, O]): O LabeledBy T#OutT = ev(i, t)
+  def >=>[S <: AnyPath, OutA <: AnyArity](s: S)
+    (implicit canCompose: Composable[F, S] { type OutArity = OutA }): 
+        Compose[F, S, OutA] = 
+    new Compose[F, S, OutA](t, s)(canCompose)
+
+  def evalOn[I, O, PO](i: I LabeledBy F#InT)
+    (implicit 
+      ev: EvalPath[I, F, O],
+      // FIXME: !!! this is an important final step, it should be in some EvalEval thing
+      pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PO }
+    ): PO = pack(ev(i, t))
 }
 
 /* Basic steps: */
-case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop) with OneOut
+case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop) with OutArity[ExactlyOne]
 
-case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source) with OneOut
-case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target) with OneOut
+case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source) with OutArity[ExactlyOne]
+case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target) with OutArity[ExactlyOne]
 
-// TODO: these should actually return `E` with the corresponding arity
-case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge) { type OutArity = E#InArity }
-case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge) { type OutArity = E#OutArity }
+case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge) with OutArity[E#InArity]
+case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge) with OutArity[E#OutArity]
 
-// case class Lift[T <: AnyTraversal](val traversal: T) extends Traversal[T#InT, T#OutT](traversal.inT, traversal.outT)
+// this looks not nice, but so far I don't see a simpler way to declare it generically
+case class GetInVertices[E <: AnyEdgeType](val edge: E)
+  (implicit c: Composable[GetInEdges[E], GetSource[E]] { type OutArity = E#InArity }) 
+    extends Compose[GetInEdges[E], GetSource[E], E#InArity](GetInEdges(edge), GetSource(edge))(c)
 
-// case class Flatten[T <: AnyLabelType](val tpe: T) extends Step[T, T](tpe, tpe)
-
-/* 
-Maybe something that was obvious, but I just wrote it down and will leave it here.
-
-
-### 4 cases:
-
-- zero or one  (`Option[X]`)
-- just one     (`Id[X]`)
-- one or more  (`NEL[X]`)
-- zero or more (`List[X]`)
-
-
-#### Id 
-
-It's unit, so `∀A`
-
-- `A × Id → A`
-- `Id × A → A`
-
-Also, obviously `∀A,  A × A → A`
-
-#### Option:
-
-- `Option × NEL → List`  
-- `NEL × Option → List`
-- `Option × List → List`
-- `List × Option → List`
-
-#### NEL:
-
-- `NEL × List → NEL`
-- `List × NEL → NEL`
-
-So we have a commutative idempotent monoid: `{Id, Option, NEL, List}`
-
-`TODO:` write something about monoids, steps as Kleisli arrows and their fish-composition (`>=>`) :fishing_pole_and_fish:
-*/
+case class GetOutVertices[E <: AnyEdgeType](val edge: E)
+  (implicit c: Composable[GetOutEdges[E], GetTarget[E]] { type OutArity = E#OutArity }) 
+    extends Compose[GetOutEdges[E], GetTarget[E], E#OutArity](GetOutEdges(edge), GetTarget(edge))(c)
 
 ///////////////////////////////////////////////////////////
 
-trait AnyEvalTraversal[T <: AnyTraversal] {
+trait AnyEvalPath[P <: AnyPath] {
 
-  type Traversal = T
+  type Path = P
 
   type InVal
   type OutVal
 
-  type In = InVal LabeledBy Traversal#InT
-  type Out = OutVal LabeledBy Traversal#OutT
+  type In = InVal LabeledBy Path#InT
+  type Out = List[OutVal LabeledBy Path#OutT]
 
-  def apply(in: In, s: Traversal): Out
+  def apply(in: In, p: Path): Out
 }
 
-trait EvalTraversal[I, T <: AnyTraversal, O] 
-  extends AnyEvalTraversal[T] {
+trait EvalPath[I, P <: AnyPath, O] 
+  extends AnyEvalPath[P] {
 
   type InVal = I
   type OutVal = O
 }
 
-object AnyEvalTraversal {
+object AnyEvalPath {
 
   implicit def evalComposition[
-    F <: AnyTraversal, S <: AnyTraversal { type InT = F#OutT },
+    F <: AnyPath, S <: AnyPath { type InT = F#OutT },
     I, M, O
   ](implicit
-    evalFirst:  EvalTraversal[I, F, M],
-    evalSecond: EvalTraversal[M, S, O]
-  ):  EvalTraversal[I, Compose[F, S], O] =
-  new EvalTraversal[I, Compose[F, S], O] {
-    def apply(in: In, t: Traversal): Out = {
-      val bodyOut = evalFirst(in, t.first)
-      evalSecond(bodyOut, t.second)
+    evalFirst:  EvalPath[I, F, M],
+    evalSecond: EvalPath[M, S, O]
+  ):  EvalPath[I, Composition[F, S], O] =
+  new EvalPath[I, Composition[F, S], O] {
+    def apply(in: In, p: Path): Out = {
+      val bodyOut: List[M LabeledBy F#OutT] = evalFirst(in, p.first)
+      // new LabeledBy[List[O], S#OutT](
+      bodyOut.flatMap{ b => evalSecond(b, p.second) }
     }
   }
 }
