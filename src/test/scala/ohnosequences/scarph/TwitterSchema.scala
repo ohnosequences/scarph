@@ -12,13 +12,13 @@ object TwitterSchema {
   case object tweet extends VertexType
   case object text extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends EdgeType(user, tweet) with OneIn with ManyOut
+  case object posted extends EdgeType(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone]
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object follows extends EdgeType(user, user) with ManyIn with ManyOut
+  case object follows extends EdgeType(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
-  case object liked extends EdgeType(user, tweet) with ManyIn with OneOut
+  case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)

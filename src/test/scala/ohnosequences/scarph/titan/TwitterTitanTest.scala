@@ -226,11 +226,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // just shortcuts
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[P <: AnyProp](p: P)(pval: P#Raw): TitanVertex = {
-        tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex]
+      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
+        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
-      def edge[P <: AnyProp](p: P)(pval: P#Raw): TitanEdge = {
-        tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge]
+      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
+        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
 
@@ -246,24 +246,49 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // val tweet = TitanTwitter.tweet //implementationOf(tweet)
     // val posted = TitanTwitter.posted //implementationOf(posted)
 
-    val edu = One(user)(g.vertex(name)("@eparejatobes"))
-    val alexey = One(user)(g.vertex(name)("@laughedelic"))
-    val kim = One(user)(g.vertex(name)("@evdokim"))
-    val twt = One(tweet)(g.vertex(text)("back to twitter :)"))
-    val post = One(posted)(g.edge(time)("13.11.2012"))
+    val edu = g.vertex(user)(name)("@eparejatobes")
+    val alexey = g.vertex(user)(name)("@laughedelic")
+    val kim = g.vertex(user)(name)("@evdokim")
+    val twt = g.vertex(tweet)(text)("back to twitter :)")
+    val post = g.edge(posted)(time)("13.11.2012")
 
+    /* Evaluating steps: */
     assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
-
     assert{ GetSource(posted).evalOn(post) == edu }
 
-    assert{ (GetSource(posted) >=> GetProperty(name)).evalOn(post) == name("@eparejatobes") }
+    /* Full multiplication table: */
+    implicitly[(OneOrNone  x OneOrNone)  with Out[OneOrNone]]
+    implicitly[(ExactlyOne x ExactlyOne) with Out[ExactlyOne]]
+    implicitly[(ManyOrNone x ManyOrNone) with Out[ManyOrNone]]
+    implicitly[(AtLeastOne x AtLeastOne) with Out[AtLeastOne]]
 
-    // TODO: write evaluation for lifts
-    assert{ (GetOutEdges(posted) >=> Lift(GetSource(posted)) >=> Lift(Lift(GetProperty(name)))).evalOn(edu) == name("@eparejatobes") }
+    implicitly[(ExactlyOne x OneOrNone)  with Out[OneOrNone]]
+    implicitly[(ExactlyOne x ManyOrNone) with Out[ManyOrNone]]
+    implicitly[(ExactlyOne x AtLeastOne) with Out[AtLeastOne]]
 
-    // Lifting has to be explicit
-    // TODO: write evaluation for flattening
-    val testArity = GetTarget(follows) >=> GetOutEdges(posted) >=> Lift(GetTarget(posted)) >=> Lift(Lift(GetProperty(text))) >=> Flatten(text)
+    implicitly[(OneOrNone  x ExactlyOne) with Out[OneOrNone]]
+    implicitly[(ManyOrNone x ExactlyOne) with Out[ManyOrNone]]
+    implicitly[(AtLeastOne x ExactlyOne) with Out[AtLeastOne]]
+
+    implicitly[(OneOrNone x ManyOrNone) with Out[ManyOrNone]]
+    implicitly[(OneOrNone x AtLeastOne) with Out[ManyOrNone]]
+
+    implicitly[(ManyOrNone x OneOrNone) with Out[ManyOrNone]]
+    implicitly[(AtLeastOne x OneOrNone) with Out[ManyOrNone]]
+
+    implicitly[(AtLeastOne x ManyOrNone) with Out[AtLeastOne]]
+    implicitly[(ManyOrNone x AtLeastOne) with Out[AtLeastOne]]
+
+    /* Composing steps: */
+    // implicitly[Composable[GetSource[posted.type], GetProperty[name.type]] { type Out = ExactlyOne }]
+
+    val comp = GetSource(posted) >=> GetProperty(name)
+    
+    assert{ comp.evalOn(post)(AnyEvalPath.evalComposition, Pack.exactlynone) == name("@eparejatobes") }
+
+    // assert{ (GetOutEdges(posted) >=> GetSource(posted) >=> GetProperty(name)).evalOn(edu) == name("@eparejatobes") }
+
+    // val testArity = GetTarget(follows) >=> GetOutEdges(posted) >=> GetTarget(posted) >=> GetProperty(text)) >=> Flatten(text)
 
     /*assert{ TitanTwitter.eval(GetSource(posted), List(post)) == List(edu) }*/
 

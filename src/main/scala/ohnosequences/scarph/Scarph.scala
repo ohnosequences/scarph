@@ -90,33 +90,45 @@ trait HasOutArity { type OutArity <: AnyArity }
 trait InArity[A <: AnyArity] extends HasInArity { type InArity = A }
 trait OutArity[A <: AnyArity] extends HasOutArity { type OutArity = A }
 
-trait ManyOut extends OutArity[ManyOrNone]
-trait  OneOut extends OutArity[OneOrNone]
-trait ManyIn  extends InArity[ManyOrNone]
-trait  OneIn  extends InArity[OneOrNone]
-
 
 /* Arities multiplication */
 // not the best name, but it may look cool: A x B
 trait x[A <: AnyArity, B <: AnyArity] extends AnyFn with OutBound[AnyArity]
 
 object x extends x_2 {
-  implicit def idemp[A <: AnyArity]: A x A = new x[A, A] { type Out = A }
+  implicit def idemp[A <: AnyArity]: 
+      (A x A) with Out[A] = 
+  new (A x A) with Out[A]
 }
 
 trait x_2 extends x_3 {
-  implicit def unitL[A <: AnyArity]: ExactlyOne x A = new x[ExactlyOne, A] { type Out = A }
-  implicit def unitR[A <: AnyArity]: A x ExactlyOne = new x[A, ExactlyOne] { type Out = A }
+  implicit def unitL[A <: AnyArity]: 
+      (ExactlyOne x A) with Out[A] = 
+  new (ExactlyOne x A) with Out[A]
+
+  implicit def unitR[A <: AnyArity]: 
+      (A x ExactlyOne) with Out[A] = 
+  new (A x ExactlyOne) with Out[A]
 }
 
 trait x_3 extends x_4 {
-  implicit def oneornoneL[A <: AnyArity]: OneOrNone x A = new x[OneOrNone, A] { type Out = ManyOrNone }
-  implicit def oneornoneR[A <: AnyArity]: A x OneOrNone = new x[A, OneOrNone] { type Out = ManyOrNone }
+  implicit def oneornoneL[A <: AnyArity]: 
+      (OneOrNone x A) with Out[ManyOrNone] = 
+  new (OneOrNone x A) with Out[ManyOrNone]
+
+  implicit def oneornoneR[A <: AnyArity]: 
+      (A x OneOrNone) with Out[ManyOrNone] = 
+  new (A x OneOrNone) with Out[ManyOrNone]
 }
 
 trait x_4 {
-  implicit def atleastoneL[A <: AnyArity]: AtLeastOne x A = new x[AtLeastOne, A] { type Out = AtLeastOne }
-  implicit def atleastoneR[A <: AnyArity]: A x AtLeastOne = new x[A, AtLeastOne] { type Out = AtLeastOne }
+  implicit def atleastoneL[A <: AnyArity]: 
+      (AtLeastOne x A) with Out[AtLeastOne] = 
+  new (AtLeastOne x A) with Out[AtLeastOne]
+
+  implicit def atleastoneR[A <: AnyArity]: 
+      (A x AtLeastOne) with Out[AtLeastOne] = 
+  new (A x AtLeastOne) with Out[AtLeastOne]
 }
 
 
@@ -215,11 +227,11 @@ abstract class Composition[F <: AnyPath, S <: AnyPath](val first: F, val second:
   type Second = S
 }
 
-class Compose[F <: AnyPath, S <: AnyPath, OutA <: AnyArity] // { type InT = F#OutT }]
-  (f: F, s: S)(implicit val canCompose: Composable[F, S] { type OutArity = OutA })
+class Compose[F <: AnyPath, S <: AnyPath, A <: AnyArity] // { type InT = F#OutT }]
+  (f: F, s: S)(implicit val canCompose: Composable[F, S] { type Out = A })
     extends Composition[F, S](f, s) {
 
-  type OutArity = OutA
+  type OutArity = A
 }
 
 
@@ -230,26 +242,24 @@ object AnyPath {
 
 /* This checks that the paths are composable and multiplies their out-arities */
 @annotation.implicitNotFound(msg = "Can't compose ${F} with ${S}")
-trait Composable[F <: AnyPath, S <: AnyPath] extends HasOutArity {
+trait Composable[F <: AnyPath, S <: AnyPath] extends AnyFn with OutBound[AnyArity] {
   val mutlipliedArities: (F#OutArity x S#OutArity)
 }
 
 object Composable {
-  implicit def can[F <: AnyPath, S <: AnyPath { type InT = F#OutT }, OutA <: AnyArity]
-    (implicit m: (F#OutArity x S#OutArity) { type Out = OutA }): 
-        Composable[F, S] =
-    new Composable[F, S] {
-      val mutlipliedArities = m
-      type OutArity = OutA
-    }
+
+  implicit def can[F <: AnyPath, S <: AnyPath { type InT = F#OutT }, A <: AnyArity]
+    (implicit m: (F#OutArity x S#OutArity) { type Out = A }): 
+        Composable[F, S] with Out[A] =
+    new Composable[F, S] with Out[A] { val mutlipliedArities = m }
 }
 
 class PathOps[F <: AnyPath](val t: F) {
 
-  def >=>[S <: AnyPath, OutA <: AnyArity](s: S)
-    (implicit canCompose: Composable[F, S] { type OutArity = OutA }): 
-        Compose[F, S, OutA] = 
-    new Compose[F, S, OutA](t, s)(canCompose)
+  def >=>[S <: AnyPath, A <: AnyArity](s: S)
+    (implicit c: Composable[F, S] { type Out = A }): 
+        Compose[F, S, A] = 
+    new Compose[F, S, A](t, s)(c)
 
   def evalOn[I, O, PO](i: I LabeledBy F#InT)
     (implicit 
@@ -270,11 +280,11 @@ case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](
 
 // this looks not nice, but so far I don't see a simpler way to declare it generically
 case class GetInVertices[E <: AnyEdgeType](val edge: E)
-  (implicit c: Composable[GetInEdges[E], GetSource[E]] { type OutArity = E#InArity }) 
+  (implicit c: Composable[GetInEdges[E], GetSource[E]] { type Out = E#InArity }) 
     extends Compose[GetInEdges[E], GetSource[E], E#InArity](GetInEdges(edge), GetSource(edge))(c)
 
 case class GetOutVertices[E <: AnyEdgeType](val edge: E)
-  (implicit c: Composable[GetOutEdges[E], GetTarget[E]] { type OutArity = E#OutArity }) 
+  (implicit c: Composable[GetOutEdges[E], GetTarget[E]] { type Out = E#OutArity }) 
     extends Compose[GetOutEdges[E], GetTarget[E], E#OutArity](GetOutEdges(edge), GetTarget(edge))(c)
 
 ///////////////////////////////////////////////////////////
