@@ -9,7 +9,7 @@ import com.tinkerpop.blueprints.Vertex
 
 import java.io.File
 
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 
 import ohnosequences.scarph._
 import ohnosequences.scarph.test._, TwitterSchema._
@@ -251,36 +251,13 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
     assert{ GetSource(posted).evalOn(post) == edu }
 
-    /* Full multiplication table: */
-    implicitly[(OneOrNone  x OneOrNone)  with Out[OneOrNone]]
-    implicitly[(ExactlyOne x ExactlyOne) with Out[ExactlyOne]]
-    implicitly[(ManyOrNone x ManyOrNone) with Out[ManyOrNone]]
-    implicitly[(AtLeastOne x AtLeastOne) with Out[AtLeastOne]]
-
-    implicitly[(ExactlyOne x OneOrNone)  with Out[OneOrNone]]
-    implicitly[(ExactlyOne x ManyOrNone) with Out[ManyOrNone]]
-    implicitly[(ExactlyOne x AtLeastOne) with Out[AtLeastOne]]
-
-    implicitly[(OneOrNone  x ExactlyOne) with Out[OneOrNone]]
-    implicitly[(ManyOrNone x ExactlyOne) with Out[ManyOrNone]]
-    implicitly[(AtLeastOne x ExactlyOne) with Out[AtLeastOne]]
-
-    implicitly[(OneOrNone x ManyOrNone) with Out[ManyOrNone]]
-    implicitly[(OneOrNone x AtLeastOne) with Out[ManyOrNone]]
-
-    implicitly[(ManyOrNone x OneOrNone) with Out[ManyOrNone]]
-    implicitly[(AtLeastOne x OneOrNone) with Out[ManyOrNone]]
-
-    implicitly[(AtLeastOne x ManyOrNone) with Out[AtLeastOne]]
-    implicitly[(ManyOrNone x AtLeastOne) with Out[AtLeastOne]]
-
     /* Composing steps: */
-    val comp = GetSource(posted) >=> GetProperty(name)
+    val posterName = GetSource(posted) >=> GetProperty(name)
     
-    assert{ comp.evalOn(post) == name("@eparejatobes") }
+    assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // this query returns a list of 4 Edus, so we comare it as a set
-    assert{ (GetOutEdges(posted) >=> GetSource(posted) >=> GetProperty(name)).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+    assert{ (GetOutEdges(posted) >=> posterName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
   }
 

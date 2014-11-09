@@ -23,7 +23,7 @@ libraryDependencies += {
 resolvers += "restlet-releases" at "http://maven.restlet.org/"
 
 libraryDependencies ++= Seq(
-  "ohnosequences" %% "pointless" % "0.6.0-SNAPSHOT",
+  "ohnosequences" %% "cosas" % "0.6.0-SNAPSHOT",
   "com.thinkaurelius.titan" % "titan-all" % "0.5.0",
   "org.scalaz" %% "scalaz-core" % "7.1.0",
   "org.scalatest" %% "scalatest" % "2.2.2" % "test"

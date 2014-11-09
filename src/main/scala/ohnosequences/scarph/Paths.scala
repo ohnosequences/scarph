@@ -1,5 +1,7 @@
 package ohnosequences.scarph
 
+import ohnosequences.cosas._
+
 trait AnyPath extends HasOutArity {
 
   type InT <: AnyLabelType
@@ -16,12 +18,13 @@ abstract class Path[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: 
 }
 
 
+/* A step is a minimal unit of path */
 trait AnyStep extends AnyPath
 
 abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
   extends Path[I, O](i, o) with AnyStep
 
-
+/* Path is a composition of other paths */
 trait AnyComposition extends AnyPath {
 
   type First <: AnyPath
@@ -40,15 +43,13 @@ trait AnyComposition extends AnyPath {
   val canCompose: Composable[First, Second]
 }
 
-abstract class Composition[F <: AnyPath, S <: AnyPath](val first: F, val second: S) extends AnyComposition {
+class Compose[F <: AnyPath, S <: AnyPath, A <: AnyArity]
+  (val first: F, val second: S)
+  (implicit val canCompose: Composable[F, S] { type Out = A })
+  extends AnyComposition {
 
   type First = F
   type Second = S
-}
-
-class Compose[F <: AnyPath, S <: AnyPath, A <: AnyArity] // { type InT = F#OutT }]
-  (f: F, s: S)(implicit val canCompose: Composable[F, S] { type Out = A })
-    extends Composition[F, S](f, s) {
 
   type OutArity = A
 }
@@ -56,7 +57,7 @@ class Compose[F <: AnyPath, S <: AnyPath, A <: AnyArity] // { type InT = F#OutT 
 
 object AnyPath {
 
-  implicit def traversalOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
+  implicit def pathOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
 }
 
 /* This checks that the paths are composable and multiplies their out-arities */
@@ -75,15 +76,15 @@ object Composable {
 
 class PathOps[F <: AnyPath](val t: F) {
 
+  /* Just a synonim for composition */
   def >=>[S <: AnyPath, A <: AnyArity](s: S)
     (implicit c: Composable[F, S] { type Out = A }): 
         Compose[F, S, A] = 
     new Compose[F, S, A](t, s)(c)
 
-  def evalOn[I, O, PO](i: I LabeledBy F#InT)
+  def evalOn[I, O, PackedOut](i: I LabeledBy F#InT)
     (implicit 
       ev: EvalPath[I, F, O],
-      // FIXME: !!! this is an important final step, it should be in some EvalEval thing
-      pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PO }
-    ): PO = pack(ev(i, t))
+      pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PackedOut }
+    ): PackedOut = pack(ev(i, t))
 }

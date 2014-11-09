@@ -1,7 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._
-import shapeless._
+// TODO: use this thing from cosas
 
 trait AnyLabelType {
   val label: String

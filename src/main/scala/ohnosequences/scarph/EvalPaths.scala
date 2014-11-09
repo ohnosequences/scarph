@@ -1,5 +1,8 @@
 package ohnosequences.scarph
 
+import ohnosequences.cosas._
+
+// NOTE: maybe this should be Fn2
 trait AnyEvalPath[P <: AnyPath] {
 
   type Path = P
@@ -10,7 +13,14 @@ trait AnyEvalPath[P <: AnyPath] {
   type In = InVal LabeledBy Path#InT
   type Out = List[OutVal LabeledBy Path#OutT]
 
+  // implicitly:
+  // type PackedOut
+  // val pack: Pack[OutVal LabeledBy Path#OutT, Path#OutArity] { type Out = PackedOut }
+
   def apply(in: In, p: Path): Out
+
+  /* This returns the result of eval with respect to the out-arity */
+  // def apply(in: In, p: Path): PackedOut = pack(eval(in, p))
 }
 
 trait EvalPath[I, P <: AnyPath, O] 
@@ -32,6 +42,7 @@ object AnyEvalPath {
     evalSecond: EvalPath[M, S, O]
   ):  EvalPath[I, Compose[F, S, A], O] =
   new EvalPath[I, Compose[F, S, A], O] {
+
     def apply(in: In, p: Path): Out = {
       val bodyOut: List[M LabeledBy F#OutT] = evalFirst(in, p.first)
       bodyOut.flatMap{ b => evalSecond(b, p.second) }

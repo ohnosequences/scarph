@@ -1,10 +1,12 @@
 package ohnosequences.scarph
 
-/* Edge type has in/out vertex types, arities, etc. */
+import ohnosequences.cosas._
+
+// NOTE: maybe arity is not a proper name for what we are defining here...
 sealed trait AnyArity 
 
-// 4 things: one/many x non-empty/any
-// NOTE: don't know if the values of them are needed
+/* 4 things: one/many x non-empty/any */
+// NOTE: don't know if the values of them are needed for anything
 trait OneOrNone extends AnyArity
 trait ExactlyOne extends AnyArity
 trait ManyOrNone extends AnyArity
@@ -81,4 +83,3 @@ object Pack {
       Pack[X, AtLeastOne] with Out[NonEmptyList[X]] = 
   new Pack[X, AtLeastOne] with Out[NonEmptyList[X]] { def apply(list: In1): Out = NonEmptyList.nel(list.head, list.tail) }
 }
-

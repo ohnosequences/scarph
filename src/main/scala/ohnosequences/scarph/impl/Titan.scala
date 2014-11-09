@@ -4,6 +4,7 @@ import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._ 
 
 object titan {
+
   import com.tinkerpop.blueprints.Direction
 
   implicit def evalGetVertexProperty[P <: AnyProp { type Owner <: AnyVertexType }]:
@@ -40,6 +41,20 @@ object titan {
         .getEdges(Direction.OUT, t.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
         .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
+    }
+  }
+
+  implicit def evalGetInEdges[E <: AnyEdgeType]:
+      EvalPath[TitanVertex, GetInEdges[E], TitanEdge] =
+  new EvalPath[TitanVertex, GetInEdges[E], TitanEdge] {
+    def apply(in: In, t: Path): Out = {
+      in.value
+        .getEdges(Direction.IN, t.edge.label)
+        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
+      // FIXME: to avoid casting here, we should use getTitanEdges instead of getEdges,
+      // but it requires having an EdgeLabel, which we can get only from TitanGraph#TitanManagement,
+      // so maybe we can have it as a common evaluation context
     }
   }
 
