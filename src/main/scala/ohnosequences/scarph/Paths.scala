@@ -109,16 +109,13 @@ object AnyPath {
 
 /* This checks that the paths are composable and multiplies their out-arities */
 @annotation.implicitNotFound(msg = "Can't compose ${F} with ${S}")
-trait Composable[F <: AnyPath, S <: AnyPath] extends AnyFn with OutBound[AnyArity] {
-  val mutlipliedArities: (F#OutArity x S#OutArity)
-}
+trait Composable[F <: AnyPath, S <: AnyPath]
 
 object Composable {
 
-  implicit def can[F <: AnyPath, S <: AnyPath { type InT = F#OutT }, A <: AnyArity]
-    (implicit m: (F#OutArity x S#OutArity) { type Out = A }): 
-        Composable[F, S] with Out[A] =
-    new Composable[F, S] with Out[A] { val mutlipliedArities = m }
+  implicit def can[F <: AnyPath, S <: AnyPath { type InT = F#OutT }]:
+        Composable[F, S] =
+    new Composable[F, S] {}
 }
 
 class PathOps[F <: AnyPath](val t: F) {
@@ -129,11 +126,10 @@ class PathOps[F <: AnyPath](val t: F) {
         Compose[F, S, A] = 
     new Compose[F, S, A](t, s)(c)
 
-  def evalOn[I, O, PackedOut](i: I LabeledBy F#InT)
+  def evalOn[I, O](i: I LabeledBy F#InT)
     (implicit 
-      ev: EvalPath[I, F, O],
-      pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PackedOut }
-    ): PackedOut = pack(ev(i, t))
+      ev: EvalPath[I, F, O]
+    ): List[O LabeledBy F#OutT] = ev(i, t)
 }
 
 case class exactlyOneMapOps[X <: AnyLabelType, P <: AnyPath { type OutT = exactlyOne[X] }](val p: P) {
