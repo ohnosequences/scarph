@@ -280,39 +280,13 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     implicitly[(ManyOrNone x AtLeastOne) with Out[AtLeastOne]]
 
     /* Composing steps: */
-    // implicitly[Composable[GetSource[posted.type], GetProperty[name.type]] { type Out = ExactlyOne }]
-
     val comp = GetSource(posted) >=> GetProperty(name)
     
-    assert{ comp.evalOn(post)(AnyEvalPath.evalComposition, Pack.exactlynone) == name("@eparejatobes") }
+    assert{ comp.evalOn(post) == name("@eparejatobes") }
 
-    // assert{ (GetOutEdges(posted) >=> GetSource(posted) >=> GetProperty(name)).evalOn(edu) == name("@eparejatobes") }
+    // this query returns a list of 4 Edus, so we comare it as a set
+    assert{ (GetOutEdges(posted) >=> GetSource(posted) >=> GetProperty(name)).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
-    // val testArity = GetTarget(follows) >=> GetOutEdges(posted) >=> GetTarget(posted) >=> GetProperty(text)) >=> Flatten(text)
-
-    /*assert{ TitanTwitter.eval(GetSource(posted), List(post)) == List(edu) }*/
-
-    // import AnyQuery._
-    // import AnyEvalQuery._
-
-    // val ev = TitanTwitter.eval(posted.src)(EvalOnSchema.simple)
-
-    // assert{ ev.apply(posted.src, List(post)) == List(edu) }
-
-    /*assert{ TitanTwitter.eval(user.get(name), List(kim, alexey)) == List(name("@evdokim"), name("@laughedelic")) }*/
-
-    /*val comp = Compose(posted.src, user.get(name))*/
-    /*val comp = IdQuery(posted).source.get(name)
-
-    assertResult(List(name("@eparejatobes"))){
-      TitanTwitter.eval(comp).apply(comp, List(post))
-    }*/
-
-    /*assertResult(List()){
-      TitanTwitter.eval(user.outE(posted), List(edu))
-    }*/
-
-    // val query = posted.source.outE(posted)
   }
 
   // test("get vertex property") {

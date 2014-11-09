@@ -278,14 +278,15 @@ case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](ed
 case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge) with OutArity[E#InArity]
 case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge) with OutArity[E#OutArity]
 
-// this looks not nice, but so far I don't see a simpler way to declare it generically
+/* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,
+   but with the parenthesis, i.e. grouping this composition to be evaluated together.
+   Therefore, you can write an evaluator for this composition as for one step if the
+   backend allows you to optimize it this way.
+*/
 case class GetInVertices[E <: AnyEdgeType](val edge: E)
-  (implicit c: Composable[GetInEdges[E], GetSource[E]] { type Out = E#InArity }) 
-    extends Compose[GetInEdges[E], GetSource[E], E#InArity](GetInEdges(edge), GetSource(edge))(c)
-
+    extends Compose[GetInEdges[E], GetSource[E], E#InArity](GetInEdges(edge), GetSource(edge))
 case class GetOutVertices[E <: AnyEdgeType](val edge: E)
-  (implicit c: Composable[GetOutEdges[E], GetTarget[E]] { type Out = E#OutArity }) 
-    extends Compose[GetOutEdges[E], GetTarget[E], E#OutArity](GetOutEdges(edge), GetTarget(edge))(c)
+    extends Compose[GetOutEdges[E], GetTarget[E], E#OutArity](GetOutEdges(edge), GetTarget(edge))
 
 ///////////////////////////////////////////////////////////
 
@@ -312,16 +313,17 @@ trait EvalPath[I, P <: AnyPath, O]
 object AnyEvalPath {
 
   implicit def evalComposition[
-    F <: AnyPath, S <: AnyPath { type InT = F#OutT },
+    F <: AnyPath, 
+    S <: AnyPath { type InT = F#OutT },
+    A <: AnyArity,
     I, M, O
   ](implicit
     evalFirst:  EvalPath[I, F, M],
     evalSecond: EvalPath[M, S, O]
-  ):  EvalPath[I, Composition[F, S], O] =
-  new EvalPath[I, Composition[F, S], O] {
+  ):  EvalPath[I, Compose[F, S, A], O] =
+  new EvalPath[I, Compose[F, S, A], O] {
     def apply(in: In, p: Path): Out = {
       val bodyOut: List[M LabeledBy F#OutT] = evalFirst(in, p.first)
-      // new LabeledBy[List[O], S#OutT](
       bodyOut.flatMap{ b => evalSecond(b, p.second) }
     }
   }
