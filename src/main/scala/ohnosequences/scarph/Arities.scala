@@ -3,14 +3,15 @@ package ohnosequences.scarph
 import ohnosequences.cosas._
 
 // NOTE: maybe arity is not a proper name for what we are defining here...
-sealed trait AnyArity 
+sealed trait AnyArity {}
 
 /* 4 things: one/many x non-empty/any */
 // NOTE: don't know if the values of them are needed for anything
-trait OneOrNone extends AnyArity
-trait ExactlyOne extends AnyArity
-trait ManyOrNone extends AnyArity
-trait AtLeastOne extends AnyArity
+// TODO objects and aliases for their .type
+trait OneOrNone extends AnyArity // Option
+trait ExactlyOne extends AnyArity // Id
+trait ManyOrNone extends AnyArity // List
+trait AtLeastOne extends AnyArity // NEList
 
 trait HasInArity  { type InArity  <: AnyArity }
 trait HasOutArity { type OutArity <: AnyArity }
@@ -70,7 +71,7 @@ object Pack {
   new Pack[X, OneOrNone] with Out[Option[X]] { def apply(list: In1): Out = list.headOption }
 
   // do we need a container here?
-  implicit def exactlynone[X]: 
+  implicit def exactlyone[X]: 
       Pack[X, ExactlyOne] with Out[X] = 
   new Pack[X, ExactlyOne] with Out[X] { def apply(list: In1): Out = list.head }
 

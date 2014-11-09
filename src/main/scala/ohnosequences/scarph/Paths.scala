@@ -11,6 +11,13 @@ trait AnyPath extends HasOutArity {
   val  outT: OutT
 }
 
+trait AnyWrappedPath extends AnyPath {
+
+  type OutT <: AnyContainer
+
+  type WrappedByOut = OutT#Of
+}
+
 abstract class Path[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyPath {
 
   type InT = I
@@ -54,10 +61,50 @@ class Compose[F <: AnyPath, S <: AnyPath, A <: AnyArity]
   type OutArity = A
 }
 
+/*
+this represents mapping a Path over a container; the path should have InT/OutT matching what the container wraps
+*/
+trait AnyMapExactlyOne extends AnyPath { map =>
+
+  type X <: AnyLabelType
+  type InT = exactlyOne[X]
+
+  type Mapped <: AnyPath { type InT = X }
+  val mapped: Mapped
+
+  type OutT <: exactlyOne[Mapped#OutT]
+}
+
+/*
+  here we need
+
+  1. the container value
+  2. the path that is being mapped
+
+  most likely it would be better to specialize for each container. This is just a hack.
+*/
+case class MapExactlyOne[
+  X0 <: AnyLabelType,
+  M <: AnyPath { type InT = X0 }
+](val inT: exactlyOne[X0], val mapped: M) extends AnyMapExactlyOne {
+
+  type X = X0
+  type Mapped = M
+  type OutT = exactlyOne[M#OutT]
+
+  val outT: exactlyOne[M#OutT] = inT(mapped.outT)
+}
 
 object AnyPath {
 
   implicit def pathOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
+
+  implicit def mapExactlyOneOps[X <: AnyLabelType, P <: AnyWrappedPath { type OutT = exactlyOne[X] }](p: P): exactlyOneMapOps[P#WrappedByOut,P] = exactlyOneMapOps[P#WrappedByOut,P](p)
+
+  implicit def mapOps[
+    R <: AnyEdgeType { type InC[X <: AnyLabelType] = exactlyOne[X] }
+  ](in:In[R] { type OutT = exactlyOne[R] }): exactlyOneMapOps[R, In[R]] = 
+    exactlyOneMapOps[R, In[R]](in)
 }
 
 /* This checks that the paths are composable and multiplies their out-arities */
@@ -76,7 +123,7 @@ object Composable {
 
 class PathOps[F <: AnyPath](val t: F) {
 
-  /* Just a synonim for composition */
+  /* Just a synonym for composition */
   def >=>[S <: AnyPath, A <: AnyArity](s: S)
     (implicit c: Composable[F, S] { type Out = A }): 
         Compose[F, S, A] = 
@@ -87,4 +134,9 @@ class PathOps[F <: AnyPath](val t: F) {
       ev: EvalPath[I, F, O],
       pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PackedOut }
     ): PackedOut = pack(ev(i, t))
+}
+
+case class exactlyOneMapOps[X <: AnyLabelType, P <: AnyPath { type OutT = exactlyOne[X] }](val p: P) {
+
+  def map[F <: AnyPath { type InT = X }](f: F): MapExactlyOne[X, F] = MapExactlyOne(p.outT, f)
 }
