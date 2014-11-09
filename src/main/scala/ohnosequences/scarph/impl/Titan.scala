@@ -58,4 +58,26 @@ object titan {
     }
   }
 
+  implicit def evalGetOutVertices[E <: AnyEdgeType]:
+      EvalPath[TitanVertex, GetOutVertices[E], TitanVertex] =
+  new EvalPath[TitanVertex, GetOutVertices[E], TitanVertex] {
+    def apply(in: In, t: Path): Out = {
+      in.value
+        .getVertices(Direction.OUT, t.edge.label)
+        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+        .toList.map{ new LabeledBy[TitanVertex, E#Target]( _ ) }
+    }
+  }
+
+  implicit def evalGetInVertices[E <: AnyEdgeType]:
+      EvalPath[TitanVertex, GetInVertices[E], TitanVertex] =
+  new EvalPath[TitanVertex, GetInVertices[E], TitanVertex] {
+    def apply(in: In, t: Path): Out = {
+      in.value
+        .getVertices(Direction.IN, t.edge.label)
+        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+        .toList.map{ new LabeledBy[TitanVertex, E#Source]( _ ) }
+    }
+  }
+
 }

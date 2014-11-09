@@ -259,6 +259,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // this query returns a list of 4 Edus, so we comare it as a set
     assert{ (GetOutEdges(posted) >=> posterName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
+    // testing evaluation of getInVertices as one step
+    // FIXME: it works ONLY if we have eval for exactly GetInVertices (should work without it too)
+    assert{ (GetInVertices(posted) >=> GetProperty(name)).evalOn(twt) == name("@eparejatobes") }
   }
 
   // test("get vertex property") {
