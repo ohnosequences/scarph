@@ -241,48 +241,47 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
-    import TitanTwitter._
-    // val user = TitanTwitter.user //implementationOf(user)
-    // val tweet = TitanTwitter.tweet //implementationOf(tweet)
-    // val posted = TitanTwitter.posted //implementationOf(posted)
-
     val edu = g.vertex(user)(name)("@eparejatobes")
     val alexey = g.vertex(user)(name)("@laughedelic")
     val kim = g.vertex(user)(name)("@evdokim")
     val twt = g.vertex(tweet)(text)("back to twitter :)")
     val post = g.edge(posted)(time)("13.11.2012")
 
+    /* Evaluating steps: */
     assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
-
     assert{ GetSource(posted).evalOn(post) == edu }
 
-    assert{ (GetSource(posted) >=> GetProperty(name)).evalOn(post) == name("@eparejatobes") }
+    /* Full multiplication table: */
+    implicitly[(OneOrNone  x OneOrNone)  with Out[OneOrNone]]
+    implicitly[(ExactlyOne x ExactlyOne) with Out[ExactlyOne]]
+    implicitly[(ManyOrNone x ManyOrNone) with Out[ManyOrNone]]
+    implicitly[(AtLeastOne x AtLeastOne) with Out[AtLeastOne]]
 
-    assert{ (GetOutEdges(posted) >=> (GetSource(posted) >=> GetProperty(name))).evalOn(edu) == name("@eparejatobes") }
+    implicitly[(ExactlyOne x OneOrNone)  with Out[OneOrNone]]
+    implicitly[(ExactlyOne x ManyOrNone) with Out[ManyOrNone]]
+    implicitly[(ExactlyOne x AtLeastOne) with Out[AtLeastOne]]
 
-    /*assert{ TitanTwitter.eval(GetSource(posted), List(post)) == List(edu) }*/
+    implicitly[(OneOrNone  x ExactlyOne) with Out[OneOrNone]]
+    implicitly[(ManyOrNone x ExactlyOne) with Out[ManyOrNone]]
+    implicitly[(AtLeastOne x ExactlyOne) with Out[AtLeastOne]]
 
-    // import AnyQuery._
-    // import AnyEvalQuery._
+    implicitly[(OneOrNone x ManyOrNone) with Out[ManyOrNone]]
+    implicitly[(OneOrNone x AtLeastOne) with Out[ManyOrNone]]
 
-    // val ev = TitanTwitter.eval(posted.src)(EvalOnSchema.simple)
+    implicitly[(ManyOrNone x OneOrNone) with Out[ManyOrNone]]
+    implicitly[(AtLeastOne x OneOrNone) with Out[ManyOrNone]]
 
-    // assert{ ev.apply(posted.src, List(post)) == List(edu) }
+    implicitly[(AtLeastOne x ManyOrNone) with Out[AtLeastOne]]
+    implicitly[(ManyOrNone x AtLeastOne) with Out[AtLeastOne]]
 
-    /*assert{ TitanTwitter.eval(user.get(name), List(kim, alexey)) == List(name("@evdokim"), name("@laughedelic")) }*/
+    /* Composing steps: */
+    val comp = GetSource(posted) >=> GetProperty(name)
+    
+    assert{ comp.evalOn(post) == name("@eparejatobes") }
 
-    /*val comp = Compose(posted.src, user.get(name))*/
-    /*val comp = IdQuery(posted).source.get(name)
+    // this query returns a list of 4 Edus, so we comare it as a set
+    assert{ (GetOutEdges(posted) >=> GetSource(posted) >=> GetProperty(name)).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
-    assertResult(List(name("@eparejatobes"))){
-      TitanTwitter.eval(comp).apply(comp, List(post))
-    }*/
-
-    /*assertResult(List()){
-      TitanTwitter.eval(user.outE(posted), List(edu))
-    }*/
-
-    // val query = posted.source.outE(posted)
   }
 
   // test("get vertex property") {
