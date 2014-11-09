@@ -241,11 +241,6 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
-    import TitanTwitter._
-    // val user = TitanTwitter.user //implementationOf(user)
-    // val tweet = TitanTwitter.tweet //implementationOf(tweet)
-    // val posted = TitanTwitter.posted //implementationOf(posted)
-
     val edu = g.vertex(user)(name)("@eparejatobes")
     val alexey = g.vertex(user)(name)("@laughedelic")
     val kim = g.vertex(user)(name)("@evdokim")
