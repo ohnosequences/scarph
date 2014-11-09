@@ -253,15 +253,6 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     /* Composing steps: */
     val posterName = GetSource(posted) >=> GetProperty(name)
-
-    import AnyPath._, AnyVertexType._, AnyEdgeType._
-    // oh yeah
-
-    val p = tweet in posted
-    val zzz = p map posted.src
-
-    val pp = tweet in posted map posted.src
-    
     
     assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
