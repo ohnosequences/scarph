@@ -11,8 +11,8 @@ import java.io.File
 
 import ohnosequences.cosas._
 
-import ohnosequences.scarph._
-import ohnosequences.scarph.test._, TwitterSchema._
+import ohnosequences.scarph._, impl.titanSchema._
+import ohnosequences.scarph.test._, Twitter._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -21,7 +21,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   def createTitanTwitterInstance(g: TitanGraph): Unit = {
 
-    // g.createSchema(TwitterSchema.schemaType)
+    g.createSchema(Twitter.schema)
 
     /* Adding things */
     val edu = g.addVertexWithLabel(user.label)
@@ -164,61 +164,61 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   // checks existence and arity
-  def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET) = {
+  def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET)
+    (implicit multi: EdgeTypeMultiplicity[ET]) = {
 
     assert{ mgmt.containsRelationType(et.label) }
 
-    // assertResult(multi(et)) {
-    //   mgmt.getEdgeLabel(et.label).getMultiplicity
-    // }
+    assertResult(multi(et)) {
+      mgmt.getEdgeLabel(et.label).getMultiplicity
+    }
   }
 
   // checks existence and dataType
-  def checkPropertyKey[P <: AnyProperty](mgmt: TitanManagement, p: P) = {
+  def checkPropertyKey[P <: AnyProp](mgmt: TitanManagement, p: P)
+    (implicit cc: scala.reflect.ClassTag[P#Raw]) = {
 
     assert{ mgmt.containsRelationType(p.label) }
 
-    // import scala.reflect._
-    // assertResult(p.classTag.runtimeClass.asInstanceOf[Class[P#Raw]]) {
-    //   mgmt.getPropertyKey(p.label).getDataType
-    // }
+    assertResult(cc.runtimeClass.asInstanceOf[Class[P#Raw]]) {
+      mgmt.getPropertyKey(p.label).getDataType
+    }
   }
 
   // checks existence, type and the indexed property
-  // def checkIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix) = {
+  def checkIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix) = {
 
-  //   assert{ mgmt.containsGraphIndex(ix.label) }
+    assert{ mgmt.containsGraphIndex(ix.label) }
 
-  //   val index = mgmt.getGraphIndex(ix.label)
-  //   // TODO: check for mixed indexes and any other stuff
-  //   assert{ index.isCompositeIndex }
-  //   assert{ index.getFieldKeys.toSet == Set(mgmt.getPropertyKey(ix.property.label)) }
-  // }
+    val index = mgmt.getGraphIndex(ix.label)
+    // TODO: check for mixed indexes and any other stuff
+    assert{ index.isCompositeIndex }
+    assert{ index.getFieldKeys.toSet == Set(mgmt.getPropertyKey(ix.property.label)) }
+  }
 
   // TODO: make it a graph op: checkSchema
-  // test("check schema keys/labels") {
-  //   // import TestContext._, impl._
+  test("check schema keys/labels") {
 
-  //   val mgmt = g.getManagementSystem
+    val mgmt = g.getManagementSystem
 
-  //   checkPropertyKey(mgmt, name)
-  //   checkPropertyKey(mgmt, age)
-  //   checkPropertyKey(mgmt, text)
-  //   checkPropertyKey(mgmt, url)
-  //   checkPropertyKey(mgmt, time)
+    checkPropertyKey(mgmt, name)
+    checkPropertyKey(mgmt, age)
+    checkPropertyKey(mgmt, text)
+    checkPropertyKey(mgmt, url)
+    checkPropertyKey(mgmt, time)
 
-  //   checkEdgeLabel(mgmt, posted)
-  //   checkEdgeLabel(mgmt, follows)
+    checkEdgeLabel(mgmt, posted)
+    checkEdgeLabel(mgmt, follows)
 
-  //   assert{ mgmt.containsVertexLabel(user.label) }
-  //   assert{ mgmt.containsVertexLabel(tweet.label) }
+    assert{ mgmt.containsVertexLabel(user.label) }
+    assert{ mgmt.containsVertexLabel(tweet.label) }
 
-  //   checkIndex(mgmt, UserNameIx)
-  //   checkIndex(mgmt, TweetTextIx)
-  //   checkIndex(mgmt, PostedTimeIx)
+    checkIndex(mgmt, nameIx)
+    checkIndex(mgmt, textIx)
+    checkIndex(mgmt, timeIx)
 
-  //   mgmt.commit
-  // }
+    mgmt.commit
+  }
 
   test("check what we got from the index queries") {
     import TestContext._, impl._

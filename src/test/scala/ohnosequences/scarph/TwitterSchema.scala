@@ -3,7 +3,7 @@ package ohnosequences.scarph.test
 import ohnosequences.scarph._
 import ohnosequences.cosas._, AnyTypeSet._
 
-object TwitterSchema {
+object Twitter {
 
   case object user extends VertexType
   case object name extends PropertyOf(user) { type Raw = String }
