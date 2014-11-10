@@ -1,9 +1,11 @@
 package ohnosequences.scarph.impl
 
 import ohnosequences.scarph._
-import com.thinkaurelius.titan.core._ 
+import com.thinkaurelius.titan.core._, schema._
 
-object titan {
+case class titan(val graph: TitanGraph) {
+
+  // val mgmt: TitanManagement = graph.getManagementSystem
 
   import com.tinkerpop.blueprints.Direction
 

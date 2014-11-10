@@ -19,16 +19,16 @@ object TwitterSchema {
   case object follows extends EdgeType(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
   case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
+
+  case object nameIx extends CompositeIndex(name)
+  case object textIx extends CompositeIndex(text)
+  case object timeIx extends CompositeIndex(time)
+
+  val schema = Schema(label = "twitter",
+    properties = name :~: age :~: text :~: time :~: url :~: ∅,
+    vertexTypes =  user :~: tweet :~: ∅,
+    edgeTypes = posted :~: follows :~: liked :~: ∅,
+    indexes = nameIx :~: textIx :~: timeIx :~: ∅
+  )
+
 }
-
-//   case object UserNameIx extends CompositeIndex(User, name)
-//   case object TweetTextIx extends CompositeIndex(Tweet, text)
-//   case object PostedTimeIx extends CompositeIndex(Posted, time)
-
-//   val schemaType = SchemaType("twitter",
-//     vertexTypes = User :~: Tweet :~: ∅,
-//     edgeTypes = Posted :~: Follows :~: ∅,
-//     indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅
-//   )
-
-// }

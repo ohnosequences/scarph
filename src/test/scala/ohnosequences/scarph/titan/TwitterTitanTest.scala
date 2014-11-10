@@ -13,7 +13,6 @@ import ohnosequences.cosas._
 
 import ohnosequences.scarph._
 import ohnosequences.scarph.test._, TwitterSchema._
-import ohnosequences.scarph.impl.titan._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
@@ -152,7 +151,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   object TestContext {
-    // val impl = TwitterImpl(g); import impl._
+    val impl = ohnosequences.scarph.impl.titan(g); import impl._
 
     // quering vertices
     // val edu = user.query(user ? (name === "@eparejatobes")).head
