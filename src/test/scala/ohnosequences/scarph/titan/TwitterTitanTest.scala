@@ -162,6 +162,22 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // // quering edges
     // val post = posted.query(posted ? (time === "13.11.2012")).head
+
+    // just shortcuts
+    implicit class graphOps(tg: TitanGraph) {
+      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
+        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
+      }
+      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
+        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
+      }
+    }
+
+    val edu = g.vertex(user)(name)("@eparejatobes")
+    val alexey = g.vertex(user)(name)("@laughedelic")
+    val kim = g.vertex(user)(name)("@evdokim")
+    val twt = g.vertex(tweet)(text)("back to twitter :)")
+    val post = g.edge(posted)(time)("13.11.2012")
   }
 
   // checks existence and arity
@@ -222,17 +238,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   // }
 
   test("check what we got from the index queries") {
-    import TestContext._, impl._
-
-    // just shortcuts
-    implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
-        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
-      }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
-        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
-      }
-    }
+    import TestContext._
 
     // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
     // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
@@ -240,12 +246,6 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
 
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
-
-    val edu = g.vertex(user)(name)("@eparejatobes")
-    val alexey = g.vertex(user)(name)("@laughedelic")
-    val kim = g.vertex(user)(name)("@evdokim")
-    val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post = g.edge(posted)(time)("13.11.2012")
 
     /* Evaluating steps: */
     assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
@@ -265,13 +265,16 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("cool queries dsl") {
+    import TestContext._
     import syntax.simple._
 
     // element op:
     val userName = user.get(name)
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
 
     // edge op:
     val posterName = posted.source.get(name)
+    assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // vertex op:
     val friendsPosts = user.out(follows).outE(posted).target

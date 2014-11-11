@@ -13,14 +13,7 @@ trait AnyEvalPath[P <: AnyPath] {
   type In = InVal LabeledBy Path#InT
   type Out = List[OutVal LabeledBy Path#OutT]
 
-  // implicitly:
-  // type PackedOut
-  // val pack: Pack[OutVal LabeledBy Path#OutT, Path#OutArity] { type Out = PackedOut }
-
   def apply(in: In, p: Path): Out
-
-  /* This returns the result of eval with respect to the out-arity */
-  // def apply(in: In, p: Path): PackedOut = pack(eval(in, p))
 }
 
 trait EvalPath[I, P <: AnyPath, O] 
@@ -31,6 +24,13 @@ trait EvalPath[I, P <: AnyPath, O]
 }
 
 object AnyEvalPath {
+
+  implicit def evalIdStep[T <: AnyLabelType, X]:
+      EvalPath[X, IdStep[T], X] =
+  new EvalPath[X, IdStep[T], X] {
+
+    def apply(in: In, p: Path): Out = List(in)
+  }
 
   implicit def evalComposition[
     F <: AnyPath, 
