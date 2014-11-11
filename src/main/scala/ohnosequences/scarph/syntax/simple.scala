@@ -2,7 +2,7 @@ package ohnosequences.scarph.syntax
 
 import ohnosequences.scarph._
 
-/* This is an example of a gremlin-like syntax for paths construction */
+/* This is an example gremlin-like syntax for paths construction */
 object simple {
 
   /* Element types */
@@ -31,10 +31,12 @@ object simple {
 
   class EdgeOps[Base <: AnyPath { type OutT <: AnyEdgeType }](base: Base) {
 
+    // NOTE: in gremlin this is called .outV
     def source(implicit c: Composable[Base, GetSource[Base#OutT]] { type Out = Base#OutArity }):
         Compose[Base, GetSource[Base#OutT], Base#OutArity] =
     new Compose[Base, GetSource[Base#OutT], Base#OutArity](base, GetSource(base.outT))(c)
 
+    // NOTE: in gremlin this is called .inV
     def target(implicit c: Composable[Base, GetTarget[Base#OutT]] { type Out = Base#OutArity }):
         Compose[Base, GetTarget[Base#OutT], Base#OutArity] =
     new Compose[Base, GetTarget[Base#OutT], Base#OutArity](base, GetTarget(base.outT))(c)
