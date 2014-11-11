@@ -153,8 +153,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   object TestContext {
     val impl = ohnosequences.scarph.impl.titan(g); import impl._
 
+    import PredicateSyntax._
     // quering vertices
-    // val edu = user.query(user ? (name === "@eparejatobes")).head
+    val edu = ( Query(user ? (name === "@eparejatobes")) ).head
     // val alexey = user.query(user ? (name === "@laughedelic")).head
     // val kim = user.query(user ? (name === "@evdokim")).head
     // val twt = tweet.query(tweet ? (text === "back to twitter :)")).head
@@ -186,7 +187,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   // checks existence, type and the indexed property
-  def checkIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix) = {
+  def checkIndex[Ix <: AnySimpleIndex](mgmt: TitanManagement, ix: Ix) = {
 
     assert{ mgmt.containsGraphIndex(ix.label) }
 
@@ -233,18 +234,18 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       }
     }
 
+    // val edu = g.vertex(user)(name)("@eparejatobes")
+    val alexey = g.vertex(user)(name)("@laughedelic")
+    val kim = g.vertex(user)(name)("@evdokim")
+    val twt = g.vertex(tweet)(text)("back to twitter :)")
+    val post = g.edge(posted)(time)("13.11.2012")
+
     // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
     // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
     // assert{ kim == graph.vertex(user)(name)("@evdokim") }
     // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
 
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
-
-    val edu = g.vertex(user)(name)("@eparejatobes")
-    val alexey = g.vertex(user)(name)("@laughedelic")
-    val kim = g.vertex(user)(name)("@evdokim")
-    val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post = g.edge(posted)(time)("13.11.2012")
 
     /* Evaluating steps: */
     assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
