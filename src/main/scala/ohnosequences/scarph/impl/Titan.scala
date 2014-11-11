@@ -22,13 +22,13 @@ object titan {
   implicit def evalGetSource[E <: AnyEdgeType]:
       EvalPath[TitanEdge, GetSource[E], TitanVertex] =
   new EvalPath[TitanEdge, GetSource[E], TitanVertex] {
-    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#Source]( in.value.getVertex(Direction.OUT) ))
+    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#SourceType]( in.value.getVertex(Direction.OUT) ))
   }
 
   implicit def evalGetTarget[E <: AnyEdgeType]:
       EvalPath[TitanEdge, GetTarget[E], TitanVertex] =
   new EvalPath[TitanEdge, GetTarget[E], TitanVertex] {
-    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#Target]( in.value.getVertex(Direction.IN) ))
+    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#TargetType]( in.value.getVertex(Direction.IN) ))
   }
 
   import scala.collection.JavaConversions._
@@ -65,7 +65,7 @@ object titan {
       in.value
         .getVertices(Direction.OUT, t.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, E#Target]( _ ) }
+        .toList.map{ new LabeledBy[TitanVertex, E#TargetType]( _ ) }
     }
   }
 
@@ -76,7 +76,7 @@ object titan {
       in.value
         .getVertices(Direction.IN, t.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, E#Source]( _ ) }
+        .toList.map{ new LabeledBy[TitanVertex, E#SourceType]( _ ) }
     }
   }
 

@@ -264,6 +264,19 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ (GetInVertices(posted) >=> GetProperty(name)).evalOn(twt) == name("@eparejatobes") }
   }
 
+  test("cool queries dsl") {
+    import syntax.simple._
+
+    // element op:
+    val userName = user.get(name)
+
+    // edge op:
+    val posterName = posted.source.get(name)
+
+    // vertex op:
+    val friendsPosts = user.out(follows).outE(posted).target
+  }
+
   // test("get vertex property") {
   //   import TestContext._, impl._
 
