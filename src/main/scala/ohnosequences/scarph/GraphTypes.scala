@@ -31,20 +31,20 @@ abstract class VertexType extends AnyVertexType {
 
 trait AnyEdgeType extends AnyElementType with HasInArity with HasOutArity {
 
-  type Source <: AnyVertexType
-  val  source: Source
+  type SourceType <: AnyVertexType
+  val  sourceType: SourceType
 
-  type Target <: AnyVertexType
-  val  target: Target
+  type TargetType <: AnyVertexType
+  val  targetType: TargetType
 }
 
 abstract class EdgeType[
   I <: AnyVertexType, 
   O <: AnyVertexType
-](val source: I, val target: O) extends AnyEdgeType {
+](val sourceType: I, val targetType: O) extends AnyEdgeType {
 
-  type Source = I
-  type Target = O
+  type SourceType = I
+  type TargetType = O
 
   val label = this.toString
 }

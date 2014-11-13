@@ -25,6 +25,13 @@ trait EvalPath[I, P <: AnyPath, O]
 
 object AnyEvalPath {
 
+  implicit def evalIdStep[T <: AnyLabelType, X]:
+      EvalPath[X, IdStep[T], X] =
+  new EvalPath[X, IdStep[T], X] {
+
+    def apply(in: In, p: Path): Out = List(in)
+  }
+
   implicit def evalComposition[
     F <: AnyPath, 
     S <: AnyPath { type InT = F#OutT },

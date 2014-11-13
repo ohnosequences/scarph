@@ -84,13 +84,13 @@ case class titan(val graph: TitanGraph) {
   implicit def evalGetSource[E <: AnyEdgeType]:
       EvalPath[TitanEdge, GetSource[E], TitanVertex] =
   new EvalPath[TitanEdge, GetSource[E], TitanVertex] {
-    def apply(in: In, path: Path): Out = List(new LabeledBy[TitanVertex, E#Source]( in.value.getVertex(Direction.OUT) ))
+    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#SourceType]( in.value.getVertex(Direction.OUT) ))
   }
 
   implicit def evalGetTarget[E <: AnyEdgeType]:
       EvalPath[TitanEdge, GetTarget[E], TitanVertex] =
   new EvalPath[TitanEdge, GetTarget[E], TitanVertex] {
-    def apply(in: In, path: Path): Out = List(new LabeledBy[TitanVertex, E#Target]( in.value.getVertex(Direction.IN) ))
+    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#TargetType]( in.value.getVertex(Direction.IN) ))
   }
 
   implicit def evalGetOutEdges[E <: AnyEdgeType]:
@@ -125,7 +125,7 @@ case class titan(val graph: TitanGraph) {
       in.value
         .getVertices(Direction.OUT, path.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, E#Target]( _ ) }
+        .toList.map{ new LabeledBy[TitanVertex, E#TargetType]( _ ) }
     }
   }
 
@@ -136,7 +136,7 @@ case class titan(val graph: TitanGraph) {
       in.value
         .getVertices(Direction.IN, path.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, E#Source]( _ ) }
+        .toList.map{ new LabeledBy[TitanVertex, E#SourceType]( _ ) }
     }
   }
 

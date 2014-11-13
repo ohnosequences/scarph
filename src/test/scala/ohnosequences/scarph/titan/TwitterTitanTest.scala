@@ -249,6 +249,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val postAuthorName = postAuthor >=> userName
     val tweetAuthorName = GetInEdges(posted) >=> postAuthorName
 
+    val edu = Query(user).evalOn(askEdu).head
+    val post = Query(posted).evalOn(askPost).head
+    val twt = Query(tweet).evalOn(askTweet).head
   }
 
   test("check what we got from the index queries") {
@@ -265,10 +268,6 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     import shapeless._, poly._
     import com.tinkerpop.blueprints.{ Query => BQuery }
 
-    val edu = Query(user).evalOn(askEdu).head
-    val post = Query(posted).evalOn(askPost).head
-    val twt = Query(tweet).evalOn(askTweet).head
-
     assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)) == List() }
     assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)) == List(edu) }
 
@@ -284,6 +283,22 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ (GetOutEdges(posted) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
     assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
+  }
+
+  test("cool queries dsl") {
+    import TestContext._, impl._
+    import syntax.simple._
+
+    // element op:
+    val userName = user.get(name)
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
+
+    // edge op:
+    val posterName = posted.source.get(name)
+    assert{ posterName.evalOn(post) == name("@eparejatobes") }
+
+    // vertex op:
+    val friendsPosts = user.out(follows).outE(posted).target
   }
 
   // test("get vertex property") {
