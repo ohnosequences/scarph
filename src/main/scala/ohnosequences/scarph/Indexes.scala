@@ -4,9 +4,7 @@ import ohnosequences.pointless._
 import scala.reflect.ClassTag
 
 /* ## Indexes */
-trait AnyIndex {
-
-  val label: String
+trait AnyIndex extends AnyLabelType {
 
   type IndexedType <: AnyElementType
   val  indexedType: IndexedType
@@ -27,7 +25,7 @@ object AnyIndex {
    > Also note, that composite graph indexes can only be used for equality constraints.
  */
 // TODO: so far implemented only for one property
-trait AnyCompositeIndex extends AnyIndex {
+trait AnySimpleIndex extends AnyIndex {
 
   type Property <: AnyProp
   val  property: Property
@@ -36,7 +34,7 @@ trait AnyCompositeIndex extends AnyIndex {
   val  indexedType = property.owner
 }
 
-class CompositeIndex[P <: AnyProp](val property: P) extends AnyCompositeIndex {
+class SimpleIndex[P <: AnyProp](val property: P) extends AnySimpleIndex {
 
   // NOTE: normally, you don't care about the index name, but it has to be unique
   val label = this.toString

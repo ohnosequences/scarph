@@ -20,9 +20,9 @@ object Twitter {
 
   case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
-  case object nameIx extends CompositeIndex(name)
-  case object textIx extends CompositeIndex(text)
-  case object timeIx extends CompositeIndex(time)
+  case object nameIx extends SimpleIndex(name)
+  case object textIx extends SimpleIndex(text)
+  case object timeIx extends SimpleIndex(time)
 
   val schema = Schema(label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,

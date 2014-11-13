@@ -1,46 +1,104 @@
 package ohnosequences.scarph.impl
 
+import shapeless._
+import ohnosequences.cosas._, AnyFn._ 
+import ohnosequences.cosas.ops.typeSet._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._, schema._
+import scala.collection.JavaConversions._
 
 case class titan(val graph: TitanGraph) {
 
   // val mgmt: TitanManagement = graph.getManagementSystem
+
+  import com.tinkerpop.blueprints.Compare._
+  import com.tinkerpop.blueprints.{ Query => BQuery }
+
+  case object toBlueprintsCondition extends Poly1 {
+    implicit def eq[C <: AnyEqual]          = at[C] { c => { q: BQuery => q.has(c.property.label, EQUAL, c.value) } }
+    implicit def ne[C <: AnyNotEqual]       = at[C] { c => { q: BQuery => q.has(c.property.label, NOT_EQUAL, c.value) } }
+    implicit def le[C <: AnyLess]           = at[C] { c => { q: BQuery => q.has(c.property.label, LESS_THAN, c.value) } }
+    implicit def lq[C <: AnyLessOrEqual]    = at[C] { c => { q: BQuery => q.has(c.property.label, LESS_THAN_EQUAL, c.value) } }
+    implicit def gr[C <: AnyGreater]        = at[C] { c => { q: BQuery => q.has(c.property.label, GREATER_THAN, c.value) } }
+    implicit def gq[C <: AnyGreaterOrEqual] = at[C] { c => { q: BQuery => q.has(c.property.label, GREATER_THAN_EQUAL, c.value) } }
+  }
+
+  trait ToBlueprintsPredicate[P <: AnyPredicate] extends Fn2[P, BQuery] with Out[BQuery]
+
+  object ToBlueprintsPredicate {
+
+    implicit def convert[P <: AnyPredicate]
+      (implicit m: MapFoldSet[toBlueprintsCondition.type, P#Conditions, BQuery => BQuery]):
+        ToBlueprintsPredicate[P] =
+    new ToBlueprintsPredicate[P] {
+      def apply(p: In1, q: In2): Out = {
+        def id[A]: A => A = x => x
+        def compose[A, B, C](f: A => B, g: B => C): A => C = x => g(f(x))
+        val addConditions = m(p.conditions, id, compose)
+        addConditions(q)
+      }
+    }
+  }
+
+  implicit def evalSimpleVertexQuery[
+    V <: AnyVertexType,
+    P <: AnyPredicate.On[V]
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      EvalPath[P, Query[V], TitanVertex] =
+  new EvalPath[P, Query[V], TitanVertex] {
+    def apply(in: In, path: Path): Out = {
+      transform(in.value, graph.query)
+        .vertices.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+        .toList.map{ new LabeledBy[TitanVertex, P#ElementType]( _ ) }
+    }
+  }
+
+  implicit def evalSimpleEdgeQuery[
+    E <: AnyEdgeType,
+    P <: AnyPredicate.On[E]
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      EvalPath[P, Query[E], TitanEdge] =
+  new EvalPath[P, Query[E], TitanEdge] {
+    def apply(in: In, path: Path): Out = {
+      transform(in.value, graph.query)
+        .edges.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
+    }
+  }
+
 
   import com.tinkerpop.blueprints.Direction
 
   implicit def evalGetVertexProperty[P <: AnyProp { type Owner <: AnyVertexType }]:
       EvalPath[TitanVertex, GetProperty[P], P#Raw] =
   new EvalPath[TitanVertex, GetProperty[P], P#Raw] {
-    def apply(in: In, t: Path): Out = List(t.prop( in.value.getProperty[P#Raw](t.prop.label) ))
+    def apply(in: In, path: Path): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
   }
 
   implicit def evalGetEdgeProperty[P <: AnyProp { type Owner <: AnyEdgeType }]:
       EvalPath[TitanEdge, GetProperty[P], P#Raw] =
   new EvalPath[TitanEdge, GetProperty[P], P#Raw] {
-    def apply(in: In, t: Path): Out = List(t.prop( in.value.getProperty[P#Raw](t.prop.label) ))
+    def apply(in: In, path: Path): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
   }
 
   implicit def evalGetSource[E <: AnyEdgeType]:
       EvalPath[TitanEdge, GetSource[E], TitanVertex] =
   new EvalPath[TitanEdge, GetSource[E], TitanVertex] {
-    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#Source]( in.value.getVertex(Direction.OUT) ))
+    def apply(in: In, path: Path): Out = List(new LabeledBy[TitanVertex, E#Source]( in.value.getVertex(Direction.OUT) ))
   }
 
   implicit def evalGetTarget[E <: AnyEdgeType]:
       EvalPath[TitanEdge, GetTarget[E], TitanVertex] =
   new EvalPath[TitanEdge, GetTarget[E], TitanVertex] {
-    def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#Target]( in.value.getVertex(Direction.IN) ))
+    def apply(in: In, path: Path): Out = List(new LabeledBy[TitanVertex, E#Target]( in.value.getVertex(Direction.IN) ))
   }
-
-  import scala.collection.JavaConversions._
 
   implicit def evalGetOutEdges[E <: AnyEdgeType]:
       EvalPath[TitanVertex, GetOutEdges[E], TitanEdge] =
   new EvalPath[TitanVertex, GetOutEdges[E], TitanEdge] {
-    def apply(in: In, t: Path): Out = {
+    def apply(in: In, path: Path): Out = {
       in.value
-        .getEdges(Direction.OUT, t.edge.label)
+        .getEdges(Direction.OUT, path.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
         .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
     }
@@ -49,9 +107,9 @@ case class titan(val graph: TitanGraph) {
   implicit def evalGetInEdges[E <: AnyEdgeType]:
       EvalPath[TitanVertex, GetInEdges[E], TitanEdge] =
   new EvalPath[TitanVertex, GetInEdges[E], TitanEdge] {
-    def apply(in: In, t: Path): Out = {
+    def apply(in: In, path: Path): Out = {
       in.value
-        .getEdges(Direction.IN, t.edge.label)
+        .getEdges(Direction.IN, path.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
         .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
       // FIXME: to avoid casting here, we should use getTitanEdges instead of getEdges,
@@ -63,9 +121,9 @@ case class titan(val graph: TitanGraph) {
   implicit def evalGetOutVertices[E <: AnyEdgeType]:
       EvalPath[TitanVertex, GetOutVertices[E], TitanVertex] =
   new EvalPath[TitanVertex, GetOutVertices[E], TitanVertex] {
-    def apply(in: In, t: Path): Out = {
+    def apply(in: In, path: Path): Out = {
       in.value
-        .getVertices(Direction.OUT, t.edge.label)
+        .getVertices(Direction.OUT, path.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
         .toList.map{ new LabeledBy[TitanVertex, E#Target]( _ ) }
     }
@@ -74,9 +132,9 @@ case class titan(val graph: TitanGraph) {
   implicit def evalGetInVertices[E <: AnyEdgeType]:
       EvalPath[TitanVertex, GetInVertices[E], TitanVertex] =
   new EvalPath[TitanVertex, GetInVertices[E], TitanVertex] {
-    def apply(in: In, t: Path): Out = {
+    def apply(in: In, path: Path): Out = {
       in.value
-        .getVertices(Direction.IN, t.edge.label)
+        .getVertices(Direction.IN, path.edge.label)
         .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
         .toList.map{ new LabeledBy[TitanVertex, E#Source]( _ ) }
     }
@@ -151,21 +209,21 @@ object titanSchema {
   }
 
   object addIndex extends Poly1 {
-    implicit def vertexIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyVertexType }] = 
+    implicit def vertexIx[Ix <: AnySimpleIndex { type IndexedType <: AnyVertexType }] = 
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
           m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
             .indexOnly(m.getVertexLabel(ix.indexedType.label))
             .addKey(m.getPropertyKey(ix.property.label))
-            .buildCompositeIndex()
+            .buildCompositeIndex
         }
       }
 
-    implicit def edgeIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyEdgeType }] = 
+    implicit def edgeIx[Ix <: AnySimpleIndex { type IndexedType <: AnyEdgeType }] = 
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
           m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])
             .indexOnly(m.getEdgeLabel(ix.indexedType.label))
             .addKey(m.getPropertyKey(ix.property.label))
-            .buildCompositeIndex()
+            .buildCompositeIndex
         }
       }
   }
