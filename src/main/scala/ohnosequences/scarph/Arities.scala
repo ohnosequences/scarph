@@ -4,13 +4,15 @@ import ohnosequences.cosas._
 
 // NOTE: maybe arity is not a proper name for what we are defining here...
 sealed trait AnyArity 
+trait AnyOneArity extends AnyArity
+trait AnyManyArity extends AnyArity
 
 /* 4 things: one/many x non-empty/any */
 // NOTE: don't know if the values of them are needed for anything
-trait OneOrNone extends AnyArity
-trait ExactlyOne extends AnyArity
-trait ManyOrNone extends AnyArity
-trait AtLeastOne extends AnyArity
+trait OneOrNone  extends AnyOneArity
+trait ExactlyOne extends AnyOneArity
+trait ManyOrNone extends AnyManyArity
+trait AtLeastOne extends AnyManyArity
 
 trait HasInArity  { type InArity  <: AnyArity }
 trait HasOutArity { type OutArity <: AnyArity }

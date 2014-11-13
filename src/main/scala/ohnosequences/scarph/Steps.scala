@@ -20,3 +20,7 @@ case class GetInVertices[E <: AnyEdgeType](val edge: E)
     extends Compose[GetInEdges[E], GetSource[E], E#InArity](GetInEdges(edge), GetSource(edge))
 case class GetOutVertices[E <: AnyEdgeType](val edge: E)
     extends Compose[GetOutEdges[E], GetTarget[E], E#OutArity](GetOutEdges(edge), GetTarget(edge))
+
+
+case class Query[E <: AnyElementType](val elem: E) extends 
+  Step[PredicateType[E], E](PredicateType[E](elem), elem) with OutArity[ManyOrNone]
