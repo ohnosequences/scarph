@@ -1,120 +1,100 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._
-
-/* Condition is some restriction on the property values */
-trait AnyCondition { 
-
-  type Property <: AnyProp
-  val  property: Property
-
-  type ElementType = Property#Owner
-  val  elementType = property.owner
-}
-
-object AnyCondition {
-
-  type OnProperty[P <: AnyProp] = AnyCondition { type Property = P }
-  type OnElementType[E <: AnyElementType] = AnyCondition { type ElementType = E }
-}
+import ohnosequences.cosas._, AnyTypeSet._
 
 
-/* Comparison conditions with **One** property value */
-trait AnyCompareCondition extends AnyCondition { val value: Property#Raw }
-trait CompareCondition[A <: AnyProp] extends AnyCompareCondition { type Property = A }
-
-
-trait AnyEqual extends AnyCompareCondition
-case class Equal[A <: AnyProp](
-  val property: A,
-  val value: A#Raw
-) extends AnyEqual with CompareCondition[A]
-
-trait AnyNotEqual extends AnyCompareCondition
-case class NotEqual[A <: AnyProp](
-  val property: A,
-  val value: A#Raw
-) extends AnyNotEqual with CompareCondition[A]
-
-
-trait AnyLess extends AnyCompareCondition
-case class Less[A <: AnyProp](
-  val property: A,
-  val value: A#Raw
-) extends AnyLess with CompareCondition[A]
-
-trait AnyLessOrEqual extends AnyCompareCondition
-case class LessOrEqual[A <: AnyProp](
-  val property: A,
-  val value: A#Raw
-) extends AnyLessOrEqual with CompareCondition[A]
-
-
-trait AnyGreater extends AnyCompareCondition
-case class Greater[A <: AnyProp](
-  val property: A,
-  val value: A#Raw
-) extends AnyGreater with CompareCondition[A]
-
-trait AnyGreaterOrEqual extends AnyCompareCondition
-case class GreaterOrEqual[A <: AnyProp](
-  val property: A,
-  val value: A#Raw
-) extends AnyGreaterOrEqual with CompareCondition[A]
-
-
-/* Predicate is a combination of conditions over **one** element type */
-trait AnyPredicate {
+/* Predicate is a restriction on properties of an element type */
+trait AnyPredicateType extends AnyLabelType {
   
   type ElementType <: AnyElementType
   val  elementType: ElementType
+
+  val label = s"PredicateOn(${elementType.label})"
 }
 
-object AnyPredicate {
+object AnyPredicateType {
 
-  type On[E <: AnyElementType] = AnyPredicate { type ElementType = E }
+  type On[E <: AnyElementType] = AnyPredicateType { type ElementType = E }
 }
 
+case class PredicateType[E <: AnyElementType](val elementType: E) 
+  extends AnyPredicateType { type ElementType = E }
 
-/* Predicates with just one condition */
-trait AnySimplePredicate extends AnyPredicate {
 
-  type Condition <: AnyCondition
+
+trait AnyPredicate {
+
+  type ElementType <: AnyElementType
+  val  elementType: ElementType
+
+  type Conditions <: AnyTypeSet //.Of[AnyCondition] //.OnElementType[ElementType]]
+  val  conditions: Conditions
+}
+
+/* Empty predicate doesn't have any restrictions */
+trait AnyEmptyPredicate extends AnyPredicate {
+  type Conditions = ∅
+  val  conditions = ∅
+}
+
+class EmptyPredicate[E <: AnyElementType](val elementType: E) 
+  extends AnyEmptyPredicate { type ElementType = E }
+
+
+/* This is just like cons, but controlling, that all conditions are on the same element type */
+trait AnyAndPredicate extends AnyPredicate {
+
+  type Body <: AnyPredicate
+  val  body: Body
+
+  type ElementType = Body#ElementType
+  val  elementType = body.elementType
+
+  type Condition <: AnyCondition.OnElementType[Body#ElementType]
   val  condition: Condition
 
-  type ElementType = Condition#ElementType
-  val  elementType = condition.elementType
+  type Conditions = Condition :~: Body#Conditions
+  val  conditions = condition :~: (body.conditions: Body#Conditions)
 }
 
-case class SimplePredicate[C <: AnyCondition](val condition: C) 
-  extends AnySimplePredicate { type Condition = C }
+case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElementType[B#ElementType]]
+  (val body: B, val condition: C) extends AnyAndPredicate {
+
+  type Body = B
+  type Condition = C
+}
 
 
 /* Nice methods to build conditions and predicates */
 object PredicateSyntax {
 
-  implicit def predicateOps[E <: AnyElementType](elem: E):
-      PredicateOps[E] = 
-      PredicateOps[E](elem)
+  def any[E <: AnyElementType](e: E): EmptyPredicate[E] = new EmptyPredicate[E](e)
+
+  implicit def labeledPredicate[E <: AnyElementType, P <: AnyPredicate { type ElementType = E }](p: P):
+      (P LabeledBy PredicateType[E]) =
+  new (P LabeledBy PredicateType[E])(p)
+
+  implicit def elementPredicateOps[E <: AnyElementType](elem: E):
+      ElementPredicateOps[E] = 
+      ElementPredicateOps[E](elem)
+
+  implicit def predicateOps[P <: AnyPredicate](p: P):
+      PredicateOps[P] = 
+      PredicateOps[P](p)
 
   implicit def compareConditionOps[A <: AnyProp](property: A):
       CompareConditionOps[A] = 
       CompareConditionOps[A](property)
 }
 
-/* ## Method aliases for predicate constructors */
-case class CompareConditionOps[A <: AnyProp](property: A) {
-  final def ===(value: A#Raw): Equal[A] = Equal(property, value)
-  final def =/=(value: A#Raw): NotEqual[A] = NotEqual(property, value)
+case class ElementPredicateOps[E <: AnyElementType](elem: E) {
 
-  final def <(value: A#Raw): Less[A] = Less(property, value)
-  final def ≤(value: A#Raw): LessOrEqual[A] = LessOrEqual(property, value)
-
-  final def >(value: A#Raw): Greater[A] = Greater(property, value)
-  final def ≥(value: A#Raw): GreaterOrEqual[A] = GreaterOrEqual(property, value)
+  def ?[C <: AnyCondition.OnElementType[E]](c: C): 
+    AndPredicate[EmptyPredicate[E], C] = AndPredicate(new EmptyPredicate(elem), c)
 }
 
-case class PredicateOps[E <: AnyElementType](elem: E) {
+case class PredicateOps[P <: AnyPredicate](pred: P) {
 
-  def ?[C <: AnyCondition.OnElementType[E]](c: C): SimplePredicate[C] = SimplePredicate[C](c)
+  def and[C <: AnyCondition.OnElementType[P#ElementType]](c: C): 
+    AndPredicate[P, C] = AndPredicate(pred, c)
 }

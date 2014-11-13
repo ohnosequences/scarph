@@ -150,19 +150,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     }
   }
 
-  object TestContext {
-    val impl = ohnosequences.scarph.impl.titan(g); import impl._
 
-    import PredicateSyntax._
-    // quering vertices
-    val edu = ( Query(user ? (name === "@eparejatobes")) ).head
-    // val alexey = user.query(user ? (name === "@laughedelic")).head
-    // val kim = user.query(user ? (name === "@evdokim")).head
-    // val twt = tweet.query(tweet ? (text === "back to twitter :)")).head
-
-    // // quering edges
-    // val post = posted.query(posted ? (time === "13.11.2012")).head
-  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // checks existence and arity
   def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET)
@@ -221,47 +210,71 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     mgmt.commit
   }
 
-  test("check what we got from the index queries") {
-    import TestContext._, impl._
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // just shortcuts
-    implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
-        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
-      }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
-        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
-      }
-    }
+  object TestContext {
+    val impl = ohnosequences.scarph.impl.titan(g); import impl._
+
+    import PredicateSyntax._
+
+    // predicates for quering vertices
+    val askEdu = user ? (name === "@eparejatobes")
+    val askAlexey = user ? (name === "@laughedelic")
+    val askKim = user ? (name === "@evdokim")
+
+    val askTweet = tweet ? (text === "back to twitter :)")
+
+    // predicates for quering edges
+    val askPost = posted ? (time === "13.11.2012")
+
+    // low level querying:
+    // implicit class graphOps(tg: TitanGraph) {
+    //   def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
+    //     v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
+    //   }
+    //   def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
+    //     e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
+    //   }
+    // }
 
     // val edu = g.vertex(user)(name)("@eparejatobes")
-    val alexey = g.vertex(user)(name)("@laughedelic")
-    val kim = g.vertex(user)(name)("@evdokim")
-    val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post = g.edge(posted)(time)("13.11.2012")
+    // val alexey = g.vertex(user)(name)("@laughedelic")
+    // val kim = g.vertex(user)(name)("@evdokim")
+    // val twt = g.vertex(tweet)(text)("back to twitter :)")
+    // val post = g.edge(posted)(time)("13.11.2012")
+
+    // prepared test queries (they can be reused for different tests)
+    val userName = GetProperty(name)
+    val postAuthor = GetSource(posted)
+    val postAuthorName = postAuthor >=> userName
+    val tweetAuthorName = GetInEdges(posted) >=> postAuthorName
+
+  }
+
+  test("check what we got from the index queries") {
+    import TestContext._, impl._
+    import PredicateSyntax._
 
     // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
     // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
     // assert{ kim == graph.vertex(user)(name)("@evdokim") }
     // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
-
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
     /* Evaluating steps: */
-    assert{ GetProperty(name).evalOn(edu) == name("@eparejatobes") }
-    assert{ GetSource(posted).evalOn(post) == edu }
+    val edu = Query(user).evalOn(askEdu).head
+    val post = Query(posted).evalOn(askPost).head
+    val twt = Query(tweet).evalOn(askTweet).head
 
-    /* Composing steps: */
-    val posterName = GetSource(posted) >=> GetProperty(name)
-    
-    assert{ posterName.evalOn(post) == name("@eparejatobes") }
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
+    assert{ postAuthor.evalOn(post) == edu }
+
+    assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
 
     // this query returns a list of 4 Edus, so we comare it as a set
-    assert{ (GetOutEdges(posted) >=> posterName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+    assert{ (GetOutEdges(posted) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
-    // testing evaluation of getInVertices as one step
-    // FIXME: it works ONLY if we have eval for exactly GetInVertices (should work without it too)
-    assert{ (GetInVertices(posted) >=> GetProperty(name)).evalOn(twt) == name("@eparejatobes") }
+    assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
   }
 
   // test("get vertex property") {

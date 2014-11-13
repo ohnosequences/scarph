@@ -8,20 +8,48 @@ import scala.collection.JavaConversions._
 case class titan(val graph: TitanGraph) {
 
   // val mgmt: TitanManagement = graph.getManagementSystem
-  trait ToTitanCondition[C <: AnyCompareCondition] extends Fn1[C] with Out[com.tinkerpop.blueprints.Predicate]
+  trait ToTitanCondition[C <: AnyCompareCondition] extends Fn1[C] with Out[com.tinkerpop.blueprints.Compare]
+
+  object ToTitanCondition {
+
+    implicit def default[C <: AnyCompareCondition]:
+        ToTitanCondition[C] =
+    new ToTitanCondition[C] {
+      def apply(in: In1): Out = com.tinkerpop.blueprints.Compare.EQUAL
+    }
+  }
 
   implicit def evalSimpleVertexQuery[
-    P <: AnySimplePredicate { 
+    V <: AnyVertexType,
+    P <: AnyAndPredicate { 
+      type Body <: AnyEmptyPredicate
       type Condition <: AnyCompareCondition
-      type ElementType <: AnyVertexType 
+      type ElementType = V
     }](implicit toTitan: ToTitanCondition[P#Condition]):
-      EvalPath[TitanVertex, Query[P], TitanVertex] =
-  new EvalPath[TitanVertex, Query[P], TitanVertex] {
+      EvalPath[P, Query[V], TitanVertex] =
+  new EvalPath[P, Query[V], TitanVertex] {
     def apply(in: In, path: Path): Out = {
-      val cond = path.predicate.condition
+      val cond = in.value.condition
       graph.query.has(cond.property.label, toTitan(cond), cond.value)
         .vertices.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
         .toList.map{ new LabeledBy[TitanVertex, P#ElementType]( _ ) }
+    }
+  }
+
+  implicit def evalSimpleEdgeQuery[
+    E <: AnyEdgeType,
+    P <: AnyAndPredicate { 
+      type Body <: AnyEmptyPredicate
+      type Condition <: AnyCompareCondition
+      type ElementType = E
+    }](implicit toTitan: ToTitanCondition[P#Condition]):
+      EvalPath[P, Query[E], TitanEdge] =
+  new EvalPath[P, Query[E], TitanEdge] {
+    def apply(in: In, path: Path): Out = {
+      val cond = in.value.condition
+      graph.query.has(cond.property.label, toTitan(cond), cond.value)
+        .edges.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
     }
   }
 
