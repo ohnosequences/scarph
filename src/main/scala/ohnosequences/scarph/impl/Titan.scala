@@ -97,10 +97,13 @@ case class titan(val graph: TitanGraph) {
       EvalPath[TitanVertex, GetOutEdges[E], TitanEdge] =
   new EvalPath[TitanVertex, GetOutEdges[E], TitanEdge] {
     def apply(in: In, path: Path): Out = {
-      in.value
-        .getEdges(Direction.OUT, path.edge.label)
-        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+      val mgmt = graph.getManagementSystem
+      val lbl = mgmt.getEdgeLabel(path.edge.label)
+      val result = in.value
+        .getTitanEdges(Direction.OUT, lbl)
         .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
+      mgmt.commit
+      result
     }
   }
 
@@ -108,13 +111,13 @@ case class titan(val graph: TitanGraph) {
       EvalPath[TitanVertex, GetInEdges[E], TitanEdge] =
   new EvalPath[TitanVertex, GetInEdges[E], TitanEdge] {
     def apply(in: In, path: Path): Out = {
-      in.value
-        .getEdges(Direction.IN, path.edge.label)
-        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+      val mgmt = graph.getManagementSystem
+      val lbl = mgmt.getEdgeLabel(path.edge.label)
+      val result = in.value
+        .getTitanEdges(Direction.IN, lbl)
         .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
-      // FIXME: to avoid casting here, we should use getTitanEdges instead of getEdges,
-      // but it requires having an EdgeLabel, which we can get only from TitanGraph#TitanManagement,
-      // so maybe we can have it as a common evaluation context
+      mgmt.commit
+      result
     }
   }
 
