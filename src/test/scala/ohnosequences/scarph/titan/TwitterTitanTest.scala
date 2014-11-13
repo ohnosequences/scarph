@@ -262,9 +262,18 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
     /* Evaluating steps: */
+    import shapeless._, poly._
+    import com.tinkerpop.blueprints.{ Query => BQuery }
+
     val edu = Query(user).evalOn(askEdu).head
     val post = Query(posted).evalOn(askPost).head
     val twt = Query(tweet).evalOn(askTweet).head
+
+    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)) == List() }
+    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)) == List(edu) }
+
+    assert{ (Query(user) >=> GetProperty(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
+    assert{ (Query(user) >=> GetProperty(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
 
     assert{ userName.evalOn(edu) == name("@eparejatobes") }
     assert{ postAuthor.evalOn(post) == edu }

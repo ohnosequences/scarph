@@ -1,6 +1,8 @@
 package ohnosequences.scarph.impl
 
-import ohnosequences.cosas._, AnyFn._
+import shapeless._
+import ohnosequences.cosas._, AnyFn._ 
+import ohnosequences.cosas.ops.typeSet._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._, schema._
 import scala.collection.JavaConversions._
@@ -8,29 +10,44 @@ import scala.collection.JavaConversions._
 case class titan(val graph: TitanGraph) {
 
   // val mgmt: TitanManagement = graph.getManagementSystem
-  trait ToTitanCondition[C <: AnyCompareCondition] extends Fn1[C] with Out[com.tinkerpop.blueprints.Compare]
 
-  object ToTitanCondition {
+  import com.tinkerpop.blueprints.Compare._
+  import com.tinkerpop.blueprints.{ Query => BQuery }
 
-    implicit def default[C <: AnyCompareCondition]:
-        ToTitanCondition[C] =
-    new ToTitanCondition[C] {
-      def apply(in: In1): Out = com.tinkerpop.blueprints.Compare.EQUAL
+  case object toBlueprintsCondition extends Poly1 {
+    implicit def eq[C <: AnyEqual]          = at[C] { c => { q: BQuery => q.has(c.property.label, EQUAL, c.value) } }
+    implicit def ne[C <: AnyNotEqual]       = at[C] { c => { q: BQuery => q.has(c.property.label, NOT_EQUAL, c.value) } }
+    implicit def le[C <: AnyLess]           = at[C] { c => { q: BQuery => q.has(c.property.label, LESS_THAN, c.value) } }
+    implicit def lq[C <: AnyLessOrEqual]    = at[C] { c => { q: BQuery => q.has(c.property.label, LESS_THAN_EQUAL, c.value) } }
+    implicit def gr[C <: AnyGreater]        = at[C] { c => { q: BQuery => q.has(c.property.label, GREATER_THAN, c.value) } }
+    implicit def gq[C <: AnyGreaterOrEqual] = at[C] { c => { q: BQuery => q.has(c.property.label, GREATER_THAN_EQUAL, c.value) } }
+  }
+
+  trait ToBlueprintsPredicate[P <: AnyPredicate] extends Fn2[P, BQuery] with Out[BQuery]
+
+  object ToBlueprintsPredicate {
+
+    implicit def convert[P <: AnyPredicate]
+      (implicit m: MapFoldSet[toBlueprintsCondition.type, P#Conditions, BQuery => BQuery]):
+        ToBlueprintsPredicate[P] =
+    new ToBlueprintsPredicate[P] {
+      def apply(p: In1, q: In2): Out = {
+        def id[A]: A => A = x => x
+        def compose[A, B, C](f: A => B, g: B => C): A => C = x => g(f(x))
+        val addConditions = m(p.conditions, id, compose)
+        addConditions(q)
+      }
     }
   }
 
   implicit def evalSimpleVertexQuery[
     V <: AnyVertexType,
-    P <: AnyAndPredicate { 
-      type Body <: AnyEmptyPredicate
-      type Condition <: AnyCompareCondition
-      type ElementType = V
-    }](implicit toTitan: ToTitanCondition[P#Condition]):
+    P <: AnyPredicate.On[V]
+  ](implicit transform: ToBlueprintsPredicate[P]): 
       EvalPath[P, Query[V], TitanVertex] =
   new EvalPath[P, Query[V], TitanVertex] {
     def apply(in: In, path: Path): Out = {
-      val cond = in.value.condition
-      graph.query.has(cond.property.label, toTitan(cond), cond.value)
+      transform(in.value, graph.query)
         .vertices.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
         .toList.map{ new LabeledBy[TitanVertex, P#ElementType]( _ ) }
     }
@@ -38,16 +55,12 @@ case class titan(val graph: TitanGraph) {
 
   implicit def evalSimpleEdgeQuery[
     E <: AnyEdgeType,
-    P <: AnyAndPredicate { 
-      type Body <: AnyEmptyPredicate
-      type Condition <: AnyCompareCondition
-      type ElementType = E
-    }](implicit toTitan: ToTitanCondition[P#Condition]):
+    P <: AnyPredicate.On[E]
+  ](implicit transform: ToBlueprintsPredicate[P]): 
       EvalPath[P, Query[E], TitanEdge] =
   new EvalPath[P, Query[E], TitanEdge] {
     def apply(in: In, path: Path): Out = {
-      val cond = in.value.condition
-      graph.query.has(cond.property.label, toTitan(cond), cond.value)
+      transform(in.value, graph.query)
         .edges.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
         .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
     }

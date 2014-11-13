@@ -31,6 +31,11 @@ trait AnyPredicate {
   val  conditions: Conditions
 }
 
+object AnyPredicate {
+
+  type On[E <: AnyElementType] = AnyPredicate { type ElementType = E }
+}
+
 /* Empty predicate doesn't have any restrictions */
 trait AnyEmptyPredicate extends AnyPredicate {
   type Conditions = ∅
