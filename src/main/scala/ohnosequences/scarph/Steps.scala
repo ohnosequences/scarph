@@ -11,6 +11,9 @@ case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#TargetType
 case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#TargetType, E](edge.targetType, edge) with OutArity[E#InArity]
 case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#SourceType, E](edge.sourceType, edge) with OutArity[E#OutArity]
 
+case class GetOutE[E <: AnyEdgeType, P <: AnyPredicate.On[E]](val pred: P) 
+  extends Step[E#SourceType, E](pred.elementType.sourceType, pred.elementType) with OutArity[E#OutArity]
+
 /* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,
    but with the parenthesis, i.e. grouping this composition to be evaluated together.
    Therefore, you can write an evaluator for this composition as for one step if the

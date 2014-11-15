@@ -3,7 +3,7 @@ package ohnosequences.scarph
 import ohnosequences.cosas._
 
 // NOTE: maybe this should be Fn2
-trait AnyEvalPath[P <: AnyPath] {
+trait AnyTraverser[P <: AnyPath] {
 
   type Path = P
 
@@ -16,18 +16,18 @@ trait AnyEvalPath[P <: AnyPath] {
   def apply(in: In, p: Path): Out
 }
 
-trait EvalPath[I, P <: AnyPath, O] 
-  extends AnyEvalPath[P] {
+trait Traverser[I, P <: AnyPath, O] 
+  extends AnyTraverser[P] {
 
   type InVal = I
   type OutVal = O
 }
 
-object AnyEvalPath {
+object AnyTraverser {
 
   implicit def evalIdStep[T <: AnyLabelType, X]:
-      EvalPath[X, IdStep[T], X] =
-  new EvalPath[X, IdStep[T], X] {
+      Traverser[X, IdStep[T], X] =
+  new Traverser[X, IdStep[T], X] {
 
     def apply(in: In, p: Path): Out = List(in)
   }
@@ -38,10 +38,10 @@ object AnyEvalPath {
     A <: AnyArity,
     I, M, O
   ](implicit
-    evalFirst:  EvalPath[I, F, M],
-    evalSecond: EvalPath[M, S, O]
-  ):  EvalPath[I, Compose[F, S, A], O] =
-  new EvalPath[I, Compose[F, S, A], O] {
+    evalFirst:  Traverser[I, F, M],
+    evalSecond: Traverser[M, S, O]
+  ):  Traverser[I, Compose[F, S, A], O] =
+  new Traverser[I, Compose[F, S, A], O] {
 
     def apply(in: In, p: Path): Out = {
       val bodyOut: List[M LabeledBy F#OutT] = evalFirst(in, p.first)

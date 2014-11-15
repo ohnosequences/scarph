@@ -11,7 +11,8 @@ import java.io.File
 
 import ohnosequences.cosas._
 
-import ohnosequences.scarph._, impl.titanSchema._
+import ohnosequences.scarph._ 
+import ohnosequences.scarph.impl._, titan.schema._, titan.predicates._
 import ohnosequences.scarph.test._, Twitter._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
@@ -216,7 +217,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   import syntax.predicates._
 
   object TestContext {
-    val impl = ohnosequences.scarph.impl.titan(g); import impl._
+    val traversers = impl.titan.traversers(g); import traversers._
 
     // predicates for quering vertices
     val askEdu = user ? (name === "@eparejatobes")
@@ -256,7 +257,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("check what we got from the index queries") {
-    import TestContext._, impl._
+    import TestContext._, traversers._
 
     // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
     // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
@@ -286,7 +287,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   test("cool queries dsl") {
-    import TestContext._, impl._
+    import TestContext._, traversers._
     import syntax.steps._
 
     // element op:
