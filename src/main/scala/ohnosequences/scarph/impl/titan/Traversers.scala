@@ -20,7 +20,7 @@ case class traversers(val graph: TitanGraph) {
     def apply(in: In, path: Path): Out = {
       transform(in.value, graph.query)
         .vertices.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, P#ElementType]( _ ) }
+        .toList.map{ new LabeledBy[TitanVertex, V]( _ ) }
     }
   }
 
@@ -33,7 +33,7 @@ case class traversers(val graph: TitanGraph) {
     def apply(in: In, path: Path): Out = {
       transform(in.value, graph.query)
         .edges.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
-        .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
+        .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
     }
   }
 

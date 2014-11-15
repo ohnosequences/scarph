@@ -77,7 +77,7 @@ object schema {
     implicit def vertexIx[Ix <: AnySimpleIndex { type IndexedType <: AnyVertexType }] = 
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
           m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
-            .indexOnly(m.getVertexLabel(ix.indexedType.label))
+            // .indexOnly(m.getVertexLabel(ix.indexedType.label))
             .addKey(m.getPropertyKey(ix.property.label))
             .buildCompositeIndex
         }
@@ -86,7 +86,7 @@ object schema {
     implicit def edgeIx[Ix <: AnySimpleIndex { type IndexedType <: AnyEdgeType }] = 
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
           m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])
-            .indexOnly(m.getEdgeLabel(ix.indexedType.label))
+            // .indexOnly(m.getEdgeLabel(ix.indexedType.label))
             .addKey(m.getPropertyKey(ix.property.label))
             .buildCompositeIndex
         }
