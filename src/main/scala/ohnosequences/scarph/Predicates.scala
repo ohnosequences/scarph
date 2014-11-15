@@ -68,38 +68,3 @@ case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElementType[B#Ele
   type Body = B
   type Condition = C
 }
-
-
-/* Nice methods to build conditions and predicates */
-object PredicateSyntax {
-
-  def any[E <: AnyElementType](e: E): EmptyPredicate[E] = new EmptyPredicate[E](e)
-
-  implicit def labeledPredicate[E <: AnyElementType, P <: AnyPredicate { type ElementType = E }](p: P):
-      (P LabeledBy PredicateType[E]) =
-  new (P LabeledBy PredicateType[E])(p)
-
-  implicit def elementPredicateOps[E <: AnyElementType](elem: E):
-      ElementPredicateOps[E] = 
-      ElementPredicateOps[E](elem)
-
-  implicit def predicateOps[P <: AnyPredicate](p: P):
-      PredicateOps[P] = 
-      PredicateOps[P](p)
-
-  implicit def compareConditionOps[A <: AnyProp](property: A):
-      CompareConditionOps[A] = 
-      CompareConditionOps[A](property)
-}
-
-case class ElementPredicateOps[E <: AnyElementType](elem: E) {
-
-  def ?[C <: AnyCondition.OnElementType[E]](c: C): 
-    AndPredicate[EmptyPredicate[E], C] = AndPredicate(new EmptyPredicate(elem), c)
-}
-
-case class PredicateOps[P <: AnyPredicate](pred: P) {
-
-  def and[C <: AnyCondition.OnElementType[P#ElementType]](c: C): 
-    AndPredicate[P, C] = AndPredicate(pred, c)
-}

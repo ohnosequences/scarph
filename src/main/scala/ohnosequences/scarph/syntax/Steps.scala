@@ -3,7 +3,7 @@ package ohnosequences.scarph.syntax
 import ohnosequences.scarph._
 
 /* This is an example gremlin-like syntax for paths construction */
-object simple {
+object steps {
 
   /* Element types */
   implicit def fromElement[E <: AnyElementType](e: E):

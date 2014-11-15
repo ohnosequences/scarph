@@ -212,10 +212,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
+  import syntax.conditions._
+  import syntax.predicates._
+
   object TestContext {
     val impl = ohnosequences.scarph.impl.titan(g); import impl._
-
-    import PredicateSyntax._
 
     // predicates for quering vertices
     val askEdu = user ? (name === "@eparejatobes")
@@ -256,7 +257,6 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   test("check what we got from the index queries") {
     import TestContext._, impl._
-    import PredicateSyntax._
 
     // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
     // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
@@ -287,7 +287,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
   test("cool queries dsl") {
     import TestContext._, impl._
-    import syntax.simple._
+    import syntax.steps._
 
     // element op:
     val userName = user.get(name)
