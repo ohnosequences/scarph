@@ -11,7 +11,7 @@ import java.io.File
 
 import ohnosequences.cosas._
 
-import ohnosequences.scarph._ 
+import ohnosequences.scarph._, steps._
 import ohnosequences.scarph.impl._, titan.schema._, titan.predicates._
 import ohnosequences.scarph.test._, Twitter._
 
@@ -246,10 +246,10 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // val post = g.edge(posted)(time)("13.11.2012")
 
     // prepared test queries (they can be reused for different tests)
-    val userName = GetProperty(name)
-    val postAuthor = GetSource(posted)
+    val userName = Get(name)
+    val postAuthor = Source(posted)
     val postAuthorName = postAuthor >=> userName
-    val tweetAuthorName = GetInEdges(posted) >=> postAuthorName
+    val tweetAuthorName = InE(any(posted)) >=> postAuthorName
 
     val edu = Query(user).evalOn(askEdu).head
     val post = Query(posted).evalOn(askPost).head
@@ -272,8 +272,8 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)) == List() }
     assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)) == List(edu) }
 
-    assert{ (Query(user) >=> GetProperty(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
-    assert{ (Query(user) >=> GetProperty(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
+    assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
+    assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
 
     assert{ userName.evalOn(edu) == name("@eparejatobes") }
     assert{ postAuthor.evalOn(post) == edu }
@@ -281,7 +281,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
 
     // this query returns a list of 4 Edus, so we comare it as a set
-    assert{ (GetOutEdges(posted) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+    assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
     assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
   }
@@ -299,69 +299,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // vertex op:
-    val friendsPosts = user.out(follows).outE(posted).target
+    val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
+
+    // testing vertex query
+    val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
+    assert{ vertexQuery.evalOn(edu) == List(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
-
-  // test("get vertex property") {
-  //   import TestContext._, impl._
-
-  //   // pure blueprints with string keys and casting:
-  //   assert(edu.raw.getProperty[Int]("age") == 95)
-  //   // safe and nifty:
-  //   assert(edu.get(age).raw == 95)
-  //   // and it's the same thing
-  //   assert(edu.raw.getProperty[Int]("age") == edu.get(age).raw)
-  // }
-
-  // test("get OUTgoing edges and their property") {
-  //   import TestContext._, impl._
-
-  //   assertResult(List(time("15.2.2014"), time("7.2.2014"))) {
-  //     alexey out posted map { _ get time }
-  //   }
-
-  // }
-
-  // test("get INcoming edges and their property") {
-  //   import TestContext._, impl._
-
-  //   assertResult(Some(time("13.11.2012"))) {
-  //     twt in posted map { _ get time }
-  //   }
-  // }
-
-  // test("get target/source vertices of incoming/outgoing edges") {
-  //   import TestContext._, impl._
-
-  //   assert{ post.src == edu }
-  //   assert{ post.tgt == twt }
-
-  //   assertResult( Some(name("@eparejatobes")) ) {
-  //     twt in posted map { _.src } map { _ get name }
-  //   }
-
-  //   assert {
-  //     (edu out follows map { _.tgt }) ==
-  //     (edu  in follows map { _.src })
-  //   }
-
-  //   assertResult( Set(name("@eparejatobes"), name("@laughedelic"), name("@evdokim")) ) {
-  //     (edu out follows
-  //       map { _.tgt }
-  //       flatMap { _ out follows }
-  //       map { _.tgt }
-  //       map { _ get name }
-  //     ).toSet
-  //   }
-
-  // }
-
-  // // test("out + target vs. outV") {
-
-  // //   assert {
-  // //     (edu out  follows map { _.tgt }) ==
-  // //     (edu outV follows)
-  // //   }
-  // // }
 
 }

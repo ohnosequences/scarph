@@ -11,6 +11,7 @@ object predicates {
 
   import com.tinkerpop.blueprints.Compare._
   import com.tinkerpop.blueprints.{ Query => BQuery }
+  // import com.thinkaurelius.titan.core.{ TitanVertexQuery => BQuery }
 
   // TODO: names here are awful, rename it
   case object toBlueprintsCondition extends Poly1 {

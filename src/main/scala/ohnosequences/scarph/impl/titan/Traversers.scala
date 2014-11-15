@@ -6,7 +6,7 @@ import ohnosequences.cosas.ops.typeSet._
 import com.thinkaurelius.titan.core._, schema._
 import scala.collection.JavaConversions._
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, steps._
 import ohnosequences.scarph.impl.titan.predicates._
 
 case class traversers(val graph: TitanGraph) {
@@ -40,79 +40,84 @@ case class traversers(val graph: TitanGraph) {
 
   import com.tinkerpop.blueprints.Direction
 
-  implicit def evalGetVertexProperty[P <: AnyProp { type Owner <: AnyVertexType }]:
-      Traverser[TitanVertex, GetProperty[P], P#Raw] =
-  new Traverser[TitanVertex, GetProperty[P], P#Raw] {
+  implicit def evalVertexGet[P <: AnyProp { type Owner <: AnyVertexType }]:
+      Traverser[TitanVertex, Get[P], P#Raw] =
+  new Traverser[TitanVertex, Get[P], P#Raw] {
     def apply(in: In, path: Path): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
   }
 
-  implicit def evalGetEdgeProperty[P <: AnyProp { type Owner <: AnyEdgeType }]:
-      Traverser[TitanEdge, GetProperty[P], P#Raw] =
-  new Traverser[TitanEdge, GetProperty[P], P#Raw] {
+  implicit def evalEdgeGet[P <: AnyProp { type Owner <: AnyEdgeType }]:
+      Traverser[TitanEdge, Get[P], P#Raw] =
+  new Traverser[TitanEdge, Get[P], P#Raw] {
     def apply(in: In, path: Path): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
   }
 
-  implicit def evalGetSource[E <: AnyEdgeType]:
-      Traverser[TitanEdge, GetSource[E], TitanVertex] =
-  new Traverser[TitanEdge, GetSource[E], TitanVertex] {
+  implicit def evalSource[E <: AnyEdgeType]:
+      Traverser[TitanEdge, Source[E], TitanVertex] =
+  new Traverser[TitanEdge, Source[E], TitanVertex] {
     def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#SourceType]( in.value.getVertex(Direction.OUT) ))
   }
 
-  implicit def evalGetTarget[E <: AnyEdgeType]:
-      Traverser[TitanEdge, GetTarget[E], TitanVertex] =
-  new Traverser[TitanEdge, GetTarget[E], TitanVertex] {
+  implicit def evalTarget[E <: AnyEdgeType]:
+      Traverser[TitanEdge, Target[E], TitanVertex] =
+  new Traverser[TitanEdge, Target[E], TitanVertex] {
     def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#TargetType]( in.value.getVertex(Direction.IN) ))
   }
 
-  implicit def evalGetOutEdges[E <: AnyEdgeType]:
-      Traverser[TitanVertex, GetOutEdges[E], TitanEdge] =
-  new Traverser[TitanVertex, GetOutEdges[E], TitanEdge] {
+  implicit def evalInE[
+    P <: AnyPredicate { type ElementType <: AnyEdgeType }
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      Traverser[TitanVertex, InE[P], TitanEdge] =
+  new Traverser[TitanVertex, InE[P], TitanEdge] {
     def apply(in: In, path: Path): Out = {
-      val mgmt = graph.getManagementSystem
-      val lbl = mgmt.getEdgeLabel(path.edge.label)
-      val result = in.value
-        .getTitanEdges(Direction.OUT, lbl)
-        .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
-      mgmt.commit
-      result
+      transform(path.pred, 
+        in.value.query
+          .labels(path.pred.elementType.label)
+          .direction(Direction.IN)
+        ).edges
+        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
     }
   }
 
-  implicit def evalGetInEdges[E <: AnyEdgeType]:
-      Traverser[TitanVertex, GetInEdges[E], TitanEdge] =
-  new Traverser[TitanVertex, GetInEdges[E], TitanEdge] {
+  implicit def evalOutE[
+    P <: AnyPredicate { type ElementType <: AnyEdgeType }
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      Traverser[TitanVertex, OutE[P], TitanEdge] =
+  new Traverser[TitanVertex, OutE[P], TitanEdge] {
     def apply(in: In, path: Path): Out = {
-      val mgmt = graph.getManagementSystem
-      val lbl = mgmt.getEdgeLabel(path.edge.label)
-      val result = in.value
-        .getTitanEdges(Direction.IN, lbl)
-        .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
-      mgmt.commit
-      result
+      transform(path.pred, 
+        in.value.query
+          .labels(path.pred.elementType.label)
+          .direction(Direction.OUT)
+        ).edges
+        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
+        .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
     }
   }
 
-  implicit def evalGetOutVertices[E <: AnyEdgeType]:
-      Traverser[TitanVertex, GetOutVertices[E], TitanVertex] =
-  new Traverser[TitanVertex, GetOutVertices[E], TitanVertex] {
-    def apply(in: In, path: Path): Out = {
-      in.value
-        .getVertices(Direction.OUT, path.edge.label)
-        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, E#TargetType]( _ ) }
-    }
-  }
+  // TODO: this implementation won't work in one step with vertex-query
+  // implicit def evalOutVertices[E <: AnyEdgeType]:
+  //     Traverser[TitanVertex, OutVertices[E], TitanVertex] =
+  // new Traverser[TitanVertex, OutVertices[E], TitanVertex] {
+  //   def apply(in: In, path: Path): Out = {
+  //     in.value
+  //       .getVertices(Direction.OUT, path.edge.label)
+  //       .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+  //       .toList.map{ new LabeledBy[TitanVertex, E#TargetType]( _ ) }
+  //   }
+  // }
 
-  implicit def evalGetInVertices[E <: AnyEdgeType]:
-      Traverser[TitanVertex, GetInVertices[E], TitanVertex] =
-  new Traverser[TitanVertex, GetInVertices[E], TitanVertex] {
-    def apply(in: In, path: Path): Out = {
-      in.value
-        .getVertices(Direction.IN, path.edge.label)
-        .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-        .toList.map{ new LabeledBy[TitanVertex, E#SourceType]( _ ) }
-    }
-  }
+  // implicit def evalInVertices[E <: AnyEdgeType]:
+  //     Traverser[TitanVertex, InVertices[E], TitanVertex] =
+  // new Traverser[TitanVertex, InVertices[E], TitanVertex] {
+  //   def apply(in: In, path: Path): Out = {
+  //     in.value
+  //       .getVertices(Direction.IN, path.edge.label)
+  //       .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+  //       .toList.map{ new LabeledBy[TitanVertex, E#SourceType]( _ ) }
+  //   }
+  // }
 
 }
 

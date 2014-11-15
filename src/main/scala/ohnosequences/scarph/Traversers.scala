@@ -1,6 +1,7 @@
 package ohnosequences.scarph
 
 import ohnosequences.cosas._
+import ohnosequences.scarph.steps._
 
 // NOTE: maybe this should be Fn2
 trait AnyTraverser[P <: AnyPath] {
