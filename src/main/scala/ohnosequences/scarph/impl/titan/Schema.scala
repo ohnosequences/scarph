@@ -90,25 +90,29 @@ object schema {
           val lbl: EdgeLabel = m.getEdgeLabel(ix.indexedType.label)
           val props: List[PropertyKey] = propLabels(ix.properties).map{ m.getPropertyKey(_) }
 
-          m.buildEdgeIndex(lbl, ix.label, direction, props: _*)  : TitanIndex
+          m.buildEdgeIndex(lbl, ix.label, direction, props: _*) : TitanIndex
         }
       }
 
-    implicit def vertexIx[Ix <: AnySimpleIndex { type IndexedType <: AnyVertexType }] = 
+    implicit def vertexIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyVertexType }]
+      (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
-          m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
-            // .indexOnly(m.getVertexLabel(ix.indexedType.label))
-            .addKey(m.getPropertyKey(ix.property.label))
-            .buildCompositeIndex : TitanIndex
+
+          propLabels(ix.properties)
+            .foldLeft(m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])){
+              (builder, lbl) => builder.addKey(m.getPropertyKey(lbl))
+            }.buildCompositeIndex : TitanIndex
         }
       }
 
-    implicit def edgeIx[Ix <: AnySimpleIndex { type IndexedType <: AnyEdgeType }] = 
+    implicit def edgeIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyEdgeType }]
+      (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
-          m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])
-            // .indexOnly(m.getEdgeLabel(ix.indexedType.label))
-            .addKey(m.getPropertyKey(ix.property.label))
-            .buildCompositeIndex : TitanIndex
+
+          propLabels(ix.properties)
+            .foldLeft(m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])){
+              (builder, lbl) => builder.addKey(m.getPropertyKey(lbl))
+            }.buildCompositeIndex : TitanIndex
         }
       }
   }

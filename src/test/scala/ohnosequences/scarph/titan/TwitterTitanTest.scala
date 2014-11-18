@@ -73,7 +73,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   // checks existence, type and the indexed property
-  def checkIndex[Ix <: AnySimpleIndex](mgmt: TitanManagement, ix: Ix) = {
+  def checkSimpleIndex[Ix <: AnySimpleIndex](mgmt: TitanManagement, ix: Ix) = {
 
     assert{ mgmt.containsGraphIndex(ix.label) }
 
@@ -100,9 +100,9 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ mgmt.containsVertexLabel(user.label) }
     assert{ mgmt.containsVertexLabel(tweet.label) }
 
-    checkIndex(mgmt, nameIx)
-    checkIndex(mgmt, textIx)
-    checkIndex(mgmt, timeIx)
+    checkSimpleIndex(mgmt, userByName)
+    checkSimpleIndex(mgmt, tweetByText)
+    checkSimpleIndex(mgmt, postedByTime)
 
     mgmt.commit
   }

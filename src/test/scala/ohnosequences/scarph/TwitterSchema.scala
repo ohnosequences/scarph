@@ -20,17 +20,27 @@ object Twitter {
 
   case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
-  case object nameIx extends SimpleIndex(name)
-  case object textIx extends SimpleIndex(text)
-  case object timeIx extends SimpleIndex(time)
+  // simple indexes
+  case object userByName extends SimpleIndex(user, name)
+  case object tweetByText extends SimpleIndex(tweet, text)
+  case object postedByTime extends SimpleIndex(posted, time)
 
-  case object postedByTimeAndUrl extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
+  // composite indexes
+  case object userByNameAndAge extends CompositeIndex(user, name :~: age :~: ∅)
+
+  // vertex-centric indexes
+  case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
 
   val schema = Schema(label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,
     vertexTypes =  user :~: tweet :~: ∅,
     edgeTypes = posted :~: follows :~: liked :~: ∅,
-    indexes = nameIx :~: textIx :~: timeIx :~: postedByTimeAndUrl :~: ∅
+    indexes = 
+      userByName :~: userByNameAndAge :~:
+      tweetByText :~: 
+      postedByTime :~: 
+      postedByTimeAndUrlLocal :~: 
+      ∅
   )
 
 }
