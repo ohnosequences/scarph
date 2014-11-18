@@ -1,5 +1,8 @@
 package ohnosequences.scarph
 
+import ohnosequences.cosas._, AnyDenotation._, AnyWrap._
+import AnyEdge._
+
 /*
   `AnyVertex` defines a denotation of the corresponding `VertexType`.
 
@@ -8,55 +11,30 @@ package ohnosequences.scarph
   They are designed to be compatible with shapeless records (maybe, we'll see).
 */
 
-trait AnyVertex extends Denotation[AnyVertexType] with HasProperties { vertex =>
+  // // no bounds for now, maybe later
+  // abstract class OutVertexQueryEval[E <: AnyEdge, Q <: AnyQuery](val e: E, val query: Q) {
 
-  /* Getters for incoming/outgoing edges */
-  trait AnyRetrieveOutEdge {
+  //   type Query = Q
+  //   // evaluate the query at the vertex rep
+  //   def apply(rep: vertex.Rep, query: Query): e.tpe.Out[E#Rep]
+  // }
 
-    type Edge <: AnyEdge
-    val e: Edge
+  // abstract class InVertexQueryEval[E <: AnyEdge, Q <: AnyQuery](val e: E, val query: Q) {
 
-    def apply(rep: vertex.Rep): e.tpe.Out[e.Rep]
-  }
+  //   type Query = Q
+  //   // evaluate the query at the vertex rep
+  //   def apply(rep: vertex.Rep): e.tpe.In[E#Rep]
+  // }
+trait AnyVertex extends AnyElementOf[AnyVertexType]
 
-  abstract class RetrieveOutEdge[E <: Singleton with AnyEdge](val e: E) 
-    extends AnyRetrieveOutEdge { type Edge = E }
-
-  trait AnyRetrieveInEdge {
-
-    type Edge <: AnyEdge
-    val e: Edge
-
-    def apply(rep: vertex.Rep): e.tpe.In[e.Rep]
-  }
-  abstract class RetrieveInEdge[E <: Singleton with AnyEdge](val e: E) 
-      extends AnyRetrieveInEdge { type Edge = E }
-
-  abstract class Out[E <: Singleton with AnyEdge](edge: E) extends RetrieveOutEdge[E](edge)
-
-  implicit def vertexOps(rep: vertex.Rep) = VertexOps(rep)
-  case class   VertexOps(rep: vertex.Rep) {
-
-    def out[E <: Singleton with AnyEdge { type Tpe <: From[vertex.Tpe] }]
-      (e: E)(implicit mkRetriever: E => RetrieveOutEdge[E]): E#Tpe#Out[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
-
-    def in[E <: Singleton with AnyEdge { type Tpe <: To[vertex.Tpe] }]
-      (e: E)(implicit mkRetriever: E => RetrieveInEdge[E]): E#Tpe#In[E#Rep] = {
-        val retriever = mkRetriever(e)
-        retriever(rep)
-      }
-
-  }
-
+abstract class Vertex[VT <: AnyVertexType]
+  (val  tpe : VT) extends AnyVertex { 
+   type Tpe = VT
 }
-
-abstract class Vertex[VT <: AnyVertexType](val tpe: VT) 
-  extends AnyVertex { type Tpe = VT }
 
 object AnyVertex {
-  type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
-}
 
+  type ofType[VT <: AnyVertexType] = AnyVertex { type Tpe = VT }
+
+  type VertexTypeOf[V <: AnyVertex] = V#Tpe
+}

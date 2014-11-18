@@ -1,0 +1,10 @@
+* initial release;
+* you can define an extendable graph model: 
+  - declaring properties
+  - vertex and edge types
+  - declaring that those types have some properties
+  - you can do that in any place and than add some things
+* you can provide implementations of those types for a particular db backend:
+  - implementation for the TitanDB is incuded in this release;
+* you can define a restricted graph schema and create it for the graph implementation;
+* _indexes will be in the next release_, so far you can use just the backend-dependent ways of retrieving things;

@@ -2,89 +2,98 @@
 ```scala
 package ohnosequences.scarph
 
-import ohnosequences.typesets._
+import ohnosequences.pointless._
 
-trait AnyEdge extends Denotation[AnyEdgeType] with CanGetProperties { edge =>
+trait AnyGraphSchema {
 
-  // NOTE: if I remove this from here type inference fails. Most likely a bug
-  type Tpe <: AnyEdgeType
+  val label: String
 
-  type Source <: AnyVertex.ofType[Tpe#SourceType]
-  val  source: Source
+  type Dependencies <: TypeSet
+  val  dependencies: Dependencies
 
-  type Target <: AnyVertex.ofType[Tpe#TargetType]
-  val  target: Target
+  type Properties <: TypeSet
+  val  properties: Properties
+
+  type VertexTypes <: TypeSet
+  val  vertexTypes: VertexTypes
+
+  type EdgeTypes <: TypeSet
+  val  edgeTypes: EdgeTypes
 ```
 
-Get source/target from this representation
+These two _values_ store sets of pairs `(vertexType/edgeType, it's properties)`
 
 ```scala
-  abstract class GetSource {
-    type Out = source.Rep
-    def apply(edgeRep: edge.Rep): Out
+  type VerticesWithProperties <: TypeSet
+  val  verticesWithProperties: VerticesWithProperties = vertexPropertyAssoc(vertexTypes, properties)
+
+  type EdgesWithProperties <: TypeSet
+  val  edgesWithProperties: EdgesWithProperties = edgePropertyAssoc(edgeTypes, properties)
+
+  val vertexPropertyAssoc: ZipWithProps.Aux[VertexTypes, Properties, VerticesWithProperties]
+  val   edgePropertyAssoc: ZipWithProps.Aux[EdgeTypes, Properties, EdgesWithProperties]
+
+  override def toString = s"""${label} schema:
+  vertexTypes: ${verticesWithProperties}
+    edgeTypes: ${edgesWithProperties}"""
+
+}
+
+object AnyGraphSchema {
+```
+
+Additional methods
+
+```scala
+  implicit def schemaOps[S <: AnyGraphSchema](sch: S): GraphSchemaOps[S] = GraphSchemaOps[S](sch)
+  case class   GraphSchemaOps[S <: AnyGraphSchema](schema: S) {
+```
+
+This method returns properties that are associated with the given **vertex** type
+
+```scala
+    def vertexProperties[VT <: Singleton with AnyVertexType](vertexType: VT)(implicit
+      e: VT ? schema.VertexTypes,
+      f: FilterProps[VT, schema.Properties]
+    ): f.Out = f(schema.properties)
+```
+
+This method returns properties that are associated with the given **edge** type
+
+```scala
+    def edgeProperties[ET <: Singleton with AnyEdgeType](edgeType: ET)(implicit
+      e: ET ? schema.EdgeTypes,
+      f: FilterProps[ET, schema.Properties]
+    ): f.Out = f(schema.properties)
   }
-  abstract class GetTarget { 
-    type Out = target.Rep 
-    def apply(edgeRep: edge.Rep): Out
-  }
+}
+
+case class GraphSchema[
+    Ds <: TypeSet : boundedBy[AnyGraphSchema]#is,
+    Ps <: TypeSet : boundedBy[AnyProperty]#is,
+    Vs <: TypeSet : boundedBy[AnyVertexType]#is,
+    Es <: TypeSet : boundedBy[AnyEdgeType]#is,
+    VP <: TypeSet,
+    EP <: TypeSet
+  ](val label: String,
+    val dependencies: Ds = ?,
+    val properties:   Ps = ?,
+    val vertexTypes:  Vs = ?,
+    val edgeTypes:    Es = ?
+  )(implicit
+    val vertexPropertyAssoc: ZipWithProps.Aux[Vs, Ps, VP],
+    val   edgePropertyAssoc: ZipWithProps.Aux[Es, Ps, EP]
+  ) extends AnyGraphSchema {
+
+  type Dependencies = Ds
+  type Properties   = Ps
+  type VertexTypes  = Vs
+  type EdgeTypes    = Es
+  type VerticesWithProperties = VP
+  type    EdgesWithProperties = EP
 
 }
 
-class Edge[
-    S <: AnyVertex.ofType[ET#SourceType],
-    ET <: AnyEdgeType, 
-    T <: AnyVertex.ofType[ET#TargetType]
-  ](val source: S, val tpe: ET, val target: T) extends AnyEdge { 
-    type Source = S
-    type Tpe = ET 
-    type Target = T
-  }
-
-object AnyEdge {
-
-  import AnyEdgeType._
-
-  type ofType[ET <: AnyEdgeType] = AnyEdge { type Tpe = ET }
-
-  type -->[S <: AnyVertexType, T <: AnyVertexType] = AnyEdge { type Tpe <: S ==> T }
-}
-
-object Edge {
-
-  type RepOf[E <: Singleton with AnyEdge] = AnyTag.TaggedWith[E]
-}
-
-trait AnySealedEdge extends AnyEdge { sealedEdge =>
-  
-  type Tpe <: AnySealedEdgeType
-
-  final type Raw = raw
-  type Other
-
-  case class raw(val fields: tpe.record.Rep, val other: Other)
-  // double tagging FTW!
-  final def fields[R <: TypeSet](r: R)(implicit
-    p: R ~> tpe.record.Raw
-  ): tpe.record.Rep = ( tpe.record ->> p(r) )
-
-  implicit def propertyOps(rep: sealedEdge.Rep): tpe.record.PropertyOps = tpe.record.PropertyOps(rep.fields) 
-}
-
-abstract class SealedEdge [
-  S <: AnyVertex.ofType[ET#SourceType],
-  ET <: AnySealedEdgeType,
-  T <: AnyVertex.ofType[ET#TargetType]
-](
-  val source: S,
-  val tpe: ET,
-  val target: T
-) 
-extends AnySealedEdge { 
-
-  type Source = S
-  type Tpe = ET 
-  type Target = T
-}
 ```
 
 
