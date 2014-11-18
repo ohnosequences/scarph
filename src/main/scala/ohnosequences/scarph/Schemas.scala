@@ -1,7 +1,7 @@
 package ohnosequences.scarph
 
 import ohnosequences.cosas._, AnyTypeSet._
-// import ohnosequences.pointless.ops.typeSet._
+// import ohnosequences.cosas.ops.typeSet._
 
 trait AnySchema {
 

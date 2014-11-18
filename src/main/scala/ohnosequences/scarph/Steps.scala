@@ -1,26 +1,23 @@
 package ohnosequences.scarph
 
-case class IdStep[T <: AnyLabelType](t: T) extends Step[T, T](t, t) with OutArity[ExactlyOne]
+object steps {
 
-/* Basic steps: */
-case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop) with OutArity[ExactlyOne]
+  case class IdStep[T <: AnyLabelType](t: T) extends Step[T, T](t, t) with OutArity[ExactlyOne]
 
-case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#SourceType](edge, edge.sourceType) with OutArity[ExactlyOne]
-case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#TargetType](edge, edge.targetType) with OutArity[ExactlyOne]
+  /* Basic steps: */
+  case class Get[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop) with OutArity[ExactlyOne]
 
-case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#TargetType, E](edge.targetType, edge) with OutArity[E#InArity]
-case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#SourceType, E](edge.sourceType, edge) with OutArity[E#OutArity]
+  case class Source[E <: AnyEdgeType](val edge: E) extends Step[E, E#SourceType](edge, edge.sourceType) with OutArity[ExactlyOne]
+  case class Target[E <: AnyEdgeType](val edge: E) extends Step[E, E#TargetType](edge, edge.targetType) with OutArity[ExactlyOne]
 
-/* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,
-   but with the parenthesis, i.e. grouping this composition to be evaluated together.
-   Therefore, you can write an evaluator for this composition as for one step if the
-   backend allows you to optimize it this way.
-*/
-case class GetInVertices[E <: AnyEdgeType](val edge: E)
-    extends Compose[GetInEdges[E], GetSource[E], E#InArity](GetInEdges(edge), GetSource(edge))
-case class GetOutVertices[E <: AnyEdgeType](val edge: E)
-    extends Compose[GetOutEdges[E], GetTarget[E], E#OutArity](GetOutEdges(edge), GetTarget(edge))
+  case class InE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
+    extends Step[P#ElementType#TargetType, P#ElementType](pred.elementType.targetType, pred.elementType) with OutArity[P#ElementType#InArity]
+  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
+    extends Step[P#ElementType#SourceType, P#ElementType](pred.elementType.sourceType, pred.elementType) with OutArity[P#ElementType#OutArity]
 
+  // TODO: steps for in/out vertices
 
-case class Query[E <: AnyElementType](val elem: E) extends 
-  Step[PredicateType[E], E](PredicateType[E](elem), elem) with OutArity[ManyOrNone]
+  case class Query[E <: AnyElementType](val elem: E)
+    extends Step[PredicateType[E], E](PredicateType[E](elem), elem) with OutArity[ManyOrNone]
+
+}

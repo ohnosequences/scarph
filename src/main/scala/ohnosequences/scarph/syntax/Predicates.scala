@@ -14,6 +14,10 @@ object predicates {
       (P LabeledBy PredicateType[E]) =
   new (P LabeledBy PredicateType[E])(p)
 
+  // implicit def elementLabeledPredicate[E <: AnyElementType](e: E):
+  //     (EmptyPredicate[E] LabeledBy PredicateType[E]) =
+  // new (EmptyPredicate[E] LabeledBy PredicateType[E])(new EmptyPredicate[E](e))
+
 
   /* A way of building a predicate from an element */
   implicit def elementPredicateOps[E <: AnyElementType](elem: E):

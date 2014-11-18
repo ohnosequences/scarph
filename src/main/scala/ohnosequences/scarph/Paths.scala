@@ -84,7 +84,7 @@ class PathOps[F <: AnyPath](val t: F) {
 
   def evalOn[I, O, PackedOut](i: I LabeledBy F#InT)
     (implicit 
-      ev: EvalPath[I, F, O],
+      ev: Traverser[I, F, O],
       pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PackedOut }
     ): PackedOut = pack(ev(i, t))
 }
