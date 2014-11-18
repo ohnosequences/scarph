@@ -1,7 +1,17 @@
 package ohnosequences.scarph
 
-import ohnosequences.pointless._
+import ohnosequences.cosas._
 import scala.reflect.ClassTag
+
+// trait AnyDirection
+// case object InDirection extends AnyDirection
+// case object OutDirection extends AnyDirection
+// case object BothDirections extends AnyDirection
+
+// trait AnyOrder
+// case object Ascending extends AnyOrder
+// case object Descending extends AnyOrder
+
 
 /* ## Indexes */
 trait AnyIndex extends AnyLabelType {
@@ -40,4 +50,32 @@ class SimpleIndex[P <: AnyProp](val property: P) extends AnySimpleIndex {
   val label = this.toString
 
   type Property = P
+}
+
+
+trait AnyLocalEdgeIndex extends AnyIndex {
+
+  type IndexedType <: AnyEdgeType
+
+  type Properties <: AnyTypeSet.Of[PropertyOf[IndexedType]]
+  val  properties: Properties
+
+  type IndexType <: AnyLocalIndexType
+  val  indexType: IndexType
+}
+
+sealed trait AnyLocalIndexType
+case object OnlySourceCentric extends AnyLocalIndexType
+case object OnlyTargetCentric extends AnyLocalIndexType
+case object BothEndsCentric extends AnyLocalIndexType
+
+class LocalEdgeIndex[E <: AnyEdgeType, Ps <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
+  (val indexedType: E, val indexType: T, val properties: Ps) 
+    extends AnyLocalEdgeIndex {
+
+  val label = this.toString
+
+  type IndexedType = E
+  type IndexType = T
+  type Properties = Ps
 }

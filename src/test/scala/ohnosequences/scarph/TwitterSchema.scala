@@ -24,11 +24,13 @@ object Twitter {
   case object textIx extends SimpleIndex(text)
   case object timeIx extends SimpleIndex(time)
 
+  case object postedByTimeAndUrl extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
+
   val schema = Schema(label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,
     vertexTypes =  user :~: tweet :~: ∅,
     edgeTypes = posted :~: follows :~: liked :~: ∅,
-    indexes = nameIx :~: textIx :~: timeIx :~: ∅
+    indexes = nameIx :~: textIx :~: timeIx :~: postedByTimeAndUrl :~: ∅
   )
 
 }

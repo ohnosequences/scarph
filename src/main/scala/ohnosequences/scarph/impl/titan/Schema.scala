@@ -7,6 +7,7 @@ import ohnosequences.cosas.ops.typeSet._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
 import com.thinkaurelius.titan.core.Multiplicity
+import com.tinkerpop.blueprints.Direction
 import com.thinkaurelius.titan.core.schema._
 import shapeless._, poly._
 import scala.reflect._
@@ -73,13 +74,32 @@ object schema {
     }
   }
 
+  object propertyLabel extends Poly1 {
+    implicit def default[P <: AnyProp] = at[P]{ _.label }
+  }
+
   object addIndex extends Poly1 {
+    implicit def localIx[Ix <: AnyLocalEdgeIndex]
+      (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
+      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+          val direction: Direction = (ix.indexType: AnyLocalIndexType) match {
+            case OnlySourceCentric => Direction.OUT
+            case OnlyTargetCentric => Direction.IN
+            case BothEndsCentric   => Direction.BOTH
+          }
+          val lbl: EdgeLabel = m.getEdgeLabel(ix.indexedType.label)
+          val props: List[PropertyKey] = propLabels(ix.properties).map{ m.getPropertyKey(_) }
+
+          m.buildEdgeIndex(lbl, ix.label, direction, props: _*)  : TitanIndex
+        }
+      }
+
     implicit def vertexIx[Ix <: AnySimpleIndex { type IndexedType <: AnyVertexType }] = 
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
           m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])
             // .indexOnly(m.getVertexLabel(ix.indexedType.label))
             .addKey(m.getPropertyKey(ix.property.label))
-            .buildCompositeIndex
+            .buildCompositeIndex : TitanIndex
         }
       }
 
@@ -88,7 +108,7 @@ object schema {
           m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])
             // .indexOnly(m.getEdgeLabel(ix.indexedType.label))
             .addKey(m.getPropertyKey(ix.property.label))
-            .buildCompositeIndex
+            .buildCompositeIndex : TitanIndex
         }
       }
   }
@@ -107,7 +127,7 @@ object schema {
       vertexTypesMapper: MapToList[addVertexLabel.type, gs.VertexTypes] with 
                          InContainer[TitanManagement => VertexLabel],
       indexMapper: MapToList[addIndex.type, gs.Indexes] with 
-                   InContainer[TitanManagement => TitanGraphIndex]
+                   InContainer[TitanManagement => TitanIndex]
     ) = {
       /* We want this to happen all in _one_ transaction */
       val mgmt = g.getManagementSystem
