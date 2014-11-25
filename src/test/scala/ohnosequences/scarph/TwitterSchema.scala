@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, types._
 import ohnosequences.cosas._, AnyTypeSet._
 
 object TwitterSchema {
@@ -12,33 +12,21 @@ object TwitterSchema {
   case object tweet extends VertexType
   case object text extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends EdgeType(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone] {
+  case object posted extends EdgeType( exactlyOne(user), manyOrNone(tweet) )
+  // case object posted extends ==>( exactlyOne(user), manyOrNone(tweet) )
 
-    type InC[X <: AnyLabelType] = exactlyOne[X]
-    val inV = exactlyOne(user)
-    type OutC[Y <: AnyLabelType] = manyOrNone[Y]
-    val outV = manyOrNone(tweet)
-  }
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object follows extends EdgeType(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone] {
+  case object follows extends EdgeType(manyOrNone(user), manyOrNone(user))
 
-    type InC[X <: AnyLabelType] = manyOrNone[X]
-    val inV = manyOrNone(user)
+  case object liked extends EdgeType(manyOrNone(user), manyOrNone(tweet)) 
 
-    type OutC[Y <: AnyLabelType] = manyOrNone[Y]
-    val outV = manyOrNone(user)
-  }
+  // stupid queries
+  val uh = in(follows)
 
-  case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone] {
-
-    type InC[X <: AnyLabelType] = manyOrNone[X]
-    val inV = manyOrNone(user)
-
-    type OutC[Y <: AnyLabelType] = manyOrNone[Y]
-    val outV = manyOrNone(tweet)
-  }
+  val zz = target(follows) >=> in(follows)
+  // val uhoh = Compose(target(follows), in(follows))
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)

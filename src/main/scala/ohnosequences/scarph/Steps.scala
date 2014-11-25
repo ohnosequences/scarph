@@ -12,23 +12,50 @@ package ohnosequences.scarph
 
 
 
-case class In[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E#InC[E]](edge.target, edge.inV(edge)) with AnyWrappedPath {
+case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
+
+  type InT = edge.Target
+  val  inT = edge.target
+  type InC[X <: AnyLabelType] = exactlyOne[X]
+  // type In = InC[InT]
+  val in: In = exactlyOne(edge.target)
+
+  type OutT = E
+  val  outT = edge
+  type OutC[X <: AnyLabelType] = edge.OutC[X]
+  // type Out = OutC[OutT]
+  val out: Out = edge.outV(edge)
 }
 
+case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
+  type InT = E
+  val inT = edge
+  type InC[X <: AnyLabelType] = exactlyOne[X]
+  val in: In = exactlyOne(edge)
 
-case class InV[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E#InC[E#Source]](edge.target, edge.inV(edge.source))
-case class Src[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)
-
-case class vertexOps[V <: AnyVertexType](v: V) {
-
-  def in[E <: AnyEdgeType { type Target = V }](edge: E) = In(edge)
+  type OutT = edge.Target
+  val outT = edge.target
+  type OutC[X <: AnyLabelType] = exactlyOne[X]
+  val out: Out = exactlyOne(edge.target)
 }
 
-case class edgeOps[E <: AnyEdgeType](e: E) {
+// (exactlyOne(edge.target), edge.outV(edge))
 
-  def src: Src[E] = Src(e)
-}
+
+
+// case class InV[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E#InC[E#Source]](edge.target, edge.inV(edge.source))
+// case class Src[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)
+
+// case class vertexOps[V <: AnyVertexType](v: V) {
+
+//   def in[E <: AnyEdgeType { type Target = V }](edge: E) = In(edge)
+// }
+
+// case class edgeOps[E <: AnyEdgeType](e: E) {
+
+//   def src: Src[E] = Src(e)
+// }
 
 /* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,
    but with the parenthesis, i.e. grouping this composition to be evaluated together.
