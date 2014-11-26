@@ -30,16 +30,16 @@ abstract class EvalPathOn[I,P <: AnyPath,O](val path: P) extends AnyEvalPathOn[I
 
 object AnyEvalPath {
 
-  abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
+  // abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
 
-    val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = I LabeledBy comp.path.In }
-    val evalSecond: EvalPathOn[M,path.second.type,O] { type In = M LabeledBy comp.path.first.Out }
+  //   val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = I LabeledBy comp.path.In }
+  //   val evalSecond: EvalPathOn[M,path.second.type,O] { type In = M LabeledBy comp.path.first.Out }
 
-    def apply(in: In): Out = {
+  //   def apply(in: In): Out = {
 
-      val firstResult = evalFirst(in)
+  //     val firstResult = evalFirst(in)
       
-      evalSecond(firstResult)
-    }
-  }
+  //     evalSecond(firstResult)
+  //   }
+  // }
 }

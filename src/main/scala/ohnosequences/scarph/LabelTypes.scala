@@ -23,7 +23,7 @@ sealed trait AnyLabeledValue extends Any {
   // val  tpe: Tpe
 
   type Value
-  val  value: Value
+  // val  value: Value
 }
 
 trait AnyValueLabeledBy[T <: AnyLabelType] extends Any with AnyLabeledValue {

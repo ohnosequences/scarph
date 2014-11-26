@@ -1,15 +1,5 @@
 package ohnosequences.scarph
 
-object types {
-
-  // type ==>[
-  //   I <: AnyVertexType,
-  //   InC0[X <: AnyLabelType] <: Container[InC0], 
-  //   O <: AnyVertexType,
-  //   OutC0[X <: AnyLabelType] <: Container[OutC0]
-  // ] = EdgeType[I,InC0,O,OutC0]
-}
-
 /* This is any graph type that can have properties, i.e. vertex of edge type */
 trait AnyElementType extends AnyLabelType
 
@@ -43,11 +33,6 @@ abstract class VertexType extends AnyVertexType {
   val label = this.toString
 }
 
-object AnyEdgeType {
-
-  // implicit def getEdgeOps[E <: AnyEdgeType](e: E): edgeOps[E] = edgeOps(e)
-}
-
 trait AnyEdgeType extends AnyElementType {
 
   /* The source vertex for this edge */
@@ -55,48 +40,35 @@ trait AnyEdgeType extends AnyElementType {
   val  source: Source
 
   /* this is the arity for incoming edges */
-  type InC[X <: AnyLabelType] <: Container[InC] with Of[X]
-  type InV = InC[Source]
-  val inV: InV
+  type InC <: AnyConstructor
+  val inC: InC
 
   type Target <: AnyVertexType
   val  target: Target
 
-  type OutC[X <: AnyLabelType] <: Container[OutC] with Of[X]
-  type OutV = OutC[Target]
-  val outV: OutV
+  type OutC <: AnyConstructor
+  val outC: OutC
 }
 
 class EdgeType[
   I <: AnyVertexType,
-  InC0[X <: AnyLabelType] <: Container[InC0] with Of[X], 
+  InC0 <: AnyConstructor,
   O <: AnyVertexType,
-  OutC0[X <: AnyLabelType] <: Container[OutC0] with Of[X]
+  OutC0 <: AnyConstructor
 ]
 (
-  val inV: InC0[I],
-  val outV: OutC0[O]
+  val inC: InC0,
+  val source: I,
+  val outC: OutC0,
+  val target: O
 )
 extends AnyEdgeType {
 
   type Source = I
-  val source = inV.of
-  type InC[X <: AnyLabelType] = InC0[X]
+  type InC = InC0
 
   type Target = O
-  val target = outV.of
-  type OutC[X <: AnyLabelType] = OutC0[X]
+  type OutC = OutC0
 
   val label = this.toString
 }
-
-// abstract class EdgeType[
-//   I <: AnyVertexType, 
-//   O <: AnyVertexType
-// ](val source: I, val target: O) extends AnyEdgeType {
-
-//   type Source = I
-//   type Target = O
-
-//   val label = this.toString
-// }

@@ -4,17 +4,23 @@ import ohnosequences.cosas._
 
 trait AnyPath { path =>
 
+  /* the wrapped type */
   type InT <: AnyLabelType
   val  inT: InT
-  type InC[X <: AnyLabelType] <: Container[InC] with Of[X]
-  type In = InC[InT]
-  val in: In
+  /* the container used */
+  type InC <: AnyConstructor
+  val inC: InC
+
+  type In = inC.C[InT]
+  val in: In = inC(inT)
 
   type OutT <: AnyLabelType
   val  outT: OutT
-  type OutC[X <: AnyLabelType] <: Container[OutC] with Of[X]
-  type Out = OutC[OutT]
-  val out: Out
+  type OutC <: AnyConstructor
+  val outC: OutC
+
+  type Out = outC.C[OutT]
+  val out: Out = outC(outT)
 
   // no ops
   def andThen[S <: AnyPath { type In = path.Out }](s: S): AnyComposition = new AnyComposition {
@@ -25,37 +31,38 @@ trait AnyPath { path =>
     val second = s
   }
 
+  def map[F <: AnyPath { type In = path.OutT }](f: F): AnyMap = new AnyMap {
+
+    type PrevPath = path.type
+    val prevPath = path: path.type
+
+    type MappedPath = F
+    val mappedPath = f
+  }
 }
 
 class Path[
   I <: AnyLabelType,
-  InC0[X <: AnyLabelType] <: Container[InC0] with Of[X], 
+  InC0 <: AnyConstructor, 
   O <: AnyLabelType,
-  OutC0[Z <: AnyLabelType] <: Container[OutC0] with Of[Z]
+  OutC0 <: AnyConstructor
 ]
 (
-  val in: InC0[I],
-  val out: OutC0[O]
+  val inC: InC0,
+  val inT: I,
+  val outC: OutC0,
+  val outT: O
 )
 extends AnyPath {
 
   type InT = I
-  val inT = in.of
-  type InC[X <: AnyLabelType] = InC0[X]
+  type InC = InC0
 
   type OutT = O
-  val outT = out.of
-  type OutC[X <: AnyLabelType] = OutC0[X]
+  type OutC = OutC0
 }
 
-
-/* A step is a minimal unit of path */
-// trait AnyStep extends AnyPath
-
-// abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
-//   extends Path[I, O](i, o) with AnyStep
-
-/* Path is a composition of other paths */
+/* a composition of other paths */
 trait AnyComposition extends AnyPath {
 
   type First <: AnyPath
@@ -66,33 +73,57 @@ trait AnyComposition extends AnyPath {
 
   type InT = first.InT
   val inT = first.inT
-  type InC[X <: AnyLabelType] = first.InC[X]
-  val in = first.in
+  type InC = first.InC
+  val inC = first.inC
   
   type OutT = second.OutT
   val outT = second.outT
-  type OutC[X <: AnyLabelType] = second.OutC[X]
-  val out = second.out
+  type OutC = second.OutC
+  val outC = second.outC
 }
 
 /*
-this represents mapping a Path over a container; the path should have InT/OutT matching what the container wraps
+this represents mapping a Path over a container; the path should have InT/OutT matching what the container wraps.
+
+This wraps two different paths
+
+1. the first path 
 */
-trait AnyMapExactlyOne extends AnyPath { map =>
+trait AnyMap extends AnyPath {
 
-  // the container is exactlyOne
-  type InC[X <: AnyLabelType] = exactlyOne[X]
-
+  type PrevPath <: AnyPath
+  val prevPath: PrevPath
   // the path being mapped should have as In the wrapped type
-  type MappedPath <: AnyPath { type In = exactlyOne[map.InT] }
+  type MappedPath <: AnyPath { type In = prevPath.OutT }
   val mappedPath: MappedPath
+
+  type InT = prevPath.InT
+  val inT = prevPath.inT
+  type InC = prevPath.InC
+  val inC = prevPath.inC
 
   type OutT = mappedPath.Out
   val outT = mappedPath.out
-  type OutC[X <: AnyLabelType] = exactlyOne[X]
-  // type Out = exactlyOne[MappedPath#Out]
-  val out = exactlyOne(mappedPath.out)
+  type OutC = prevPath.OutC
+  val outC = prevPath.outC
 }
+
+
+// trait AnyMapExactlyOne extends AnyPath { memap =>
+
+//   // the container is exactlyOne
+//   type InC[X <: AnyLabelType] = exactlyOne[X]
+
+//   // the path being mapped should have as In the wrapped type
+//   type MappedPath <: AnyPath { type In = exactlyOne[memap.InT] }
+//   val mappedPath: MappedPath
+
+//   type OutT = mappedPath.Out
+//   val outT = mappedPath.out
+//   type OutC[X <: AnyLabelType] = exactlyOne[X]
+//   // type Out = exactlyOne[MappedPath#Out]
+//   val out = exactlyOne(mappedPath.out)
+// }
 
 /*
   here we need
@@ -100,18 +131,18 @@ trait AnyMapExactlyOne extends AnyPath { map =>
   1. the container value
   2. the path that is being mapped
 */
-abstract class MapExactlyOne[X0 <: AnyLabelType](val in: exactlyOne[X0]) extends AnyMapExactlyOne {
+// abstract class MapExactlyOne[X0 <: AnyLabelType](val in: exactlyOne[X0]) extends AnyMapExactlyOne {
 
-  type InT = X0
-  val inT = in.of
-}
+//   type InT = X0
+//   val inT = in.of
+// }
 
 object AnyPath {
 
   implicit def pathOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
 
-  implicit def mapExactlyOneOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](p: P)
-    : exactlyOneMapOps[P] = exactlyOneMapOps[P](p)
+  // implicit def mapExactlyOneOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](p: P)
+  // : exactlyOneMapOps[P] = exactlyOneMapOps[P](p)
 }
 
 class PathOps[F <: AnyPath](val f: F) {
@@ -131,11 +162,11 @@ class PathOps[F <: AnyPath](val f: F) {
   //   ): O LabeledBy F#Out = ev(i, t)
 }
 
-case class exactlyOneMapOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](val p: P) {
+// case class exactlyOneMapOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](val p: P) {
 
-  def map[F <: AnyPath { type In = exactlyOne[p.OutT] }](f: F): MapExactlyOne[p.OutT] = new MapExactlyOne(p.out) {
+//   def map[F <: AnyPath { type In = exactlyOne[p.OutT] }](f: F): MapExactlyOne[p.OutT] = new MapExactlyOne(p.out) {
 
-    type MappedPath = F
-    val mappedPath = f
-  }
-}
+//     type MappedPath = F
+//     val mappedPath = f
+//   }
+// }

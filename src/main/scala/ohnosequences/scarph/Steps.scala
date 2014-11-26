@@ -13,28 +13,39 @@ case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = edge.Target
   val  inT = edge.target
-  type InC[X <: AnyLabelType] = exactlyOne[X]
-  // type In = InC[InT]
-  val in: In = exactlyOne(edge.target)
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
 
   type OutT = E
   val  outT = edge
-  type OutC[X <: AnyLabelType] = edge.InC[X]
-  // type Out = OutC[OutT]
-  val out: Out = edge.inV(edge)
+  type OutC = edge.InC
+  val outC  = edge.inC
+}
+
+case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
+
+  type InT = edge.Target
+  val  inT = edge.target
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
+
+  type OutT = edge.Source
+  val  outT = edge.source
+  type OutC = edge.InC
+  val outC  = edge.inC
 }
 
 case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = E
   val inT = edge
-  type InC[X <: AnyLabelType] = exactlyOne[X]
-  val in: In = exactlyOne(edge)
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
 
   type OutT = edge.Target
   val outT = edge.target
-  type OutC[X <: AnyLabelType] = exactlyOne[X]
-  val out: Out = exactlyOne(edge.target)
+  type OutC = ExactlyOne.type
+  val outC = ExactlyOne
 }
 
 // case class InV[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E#InC[E#Source]](edge.target, edge.inV(edge.source))
