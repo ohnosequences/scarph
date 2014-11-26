@@ -2,50 +2,44 @@ package ohnosequences.scarph
 
 import ohnosequences.cosas._
 
-// NOTE: maybe this should be Fn2
-trait AnyEvalPath[P <: AnyPath] {
+trait AnyEvalPath {
 
-  type Path = P
+  type Path  <: AnyPath
+  val path: Path
 
   type InVal
   type OutVal
 
-  type In = InVal LabeledBy Path#In
-  type Out = OutVal LabeledBy Path#Out
+  type In <: InVal LabeledBy path.In
+  type Out = OutVal LabeledBy path.Out
 
-  // implicitly:
-  // type PackedOut
-  // val pack: Pack[OutVal LabeledBy Path#OutT, Path#OutArity] { type Out = PackedOut }
-
-  def apply(in: In, p: Path): Out
-
-  /* This returns the result of eval with respect to the out-arity */
-  // def apply(in: In, p: Path): PackedOut = pack(eval(in, p))
+  def apply(in: In): Out
 }
 
-trait EvalPath[I, P <: AnyPath, O] 
-  extends AnyEvalPath[P] {
+trait AnyEvalPathOn[I, O] 
+  extends AnyEvalPath {
 
   type InVal = I
   type OutVal = O
 }
 
+abstract class EvalPathOn[I,P <: AnyPath,O](val path: P) extends AnyEvalPathOn[I,O] {
+
+  type Path = P
+}
+
 object AnyEvalPath {
 
-  // implicit def evalComposition[
-  //   F <: AnyPath, 
-  //   S <: AnyPath { type InT = F#OutT },
-  //   I, M, O
-  // ](implicit
-  //   evalFirst:  EvalPath[I, F, M],
-  //   evalSecond: EvalPath[M, S, O]
-  // ):  EvalPath[I, Compose[F, S], O] =
-  // new EvalPath[I, Compose[F, S], O] {
+  abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
 
-  //   def apply(in: In, p: Path): Out = {
-  //     // val bodyOut: M LabeledBy F#Out = evalFirst(in, p.first: F#First)
+    val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = I LabeledBy comp.path.In }
+    val evalSecond: EvalPathOn[M,path.second.type,O] { type In = M LabeledBy comp.path.first.Out }
+
+    def apply(in: In): Out = {
+
+      val firstResult = evalFirst(in)
       
-  //     // bodyOut.flatMap{ b => evalSecond(b, p.second) }
-  //   }
-  // }
+      evalSecond(firstResult)
+    }
+  }
 }

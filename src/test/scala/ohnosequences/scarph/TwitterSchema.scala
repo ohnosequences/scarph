@@ -24,9 +24,11 @@ object TwitterSchema {
 
   // stupid queries
   val uh = in(follows)
-
   val zz = target(follows) >=> in(follows)
-  // val uhoh = Compose(target(follows), in(follows))
+  val altSyntax = target(follows) andThen in(follows)
+  val ups = in(posted)
+  // this is clunky right now, but it works
+  val uuuuh = in(posted) map (target(posted))
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)

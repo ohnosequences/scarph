@@ -9,9 +9,6 @@ package ohnosequences.scarph
 // case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge) with OutArity[E#InArity]
 // case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge) with OutArity[E#OutArity]
 
-
-
-
 case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = edge.Target
@@ -22,9 +19,9 @@ case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type OutT = E
   val  outT = edge
-  type OutC[X <: AnyLabelType] = edge.OutC[X]
+  type OutC[X <: AnyLabelType] = edge.InC[X]
   // type Out = OutC[OutT]
-  val out: Out = edge.outV(edge)
+  val out: Out = edge.inV(edge)
 }
 
 case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
@@ -39,10 +36,6 @@ case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
   type OutC[X <: AnyLabelType] = exactlyOne[X]
   val out: Out = exactlyOne(edge.target)
 }
-
-// (exactlyOne(edge.target), edge.outV(edge))
-
-
 
 // case class InV[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E#InC[E#Source]](edge.target, edge.inV(edge.source))
 // case class Src[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)

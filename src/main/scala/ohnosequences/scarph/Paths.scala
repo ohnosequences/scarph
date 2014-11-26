@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 import ohnosequences.cosas._
 
-trait AnyPath {
+trait AnyPath { path =>
 
   type InT <: AnyLabelType
   val  inT: InT
@@ -15,13 +15,16 @@ trait AnyPath {
   type OutC[X <: AnyLabelType] <: Container[OutC] with Of[X]
   type Out = OutC[OutT]
   val out: Out
-}
 
-trait AnyWrappedPath extends AnyPath {
+  // no ops
+  def andThen[S <: AnyPath { type In = path.Out }](s: S): AnyComposition = new AnyComposition {
 
-  type OutT <: AnyContainer
+    type First = path.type
+    val first = path: path.type
+    type Second = S
+    val second = s
+  }
 
-  type WrappedByOut = OutT#Of
 }
 
 class Path[
@@ -58,35 +61,17 @@ trait AnyComposition extends AnyPath {
   type First <: AnyPath
   val  first: First
 
-  type Second <: AnyPath //{ type InT = First#OutT }
+  type Second <: AnyPath { type In = first.Out }
   val  second: Second
-
-  type InT <: First#InT
-  
-  type OutT <: Second#OutT
-
-  // should be provided implicitly:
-  // val canCompose: Composable[First, Second]
-}
-
-case class Compose[F <: AnyPath, S <: AnyPath]
-  (val first: F, val second: S)
-  // (implicit val canCompose: Composable[F, S])
-  extends AnyComposition {
-
-  type First = F
-  type Second = S
 
   type InT = first.InT
   val inT = first.inT
   type InC[X <: AnyLabelType] = first.InC[X]
-  // type In = first.In
   val in = first.in
-
+  
   type OutT = second.OutT
   val outT = second.outT
   type OutC[X <: AnyLabelType] = second.OutC[X]
-  // type Out = second.Out
   val out = second.out
 }
 
@@ -95,13 +80,18 @@ this represents mapping a Path over a container; the path should have InT/OutT m
 */
 trait AnyMapExactlyOne extends AnyPath { map =>
 
-  type X <: AnyLabelType
-  type InT = exactlyOne[X]
+  // the container is exactlyOne
+  type InC[X <: AnyLabelType] = exactlyOne[X]
 
-  type Mapped <: AnyPath { type InT = X }
-  val mapped: Mapped
+  // the path being mapped should have as In the wrapped type
+  type MappedPath <: AnyPath { type In = exactlyOne[map.InT] }
+  val mappedPath: MappedPath
 
-  type OutT <: exactlyOne[Mapped#OutT]
+  type OutT = mappedPath.Out
+  val outT = mappedPath.out
+  type OutC[X <: AnyLabelType] = exactlyOne[X]
+  // type Out = exactlyOne[MappedPath#Out]
+  val out = exactlyOne(mappedPath.out)
 }
 
 /*
@@ -109,48 +99,31 @@ trait AnyMapExactlyOne extends AnyPath { map =>
 
   1. the container value
   2. the path that is being mapped
-
-  most likely it would be better to specialize for each container. This is just a hack.
 */
-// case class MapExactlyOne[
-//   X0 <: AnyLabelType,
-//   M <: AnyPath { type InT = X0 }
-// ](val inT: exactlyOne[X0], val mapped: M) extends AnyMapExactlyOne {
+abstract class MapExactlyOne[X0 <: AnyLabelType](val in: exactlyOne[X0]) extends AnyMapExactlyOne {
 
-//   type X = X0
-//   type Mapped = M
-//   type OutT = exactlyOne[M#OutT]
-
-//   val outT: exactlyOne[M#OutT] = inT(mapped.outT)
-// }
+  type InT = X0
+  val inT = in.of
+}
 
 object AnyPath {
 
   implicit def pathOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
 
-  // implicit def mapExactlyOneOps[X <: AnyLabelType, P <: AnyWrappedPath { type OutT = exactlyOne[X] }](p: P): exactlyOneMapOps[P#WrappedByOut,P] = exactlyOneMapOps[P#WrappedByOut,P](p)
-
-  // implicit def mapOps[
-  //   R <: AnyEdgeType { type InC[X <: AnyLabelType] = exactlyOne[X] }
-  // ](in:In[R] { type OutT = exactlyOne[R] }): exactlyOneMapOps[R, In[R]] = 
-  //   exactlyOneMapOps[R, In[R]](in)
+  implicit def mapExactlyOneOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](p: P)
+    : exactlyOneMapOps[P] = exactlyOneMapOps[P](p)
 }
 
-/* This checks that the paths are composable and multiplies their out-arities */
-@annotation.implicitNotFound(msg = "Can't compose ${F} with ${S}")
-trait Composable[F <: AnyPath, S <: AnyPath]
-
-object Composable {
-
-  implicit def can[F <: AnyPath, S <: AnyPath { type In <: F#Out }]:
-        Composable[F, S] =
-    new Composable[F, S] {}
-}
-
-class PathOps[F <: AnyPath](val t: F) {
+class PathOps[F <: AnyPath](val f: F) {
 
   /* Just a synonym for composition */
-  def >=>[S <: AnyPath { type In = t.Out }](s: S): Compose[F, S] = Compose[F, S](t, s)
+  def >=>[S <: AnyPath { type In = f.Out }](s: S): AnyComposition = new AnyComposition {
+
+    type First = f.type
+    val first = f: f.type
+    type Second = S
+    val second = s
+  }
 
   // def evalOn[I, O](i: I LabeledBy F#InT)
   //   (implicit 
@@ -158,7 +131,11 @@ class PathOps[F <: AnyPath](val t: F) {
   //   ): O LabeledBy F#Out = ev(i, t)
 }
 
-// case class exactlyOneMapOps[X <: AnyLabelType, P <: AnyPath { type OutT = exactlyOne[X] }](val p: P) {
+case class exactlyOneMapOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](val p: P) {
 
-//   def map[F <: AnyPath { type InT = X }](f: F): MapExactlyOne[X, F] = MapExactlyOne(p.outT, f)
-// }
+  def map[F <: AnyPath { type In = exactlyOne[p.OutT] }](f: F): MapExactlyOne[p.OutT] = new MapExactlyOne(p.out) {
+
+    type MappedPath = F
+    val mappedPath = f
+  }
+}
