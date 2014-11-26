@@ -1,13 +1,18 @@
 package ohnosequences.scarph
 
 /* Basic steps: */
-// case class GetProperty[P <: AnyProp](val prop: P) extends Step[P#Owner, P](prop.owner, prop) with OutArity[ExactlyOne]
+case class get[P <: AnyProp](val property: P) extends AnyPath {
 
-// case class GetSource[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source) with OutArity[ExactlyOne]
-// case class GetTarget[E <: AnyEdgeType](val edge: E) extends Step[E, E#Target](edge, edge.target) with OutArity[ExactlyOne]
+  type InT = property.Owner
+  val inT = property.owner
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
 
-// case class  GetInEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E](edge.target, edge) with OutArity[E#InArity]
-// case class GetOutEdges[E <: AnyEdgeType](val edge: E) extends Step[E#Source, E](edge.source, edge) with OutArity[E#OutArity]
+  type OutT = P
+  val outT = property
+  type OutC = ExactlyOne.type
+  val outC = ExactlyOne
+}
 
 case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
@@ -21,7 +26,6 @@ case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
   type OutC = edge.InC
   val outC  = edge.inC
 }
-
 case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = edge.Target
@@ -33,6 +37,42 @@ case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
   val  outT = edge.source
   type OutC = edge.InC
   val outC  = edge.inC
+}
+case class out[E <: AnyEdgeType](val edge: E) extends AnyPath {
+
+  type InT = edge.Source
+  val  inT = edge.source
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
+
+  type OutT = E
+  val  outT = edge
+  type OutC = edge.OutC
+  val outC  = edge.outC
+}
+case class outV[E <: AnyEdgeType](val edge: E) extends AnyPath {
+
+  type InT = edge.Source
+  val  inT = edge.source
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
+
+  type OutT = edge.Target
+  val  outT = edge.target
+  type OutC = edge.OutC
+  val outC  = edge.outC
+}
+case class source[E <: AnyEdgeType](val edge: E) extends AnyPath {
+
+  type InT = E
+  val inT = edge
+  type InC = ExactlyOne.type
+  val inC = ExactlyOne
+
+  type OutT = edge.Source
+  val outT = edge.source
+  type OutC = ExactlyOne.type
+  val outC = ExactlyOne
 }
 
 case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
@@ -47,19 +87,6 @@ case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
   type OutC = ExactlyOne.type
   val outC = ExactlyOne
 }
-
-// case class InV[E <: AnyEdgeType](val edge: E) extends Step[E#Target, E#InC[E#Source]](edge.target, edge.inV(edge.source))
-// case class Src[E <: AnyEdgeType](val edge: E) extends Step[E, E#Source](edge, edge.source)
-
-// case class vertexOps[V <: AnyVertexType](v: V) {
-
-//   def in[E <: AnyEdgeType { type Target = V }](edge: E) = In(edge)
-// }
-
-// case class edgeOps[E <: AnyEdgeType](e: E) {
-
-//   def src: Src[E] = Src(e)
-// }
 
 /* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,
    but with the parenthesis, i.e. grouping this composition to be evaluated together.

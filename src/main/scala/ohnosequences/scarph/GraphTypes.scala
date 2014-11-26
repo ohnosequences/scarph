@@ -3,7 +3,10 @@ package ohnosequences.scarph
 /* This is any graph type that can have properties, i.e. vertex of edge type */
 trait AnyElementType extends AnyLabelType
 
-/* Property is assigned to one element type and has a raw representation */
+/* 
+  Property is assigned to one element type and has a raw representation 
+  I'm tempted to make this a kind of edge
+*/
 trait AnyProp extends AnyLabelType {
 
   type Raw
@@ -17,12 +20,6 @@ abstract class PropertyOf[O <: AnyElementType](val owner: O) extends AnyProp {
   type Owner = O
 
   val label = this.toString
-}
-
-
-object AnyVertexType {
-
-  // implicit def getVertexOps[V <: AnyVertexType](v: V): vertexOps[V] = vertexOps(v)
 }
 
 /* Vertex type is very simple */
@@ -69,6 +66,24 @@ extends AnyEdgeType {
 
   type Target = O
   type OutC = OutC0
+
+  val label = this.toString
+}
+
+// TODO: HList-like with bound on vertices, another for paths etc
+trait AnyPar extends AnyLabelType {
+
+  type First <: AnyLabelType
+  val first: First
+
+  type Second <: AnyLabelType
+  val second: Second
+}
+
+case class ParV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyPar {
+
+  type First = F
+  type Second = S
 
   val label = this.toString
 }

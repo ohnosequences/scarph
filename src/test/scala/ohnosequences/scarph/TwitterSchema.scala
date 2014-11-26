@@ -22,7 +22,7 @@ object TwitterSchema {
   case object liked extends EdgeType(ManyOrNone, user, ManyOrNone, tweet) 
 
   // stupid queries
-  val uh = in(follows)
+  val uh = inV(follows) map get(name)
   val zz = target(follows) >=> in(follows)
   val altSyntax = target(follows) andThen in(follows)
   val ups = in(posted)
@@ -30,6 +30,11 @@ object TwitterSchema {
   val uuuuh = in(posted) map target(posted)
 
   val asdfadf = inV(follows) map inV(follows)
+
+  val ohno = Par(
+                  inV(follows) map inV(follows),
+                  target(follows) >=> in(follows)
+                )
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)
