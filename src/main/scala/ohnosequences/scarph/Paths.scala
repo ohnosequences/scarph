@@ -156,6 +156,15 @@ class PathOps[F <: AnyPath](val f: F) {
     val second = s
   }
 
+  def fmap[G <: AnyPath { type In = f.OutT }](g: G): AnyMap = new AnyMap {
+
+    type PrevPath = f.type
+    val prevPath = f: f.type
+
+    type MappedPath = G
+    val mappedPath = g
+  }
+
   // def evalOn[I, O](i: I LabeledBy F#InT)
   //   (implicit 
   //     ev: EvalPath[I, F, O]

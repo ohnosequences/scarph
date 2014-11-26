@@ -30,6 +30,7 @@ object TwitterSchema {
   val uuuuh = in(posted) map target(posted)
 
   val asdfadf = inV(follows) map inV(follows)
+  val asdfadf2 = inV(follows) fmap inV(follows)
 
   val ohno = Par(
                   inV(follows) map inV(follows),
