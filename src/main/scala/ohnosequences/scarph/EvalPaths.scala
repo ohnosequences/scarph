@@ -11,7 +11,7 @@ trait AnyEvalPath {
   type OutVal
 
   type In <: InVal LabeledBy path.In
-  type Out = OutVal LabeledBy path.Out
+  type Out <: OutVal LabeledBy path.Out
 
   def apply(in: In): Out
 }
@@ -30,16 +30,17 @@ abstract class EvalPathOn[I,P <: AnyPath,O](val path: P) extends AnyEvalPathOn[I
 
 object AnyEvalPath {
 
-  // abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
+  abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
 
-  //   val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = I LabeledBy comp.path.In }
-  //   val evalSecond: EvalPathOn[M,path.second.type,O] { type In = M LabeledBy comp.path.first.Out }
+    // to be provided implicitly
+    val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = comp.In }
+    val evalSecond: EvalPathOn[M,path.second.type,O] { type In = evalFirst.Out; type Out = comp.Out }
 
-  //   def apply(in: In): Out = {
+    def apply(in: evalFirst.In): Out = {
 
-  //     val firstResult = evalFirst(in)
+      val firstResult: evalSecond.In = evalFirst(in)
       
-  //     evalSecond(firstResult)
-  //   }
-  // }
+      evalSecond(firstResult)
+    }
+  }
 }

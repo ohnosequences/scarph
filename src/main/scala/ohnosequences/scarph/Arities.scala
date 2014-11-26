@@ -29,14 +29,11 @@ object AtLeastOne extends AnyConstructor {
   def apply[Y <: AnyLabelType](y: Y) = atLeastOne(y)
 }
 
-
-
 trait AnyContainer extends AnyLabelType {
 
   type Of <: AnyLabelType
   val of: Of
 }
-
 
 trait Of[T <: AnyLabelType] extends AnyContainer {
 
