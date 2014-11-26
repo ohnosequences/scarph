@@ -32,9 +32,12 @@ object AnyEvalPath {
 
   abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
 
-    // to be provided implicitly
+    // to be provided implicitly; maybe add types
     val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = comp.In }
     val evalSecond: EvalPathOn[M,path.second.type,O] { type In = evalFirst.Out; type Out = comp.Out }
+
+    type In = InVal LabeledBy path.In
+    type Out = OutVal LabeledBy path.Out
 
     def apply(in: evalFirst.In): Out = {
 
