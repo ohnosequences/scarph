@@ -248,7 +248,6 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val post = g.edge(posted)(time)("13.11.2012")
 
     /* Evaluating steps: */
-    if( edu.value == null) println("edu is null!!!")
     assert{ get(name).evalOn(edu) == name("@eparejatobes") }
     // assert{ GetSource(posted).evalOn(post) == edu }
 
