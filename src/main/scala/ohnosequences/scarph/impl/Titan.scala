@@ -1,28 +1,31 @@
 package ohnosequences.scarph.impl
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, AnyEvalPath._
 import com.thinkaurelius.titan.core._ 
 
 object titan {
 
   import com.tinkerpop.blueprints.Direction
 
-  // implicit def evalGetVertexProperty[P <: AnyProp { type Owner <: AnyVertexType }]:
-  //     EvalPath[TitanVertex, GetProperty[P], P#Raw] =
-  // new EvalPath[TitanVertex, GetProperty[P], P#Raw] {
-  //   def apply(in: In, t: Path): Out = List(t.prop( in.value.getProperty[P#Raw](t.prop.label) ))
+  implicit def evalGetVertexProperty[P <: AnyProp { type Owner <: AnyVertexType }]:
+      EvalGet[TitanVertex, P] = new EvalGet[TitanVertex, P] {
+
+    def apply[P <: Path](path: P)(in: InVal LabeledBy path.In): OutVal LabeledBy path.Out = {
+
+      path.property( in.value.getProperty[path.property.Raw](path.property.label) )
+    }
+  }
+
+  // implicit def evalGetEdgeProperty[P <: AnyProp { type Owner <: AnyEdgeType }](getP: get[P]):
+  //     EvalGet[TitanEdge, P] = new EvalGet[TitanEdge, P](getP) {
+
+  //   def apply(in: In): Out = getP.property( in.value.getProperty[P#Raw](getP.property.label) )
   // }
 
-  // implicit def evalGetEdgeProperty[P <: AnyProp { type Owner <: AnyEdgeType }]:
-  //     EvalPath[TitanEdge, GetProperty[P], P#Raw] =
-  // new EvalPath[TitanEdge, GetProperty[P], P#Raw] {
-  //   def apply(in: In, t: Path): Out = List(t.prop( in.value.getProperty[P#Raw](t.prop.label) ))
-  // }
-
-  // implicit def evalGetSource[E <: AnyEdgeType]:
-  //     EvalPath[TitanEdge, GetSource[E], TitanVertex] =
-  // new EvalPath[TitanEdge, GetSource[E], TitanVertex] {
-  //   def apply(in: In, t: Path): Out = List(new LabeledBy[TitanVertex, E#Source]( in.value.getVertex(Direction.OUT) ))
+  // implicit def evalGetSource[E <: AnyEdgeType](src: source[E]):
+  //     EvalSource[TitanEdge, E, TitanVertex] =
+  // new EvalSource[TitanEdge, E, TitanVertex](src) {
+  //   def apply(in: In): Out = new LabeledBy[TitanVertex, path.edge.Source]( in.value.getVertex(Direction.OUT) )
   // }
 
   // implicit def evalGetTarget[E <: AnyEdgeType]:

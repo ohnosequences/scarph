@@ -1,17 +1,28 @@
 package ohnosequences.scarph
 
+import AnyEvalPath._
+
 /* Basic steps: */
 case class get[P <: AnyProp](val property: P) extends AnyPath {
 
+  type Property = P
   type InT = property.Owner
-  val inT = property.owner
+  lazy val inT = property.owner
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
 
   type OutT = P
-  val outT = property
+  lazy val outT = property
   type OutC = ExactlyOne.type
-  val outC = ExactlyOne
+  lazy val outC = ExactlyOne
+
+  def evalOn[I](input: I LabeledBy In)(implicit eval: EvalGet[I,P]) = {
+
+    eval(this)(input)
+  }
+}
+
+case class getOps[P <: AnyProp](val getP: get[P]) {
 }
 
 case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {

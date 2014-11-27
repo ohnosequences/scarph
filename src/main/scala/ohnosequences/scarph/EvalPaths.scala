@@ -5,15 +5,11 @@ import ohnosequences.cosas._
 trait AnyEvalPath {
 
   type Path  <: AnyPath
-  val path: Path
 
   type InVal
   type OutVal
 
-  type In <: InVal LabeledBy path.In
-  type Out <: OutVal LabeledBy path.Out
-
-  def apply(in: In): Out
+  def apply[P <: Path](path: P)(in: InVal LabeledBy path.In): OutVal LabeledBy path.Out
 }
 
 trait AnyEvalPathOn[I, O] 
@@ -23,27 +19,35 @@ trait AnyEvalPathOn[I, O]
   type OutVal = O
 }
 
-abstract class EvalPathOn[I,P <: AnyPath,O](val path: P) extends AnyEvalPathOn[I,O] {
+abstract class EvalPathOn[I,P <: AnyPath,O] extends AnyEvalPathOn[I,O] {
 
   type Path = P
 }
 
 object AnyEvalPath {
 
-  abstract class EvalComposition[I, P <: AnyComposition, M, O](val composed: P) extends EvalPathOn[I,P,O](composed) { comp =>
+  abstract class EvalGet[I, P <: AnyProp] extends EvalPathOn[I, get[P], P#Raw] {
 
-    // to be provided implicitly; maybe add types
-    val evalFirst:  EvalPathOn[I,path.first.type,M] { type In = comp.In }
-    val evalSecond: EvalPathOn[M,path.second.type,O] { type In = evalFirst.Out; type Out = comp.Out }
+    // type Path = get[P]
+  }
 
-    type In = InVal LabeledBy path.In
-    type Out = OutVal LabeledBy path.Out
+  abstract class EvalSource[I, E <: AnyEdgeType, O](val path: source[E]) extends EvalPathOn[I, source[E], O] {
 
-    def apply(in: evalFirst.In): Out = {
+    type In   = I LabeledBy E
+    type Out  = O LabeledBy path.Out
+  }
 
-      val firstResult: evalSecond.In = evalFirst(in)
+  abstract class EvalComposition[I, P <: AnyComposition, M, O] extends EvalPathOn[I,P,O] { comp =>
+
+    // // to be provided implicitly; maybe add types
+    // val evalFirst:  EvalPathOn[I,P#First,M] { type Path <: {type In = comp.Path#In } }
+    // val evalSecond: EvalPathOn[M,P#Second,O]
+
+    // override def apply(path: P)(in: I LabeledBy path.In): O LabeledBy path.Out = {
+
+    //   val firstResult = evalFirst(path.first)(in)
       
-      evalSecond(firstResult)
-    }
+    //   evalSecond(path.second)(firstResult)
+    // }
   }
 }

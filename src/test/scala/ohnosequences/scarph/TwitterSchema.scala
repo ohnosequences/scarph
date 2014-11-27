@@ -13,7 +13,6 @@ object TwitterSchema {
   case object text extends PropertyOf(tweet) { type Raw = String }
 
   case object posted extends EdgeType(ExactlyOne, user, ManyOrNone, tweet)
-  // case object posted extends ==>( exactlyOne(user), manyOrNone(tweet) )
 
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
