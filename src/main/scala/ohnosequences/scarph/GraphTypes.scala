@@ -70,6 +70,15 @@ extends AnyEdgeType {
   val label = this.toString
 }
 
+object AnyEdgeType {
+
+  implicit def edgeTypeOps[E <: AnyEdgeType](edge: E): EdgeTypeOps[E] = EdgeTypeOps(edge)
+}
+case class EdgeTypeOps[E <: AnyEdgeType](edge: E) {
+
+  def src: src[E] = ohnosequences.scarph.src(edge)
+}
+
 // TODO: HList-like with bound on vertices, another for paths etc
 trait AnyPar extends AnyLabelType {
 

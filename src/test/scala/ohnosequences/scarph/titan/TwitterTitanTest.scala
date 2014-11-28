@@ -249,7 +249,10 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     /* Evaluating steps: */
     assert{ get(name).evalOn(edu) == name("@eparejatobes") }
-    // assert{ GetSource(posted).evalOn(post) == edu }
+    assert{ src(posted).evalOn(post) == edu }
+    assert{ 
+        ( (posted src) evalOn post ) == edu 
+    }
 
 //     /* Composing steps: */
 //     val posterName = GetSource(posted) >=> GetProperty(name)

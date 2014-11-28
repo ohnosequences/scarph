@@ -16,33 +16,30 @@ case class get[P <: AnyProp](val property: P) extends AnyPath {
   type OutC = ExactlyOne.type
   lazy val outC = ExactlyOne
 
-  def evalOn[I](input: I LabeledBy In)(implicit eval: EvalGet[I,P]) = {
+  def evalOn[I](input: I LabeledBy In)(implicit eval: EvalGet[I,P]): P#Raw LabeledBy Out = {
 
     eval(this)(input)
   }
 }
 
-case class getOps[P <: AnyProp](val getP: get[P]) {
-}
-
 case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = edge.Target
-  val  inT = edge.target
+  lazy val  inT = edge.target
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
 
   type OutT = E
-  val  outT = edge
+  lazy val  outT = edge
   type OutC = edge.InC
-  val outC  = edge.inC
+  lazy val outC  = edge.inC
 }
 case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = edge.Target
-  val  inT = edge.target
+  lazy val inT = edge.target
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
 
   type OutT = edge.Source
   val  outT = edge.source
@@ -52,14 +49,14 @@ case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 case class out[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = edge.Source
-  val  inT = edge.source
+  lazy val  inT = edge.source
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
 
   type OutT = E
-  val  outT = edge
+  lazy val  outT = edge
   type OutC = edge.OutC
-  val outC  = edge.outC
+  lazy val outC  = edge.outC
 }
 case class outV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
@@ -73,30 +70,48 @@ case class outV[E <: AnyEdgeType](val edge: E) extends AnyPath {
   type OutC = edge.OutC
   val outC  = edge.outC
 }
-case class source[E <: AnyEdgeType](val edge: E) extends AnyPath {
+case class src[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = E
-  val inT = edge
+  lazy val inT = edge
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
 
   type OutT = edge.Source
-  val outT = edge.source
+  lazy val outT = edge.source
   type OutC = ExactlyOne.type
-  val outC = ExactlyOne
+  lazy val outC = ExactlyOne
+
+  // def evalOn[I,O](input: I LabeledBy In)(implicit eval: EvalSource[I,E,O]): O LabeledBy Out = {
+
+  //   eval(this)(input)
+  // }
+}
+
+object src {
+
+  implicit def srcOps[E <: AnyEdgeType](src: src[E]): sourceOps[E] = sourceOps(src)
+}
+
+case class sourceOps[E <: AnyEdgeType](src: src[E]) {
+
+  def evalOn[I,O](input: I LabeledBy src.In)(implicit eval: EvalSource[I,E,O]): O LabeledBy src.Out = {
+
+    eval(src)(input)
+  }
 }
 
 case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
   type InT = E
-  val inT = edge
+  lazy val inT = edge
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
 
   type OutT = edge.Target
-  val outT = edge.target
+  lazy val outT = edge.target
   type OutC = ExactlyOne.type
-  val outC = ExactlyOne
+  lazy val outC = ExactlyOne
 }
 
 /* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,

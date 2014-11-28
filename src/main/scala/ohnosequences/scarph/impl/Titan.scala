@@ -7,10 +7,10 @@ object titan {
 
   import com.tinkerpop.blueprints.Direction
 
-  implicit def evalGetVertexProperty[P <: AnyProp { type Owner <: AnyVertexType }]:
-      EvalGet[TitanVertex, P] = new EvalGet[TitanVertex, P] {
+  implicit def evalGetVertexProperty[Prop <: AnyProp { type Owner <: AnyVertexType }]:
+      EvalGet[TitanVertex, Prop] = new EvalGet[TitanVertex, Prop] {
 
-    def apply[P <: Path](path: P)(in: InVal LabeledBy path.In): OutVal LabeledBy path.Out = {
+    override def apply(path: Path)(in: InVal LabeledBy path.In): OutVal LabeledBy path.Out = {
 
       path.property( in.value.getProperty[path.property.Raw](path.property.label) )
     }
@@ -22,11 +22,15 @@ object titan {
   //   def apply(in: In): Out = getP.property( in.value.getProperty[P#Raw](getP.property.label) )
   // }
 
-  // implicit def evalGetSource[E <: AnyEdgeType](src: source[E]):
-  //     EvalSource[TitanEdge, E, TitanVertex] =
-  // new EvalSource[TitanEdge, E, TitanVertex](src) {
-  //   def apply(in: In): Out = new LabeledBy[TitanVertex, path.edge.Source]( in.value.getVertex(Direction.OUT) )
-  // }
+  case class TitanEvalSource[E <: AnyEdgeType]() extends EvalSource[TitanEdge, E, TitanVertex] {
+
+    override def apply(path: src[E])(in: InVal LabeledBy path.In): OutVal LabeledBy path.Out = {
+
+      new (TitanVertex LabeledBy path.edge.Source)( in.value.getVertex(Direction.OUT) )
+    }
+  }
+  
+  implicit def evalGetSource[E <: AnyEdgeType]: TitanEvalSource[E] = TitanEvalSource[E]()
 
   // implicit def evalGetTarget[E <: AnyEdgeType]:
   //     EvalPath[TitanEdge, GetTarget[E], TitanVertex] =
