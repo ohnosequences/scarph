@@ -23,18 +23,18 @@ object TwitterSchema {
   // stupid queries
   val uh = inV(follows) map get(name)
   val zz = target(follows) >=> in(follows)
-  val altSyntax = target(follows) andThen in(follows)
+  val altSyntax = target(follows) >=> in(follows)
   val ups = in(posted)
   // this is clunky right now, but it works
   val uuuuh = in(posted) map target(posted)
 
   val asdfadf = inV(follows) map inV(follows)
-  val asdfadf2 = inV(follows) fmap inV(follows)
+  val asdfadf2 = inV(follows) map inV(follows)
 
-  val ohno = Par(
-                  inV(follows) map inV(follows),
-                  target(follows) >=> in(follows)
-                )
+  // val ohno = Par(
+  //                 inV(follows) map inV(follows),
+  //                 target(follows) >=> in(follows)
+  //               )
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)

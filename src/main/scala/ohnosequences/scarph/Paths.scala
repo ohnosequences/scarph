@@ -2,6 +2,8 @@ package ohnosequences.scarph
 
 import ohnosequences.cosas._
 
+import AnyEvalPath._
+
 trait AnyPath { path =>
 
   /* the wrapped type */
@@ -11,37 +13,28 @@ trait AnyPath { path =>
   type InC <: AnyConstructor
   val inC: InC
 
-  type In = inC.C[InT]
-  val in: In = inC(inT)
+  type In <: AnyLabelType//<: InC#C[InT]
+  val in: In
 
   type OutT <: AnyLabelType
   val  outT: OutT
   type OutC <: AnyConstructor
   val outC: OutC
 
-  type Out = outC.C[OutT]
-  val out: Out = outC(outT)
+  type Out <: AnyLabelType//<: OutC#C[OutT]
+  val out: Out
 
-  // no ops
-  def andThen[S <: AnyPath { type In = path.Out }](s: S): AnyComposition = new AnyComposition {
+  // def map[F <: AnyPath { type In = path.OutT }](f: F): Map[] = new AnyMap {
 
-    type First = path.type
-    val first = path: path.type
-    type Second = S
-    val second = s
-  }
+  //   type PrevPath = path.type
+  //   val prevPath = path: path.type
 
-  def map[F <: AnyPath { type In = path.OutT }](f: F): AnyMap = new AnyMap {
-
-    type PrevPath = path.type
-    val prevPath = path: path.type
-
-    type MappedPath = F
-    val mappedPath = f
-  }
+  //   type MappedPath = F
+  //   val mappedPath = f
+  // }
 }
 
-class Path[
+abstract class Path[
   I <: AnyLabelType,
   InC0 <: AnyConstructor, 
   O <: AnyLabelType,
@@ -63,119 +56,89 @@ extends AnyPath {
 }
 
 /* a composition of other paths */
-trait AnyComposition extends AnyPath {
+trait AnyComposition extends AnyPath { comp =>
 
-  type First <: AnyPath
+  type First <: AnyPath //{ type Out = Middle }
   val  first: First
 
-  type Second <: AnyPath { type In = first.Out }
+  type Second <: AnyPath //{ type In = Middle }
   val  second: Second
+}
 
-  type InT = first.InT
+case class Composition[
+  F <: AnyPath, 
+  G <: AnyPath { type In = F#Out }
+](val first: F, val second: G) extends AnyComposition {
+
+  type First = F
+  type Second = G
+
+  type InT = First#InT
   val inT = first.inT
-  type InC = first.InC
+  type InC = First#InC
   val inC = first.inC
-  
-  type OutT = second.OutT
-  val outT = second.outT
-  type OutC = second.OutC
-  val outC = second.outC
+
+  type In = First#In
+  val in = first.in
+
+  type OutT = Second#OutT
+  val outT = second.outT 
+  type OutC = Second#OutC
+  val outC = second.outC//: second.outC.type
+  type Out = Second#Out
+  val out = second.out
+
+  def evalOn[I,X,O](input: I LabeledBy In)(implicit
+    evalComp: EvalComposition[I,First,Second,X,O]
+  ): O LabeledBy Out = {
+
+    evalComp(this)(input)
+  }
 }
 
 /*
 this represents mapping a Path over a container; the path should have InT/OutT matching what the container wraps.
-
-This wraps two different paths
-
-1. the first path 
 */
 trait AnyMap extends AnyPath {
 
+  // TODO add stuff from map
   type PrevPath <: AnyPath
   val prevPath: PrevPath
   // the path being mapped should have as In the wrapped type
-  type MappedPath <: AnyPath { type In = prevPath.OutT }
+  type MappedPath <: AnyPath //{ type In = PrevPath#OutT }
   val mappedPath: MappedPath
-
-  type InT = prevPath.InT
-  val inT = prevPath.inT
-  type InC = prevPath.InC
-  val inC = prevPath.inC
-
-  type OutT = mappedPath.Out
-  val outT = mappedPath.out
-  type OutC = prevPath.OutC
-  val outC = prevPath.outC
 }
 
+case class map[P <: AnyPath, M <: AnyPath { type In = P#OutT }](val prevPath: P, val mappedPath: M) extends AnyMap {
 
-// trait AnyMapExactlyOne extends AnyPath { memap =>
+  type PrevPath = P
+  type MappedPath = M
 
-//   // the container is exactlyOne
-//   type InC[X <: AnyLabelType] = exactlyOne[X]
+  type InT = PrevPath#InT
+  val inT: InT = prevPath.inT
+  type InC = PrevPath#InC
+  val inC: InC = prevPath.inC
+  type In = PrevPath#In
+  val in: In = prevPath.in
 
-//   // the path being mapped should have as In the wrapped type
-//   type MappedPath <: AnyPath { type In = exactlyOne[memap.InT] }
-//   val mappedPath: MappedPath
+  type OutT = MappedPath#Out
+  val outT: OutT = mappedPath.out
+  type OutC = PrevPath#OutC
+  val outC = prevPath.outC
 
-//   type OutT = mappedPath.Out
-//   val outT = mappedPath.out
-//   type OutC[X <: AnyLabelType] = exactlyOne[X]
-//   // type Out = exactlyOne[MappedPath#Out]
-//   val out = exactlyOne(mappedPath.out)
-// }
-
-/*
-  here we need
-
-  1. the container value
-  2. the path that is being mapped
-*/
-// abstract class MapExactlyOne[X0 <: AnyLabelType](val in: exactlyOne[X0]) extends AnyMapExactlyOne {
-
-//   type InT = X0
-//   val inT = in.of
-// }
+  type Out = PrevPath#OutC#C[MappedPath#Out]
+  val out: Out = prevPath.outC(mappedPath.out)
+}
 
 object AnyPath {
 
-  implicit def pathOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
-
-  // implicit def mapExactlyOneOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](p: P)
-  // : exactlyOneMapOps[P] = exactlyOneMapOps[P](p)
+  implicit def pathOps[T <: AnyPath](t: T) = PathOps(t)
 }
 
-class PathOps[F <: AnyPath](val f: F) {
+case class PathOps[P <: AnyPath](val p: P) {
 
   /* Just a synonym for composition */
-  def >=>[S <: AnyPath { type In = f.Out }](s: S): AnyComposition = new AnyComposition {
+  def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P,S] = Composition(p,s)
 
-    type First = f.type
-    val first = f: f.type
-    type Second = S
-    val second = s
-  }
-
-  def fmap[G <: AnyPath { type In = f.OutT }](g: G): AnyMap = new AnyMap {
-
-    type PrevPath = f.type
-    val prevPath = f: f.type
-
-    type MappedPath = G
-    val mappedPath = g
-  }
-
-  // def evalOn[I, O](i: I LabeledBy F#InT)
-  //   (implicit 
-  //     ev: EvalPath[I, F, O]
-  //   ): O LabeledBy F#Out = ev(i, t)
+  def map[G <: AnyPath { type In = P#OutT }](g: G): map[P,G] = ohnosequences.scarph.map[P,G](p,g)
 }
-
-// case class exactlyOneMapOps[P <: AnyPath { type OutC[X <: AnyLabelType] = exactlyOne[X] }](val p: P) {
-
-//   def map[F <: AnyPath { type In = exactlyOne[p.OutT] }](f: F): MapExactlyOne[p.OutT] = new MapExactlyOne(p.out) {
-
-//     type MappedPath = F
-//     val mappedPath = f
-//   }
-// }

@@ -22,15 +22,35 @@ object titan {
   //   def apply(in: In): Out = getP.property( in.value.getProperty[P#Raw](getP.property.label) )
   // }
 
-  case class TitanEvalSource[E <: AnyEdgeType]() extends EvalSource[TitanEdge, E, TitanVertex] {
+  implicit def evalGetSource[E <: AnyEdgeType]: EvalSource[TitanEdge, E, TitanVertex] = 
+    new EvalSource[TitanEdge, E, TitanVertex] {
 
-    override def apply(path: src[E])(in: InVal LabeledBy path.In): OutVal LabeledBy path.Out = {
+      override def apply(path: src[E])(in: InVal LabeledBy path.In): TitanVertex LabeledBy src[E]#Out = {
 
-      new (TitanVertex LabeledBy path.edge.Source)( in.value.getVertex(Direction.OUT) )
+        new (TitanVertex LabeledBy E#Source)( in.value.getVertex(Direction.OUT) )
+      }
     }
-  }
-  
-  implicit def evalGetSource[E <: AnyEdgeType]: TitanEvalSource[E] = TitanEvalSource[E]()
+
+  // compositions
+
+  implicit def evalComposition[
+    I, 
+    F <: AnyPath,
+    G <: AnyPath { type In = F#Out },
+    X, 
+    O
+  ](implicit
+    evFirst: EvalPathOn[I,F,X],
+    evSecond: EvalPathOn[X,G,O]
+  ): EvalComposition[I,F,G,X,O] = 
+    EvalComposition[I,F,G,X,O](evFirst,evSecond)
+
+    // override def apply(path: Composition[F,G])(in: I LabeledBy path.In): O LabeledBy Path#Out = {
+
+    //   val firstResult: X LabeledBy F#Out = evalFirst(path.first)(in)
+      
+    //   evalSecond(path.second)(firstResult)
+    // }
 
   // implicit def evalGetTarget[E <: AnyEdgeType]:
   //     EvalPath[TitanEdge, GetTarget[E], TitanVertex] =

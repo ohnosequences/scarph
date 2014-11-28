@@ -245,7 +245,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val alexey = g.vertex(user)(name)("@laughedelic")
     val kim = g.vertex(user)(name)("@evdokim")
     val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post = g.edge(posted)(time)("13.11.2012")
+    val post: TitanEdge LabeledBy posted.type = g.edge(posted)(time)("13.11.2012")
 
     /* Evaluating steps: */
     assert{ get(name).evalOn(edu) == name("@eparejatobes") }
@@ -254,8 +254,14 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
         ( (posted src) evalOn post ) == edu 
     }
 
-//     /* Composing steps: */
-//     val posterName = GetSource(posted) >=> GetProperty(name)
+    /* Composing steps: */
+    val posterName = src(posted) >=> get(name)
+    
+    val evComp = posterName.evalOn(post)
+    // val evComp = (  src(posted) >=> get(name)  ).evalOn(post)
+    assert{ 
+       evComp == name("@eparejatobes") 
+    }
 
 //     import AnyPath._, AnyVertexType._, AnyEdgeType._
 //     // oh yeah

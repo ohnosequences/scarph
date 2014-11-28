@@ -6,15 +6,21 @@ import AnyEvalPath._
 case class get[P <: AnyProp](val property: P) extends AnyPath {
 
   type Property = P
-  type InT = property.Owner
+  type InT = Property#Owner
   lazy val inT = property.owner
   type InC = ExactlyOne.type
   lazy val inC = ExactlyOne
+
+  type In = Property#Owner
+  lazy val in = property.owner
 
   type OutT = P
   lazy val outT = property
   type OutC = ExactlyOne.type
   lazy val outC = ExactlyOne
+
+  type Out = P
+  lazy val out = property
 
   def evalOn[I](input: I LabeledBy In)(implicit eval: EvalGet[I,P]): P#Raw LabeledBy Out = {
 
@@ -28,47 +34,63 @@ case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
   lazy val  inT = edge.target
   type InC = ExactlyOne.type
   lazy val inC = ExactlyOne
+  type In = edge.Target
+  lazy val in = edge.target
 
   type OutT = E
-  lazy val  outT = edge
-  type OutC = edge.InC
-  lazy val outC  = edge.inC
+  lazy val  outT: OutT = edge
+  type OutC = edge.inC.type
+  lazy val outC: OutC  = edge.inC
+  type Out = edge.inC.C[E]
+  lazy val out: Out = edge.inC(edge)
 }
 case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
-  type InT = edge.Target
+  type InT = E#Target
   lazy val inT = edge.target
   type InC = ExactlyOne.type
   lazy val inC = ExactlyOne
+  type In = E#Target
+  lazy val in = edge.target
 
-  type OutT = edge.Source
-  val  outT = edge.source
-  type OutC = edge.InC
-  val outC  = edge.inC
+  type OutT = E#Source
+  lazy val  outT: OutT = edge.source
+  type OutC = E#InC
+  lazy val outC: OutC = edge.inC
+  type Out = E#InC#C[E#Source]
+  lazy val out: Out = edge.inC(edge.source)
 }
 case class out[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
-  type InT = edge.Source
-  lazy val  inT = edge.source
+  type InT = E#Source
+  lazy val inT = edge.source
   type InC = ExactlyOne.type
   lazy val inC = ExactlyOne
+  type In = E#Source
+  lazy val in = edge.source
 
   type OutT = E
-  lazy val  outT = edge
-  type OutC = edge.OutC
-  lazy val outC  = edge.outC
+  lazy val outT: OutT = edge
+  type OutC = edge.outC.type
+  lazy val outC: OutC  = edge.outC
+  type Out = E#OutC#C[E]
+  lazy val out: Out = edge.outC(edge)
 }
 case class outV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
-  type InT = edge.Source
-  val  inT = edge.source
+  type InT = E#Source
+  lazy val  inT = edge.source
   type InC = ExactlyOne.type
-  val inC = ExactlyOne
+  lazy val inC = ExactlyOne
+  type In = E#Source
+  lazy val in: In = edge.source
 
-  type OutT = edge.Target
-  val  outT = edge.target
-  type OutC = edge.OutC
-  val outC  = edge.outC
+  type OutT = E#Target
+  lazy val  outT = edge.target
+  type OutC = E#OutC
+  lazy val outC: OutC  = edge.outC
+  type Out = E#OutC#C[E#Target]
+  lazy val out: Out = edge.outC(edge.target)
 }
 case class src[E <: AnyEdgeType](val edge: E) extends AnyPath {
 
@@ -76,28 +98,19 @@ case class src[E <: AnyEdgeType](val edge: E) extends AnyPath {
   lazy val inT = edge
   type InC = ExactlyOne.type
   lazy val inC = ExactlyOne
+  type In = E
+  lazy val in: In = edge
 
-  type OutT = edge.Source
+  type OutT = E#Source
   lazy val outT = edge.source
   type OutC = ExactlyOne.type
   lazy val outC = ExactlyOne
+  type Out = E#Source
+  lazy val out: Out = edge.source
 
-  // def evalOn[I,O](input: I LabeledBy In)(implicit eval: EvalSource[I,E,O]): O LabeledBy Out = {
-
-  //   eval(this)(input)
-  // }
-}
-
-object src {
-
-  implicit def srcOps[E <: AnyEdgeType](src: src[E]): sourceOps[E] = sourceOps(src)
-}
-
-case class sourceOps[E <: AnyEdgeType](src: src[E]) {
-
-  def evalOn[I,O](input: I LabeledBy src.In)(implicit eval: EvalSource[I,E,O]): O LabeledBy src.Out = {
-
-    eval(src)(input)
+  def evalOn[I,O](input: I LabeledBy In)(implicit eval: EvalSource[I,E,O]): O LabeledBy Out = {
+    
+    eval(this)(input)
   }
 }
 
@@ -107,11 +120,15 @@ case class target[E <: AnyEdgeType](val edge: E) extends AnyPath {
   lazy val inT = edge
   type InC = ExactlyOne.type
   lazy val inC = ExactlyOne
+  type In = E
+  lazy val in: In = edge
 
   type OutT = edge.Target
   lazy val outT = edge.target
   type OutC = ExactlyOne.type
   lazy val outC = ExactlyOne
+  type Out = edge.Target
+  lazy val out: Out = edge.target
 }
 
 /* This is just the same as `(GetInEdges(edge) >=> GetSource(edge))` in a query,

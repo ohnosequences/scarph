@@ -10,7 +10,7 @@ trait AnyConstructor {
 }
 object ExactlyOne extends AnyConstructor { 
 
-  type C[X <: AnyLabelType] = X
+  final type C[X <: AnyLabelType] = X
   def apply[Y <: AnyLabelType](y: Y): Y = y            
 }
 object OneOrNone extends AnyConstructor  { 

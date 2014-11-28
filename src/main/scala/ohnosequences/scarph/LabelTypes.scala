@@ -11,7 +11,7 @@ object AnyLabelType {
   implicit def labelTypeOps[T <: AnyLabelType](t: T): LabelTypeOps[T] = new LabelTypeOps[T](t)
 }
 
-class LabelTypeOps[T <: AnyLabelType](t: T) {
+class LabelTypeOps[ T <: AnyLabelType](t: T) {
 
   def apply[V](v: V): V LabeledBy T = new LabeledBy(v)
 }
