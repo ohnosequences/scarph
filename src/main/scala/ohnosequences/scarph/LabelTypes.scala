@@ -39,4 +39,3 @@ final class LabeledBy[V, T <: AnyLabelType](val value: V) extends AnyVal with La
   // NOTE: it may be confusing:
   override def toString = value.toString
 }
-

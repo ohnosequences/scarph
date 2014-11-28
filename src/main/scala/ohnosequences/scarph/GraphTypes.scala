@@ -133,13 +133,6 @@ final case class atLeastOne[T <: AnyLabelType](val of: T) extends Of[T] {
 
 
 
-
-
-
-
-
-
-
 // TODO: HList-like with bound on vertices, another for paths etc
 trait AnyPar extends AnyLabelType {
 
@@ -150,7 +143,24 @@ trait AnyPar extends AnyLabelType {
   val second: Second
 }
 
+trait AnyOr extends AnyLabelType {
+
+  type First <: AnyLabelType
+  val first: First
+
+  type Second <: AnyLabelType
+  val second: Second
+}
+
 case class ParV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyPar {
+
+  type First = F
+  type Second = S
+
+  val label = this.toString
+}
+
+case class OrV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyOr {
 
   type First = F
   type Second = S

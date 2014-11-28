@@ -23,15 +23,6 @@ trait AnyPath { path =>
 
   type Out <: AnyLabelType//<: OutC#C[OutT]
   val out: Out
-
-  // def map[F <: AnyPath { type In = path.OutT }](f: F): Map[] = new AnyMap {
-
-  //   type PrevPath = path.type
-  //   val prevPath = path: path.type
-
-  //   type MappedPath = F
-  //   val mappedPath = f
-  // }
 }
 
 abstract class Path[
@@ -141,4 +132,9 @@ case class PathOps[P <: AnyPath](val p: P) {
   def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P,S] = Composition(p,s)
 
   def map[G <: AnyPath { type In = P#OutT }](g: G): map[P,G] = ohnosequences.scarph.map[P,G](p,g)
+
+  import combinators._
+
+  def ⨁[G <: AnyPath](g: G): (P ⨁ G) = Or(p,g)
+  def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
 }

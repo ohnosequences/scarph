@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._
+import ohnosequences.scarph._, combinators._
 import ohnosequences.cosas._, AnyTypeSet._
 
 object TwitterSchema {
@@ -31,10 +31,12 @@ object TwitterSchema {
   val asdfadf = inV(follows) map inV(follows)
   val asdfadf2 = inV(follows) map inV(follows)
 
-  // val ohno = Par(
-  //                 inV(follows) map inV(follows),
-  //                 target(follows) >=> in(follows)
-  //               )
+  val ohno = Par(
+                  inV(follows) map inV(follows),
+                  target(follows) >=> in(follows)
+                )
+
+  val sfdsd = ((inV(follows) map inV(follows)) ⨂ (target(follows) >=> in(follows))) ⨁ (inV(follows) map outV(posted))
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)
