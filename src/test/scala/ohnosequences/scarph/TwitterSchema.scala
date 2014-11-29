@@ -37,6 +37,8 @@ object TwitterSchema {
                 )
 
   val sfdsd = ((inV(follows) map inV(follows)) ⨂ (target(follows) >=> in(follows))) ⨁ (inV(follows) map outV(posted))
+
+  val yurj = rev( target(follows) >=> in(follows) )
 }
 
 //   case object UserNameIx extends CompositeIndex(User, name)

@@ -4,7 +4,13 @@ object combinators {
 
   type ⨁[F <: AnyPath, S <: AnyPath] = Or[F,S]
   type ⨂[F <: AnyPath, S <: AnyPath] = Par[F,S]
-  type rev[P <: AnyPath]
+  type rev[P <: AnyPath] = Rev[P]
+
+  object rev {
+    
+     def apply[P <: AnyPath](p: P): rev[P] = Rev(p)
+  }
+ 
 }
 
 trait AnyParPath extends AnyPath {

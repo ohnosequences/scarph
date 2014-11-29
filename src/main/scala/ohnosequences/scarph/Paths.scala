@@ -25,27 +25,6 @@ trait AnyPath { path =>
   val out: Out
 }
 
-abstract class Path[
-  I <: AnyLabelType,
-  InC0 <: AnyConstructor, 
-  O <: AnyLabelType,
-  OutC0 <: AnyConstructor
-]
-(
-  val inC: InC0,
-  val inT: I,
-  val outC: OutC0,
-  val outT: O
-)
-extends AnyPath {
-
-  type InT = I
-  type InC = InC0
-
-  type OutT = O
-  type OutC = OutC0
-}
-
 /* a composition of other paths */
 trait AnyComposition extends AnyPath { comp =>
 
@@ -65,20 +44,22 @@ case class Composition[
   type Second = G
 
   type InT = First#InT
-  val inT = first.inT
+  lazy val inT = first.inT
   type InC = First#InC
-  val inC = first.inC
+  lazy val inC = first.inC
 
   type In = First#In
-  val in = first.in
+  lazy val in = first.in
 
   type OutT = Second#OutT
-  val outT = second.outT 
+  lazy val outT = second.outT 
   type OutC = Second#OutC
-  val outC = second.outC//: second.outC.type
+  lazy val outC = second.outC
   type Out = Second#Out
-  val out = second.out
+  lazy val out = second.out
 
+  // TODO if we add a type member with the specific evaluator for this type
+  // we could make this method generic
   def evalOn[I,X,O](input: I LabeledBy In)(implicit
     evalComp: EvalComposition[I,First,Second,X,O]
   ): O LabeledBy Out = {
@@ -106,19 +87,19 @@ case class map[P <: AnyPath, M <: AnyPath { type In = P#OutT }](val prevPath: P,
   type MappedPath = M
 
   type InT = PrevPath#InT
-  val inT: InT = prevPath.inT
+  lazy val inT: InT = prevPath.inT
   type InC = PrevPath#InC
-  val inC: InC = prevPath.inC
+  lazy val inC: InC = prevPath.inC
   type In = PrevPath#In
-  val in: In = prevPath.in
+  lazy val in: In = prevPath.in
 
   type OutT = MappedPath#Out
-  val outT: OutT = mappedPath.out
+  lazy val outT: OutT = mappedPath.out
   type OutC = PrevPath#OutC
-  val outC = prevPath.outC
+  lazy val outC = prevPath.outC
 
   type Out = PrevPath#OutC#C[MappedPath#Out]
-  val out: Out = prevPath.outC(mappedPath.out)
+  lazy val out: Out = prevPath.outC(mappedPath.out)
 }
 
 object AnyPath {
@@ -128,13 +109,14 @@ object AnyPath {
 
 case class PathOps[P <: AnyPath](val p: P) {
 
-  /* Just a synonym for composition */
   def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P,S] = Composition(p,s)
-
+  // TODO: add witnesses for composition to workaround P <:!< P { type In = P#In }
+  // def ∘[F <: AnyPath { type Out = P#In }](f: F): Composition[F,P] 
   def map[G <: AnyPath { type In = P#OutT }](g: G): map[P,G] = ohnosequences.scarph.map[P,G](p,g)
 
   import combinators._
 
   def ⨁[G <: AnyPath](g: G): (P ⨁ G) = Or(p,g)
   def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
+  def rev: rev[P] = Rev(p) 
 }
