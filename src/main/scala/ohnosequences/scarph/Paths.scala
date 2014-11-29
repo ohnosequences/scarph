@@ -28,10 +28,10 @@ trait AnyPath { path =>
 /* a composition of other paths */
 trait AnyComposition extends AnyPath { comp =>
 
-  type First <: AnyPath //{ type Out = Middle }
+  type First <: AnyPath
   val  first: First
 
-  type Second <: AnyPath //{ type In = Middle }
+  type Second <: AnyPath
   val  second: Second
 }
 
@@ -58,8 +58,6 @@ case class Composition[
   type Out = Second#Out
   lazy val out = second.out
 
-  // TODO if we add a type member with the specific evaluator for this type
-  // we could make this method generic
   def evalOn[I,X,O](input: I LabeledBy In)(implicit
     evalComp: EvalComposition[I,First,Second,X,O]
   ): O LabeledBy Out = {

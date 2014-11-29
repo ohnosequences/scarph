@@ -7,6 +7,7 @@ trait AnyElementType extends AnyLabelType
   Property is assigned to one element type and has a raw representation 
   I'm tempted to make this a kind of edge
 */
+// TODO: edge-like!
 trait AnyProp extends AnyLabelType {
 
   type Raw

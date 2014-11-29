@@ -18,29 +18,22 @@ trait AnyEvalPathOn[I, O] extends AnyEvalPath {
 
   type InVal = I
   type OutVal = O
-
-  // override def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out
 }
 
 trait EvalPathOn[I,P <: AnyPath,O] extends AnyEvalPathOn[I,O] {
 
   type Path = P
-
-  // override def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out
 }
 
 object AnyEvalPath {
 
-  // helpers
-
   trait EvalGet[I, P <: AnyProp] extends EvalPathOn[I, get[P], P#Raw] {
 
-    override def apply(path: get[P])(in: I LabeledBy Path#In): OutVal LabeledBy get[P]#Out
+    def apply(path: get[P])(in: I LabeledBy Path#In): OutVal LabeledBy get[P]#Out
   }
   trait EvalSource[I, E <: AnyEdgeType, O] extends EvalPathOn[I, src[E], O] {
 
-    // I need this here, I don't know why
-    override def apply(path: src[E])(in: I LabeledBy Path#In): O LabeledBy src[E]#Out
+    def apply(path: src[E])(in: I LabeledBy Path#In): O LabeledBy src[E]#Out
   }
 
   trait AnyEvalComposition[
@@ -55,7 +48,7 @@ object AnyEvalPath {
    val evalFirst:  EvalPathOn[I,F,X]
    val evalSecond: EvalPathOn[X,G,O]
 
-    override def apply(path: Composition[F,G])(in: I LabeledBy Composition[F,G]#In): O LabeledBy Composition[F,G]#Out = {
+    def apply(path: Composition[F,G])(in: I LabeledBy Composition[F,G]#In): O LabeledBy Composition[F,G]#Out = {
 
       val evFirst: EvalPathOn[I,F,X] = evalFirst
       val firstResult = evFirst(path.first)(in)
@@ -70,15 +63,7 @@ object AnyEvalPath {
     G <: AnyPath { type In = F#Out },
     X, 
     O
-  ](val evalFirst: EvalPathOn[I,F,X], val evalSecond: EvalPathOn[X,G,O]) extends AnyEvalComposition[I,F,G,X,O] {
-
-    override def apply(path: Composition[F,G])(in: I LabeledBy Composition[F,G]#In): O LabeledBy Composition[F,G]#Out = {
-
-      val firstResult = evalFirst(path.first)(in)
-      
-      evalSecond(path.second)(firstResult)
-    }
-  }
+  ](val evalFirst: EvalPathOn[I,F,X], val evalSecond: EvalPathOn[X,G,O]) extends AnyEvalComposition[I,F,G,X,O] {}
 
   // TODO: how?
   // we need to have a map between containers and labels, so that each container is assigned a LabeledBy
@@ -114,6 +99,6 @@ object AnyEvalPath {
   // each path knows how to reverse itself and return something of type rev
   case class EvalRev[I,P <: AnyPath,O]() extends EvalPathOn[I,rev[P],O] {
 
-    override def apply(path: rev[P])(in: I LabeledBy rev[P]#In): O LabeledBy rev[P]#Out = ???
+    def apply(path: rev[P])(in: I LabeledBy rev[P]#In): O LabeledBy rev[P]#Out = ???
   }
 }
