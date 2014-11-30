@@ -72,7 +72,7 @@ object AnyEvalPath {
     P <: AnyPath, M <: AnyPath { type In = P#OutT },
     O, PO, PMO
   ](val evalPrevPath: EvalPathOn[I, P, PO], val evalMappedPath: EvalPathOn[O, M, PMO]) 
-  extends EvalPathOn[I, map[P, M], PMO] {
+  extends EvalPathOn[I, Map[P, M], PMO] {
 
     def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out = ???
   }
