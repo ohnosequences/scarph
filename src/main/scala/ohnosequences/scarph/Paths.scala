@@ -24,6 +24,7 @@ trait AnyPath { path =>
   type Out <: AnyLabelType//<: OutC#C[OutT]
   val  out: Out
 
+  // we will need to forget about these bounds at some point
   type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
 }
 
@@ -67,6 +68,20 @@ case class Composition[
 
   //   evalComp(this)(input)
   // }
+}
+object Composition {
+
+  implicit def compOps[F <: AnyPath, G <: AnyPath {type In = F#Out}](comp: Composition[F,G]): CompositionOps[F,G] = 
+    CompositionOps(comp)
+}
+case class CompositionOps[F <: AnyPath, G <: AnyPath { type In = F#Out}](comp: Composition[F,G]) {
+
+  def evalOn[I,X,O](input: I LabeledBy Composition[F,G]#In)(implicit
+    evalComp: EvalComposition[I,F,G,X,O]
+  ): O LabeledBy Composition[F,G]#Out = {
+
+    evalComp(comp)(input)
+  }
 }
 
 /*
@@ -122,5 +137,5 @@ case class PathOps[P <: AnyPath](val p: P) {
 
   def ⨁[G <: AnyPath](g: G): (P ⨁ G) = Or(p,g)
   def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
-  def rev: rev[P] = Rev(p) 
+  def rev: rev[P] = Rev(p)
 }

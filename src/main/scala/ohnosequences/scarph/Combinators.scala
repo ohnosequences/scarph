@@ -18,6 +18,21 @@ trait AnyParPath extends AnyPath {
   type Second <: AnyPath
   val  second: Second
 
+  type InT <: ParV[First#In, Second#In]
+  type InC <: ExactlyOne.type
+  type In <: ParV[First#In, Second#In]
+
+  type OutT <: ParV[First#Out, Second#Out]
+  type OutC <: ExactlyOne.type
+  type Out <: ParV[First#Out, Second#Out]
+}
+
+case class Par[F <: AnyPath, S <: AnyPath]
+  (val first: F, val second: S) extends AnyParPath {
+
+  type First = F
+  type Second = S
+
   type InT = ParV[First#In, Second#In]
   lazy val inT: InT = ParV(first.in, second.in)
   type InC = ExactlyOne.type
@@ -31,13 +46,8 @@ trait AnyParPath extends AnyPath {
   lazy val outC: OutC = ExactlyOne
   type Out = ParV[First#Out, Second#Out]
   lazy val out: Out = outT
-}
 
-case class Par[F <: AnyPath, S <: AnyPath]
-  (val first: F, val second: S) extends AnyParPath {
-
-  type First = F
-  type Second = S
+  type Rev <: Par[F#Rev, S#Rev] // ParV[First#Rev#In <: First#Out, Second#Rev#In <: Second#Out]
 }
 
 
