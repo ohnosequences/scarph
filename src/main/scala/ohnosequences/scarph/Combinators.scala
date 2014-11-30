@@ -92,8 +92,11 @@ trait AnyRevPath extends AnyPath {
   lazy val out: Out = original.in
 }
 
-case class Rev[P <: AnyPath]
-  (val original: P) extends AnyRevPath {
+trait RevPath[P <: AnyPath] extends AnyRevPath {
 
-  type Original = P 
+  type Original = P
+}
+
+case class Rev[P <: AnyPath]
+  (val original: P) extends RevPath[P] {
 }

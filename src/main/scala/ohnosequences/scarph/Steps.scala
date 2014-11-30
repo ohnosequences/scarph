@@ -43,6 +43,8 @@ case class in[E <: AnyEdgeType](val edge: E) extends AnyPath {
   lazy val outC: OutC  = edge.inC
   type Out = edge.inC.C[E]
   lazy val out: Out = edge.inC(edge)
+
+  // type Rev =? Map source
 }
 case class inV[E <: AnyEdgeType](val edge: E) extends AnyPath {
 

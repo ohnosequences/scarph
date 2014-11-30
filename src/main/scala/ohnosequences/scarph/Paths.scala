@@ -23,6 +23,8 @@ trait AnyPath { path =>
 
   type Out <: AnyLabelType//<: OutC#C[OutT]
   val  out: Out
+
+  type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
 }
 
 /* a composition of other paths */
@@ -38,7 +40,6 @@ trait AnyComposition extends AnyPath { comp =>
   type In = First#In
   lazy val in = first.in
 
-
   type Second <: AnyPath
   val  second: Second
 
@@ -51,19 +52,21 @@ trait AnyComposition extends AnyPath { comp =>
 }
 
 case class Composition[
-  F <: AnyPath, 
-  G <: AnyPath { type In = F#Out }
+  F <: AnyPath,
+  G <: AnyPath //{ type In = F#Out }
 ](val first: F, val second: G) extends AnyComposition {
 
   type First = F
   type Second = G
 
-  def evalOn[I,X,O](input: I LabeledBy In)(implicit
-    evalComp: EvalComposition[I,First,Second,X,O]
-  ): O LabeledBy Out = {
+  type Rev = Composition[G#Rev, F#Rev]
 
-    evalComp(this)(input)
-  }
+  // def evalOn[I,X,O](input: I LabeledBy In)(implicit
+  //   evalComp: EvalComposition[I,First,Second,X,O]
+  // ): O LabeledBy Out = {
+
+  //   evalComp(this)(input)
+  // }
 }
 
 /*
