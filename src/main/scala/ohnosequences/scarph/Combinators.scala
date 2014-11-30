@@ -16,45 +16,45 @@ object combinators {
 trait AnyParPath extends AnyPath {
 
   type First <: AnyPath
-  val first: First
+  val  first: First
   type Second <: AnyPath
-  val second: Second
+  val  second: Second
 
   type InT <: ParV[First#In, Second#In]
-  val inT: InT
+  val  inT: InT
   type InC = ExactlyOne.type
   lazy val inC: InC = ExactlyOne 
   type In <: ParV[First#In, Second#In]
-  val in: In
+  val  in: In
 
   type OutT <: ParV[First#Out, Second#Out]
-  val outT: OutT
+  val  outT: OutT
   type OutC = ExactlyOne.type
   lazy val outC: OutC = ExactlyOne
   type Out <: ParV[First#Out, Second#Out]
-  val out: Out
+  val  out: Out
 }
 
 trait AnyOrPath extends AnyPath {
 
   type First <: AnyPath
-  val first: First
+  val  first: First
   type Second <: AnyPath
-  val second: Second
+  val  second: Second
 
   type InT <: OrV[First#In, Second#In]
-  val inT: InT
+  val  inT: InT
   type InC = ExactlyOne.type
   lazy val inC: InC = ExactlyOne 
   type In <: OrV[First#In, Second#In]
-  val in: In
+  val  in: In
 
   type OutT <: OrV[First#Out, Second#Out]
-  val outT: OutT
+  val  outT: OutT
   type OutC = ExactlyOne.type
   lazy val outC: OutC = ExactlyOne
   type Out <: OrV[First#Out, Second#Out]
-  val out: Out
+  val  out: Out
 }
 
 case class Par[F <: AnyPath, S <: AnyPath](val first: F, val second: S) extends AnyParPath {

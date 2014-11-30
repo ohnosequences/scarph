@@ -39,13 +39,13 @@ trait AnyEdgeType extends AnyElementType {
 
   /* this is the arity for incoming edges */
   type InC <: AnyConstructor
-  val inC: InC
+  val  inC: InC
 
   type Target <: AnyVertexType
   val  target: Target
 
   type OutC <: AnyConstructor
-  val outC: OutC
+  val  outC: OutC
 }
 
 class EdgeType[
@@ -80,55 +80,63 @@ case class EdgeTypeOps[E <: AnyEdgeType](edge: E) {
   def src: src[E] = ohnosequences.scarph.src(edge)
 }
 
+
 trait AnyConstructor {
 
   type C[X <: AnyLabelType] <: AnyLabelType
-
   def apply[Y <: AnyLabelType](y: Y): C[Y]
 }
+
 object ExactlyOne extends AnyConstructor { 
 
   final type C[X <: AnyLabelType] = X
   def apply[Y <: AnyLabelType](y: Y): Y = y            
 }
+
 object OneOrNone extends AnyConstructor  { 
 
-  type C[X <: AnyLabelType] = oneOrNone[X]  
-  def apply[Y <: AnyLabelType](y: Y) = oneOrNone(y)
+  type C[X <: AnyLabelType] = OneOrNoneOf[X]  
+  def apply[Y <: AnyLabelType](y: Y) = OneOrNoneOf(y)
 }
+
 object ManyOrNone extends AnyConstructor { 
 
-  type C[X <: AnyLabelType] = manyOrNone[X] 
-  def apply[Y <: AnyLabelType](y: Y) = manyOrNone(y)
+  type C[X <: AnyLabelType] = ManyOrNoneOf[X] 
+  def apply[Y <: AnyLabelType](y: Y) = ManyOrNoneOf(y)
 }
+
 object AtLeastOne extends AnyConstructor { 
 
-  type C[X <: AnyLabelType] = atLeastOne[X] 
-  def apply[Y <: AnyLabelType](y: Y) = atLeastOne(y)
+  type C[X <: AnyLabelType] = AtLeastOneOf[X] 
+  def apply[Y <: AnyLabelType](y: Y) = AtLeastOneOf(y)
 }
+
 
 trait AnyContainer extends AnyLabelType {
 
   type Of <: AnyLabelType
-  val of: Of
+  val  of: Of
 }
 
 trait Of[T <: AnyLabelType] extends AnyContainer {
 
   type Of = T
 }
-final case class oneOrNone[T <: AnyLabelType](val of: T) extends Of[T] {
 
-  lazy val label = s"oneOrNone(${of.label})"
+
+final case class OneOrNoneOf[T <: AnyLabelType](val of: T) extends Of[T] {
+
+  lazy val label = s"OneOrNone(${of.label})"
 }
 
-final case class manyOrNone[T <: AnyLabelType](val of: T) extends Of[T] {
+final case class ManyOrNoneOf[T <: AnyLabelType](val of: T) extends Of[T] {
 
-  lazy val label = s"manyOrNone(${of.label})"
+  lazy val label = s"ManyOrNone(${of.label})"
 }
-final case class atLeastOne[T <: AnyLabelType](val of: T) extends Of[T] {
+
+final case class AtLeastOneOf[T <: AnyLabelType](val of: T) extends Of[T] {
   
-  lazy val label = s"atLeastOne(${of.label})"
+  lazy val label = s"AtLeastOne(${of.label})"
 }
 
 
@@ -138,19 +146,19 @@ final case class atLeastOne[T <: AnyLabelType](val of: T) extends Of[T] {
 trait AnyPar extends AnyLabelType {
 
   type First <: AnyLabelType
-  val first: First
+  val  first: First
 
   type Second <: AnyLabelType
-  val second: Second
+  val  second: Second
 }
 
 trait AnyOr extends AnyLabelType {
 
   type First <: AnyLabelType
-  val first: First
+  val  first: First
 
   type Second <: AnyLabelType
-  val second: Second
+  val  second: Second
 }
 
 case class ParV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyPar {

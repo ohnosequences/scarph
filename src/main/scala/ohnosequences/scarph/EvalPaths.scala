@@ -6,7 +6,7 @@ import combinators._
 
 trait AnyEvalPath {
 
-  type Path  <: AnyPath
+  type Path <: AnyPath
 
   type InVal
   type OutVal
@@ -20,7 +20,7 @@ trait AnyEvalPathOn[I, O] extends AnyEvalPath {
   type OutVal = O
 }
 
-trait EvalPathOn[I,P <: AnyPath,O] extends AnyEvalPathOn[I,O] {
+trait EvalPathOn[I, P <: AnyPath, O] extends AnyEvalPathOn[I, O] {
 
   type Path = P
 }
@@ -40,30 +40,27 @@ object AnyEvalPath {
     I, 
     F <: AnyPath,
     G <: AnyPath { type In = F#Out },
-    X, 
-    O
-  ] extends EvalPathOn[I,Composition[F,G],O] {
+    X, O
+  ] extends EvalPathOn[I, Composition[F, G], O] {
 
-    // // to be provided implicitly; maybe add types
-   val evalFirst:  EvalPathOn[I,F,X]
-   val evalSecond: EvalPathOn[X,G,O]
+    // to be provided implicitly; maybe add types
+    val evalFirst:  EvalPathOn[I, F, X]
+    val evalSecond: EvalPathOn[X, G, O]
 
-    def apply(path: Composition[F,G])(in: I LabeledBy Composition[F,G]#In): O LabeledBy Composition[F,G]#Out = {
+    def apply(path: Composition[F, G])(in: I LabeledBy Composition[F, G]#In): O LabeledBy Composition[F, G]#Out = {
 
-      val evFirst: EvalPathOn[I,F,X] = evalFirst
-      val firstResult = evFirst(path.first)(in)
-      
+      val firstResult = evalFirst(path.first)(in)
       evalSecond(path.second)(firstResult)
     }
   }
 
   case class EvalComposition[
-    I, 
+    I,
     F <: AnyPath,
     G <: AnyPath { type In = F#Out },
-    X, 
-    O
-  ](val evalFirst: EvalPathOn[I,F,X], val evalSecond: EvalPathOn[X,G,O]) extends AnyEvalComposition[I,F,G,X,O] {}
+    X, O
+  ](val evalFirst: EvalPathOn[I, F, X], val evalSecond: EvalPathOn[X, G, O]) 
+  extends AnyEvalComposition[I, F, G, X, O] {}
 
   // TODO: how?
   // we need to have a map between containers and labels, so that each container is assigned a LabeledBy
@@ -73,23 +70,24 @@ object AnyEvalPath {
   case class EvalMap[
     I,
     P <: AnyPath, M <: AnyPath { type In = P#OutT },
-    O,PO,PMO
-  ](val evalPrevPath: EvalPathOn[I,P,PO], val evalMappedPath: EvalPathOn[O,M,PMO]) 
-  extends EvalPathOn[I,map[P,M],PMO] {
+    O, PO, PMO
+  ](val evalPrevPath: EvalPathOn[I, P, PO], val evalMappedPath: EvalPathOn[O, M, PMO]) 
+  extends EvalPathOn[I, map[P, M], PMO] {
 
     def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out = ???
   }
 
   // TODO: how?
-  // we need to know something about how to go from labelings on two things to a labeling of one
+  // we need to know something about how to go form labelings on two things to a labeling of one
   // maybe it could be fixed so that I,O are derived from FI,SI and FO,SO respectively
   // for our use, adding to labels ops for doing so sounds reasonable (making LabeledBy lax monoidal)
   // all this applies to Or, but there is a bit more complicated due to the unnaturalness of coproducts in Scala
   case class EvalPar[
-  I,FI,SI,
-  F <: AnyPath, S <: AnyPath,
-  O,FO,SO
-  ](val evalFirst: EvalPathOn[FI,F,FO], val evalSecond: EvalPathOn[SI,S,SO]) extends EvalPathOn[I,Par[F,S],O] {
+    I, FI, SI,
+    F <: AnyPath, S <: AnyPath,
+    O, FO, SO
+  ](val evalFirst: EvalPathOn[FI, F, FO], val evalSecond: EvalPathOn[SI, S, SO])
+  extends EvalPathOn[I, Par[F, S], O] {
 
     def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out = ???
   }
@@ -97,7 +95,7 @@ object AnyEvalPath {
   // TODO: how??!?!
   // The only possible way looks to be adding rev as a primitive so to say
   // each path knows how to reverse itself and return something of type rev
-  case class EvalRev[I,P <: AnyPath,O]() extends EvalPathOn[I,rev[P],O] {
+  case class EvalRev[I, P <: AnyPath, O]() extends EvalPathOn[I, rev[P], O] {
 
     def apply(path: rev[P])(in: I LabeledBy rev[P]#In): O LabeledBy rev[P]#Out = ???
   }

@@ -40,10 +40,10 @@ object titan {
     X, 
     O
   ](implicit
-    evFirst: EvalPathOn[I,F,X],
+    evFirst:  EvalPathOn[I,F,X],
     evSecond: EvalPathOn[X,G,O]
   ): EvalComposition[I,F,G,X,O] = 
-    EvalComposition[I,F,G,X,O](evFirst,evSecond)
+     EvalComposition[I,F,G,X,O](evFirst,evSecond)
 
     // override def apply(path: Composition[F,G])(in: I LabeledBy path.In): O LabeledBy Path#Out = {
 

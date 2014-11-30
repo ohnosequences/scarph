@@ -11,18 +11,18 @@ trait AnyPath { path =>
   val  inT: InT
   /* the container used */
   type InC <: AnyConstructor
-  val inC: InC
+  val  inC: InC
 
   type In <: AnyLabelType//<: InC#C[InT]
-  val in: In
+  val  in: In
 
   type OutT <: AnyLabelType
   val  outT: OutT
   type OutC <: AnyConstructor
-  val outC: OutC
+  val  outC: OutC
 
   type Out <: AnyLabelType//<: OutC#C[OutT]
-  val out: Out
+  val  out: Out
 }
 
 /* a composition of other paths */
@@ -73,10 +73,10 @@ trait AnyMap extends AnyPath {
 
   // TODO add stuff from map
   type PrevPath <: AnyPath
-  val prevPath: PrevPath
+  val  prevPath: PrevPath
   // the path being mapped should have as In the wrapped type
   type MappedPath <: AnyPath //{ type In = PrevPath#OutT }
-  val mappedPath: MappedPath
+  val  mappedPath: MappedPath
 }
 
 case class map[P <: AnyPath, M <: AnyPath { type In = P#OutT }](val prevPath: P, val mappedPath: M) extends AnyMap {

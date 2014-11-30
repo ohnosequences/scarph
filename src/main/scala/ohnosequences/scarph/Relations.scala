@@ -4,9 +4,9 @@ package ohnosequences.scarph
 trait AnyRelation {
 
   type First <: AnyPath
-  val first: First
+  val  first: First
   type Second <: AnyPath
-  val second: Second
+  val  second: Second
 }
 
 // TODO: proofs whatever for same In and Out
