@@ -19,9 +19,9 @@ class Eq[F <: AnyPath, S <: AnyPath](val first: F, val second: S) extends AnyRel
 object Eq {
 
   // for example
-  case class inVEqinCompSrc[E <: AnyEdgeType](val edge: E) 
-    extends Eq(
-                inV(edge),
-                in(edge) map src(edge)
-              )
+  // case class inVEqinCompSrc[E <: AnyEdgeType](val edge: E) 
+  //   extends Eq(
+  //               inV(edge),
+  //               in(edge) map src(edge)
+  //             )
 }

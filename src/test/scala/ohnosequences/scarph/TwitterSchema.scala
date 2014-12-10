@@ -1,9 +1,9 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, combinators._
+import ohnosequences.scarph._, steps._, combinators._
 import ohnosequences.cosas._, AnyTypeSet._
 
-object TwitterSchema {
+object Twitter {
 
   case object user extends VertexType
   case object name extends PropertyOf(user) { type Raw = String }
@@ -20,35 +20,58 @@ object TwitterSchema {
   case object follows extends EdgeType(ManyOrNone, user, ManyOrNone, user)
   case object liked extends EdgeType(ManyOrNone, user, ManyOrNone, tweet) 
 
-  // stupid queries
-  val uh = inV(follows) map get(name)
-  val zz = target(follows) >=> in(follows)
-  val altSyntax = target(follows) >=> in(follows)
-  val ups = in(posted)
-  // this is clunky right now, but it works
-  val uuuuh = in(posted) map target(posted)
+  // case object posted extends EdgeType(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone]
+  // case object time extends PropertyOf(posted) { type Raw = String }
+  // case object url  extends PropertyOf(posted) { type Raw = String }
 
-  val asdfadf = inV(follows) map inV(follows)
-  val asdfadf2 = inV(follows) map inV(follows)
+  // case object follows extends EdgeType(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
-  val ohno = Par(
-                  inV(follows) map inV(follows),
-                  target(follows) >=> in(follows)
-                )
+  // case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
-  val sfdsd = ((inV(follows) map inV(follows)) ⨂ (target(follows) >=> in(follows))) ⨁ (inV(follows) map outV(posted))
+  // simple indexes
+  case object userByName extends SimpleIndex(user, name)
+  case object tweetByText extends SimpleIndex(tweet, text)
+  case object postedByTime extends SimpleIndex(posted, time)
 
-  val yurj = rev( target(follows) >=> in(follows) )
+  // composite indexes
+  case object userByNameAndAge extends CompositeIndex(user, name :~: age :~: ∅)
+
+  // vertex-centric indexes
+  case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
+
+  val schema = Schema(label = "twitter",
+    properties = name :~: age :~: text :~: time :~: url :~: ∅,
+    vertexTypes =  user :~: tweet :~: ∅,
+    edgeTypes = posted :~: follows :~: liked :~: ∅,
+    indexes = 
+      userByName :~: userByNameAndAge :~:
+      tweetByText :~: 
+      postedByTime :~: 
+      postedByTimeAndUrlLocal :~: 
+      ∅
+  )
+
 }
 
-//   case object UserNameIx extends CompositeIndex(User, name)
-//   case object TweetTextIx extends CompositeIndex(Tweet, text)
-//   case object PostedTimeIx extends CompositeIndex(Posted, time)
+object StupidQueries {
+  import Twitter._
 
-//   val schemaType = SchemaType("twitter",
-//     vertexTypes = User :~: Tweet :~: ∅,
-//     edgeTypes = Posted :~: Follows :~: ∅,
-//     indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅
-//   )
+  val uh = InV(follows) map Get(name)
+  val zz = Target(follows) >=> InE(follows)
+  val altSyntax = Target(follows) >=> InE(follows)
+  val ups = InE(posted)
+  // this is clunky right now, but it works
+  val uuuuh = InE(posted) map Target(posted)
 
-// }
+  val asdfadf = InV(follows) map InV(follows)
+  val asdfadf2 = InV(follows) map InV(follows)
+
+  val ohno = Par(
+    InV(follows) map InV(follows),
+    Target(follows) >=> InE(follows)
+  )
+
+  val sfdsd = ((InV(follows) map InV(follows)) ⨂ (Target(follows) >=> InE(follows))) ⨁ (InV(follows) map OutV(posted))
+
+  val yurj = rev( Target(follows) >=> InE(follows) )
+}

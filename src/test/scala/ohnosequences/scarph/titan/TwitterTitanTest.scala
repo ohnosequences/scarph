@@ -11,220 +11,121 @@ import java.io.File
 
 import ohnosequences.cosas._
 
-import ohnosequences.scarph._
-import ohnosequences.scarph.test._, TwitterSchema._
-import ohnosequences.scarph.impl.titan._
+import ohnosequences.scarph._, steps._
+import ohnosequences.scarph.impl._, titan.schema._, titan.predicates._
+import ohnosequences.scarph.test._, Twitter._
 
 class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
 
   val graphLocation = new File("/tmp/titanTest")
   var g: TitanGraph = null
 
-  def createTitanTwitterInstance(g: TitanGraph): Unit = {
-
-    // g.createSchema(TwitterSchema.schemaType)
-
-    /* Adding things */
-    val edu = g.addVertexWithLabel(user.label)
-    edu.setProperty(name.label, "@eparejatobes")
-    edu.setProperty(age.label, 95)
-
-    val alexey = g.addVertexWithLabel(user.label)
-    alexey.setProperty(name.label, "@laughedelic")
-    alexey.setProperty(age.label, 5)
-
-    val kim = g.addVertexWithLabel(user.label)
-    kim.setProperty(name.label, "@evdokim")
-    kim.setProperty(age.label, 22)
-
-
-    // everybody follows everybody — boring "/
-    edu.addEdge(follows.label, alexey)
-    edu.addEdge(follows.label, kim)
-
-    alexey.addEdge(follows.label, edu)
-    alexey.addEdge(follows.label, kim)
-
-    kim.addEdge(follows.label, alexey)
-    kim.addEdge(follows.label, edu)
-
-
-    val eduTweet1 = g.addVertexWithLabel(tweet.label)
-    eduTweet1.setProperty(text.label,
-      """#programming languages should be explicit (= code) about what they are and their needs: syntax, underlying platform, semantics""")
-
-    val eduPosted1 = edu.addEdge(posted.label, eduTweet1)
-    eduPosted1.setProperty(time.label, "27.10.2013")
-    eduPosted1.setProperty(url.label, "https://twitter.com/eparejatobes/status/394430900051927041")
-
-    val eduTweet2 = g.addVertexWithLabel(tweet.label)
-    eduTweet2.setProperty(text.label,
-      """type definitions in titan #graphdb https://github.com/thinkaurelius/titan/wiki/Type-Definition-Overview … killer feature! example of how type info can be used to get better performance""")
-
-    val eduPosted2 = edu.addEdge(posted.label, eduTweet2)
-    eduPosted2.setProperty(time.label, "20.3.2013")
-    eduPosted2.setProperty(url.label, "https://twitter.com/eparejatobes/status/314353912276738048")
-
-    val eduTweet3 = g.addVertexWithLabel(tweet.label)
-    eduTweet3.setProperty(text.label,
-      """just read "Categories for synchrony and asynchrony" http://bit.ly/15sBf22  nice paper with conditions for completeness of Kleisli cats""")
-
-    val eduPosted3 = edu.addEdge(posted.label, eduTweet3)
-    eduPosted3.setProperty(time.label, "19.2.2013")
-    eduPosted3.setProperty(url.label, "https://twitter.com/eparejatobes/status/303939214423236608")
-
-    val eduTweet4 = g.addVertexWithLabel(tweet.label)
-    eduTweet4.setProperty(text.label,
-      """back to twitter :)""")
-
-    val eduPosted4 = edu.addEdge(posted.label, eduTweet4)
-    eduPosted4.setProperty(time.label, "13.11.2012")
-    eduPosted4.setProperty(url.label, "https://twitter.com/eparejatobes/status/268324310614167552")
-
-
-    val alexeyTweet1 = g.addVertexWithLabel(tweet.label)
-    alexeyTweet1.setProperty(text.label,
-      """Spend the whole night trying to build Idris from sources. I lost any hope. Cabal is hell "(""")
-
-    val alexeyPosted1 = alexey.addEdge(posted.label, alexeyTweet1)
-    alexeyPosted1.setProperty(time.label, "15.2.2014")
-    alexeyPosted1.setProperty(url.label, "https://twitter.com/laughedelic/status/444717461150388224")
-
-    val alexeyTweet2 = g.addVertexWithLabel(tweet.label)
-    alexeyTweet2.setProperty(text.label,
-      """What I don’t like about going to bed at 8am is that the next morning there are no interesting news/notifications anywhere "/ boring morning""")
-
-    val alexeyPosted2 = alexey.addEdge(posted.label, alexeyTweet2)
-    alexeyPosted2.setProperty(time.label, "7.2.2014")
-    alexeyPosted2.setProperty(url.label, "https://twitter.com/laughedelic/status/441939905963622400")
-
-
-    val kimTweet1 = g.addVertexWithLabel(tweet.label)
-    kimTweet1.setProperty(text.label,
-      """больше недели искал нормальную jQuery-библиотеку для галереи - в итоге написал свою""")
-
-    val kimPosted1 = kim.addEdge(posted.label, kimTweet1)
-    kimPosted1.setProperty(time.label, "23.2.2012")
-    kimPosted1.setProperty(url.label, "https://twitter.com/evdokim/status/172712624931348480")
-
-    val kimTweet2 = g.addVertexWithLabel(tweet.label)
-    kimTweet2.setProperty(text.label,
-      """java.util.concurrent вообще круть!)))""")
-
-    val kimPosted2 = kim.addEdge(posted.label, kimTweet2)
-    kimPosted2.setProperty(time.label, "7.7.2011")
-    kimPosted2.setProperty(url.label, "https://twitter.com/evdokim/status/88926033750929409")
-
-    val kimTweet3 = g.addVertexWithLabel(tweet.label)
-    kimTweet3.setProperty(text.label,
-      """в раю все ездят на фиксах и смотрят арт-хаус @ ЛХ""")
-
-    val kimPosted3 = kim.addEdge(posted.label, kimTweet3)
-    kimPosted3.setProperty(time.label, "22.6.2011")
-    kimPosted3.setProperty(url.label, "https://twitter.com/evdokim/status/83373880454025216")
-
+  def cleanDir(f: File) {
+    if (f.isDirectory) f.listFiles.foreach(cleanDir(_))
+    else { println(f.toString); f.delete }
   }
 
   // Reusing the graph if possible, else cleaning the directory and creating graph
   override def beforeAll() {
+    cleanDir(graphLocation)
     g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
-    // checking that the graph is there:
-    // FIXME: it doesn't reuse the graph
-    if (g.getManagementSystem.containsRelationType("posted")) {
-      println("Reusing Titan graph")
-    } else {
-      def cleanDir(f: File) {
-        if (f.isDirectory) f.listFiles.foreach(cleanDir(_))
-        else { println(f.toString); f.delete }
-      }
-      cleanDir(graphLocation)
-      g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
-      createTitanTwitterInstance(g)
-      println("Created Titan graph")
-    }
+
+    g.createSchema(Twitter.schema)
+
+    import com.tinkerpop.blueprints.util.io.graphson._
+    GraphSONReader.inputGraph(g, getClass.getResource("/twitter_graph.json").getPath)
+
+    println("Created Titan graph")
   }
 
   override def afterAll() {
     if(g != null) {
       g.shutdown
+      // import com.tinkerpop.blueprints.util.io.graphson._
+      // GraphSONWriter.outputGraph(g, "graph_compact.json", GraphSONMode.COMPACT)
       println("Shutdown Titan graph")
     }
   }
 
-  object TestContext {
-    // val impl = TwitterImpl(g); import impl._
 
-    // quering vertices
-    // val edu = user.query(user ? (name === "@eparejatobes")).head
-    // val alexey = user.query(user ? (name === "@laughedelic")).head
-    // val kim = user.query(user ? (name === "@evdokim")).head
-    // val twt = tweet.query(tweet ? (text === "back to twitter :)")).head
-
-    // // quering edges
-    // val post = posted.query(posted ? (time === "13.11.2012")).head
-  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 
   // checks existence and arity
-  def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET) = {
+  def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET)
+    (implicit multi: EdgeTypeMultiplicity[ET]) = {
 
     assert{ mgmt.containsRelationType(et.label) }
 
-    // assertResult(multi(et)) {
-    //   mgmt.getEdgeLabel(et.label).getMultiplicity
-    // }
+    assertResult(multi(et)) {
+      mgmt.getEdgeLabel(et.label).getMultiplicity
+    }
   }
 
   // checks existence and dataType
-  def checkPropertyKey[P <: AnyProperty](mgmt: TitanManagement, p: P) = {
+  def checkPropertyKey[P <: AnyProp](mgmt: TitanManagement, p: P)
+    (implicit cc: scala.reflect.ClassTag[P#Raw]) = {
 
     assert{ mgmt.containsRelationType(p.label) }
 
-    // import scala.reflect._
-    // assertResult(p.classTag.runtimeClass.asInstanceOf[Class[P#Raw]]) {
-    //   mgmt.getPropertyKey(p.label).getDataType
-    // }
+    assertResult(cc.runtimeClass.asInstanceOf[Class[P#Raw]]) {
+      mgmt.getPropertyKey(p.label).getDataType
+    }
   }
 
   // checks existence, type and the indexed property
-  // def checkIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix) = {
+  def checkSimpleIndex[Ix <: AnySimpleIndex](mgmt: TitanManagement, ix: Ix) = {
 
-  //   assert{ mgmt.containsGraphIndex(ix.label) }
+    assert{ mgmt.containsGraphIndex(ix.label) }
 
-  //   val index = mgmt.getGraphIndex(ix.label)
-  //   // TODO: check for mixed indexes and any other stuff
-  //   assert{ index.isCompositeIndex }
-  //   assert{ index.getFieldKeys.toSet == Set(mgmt.getPropertyKey(ix.property.label)) }
-  // }
+    val index = mgmt.getGraphIndex(ix.label)
+    // TODO: check for mixed indexes and any other stuff
+    assert{ index.isCompositeIndex }
+    assert{ index.getFieldKeys.toSet == Set(mgmt.getPropertyKey(ix.property.label)) }
+  }
 
   // TODO: make it a graph op: checkSchema
-  // test("check schema keys/labels") {
-  //   // import TestContext._, impl._
+  test("check schema keys/labels") {
 
-  //   val mgmt = g.getManagementSystem
+    val mgmt = g.getManagementSystem
 
-  //   checkPropertyKey(mgmt, name)
-  //   checkPropertyKey(mgmt, age)
-  //   checkPropertyKey(mgmt, text)
-  //   checkPropertyKey(mgmt, url)
-  //   checkPropertyKey(mgmt, time)
+    checkPropertyKey(mgmt, name)
+    checkPropertyKey(mgmt, age)
+    checkPropertyKey(mgmt, text)
+    checkPropertyKey(mgmt, url)
+    checkPropertyKey(mgmt, time)
 
-  //   checkEdgeLabel(mgmt, posted)
-  //   checkEdgeLabel(mgmt, follows)
+    checkEdgeLabel(mgmt, posted)
+    checkEdgeLabel(mgmt, follows)
 
-  //   assert{ mgmt.containsVertexLabel(user.label) }
-  //   assert{ mgmt.containsVertexLabel(tweet.label) }
+    assert{ mgmt.containsVertexLabel(user.label) }
+    assert{ mgmt.containsVertexLabel(tweet.label) }
 
-  //   checkIndex(mgmt, UserNameIx)
-  //   checkIndex(mgmt, TweetTextIx)
-  //   checkIndex(mgmt, PostedTimeIx)
+    checkSimpleIndex(mgmt, userByName)
+    checkSimpleIndex(mgmt, tweetByText)
+    checkSimpleIndex(mgmt, postedByTime)
 
-  //   mgmt.commit
-  // }
+    mgmt.commit
+  }
 
-  test("check what we got from the index queries") {
-    import TestContext._, impl._
+  //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // just shortcuts
+  import syntax.conditions._
+  import syntax.predicates._
+
+  object TestContext {
+    val evals = impl.titan.evals(g); import evals._
+
+    // predicates for quering vertices
+    val askEdu = user ? (name === "@eparejatobes")
+    val askAlexey = user ? (name === "@laughedelic")
+    val askKim = user ? (name === "@evdokim")
+
+    val askTweet = tweet ? (text === "back to twitter :)")
+
+    // predicates for quering edges
+    val askPost = posted ? (time === "13.11.2012")
+
+    // low level querying:
     implicit class graphOps(tg: TitanGraph) {
       def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
         v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
@@ -234,46 +135,47 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       }
     }
 
-    // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
-    // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
-    // assert{ kim == graph.vertex(user)(name)("@evdokim") }
-    // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
-
-    // assert{ post == graph.edge(posted)(time)("13.11.2012") }
-
     val edu = g.vertex(user)(name)("@eparejatobes")
     val alexey = g.vertex(user)(name)("@laughedelic")
     val kim = g.vertex(user)(name)("@evdokim")
     val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post: TitanEdge LabeledBy posted.type = g.edge(posted)(time)("13.11.2012")
+    val post = g.edge(posted)(time)("13.11.2012")
+
+    // prepared test queries (they can be reused for different tests)
+    val userName = Get(name)
+    val postAuthor = Source(posted)
+    val postAuthorName = postAuthor >=> userName
+    // val tweetAuthorName = InE(any(posted)) >=> postAuthorName
+
+    // val edu = Query(user).evalOn(askEdu).head
+    // val post = Query(posted).evalOn(askPost).head
+    // val twt = Query(tweet).evalOn(askTweet).head
+  }
+
+  test("check what we got from the index queries") {
+    import TestContext._, evals._
+
+    // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
+    // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
+    // assert{ kim == graph.vertex(user)(name)("@evdokim") }
+    // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
+    // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
     /* Evaluating steps: */
-    assert{ get(name).evalOn(edu) == name("@eparejatobes") }
-    assert{ src(posted).evalOn(post) == edu }
-    assert{ 
-        ( (posted src) evalOn post ) == edu 
-    }
+    assert{ Get(name).evalOn(edu) == name("@eparejatobes") }
+    assert{ Source(posted).evalOn(post) == edu }
 
     /* Composing steps: */
-    val posterName = src(posted) >=> get(name)
+    val posterName = Source(posted) >=> Get(name)
     
-    val evComp = posterName.evalOn(post)
-    // val evComp = (  src(posted) >=> get(name)  ).evalOn(post)
-    assert{ 
-       evComp == name("@eparejatobes") 
-    }
+    assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
-//     import AnyPath._, AnyVertexType._, AnyEdgeType._
-//     // oh yeah
 
 //     val p = tweet in posted
 //     val zzz = p map posted.src
 
 //     val pp = tweet in posted map posted.src
     
-    
-//     assert{ posterName.evalOn(post) == name("@eparejatobes") }
-
 //     // this query returns a list of 4 Edus, so we comare it as a set
 //     assert{ (GetOutEdges(posted) >=> posterName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
@@ -343,5 +245,49 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 //   // //     (edu outV follows)
 //   // //   }
 //   // // }
+
+
+
+
+  //   /* Evaluating steps: */
+  //   import shapeless._, poly._
+  //   import com.tinkerpop.blueprints.{ Query => BQuery }
+
+  //   assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)) == List() }
+  //   assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)) == List(edu) }
+
+  //   assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
+  //   assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
+
+  //   assert{ userName.evalOn(edu) == name("@eparejatobes") }
+  //   assert{ postAuthor.evalOn(post) == edu }
+
+  //   assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
+
+  //   // this query returns a list of 4 Edus, so we comare it as a set
+  //   assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+
+  //   assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
+  // }
+
+  // test("cool queries dsl") {
+  //   import TestContext._, traversers._
+  //   import syntax.steps._
+
+  //   // element op:
+  //   val userName = user.get(name)
+  //   assert{ userName.evalOn(edu) == name("@eparejatobes") }
+
+  //   // edge op:
+  //   val posterName = posted.source.get(name)
+  //   assert{ posterName.evalOn(post) == name("@eparejatobes") }
+
+  //   // vertex op:
+  //   val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
+
+  //   // testing vertex query
+  //   val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
+  //   assert{ vertexQuery.evalOn(edu) == List(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
+  // }
 
 }

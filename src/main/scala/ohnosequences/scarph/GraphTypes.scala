@@ -1,7 +1,9 @@
 package ohnosequences.scarph
 
+import ohnosequences.scarph.steps._
+
 /* This is any graph type that can have properties, i.e. vertex of edge type */
-trait AnyElementType extends AnyLabelType
+trait AnyElementType extends AnyLabelType 
 
 /* 
   Property is assigned to one element type and has a raw representation 
@@ -23,6 +25,7 @@ abstract class PropertyOf[O <: AnyElementType](val owner: O) extends AnyProp {
   val label = this.toString
 }
 
+
 /* Vertex type is very simple */
 trait AnyVertexType extends AnyElementType
 
@@ -31,19 +34,20 @@ abstract class VertexType extends AnyVertexType {
   val label = this.toString
 }
 
+/* Edges connect vertices and have in/out arities */
 trait AnyEdgeType extends AnyElementType {
 
   /* The source vertex for this edge */
   type Source <: AnyVertexType
   val  source: Source
-
-  /* this is the arity for incoming edges */
+  /* This is the arity for incoming edges */
   type InC <: AnyConstructor
   val  inC: InC
 
+  /* The target vertex for this edge */
   type Target <: AnyVertexType
   val  target: Target
-
+  /* This is the arity for outgoing edges */
   type OutC <: AnyConstructor
   val  outC: OutC
 }
@@ -53,14 +57,11 @@ class EdgeType[
   InC0 <: AnyConstructor,
   O <: AnyVertexType,
   OutC0 <: AnyConstructor
-]
-(
-  val inC: InC0,
+](val inC: InC0,
   val source: I,
   val outC: OutC0,
   val target: O
-)
-extends AnyEdgeType {
+) extends AnyEdgeType {
 
   type Source = I
   type InC = InC0
@@ -70,76 +71,6 @@ extends AnyEdgeType {
 
   val label = this.toString
 }
-
-object AnyEdgeType {
-
-  implicit def edgeTypeOps[E <: AnyEdgeType](edge: E): EdgeTypeOps[E] = EdgeTypeOps(edge)
-}
-case class EdgeTypeOps[E <: AnyEdgeType](edge: E) {
-
-  def src: src[E] = ohnosequences.scarph.src(edge)
-}
-
-
-trait AnyConstructor {
-
-  type C[X <: AnyLabelType] <: AnyLabelType
-  def apply[Y <: AnyLabelType](y: Y): C[Y]
-}
-
-object ExactlyOne extends AnyConstructor { 
-
-  final type C[X <: AnyLabelType] = X
-  def apply[Y <: AnyLabelType](y: Y): Y = y            
-}
-
-object OneOrNone extends AnyConstructor  { 
-
-  type C[X <: AnyLabelType] = OneOrNoneOf[X]  
-  def apply[Y <: AnyLabelType](y: Y) = OneOrNoneOf(y)
-}
-
-object ManyOrNone extends AnyConstructor { 
-
-  type C[X <: AnyLabelType] = ManyOrNoneOf[X] 
-  def apply[Y <: AnyLabelType](y: Y) = ManyOrNoneOf(y)
-}
-
-object AtLeastOne extends AnyConstructor { 
-
-  type C[X <: AnyLabelType] = AtLeastOneOf[X] 
-  def apply[Y <: AnyLabelType](y: Y) = AtLeastOneOf(y)
-}
-
-
-trait AnyContainer extends AnyLabelType {
-
-  type Of <: AnyLabelType
-  val  of: Of
-}
-
-trait Of[T <: AnyLabelType] extends AnyContainer {
-
-  type Of = T
-}
-
-
-final case class OneOrNoneOf[T <: AnyLabelType](val of: T) extends Of[T] {
-
-  lazy val label = s"OneOrNone(${of.label})"
-}
-
-final case class ManyOrNoneOf[T <: AnyLabelType](val of: T) extends Of[T] {
-
-  lazy val label = s"ManyOrNone(${of.label})"
-}
-
-final case class AtLeastOneOf[T <: AnyLabelType](val of: T) extends Of[T] {
-  
-  lazy val label = s"AtLeastOne(${of.label})"
-}
-
-
 
 
 // TODO: HList-like with bound on vertices, another for paths etc

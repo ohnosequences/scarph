@@ -1,9 +1,11 @@
 package ohnosequences.scarph
 
 import ohnosequences.cosas._
-
+import ohnosequences.scarph.steps._
 import combinators._
 
+// NOTE: maybe this should be Fn2
+// trait AnyTraverser[P <: AnyPath] {
 trait AnyEvalPath {
 
   type Path <: AnyPath
@@ -11,7 +13,10 @@ trait AnyEvalPath {
   type InVal
   type OutVal
 
-  def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out
+  type In = InVal LabeledBy Path#In
+  type Out = OutVal LabeledBy Path#Out
+
+  def apply(path: Path)(in: In): Out
 }
 
 trait AnyEvalPathOn[I, O] extends AnyEvalPath {
@@ -27,14 +32,9 @@ trait EvalPathOn[I, P <: AnyPath, O] extends AnyEvalPathOn[I, O] {
 
 object AnyEvalPath {
 
-  trait EvalGet[I, P <: AnyProp] extends EvalPathOn[I, get[P], P#Raw] {
-
-    def apply(path: get[P])(in: I LabeledBy Path#In): OutVal LabeledBy get[P]#Out
-  }
-  trait EvalSource[I, E <: AnyEdgeType, O] extends EvalPathOn[I, src[E], O] {
-
-    def apply(path: src[E])(in: I LabeledBy Path#In): O LabeledBy src[E]#Out
-  }
+  implicit def evalIdStep[T <: AnyLabelType, X]:
+      EvalPathOn[X, IdStep[T], X] =
+  new EvalPathOn[X, IdStep[T], X] { def apply(p: Path)(in: In): Out = in }
 
   trait AnyEvalComposition[
     I, 

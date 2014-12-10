@@ -6,30 +6,30 @@ import AnyEvalPath._
 
 trait AnyPath { path =>
 
-  /* the wrapped type */
+  /* The wrapped type */
   type InT <: AnyLabelType
   val  inT: InT
-  /* the container used */
+  /* The container used */
   type InC <: AnyConstructor
   val  inC: InC
-
-  type In <: AnyLabelType//<: InC#C[InT]
+  /* Their combination: InC#C[InT] */
+  type In <: AnyLabelType //<: InC#C[InT]
   val  in: In
 
+  /* Same for out: */
   type OutT <: AnyLabelType
   val  outT: OutT
   type OutC <: AnyConstructor
   val  outC: OutC
-
-  type Out <: AnyLabelType//<: OutC#C[OutT]
+  type Out <: AnyLabelType //<: OutC#C[OutT]
   val  out: Out
 
-  // we will need to forget about these bounds at some point
+  // NOTE: we will need to forget about these bounds at some point
   type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
 }
 
-/* a composition of other paths */
-trait AnyComposition extends AnyPath { comp =>
+/* A composition of two paths */
+trait AnyComposition extends AnyPath {
 
   type First <: AnyPath
   val  first: First
@@ -40,6 +40,7 @@ trait AnyComposition extends AnyPath { comp =>
   lazy val inC = first.inC
   type In = First#In
   lazy val in = first.in
+
 
   type Second <: AnyPath
   val  second: Second
@@ -138,4 +139,7 @@ case class PathOps[P <: AnyPath](val p: P) {
   def ⨁[G <: AnyPath](g: G): (P ⨁ G) = Or(p,g)
   def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
   def rev: rev[P] = Rev(p)
+
+  def evalOn[I, O](input: I LabeledBy P#In)
+    (implicit eval: EvalPathOn[I, P, O]): O LabeledBy P#Out = eval(p)(input)
 }
