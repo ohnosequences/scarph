@@ -6,25 +6,18 @@ import AnyEvalPath._
 
 trait AnyPath { path =>
 
-  /* The wrapped type */
-  type InT <: AnyLabelType
-  val  inT: InT
   /* The container used */
   type InC <: AnyConstructor
   val  inC: InC
-  /* Their combination: InC#C[InT] */
-  type In <: AnyLabelType //<: InC#C[InT]
-  // type In = InC#C[InT]
-  val  in: In //= inC(inT)
+  /* The wrapped type */
+  type InT <: AnyLabelType
+  val  inT: InT
 
   /* Same for out: */
-  type OutT <: AnyLabelType
-  val  outT: OutT
   type OutC <: AnyConstructor
   val  outC: OutC
-  type Out <: AnyLabelType //<: OutC#C[OutT]
-  // type Out = OutC#C[OutT]
-  val  out: Out //= outC(outT)
+  type OutT <: AnyLabelType
+  val  outT: OutT
 
   // NOTE: we will need to forget about these bounds at some point
   // type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
@@ -41,15 +34,11 @@ abstract class Path[
   val outT: OT
 ) extends AnyPath {
 
-  type InT = IT
   type InC = IC
-  type In = InC#C[InT]
-  val  in = inC(inT)
+  type InT = IT
 
-  type OutT = OT
   type OutC = OC
-  type Out = OutC#C[OutT]
-  val  out = outC(outT)
+  type OutT = OT
 }
 
 /* A composition of two paths */
@@ -62,9 +51,6 @@ trait AnyComposition extends AnyPath {
   lazy val inT = first.inT
   type InC = First#InC
   lazy val inC = first.inC
-  type In = First#In
-  lazy val in = first.in
-
 
   type Second <: AnyPath
   val  second: Second
@@ -73,16 +59,12 @@ trait AnyComposition extends AnyPath {
   lazy val outT = second.outT 
   type OutC = Second#OutC
   lazy val outC = second.outC
-  type Out = Second#Out
-  lazy val out = second.out
 }
 
 case class Composition[
   F <: AnyPath,
   S <: AnyPath //{ type In = F#Out }
-](val first: F, val second: S)
-// Path[F#InC, F#InT, S#OutC, S#OutT](first.inC, first.inT, second.outC, second.outT) with 
-   extends AnyComposition {
+](val first: F, val second: S) extends AnyComposition {
 
   type First = F
   type Second = S
@@ -103,20 +85,15 @@ trait AnyMapPath extends AnyPath {
   lazy val inT: InT = prevPath.inT
   type InC = PrevPath#InC
   lazy val inC: InC = prevPath.inC
-  type In = PrevPath#In
-  lazy val in: In = prevPath.in
-
 
   // the path being mapped should have as In the wrapped type
   type MappedPath <: AnyPath //{ type In = PrevPath#OutT }
   val  mappedPath: MappedPath
 
-  type OutT = MappedPath#Out
-  lazy val outT: OutT = mappedPath.out
+  type OutT = AnyPath.OutOf[MappedPath]
+  lazy val outT: OutT = mappedPath.outC(mappedPath.outT)
   type OutC = PrevPath#OutC
   lazy val outC = prevPath.outC
-  type Out = PrevPath#OutC#C[MappedPath#Out]
-  lazy val out: Out = prevPath.outC(mappedPath.out)
 }
 
 case class Map[P <: AnyPath, M <: AnyPath { type In = P#OutT }]
@@ -128,13 +105,18 @@ case class Map[P <: AnyPath, M <: AnyPath { type In = P#OutT }]
 
 
 object AnyPath {
+  type InOf[P <: AnyPath] = P#InC#C[P#InT]
+  type OutOf[P <: AnyPath] = P#OutC#C[P#OutT]
 
   implicit def pathOps[T <: AnyPath](t: T) = PathOps(t)
 }
 
 case class PathOps[P <: AnyPath](val p: P) {
 
-  def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P,S] = Composition(p,s)
+  val in: AnyPath.InOf[P] = p.inC(p.inT)
+  val out: AnyPath.OutOf[P] = p.outC(p.outT)
+
+  def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P,S] = Composition(p,s)
   // TODO: add witnesses for composition to workaround P <:!< P { type In = P#In }
   // def ∘[F <: AnyPath { type Out = P#In }](f: F): Composition[F,P] 
   def map[G <: AnyPath { type In = P#OutT }](g: G): Map[P,G] = ohnosequences.scarph.Map[P,G](p,g)
@@ -145,6 +127,6 @@ case class PathOps[P <: AnyPath](val p: P) {
   def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
   def rev: rev[P] = Rev(p)
 
-  def evalOn[I, O](input: I LabeledBy P#In)
-    (implicit eval: EvalPathOn[I, P, O]): O LabeledBy P#Out = eval(p)(input)
+  def evalOn[I, O](input: I LabeledBy P#InC#C[P#InT])
+    (implicit eval: EvalPathOn[I, P, O]): O LabeledBy P#OutC#C[P#OutT] = eval(p)(input)
 }

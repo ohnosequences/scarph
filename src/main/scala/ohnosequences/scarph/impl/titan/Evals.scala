@@ -44,28 +44,28 @@ case class evals(val graph: TitanGraph) {
       EvalPathOn[TitanVertex, Get[P], P#Raw] =
   new EvalPathOn[TitanVertex, Get[P], P#Raw] {
     // def apply(path: Path)(in: In): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
-    def apply(path: Path)(in: In): Out = path.property( in.value.getProperty[path.property.Raw](path.property.label) )
+    def apply(path: Path)(in: In): Out = ExactlyOne(path.property)( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
   implicit def evalEdgeGet[P <: AnyProp { type Owner <: AnyEdgeType }]:
       EvalPathOn[TitanEdge, Get[P], P#Raw] =
   new EvalPathOn[TitanEdge, Get[P], P#Raw] {
     // def apply(path: Path)(in: In): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
-    def apply(path: Path)(in: In): Out = path.property( in.value.getProperty[path.property.Raw](path.property.label) )
+    def apply(path: Path)(in: In): Out = ExactlyOne(path.property)( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
   implicit def evalSource[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Source[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Source[E], TitanVertex] {
     // def apply(path: Path)(in: In): Out = List(new LabeledBy[TitanVertex, E#SourceType]( in.value.getVertex(Direction.OUT) ))
-    def apply(path: Path)(in: In): Out = new (TitanVertex LabeledBy E#Source)( in.value.getVertex(Direction.OUT) )
+    def apply(path: Path)(in: In): Out = new (TitanVertex LabeledBy ExactlyOne.C[E#Source])( in.value.getVertex(Direction.OUT) )
   }
 
   implicit def evalTarget[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Target[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Target[E], TitanVertex] {
     // def apply(path: Path)(in: In): Out = List(new LabeledBy[TitanVertex, E#TargetType]( in.value.getVertex(Direction.IN) ))
-    def apply(path: Path)(in: In): Out = new (TitanVertex LabeledBy E#Target)( in.value.getVertex(Direction.IN) )
+    def apply(path: Path)(in: In): Out = new (TitanVertex LabeledBy ExactlyOne.C[E#Target])( in.value.getVertex(Direction.IN) )
   }
 
   // implicit def evalInE[

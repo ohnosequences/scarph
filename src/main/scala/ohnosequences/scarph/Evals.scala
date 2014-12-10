@@ -1,11 +1,10 @@
 package ohnosequences.scarph
 
 import ohnosequences.cosas._
-import ohnosequences.scarph.steps._
+import steps._, AnyPath._
 import combinators._
 
 // NOTE: maybe this should be Fn2
-// trait AnyTraverser[P <: AnyPath] {
 trait AnyEvalPath {
 
   type Path <: AnyPath
@@ -13,8 +12,8 @@ trait AnyEvalPath {
   type InVal
   type OutVal
 
-  type In = InVal LabeledBy Path#In
-  type Out = OutVal LabeledBy Path#Out
+  type In = InVal LabeledBy InOf[Path]
+  type Out = OutVal LabeledBy OutOf[Path]
 
   def apply(path: Path)(in: In): Out
 }
@@ -39,7 +38,7 @@ object AnyEvalPath {
   implicit def evalComposition[
     I, 
     F <: AnyPath,
-    G <: AnyPath { type In = F#Out },
+    G <: AnyPath { type InC = F#OutC; type InT = F#OutT },
     X, O
   ](implicit
     evalFirst:  EvalPathOn[I, F, X],
@@ -64,7 +63,7 @@ object AnyEvalPath {
   ](val evalPrevPath: EvalPathOn[I, P, PO], val evalMappedPath: EvalPathOn[O, M, PMO]) 
   extends EvalPathOn[I, Map[P, M], PMO] {
 
-    def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out = ???
+    def apply(path: Path)(in: In): Out = ???
   }
 
   // TODO: how?
@@ -79,7 +78,7 @@ object AnyEvalPath {
   ](val evalFirst: EvalPathOn[FI, F, FO], val evalSecond: EvalPathOn[SI, S, SO])
   extends EvalPathOn[I, Par[F, S], O] {
 
-    def apply(path: Path)(in: InVal LabeledBy Path#In): OutVal LabeledBy Path#Out = ???
+    def apply(path: Path)(in: In): Out = ???
   }
 
   // TODO: how??!?!
@@ -87,6 +86,6 @@ object AnyEvalPath {
   // each path knows how to reverse itself and return something of type rev
   case class EvalRev[I, P <: AnyPath, O]() extends EvalPathOn[I, rev[P], O] {
 
-    def apply(path: rev[P])(in: I LabeledBy rev[P]#In): O LabeledBy rev[P]#Out = ???
+    def apply(path: rev[P])(in: In): Out = ???
   }
 }

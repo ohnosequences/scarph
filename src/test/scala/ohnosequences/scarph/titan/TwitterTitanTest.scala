@@ -127,11 +127,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
 
     // low level querying:
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
-        v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
+      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy ExactlyOne.C[V] = {
+        ExactlyOne(v)( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
-        e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
+      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy ExactlyOne.C[E] = {
+        ExactlyOne(e)( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
 

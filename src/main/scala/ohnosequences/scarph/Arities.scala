@@ -9,8 +9,8 @@ trait AnyConstructor {
 
 object ExactlyOne extends AnyConstructor { 
 
-  final type C[T <: AnyLabelType] = T
-  def apply[T <: AnyLabelType](t: T): C[T] = t
+  final type C[T <: AnyLabelType] = ExactlyOneOf[T]
+  def apply[T <: AnyLabelType](t: T): C[T] = ExactlyOneOf(t)
 }
 
 object OneOrNone extends AnyConstructor  { 
@@ -43,6 +43,11 @@ trait Of[T <: AnyLabelType] extends AnyContainer {
   type Of = T
 }
 
+
+final case class ExactlyOneOf[T <: AnyLabelType](val of: T) extends Of[T] {
+
+  lazy val label = s"ExactlyOne(${of.label})"
+}
 
 final case class OneOrNoneOf[T <: AnyLabelType](val of: T) extends Of[T] {
 

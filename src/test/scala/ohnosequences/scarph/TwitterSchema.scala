@@ -53,25 +53,25 @@ object Twitter {
 
 }
 
-object StupidQueries {
-  import Twitter._
+// object StupidQueries {
+//   import Twitter._
 
-  val uh = InV(follows) map Get(name)
-  val zz = Target(follows) >=> InE(follows)
-  val altSyntax = Target(follows) >=> InE(follows)
-  val ups = InE(posted)
-  // this is clunky right now, but it works
-  val uuuuh = InE(posted) map Target(posted)
+//   val uh = InV(follows) map Get(name)
+//   val zz = Target(follows) >=> InE(follows)
+//   val altSyntax = Target(follows) >=> InE(follows)
+//   val ups = InE(posted)
+//   // this is clunky right now, but it works
+//   val uuuuh = InE(posted) map Target(posted)
 
-  val asdfadf = InV(follows) map InV(follows)
-  val asdfadf2 = InV(follows) map InV(follows)
+//   val asdfadf = InV(follows) map InV(follows)
+//   val asdfadf2 = InV(follows) map InV(follows)
 
-  val ohno = Par(
-    InV(follows) map InV(follows),
-    Target(follows) >=> InE(follows)
-  )
+//   val ohno = Par(
+//     InV(follows) map InV(follows),
+//     Target(follows) >=> InE(follows)
+//   )
 
-  val sfdsd = ((InV(follows) map InV(follows)) ⨂ (Target(follows) >=> InE(follows))) ⨁ (InV(follows) map OutV(posted))
+//   val sfdsd = ((InV(follows) map InV(follows)) ⨂ (Target(follows) >=> InE(follows))) ⨁ (InV(follows) map OutV(posted))
 
-  val yurj = rev( Target(follows) >=> InE(follows) )
-}
+//   val yurj = rev( Target(follows) >=> InE(follows) )
+// }
