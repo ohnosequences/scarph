@@ -11,17 +11,6 @@ import ohnosequences.scarph.impl.titan.predicates._
 
 case class evals(val graph: TitanGraph) {
 
-  implicit def evalComposition[
-    I, 
-    F <: AnyPath,
-    G <: AnyPath { type In = F#Out },
-    X, O
-  ](implicit
-    evFirst:  EvalPathOn[I, F, X],
-    evSecond: EvalPathOn[X, G, O]
-  ): EvalComposition[I, F, G, X, O] = 
-     EvalComposition[I, F, G, X, O](evFirst, evSecond)
-
   // implicit def evalSimpleVertexQuery[
   //   V <: AnyVertexType,
   //   P <: AnyPredicate.On[V]

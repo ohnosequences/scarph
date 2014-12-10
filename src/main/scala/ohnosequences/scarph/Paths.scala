@@ -14,7 +14,8 @@ trait AnyPath { path =>
   val  inC: InC
   /* Their combination: InC#C[InT] */
   type In <: AnyLabelType //<: InC#C[InT]
-  val  in: In
+  // type In = InC#C[InT]
+  val  in: In //= inC(inT)
 
   /* Same for out: */
   type OutT <: AnyLabelType
@@ -22,10 +23,33 @@ trait AnyPath { path =>
   type OutC <: AnyConstructor
   val  outC: OutC
   type Out <: AnyLabelType //<: OutC#C[OutT]
-  val  out: Out
+  // type Out = OutC#C[OutT]
+  val  out: Out //= outC(outT)
 
   // NOTE: we will need to forget about these bounds at some point
-  type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
+  // type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
+}
+
+abstract class Path[
+  IC <: AnyConstructor,
+  IT <: AnyLabelType,
+  OC <: AnyConstructor,
+  OT <: AnyLabelType
+](val inC: IC,
+  val inT: IT,
+  val outC: OC,
+  val outT: OT
+) extends AnyPath {
+
+  type InT = IT
+  type InC = IC
+  type In = InC#C[InT]
+  val  in = inC(inT)
+
+  type OutT = OT
+  type OutC = OC
+  type Out = OutC#C[OutT]
+  val  out = outC(outT)
 }
 
 /* A composition of two paths */
@@ -55,34 +79,15 @@ trait AnyComposition extends AnyPath {
 
 case class Composition[
   F <: AnyPath,
-  G <: AnyPath //{ type In = F#Out }
-](val first: F, val second: G) extends AnyComposition {
+  S <: AnyPath //{ type In = F#Out }
+](val first: F, val second: S)
+// Path[F#InC, F#InT, S#OutC, S#OutT](first.inC, first.inT, second.outC, second.outT) with 
+   extends AnyComposition {
 
   type First = F
-  type Second = G
+  type Second = S
 
-  type Rev = Composition[G#Rev, F#Rev]
-
-  // def evalOn[I,X,O](input: I LabeledBy In)(implicit
-  //   evalComp: EvalComposition[I,First,Second,X,O]
-  // ): O LabeledBy Out = {
-
-  //   evalComp(this)(input)
-  // }
-}
-object Composition {
-
-  implicit def compOps[F <: AnyPath, G <: AnyPath {type In = F#Out}](comp: Composition[F,G]): CompositionOps[F,G] = 
-    CompositionOps(comp)
-}
-case class CompositionOps[F <: AnyPath, G <: AnyPath { type In = F#Out}](comp: Composition[F,G]) {
-
-  def evalOn[I,X,O](input: I LabeledBy Composition[F,G]#In)(implicit
-    evalComp: EvalComposition[I,F,G,X,O]
-  ): O LabeledBy Composition[F,G]#Out = {
-
-    evalComp(comp)(input)
-  }
+  // type Rev = Composition[S#Rev, F#Rev]
 }
 
 /*

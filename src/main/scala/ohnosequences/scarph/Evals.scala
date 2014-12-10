@@ -34,33 +34,23 @@ object AnyEvalPath {
 
   implicit def evalIdStep[T <: AnyLabelType, X]:
       EvalPathOn[X, IdStep[T], X] =
-  new EvalPathOn[X, IdStep[T], X] { def apply(p: Path)(in: In): Out = in }
+  new EvalPathOn[X, IdStep[T], X] { def apply(path: Path)(in: In): Out = in }
 
-  trait AnyEvalComposition[
+  implicit def evalComposition[
     I, 
     F <: AnyPath,
     G <: AnyPath { type In = F#Out },
     X, O
-  ] extends EvalPathOn[I, Composition[F, G], O] {
-
-    // to be provided implicitly; maybe add types
-    val evalFirst:  EvalPathOn[I, F, X]
-    val evalSecond: EvalPathOn[X, G, O]
-
-    def apply(path: Composition[F, G])(in: I LabeledBy Composition[F, G]#In): O LabeledBy Composition[F, G]#Out = {
-
+  ](implicit
+    evalFirst:  EvalPathOn[I, F, X],
+    evalSecond: EvalPathOn[X, G, O]
+  ):  EvalPathOn[I, Composition[F, G], O] = 
+  new EvalPathOn[I, Composition[F, G], O] {
+    def apply(path: Path)(in: In): Out = {
       val firstResult = evalFirst(path.first)(in)
       evalSecond(path.second)(firstResult)
     }
   }
-
-  case class EvalComposition[
-    I,
-    F <: AnyPath,
-    G <: AnyPath { type In = F#Out },
-    X, O
-  ](val evalFirst: EvalPathOn[I, F, X], val evalSecond: EvalPathOn[X, G, O]) 
-  extends AnyEvalComposition[I, F, G, X, O] {}
 
   // TODO: how?
   // we need to have a map between containers and labels, so that each container is assigned a LabeledBy

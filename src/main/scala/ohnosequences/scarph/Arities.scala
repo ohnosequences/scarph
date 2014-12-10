@@ -3,32 +3,32 @@ package ohnosequences.scarph
 
 trait AnyConstructor {
 
-  type C[X <: AnyLabelType] <: AnyLabelType
-  def apply[Y <: AnyLabelType](y: Y): C[Y]
+  type C[T <: AnyLabelType] <: AnyLabelType
+  def apply[T <: AnyLabelType](t: T): C[T]
 }
 
 object ExactlyOne extends AnyConstructor { 
 
-  final type C[X <: AnyLabelType] = X
-  def apply[Y <: AnyLabelType](y: Y): Y = y            
+  final type C[T <: AnyLabelType] = T
+  def apply[T <: AnyLabelType](t: T): C[T] = t
 }
 
 object OneOrNone extends AnyConstructor  { 
 
-  type C[X <: AnyLabelType] = OneOrNoneOf[X]  
-  def apply[Y <: AnyLabelType](y: Y) = OneOrNoneOf(y)
+  type C[T <: AnyLabelType] = OneOrNoneOf[T]  
+  def apply[T <: AnyLabelType](t: T): C[T] = OneOrNoneOf(t)
 }
 
 object ManyOrNone extends AnyConstructor { 
 
-  type C[X <: AnyLabelType] = ManyOrNoneOf[X] 
-  def apply[Y <: AnyLabelType](y: Y) = ManyOrNoneOf(y)
+  type C[T <: AnyLabelType] = ManyOrNoneOf[T] 
+  def apply[T <: AnyLabelType](t: T): C[T] = ManyOrNoneOf(t)
 }
 
 object AtLeastOne extends AnyConstructor { 
 
-  type C[X <: AnyLabelType] = AtLeastOneOf[X] 
-  def apply[Y <: AnyLabelType](y: Y) = AtLeastOneOf(y)
+  type C[T <: AnyLabelType] = AtLeastOneOf[T] 
+  def apply[T <: AnyLabelType](t: T): C[T] = AtLeastOneOf(t)
 }
 
 
