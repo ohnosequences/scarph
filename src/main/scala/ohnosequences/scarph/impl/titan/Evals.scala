@@ -11,31 +11,33 @@ import ohnosequences.scarph.impl.titan.predicates._
 
 case class evals(val graph: TitanGraph) {
 
-  // implicit def evalSimpleVertexQuery[
-  //   V <: AnyVertexType,
-  //   P <: AnyPredicate.On[V]
-  // ](implicit transform: ToBlueprintsPredicate[P]): 
-  //     EvalPathOn[P, Query[V], TitanVertex] =
-  // new EvalPathOn[P, Query[V], TitanVertex] {
-  //   def apply(path: Path)(in: In): Out = {
-  //     transform(in.value, graph.query)
-  //       .vertices.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
-  //       .toList.map{ new LabeledBy[TitanVertex, V]( _ ) }
-  //   }
-  // }
+  implicit def evalVertexQuery[
+    V <: AnyVertexType,
+    P <: AnyPredicate.On[V]
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      EvalPathOn[P, Query[V], Stream[TitanVertex]] =
+  new EvalPathOn[P, Query[V], Stream[TitanVertex]] {
+    def apply(path: Path)(in: In): Out = {
+      ManyOrNone(path.elem)(
+        transform(in.value, graph.query).vertices
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]].toStream
+      )
+    }
+  }
 
-  // implicit def evalSimpleEdgeQuery[
-  //   E <: AnyEdgeType,
-  //   P <: AnyPredicate.On[E]
-  // ](implicit transform: ToBlueprintsPredicate[P]): 
-  //     EvalPathOn[P, Query[E], TitanEdge] =
-  // new EvalPathOn[P, Query[E], TitanEdge] {
-  //   def apply(path: Path)(in: In): Out = {
-  //     transform(in.value, graph.query)
-  //       .edges.asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
-  //       .toList.map{ new LabeledBy[TitanEdge, E]( _ ) }
-  //   }
-  // }
+  implicit def evalEdgeQuery[
+    E <: AnyEdgeType,
+    P <: AnyPredicate.On[E]
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      EvalPathOn[P, Query[E], Stream[TitanEdge]] =
+  new EvalPathOn[P, Query[E], Stream[TitanEdge]] {
+    def apply(path: Path)(in: In): Out = {
+      ManyOrNone(path.elem)(
+        transform(in.value, graph.query).edges
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+      )
+    }
+  }
 
 
   import com.tinkerpop.blueprints.Direction
@@ -43,62 +45,64 @@ case class evals(val graph: TitanGraph) {
   implicit def evalVertexGet[P <: AnyProp { type Owner <: AnyVertexType }]:
       EvalPathOn[TitanVertex, Get[P], P#Raw] =
   new EvalPathOn[TitanVertex, Get[P], P#Raw] {
-    // def apply(path: Path)(in: In): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
     def apply(path: Path)(in: In): Out = ExactlyOne(path.property)( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
   implicit def evalEdgeGet[P <: AnyProp { type Owner <: AnyEdgeType }]:
       EvalPathOn[TitanEdge, Get[P], P#Raw] =
   new EvalPathOn[TitanEdge, Get[P], P#Raw] {
-    // def apply(path: Path)(in: In): Out = List(path.prop( in.value.getProperty[P#Raw](path.prop.label) ))
     def apply(path: Path)(in: In): Out = ExactlyOne(path.property)( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
   implicit def evalSource[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Source[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Source[E], TitanVertex] {
-    // def apply(path: Path)(in: In): Out = List(new LabeledBy[TitanVertex, E#SourceType]( in.value.getVertex(Direction.OUT) ))
-    def apply(path: Path)(in: In): Out = new (TitanVertex LabeledBy ExactlyOne.C[E#Source])( in.value.getVertex(Direction.OUT) )
+    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).source)( in.value.getVertex(Direction.OUT) )
   }
 
   implicit def evalTarget[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Target[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Target[E], TitanVertex] {
-    // def apply(path: Path)(in: In): Out = List(new LabeledBy[TitanVertex, E#TargetType]( in.value.getVertex(Direction.IN) ))
-    def apply(path: Path)(in: In): Out = new (TitanVertex LabeledBy ExactlyOne.C[E#Target])( in.value.getVertex(Direction.IN) )
+    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).target)( in.value.getVertex(Direction.IN) )
   }
 
-  // implicit def evalInE[
-  //   P <: AnyPredicate { type ElementType <: AnyEdgeType }
-  // ](implicit transform: ToBlueprintsPredicate[P]): 
-  //     EvalPathOn[TitanVertex, InE[P], TitanEdge] =
-  // new EvalPathOn[TitanVertex, InE[P], TitanEdge] {
-  //   def apply(path: Path)(in: In): Out = {
-  //     transform(path.pred, 
-  //       in.value.query
-  //         .labels(path.pred.elementType.label)
-  //         .direction(Direction.IN)
-  //       ).edges
-  //       .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
-  //       .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
-  //   }
-  // }
+  implicit def evalInE[
+    P <: AnyPredicate { type ElementType <: AnyEdgeType }
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      EvalPathOn[TitanVertex, InE[P], Stream[TitanEdge]] =
+  new EvalPathOn[TitanVertex, InE[P], Stream[TitanEdge]] {
+    def apply(path: Path)(in: In): Out = {
+      type E = P#ElementType
+      val elem: E = path.pred.elementType
+      (elem.inC: E#InC)(elem: E)(
+        transform(path.pred, 
+          in.value.query
+            .labels(path.pred.elementType.label)
+            .direction(Direction.IN)
+          ).edges
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+      )
+    }
+  }
 
-  // implicit def evalOutE[
-  //   P <: AnyPredicate { type ElementType <: AnyEdgeType }
-  // ](implicit transform: ToBlueprintsPredicate[P]): 
-  //     EvalPathOn[TitanVertex, OutE[P], TitanEdge] =
-  // new EvalPathOn[TitanVertex, OutE[P], TitanEdge] {
-  //   def apply(path: Path)(in: In): Out = {
-  //     transform(path.pred, 
-  //       in.value.query
-  //         .labels(path.pred.elementType.label)
-  //         .direction(Direction.OUT)
-  //       ).edges
-  //       .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]]
-  //       .toList.map{ new LabeledBy[TitanEdge, P#ElementType]( _ ) }
-  //   }
-  // }
+  implicit def evalOutE[
+    P <: AnyPredicate { type ElementType <: AnyEdgeType }
+  ](implicit transform: ToBlueprintsPredicate[P]): 
+      EvalPathOn[TitanVertex, OutE[P], Stream[TitanEdge]] =
+  new EvalPathOn[TitanVertex, OutE[P], Stream[TitanEdge]] {
+    def apply(path: Path)(in: In): Out = {
+      type E = P#ElementType
+      val elem: E = path.pred.elementType
+      (elem.outC: E#OutC)(elem: E)(
+        transform(path.pred, 
+          in.value.query
+            .labels(path.pred.elementType.label)
+            .direction(Direction.OUT)
+          ).edges
+          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+      )
+    }
+  }
 
   // TODO: this implementation won't work in one step with vertex-query
   // implicit def evalOutVertices[E <: AnyEdgeType]:

@@ -11,17 +11,19 @@ object steps {
   case class Get[P <: AnyProp](val property: P) 
     extends Path[ExactlyOne.type, P#Owner, ExactlyOne.type, P](ExactlyOne, property.owner, ExactlyOne, property)
 
-  case class InE[E <: AnyEdgeType](val edge: E) 
-    extends Path[ExactlyOne.type, E#Target, E#InC, E](ExactlyOne, edge.target, edge.inC, edge)
+  case class InE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
+    extends Path[ExactlyOne.type, P#ElementType#Target, P#ElementType#InC, P#ElementType](ExactlyOne, pred.elementType.target, pred.elementType.inC, pred.elementType)
 
-  case class InV[E <: AnyEdgeType](val edge: E) 
-    extends Path[ExactlyOne.type, E#Target, E#InC, E#Source](ExactlyOne, edge.target, edge.inC, edge.source)
+  // TODO: same as for InE
+  // case class InV[E <: AnyEdgeType](val edge: E) 
+  //   extends Path[ExactlyOne.type, E#Target, E#InC, E#Source](ExactlyOne, edge.target, edge.inC, edge.source)
 
-  case class OutE[E <: AnyEdgeType](val edge: E) 
-    extends Path[ExactlyOne.type, E#Source, E#OutC, E](ExactlyOne, edge.source, edge.outC, edge)
+  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
+    extends Path[ExactlyOne.type, P#ElementType#Source, P#ElementType#OutC, P#ElementType](ExactlyOne, pred.elementType.source, pred.elementType.outC, pred.elementType)
 
-  case class OutV[E <: AnyEdgeType](val edge: E) 
-    extends Path[ExactlyOne.type, E#Source, E#OutC, E#Target](ExactlyOne, edge.source, edge.outC, edge.target)
+  // TODO: same as for OutE
+  // case class OutV[E <: AnyEdgeType](val edge: E) 
+  //   extends Path[ExactlyOne.type, E#Source, E#OutC, E#Target](ExactlyOne, edge.source, edge.outC, edge.target)
 
   case class Source[E <: AnyEdgeType](val edge: E)
     extends Path[ExactlyOne.type, E, ExactlyOne.type, E#Source](ExactlyOne, edge, ExactlyOne, edge.source)
@@ -33,8 +35,3 @@ object steps {
     extends Path[ExactlyOne.type, PredicateType[E], ManyOrNone.type, E](ExactlyOne, PredicateType[E](elem), ManyOrNone, elem)
 
 }
-
-//   case class InE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
-//     extends Step[P#ElementType#TargetType, P#ElementType](pred.elementType.targetType, pred.elementType) with OutArity[P#ElementType#InArity]
-//   case class OutE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
-//     extends Step[P#ElementType#SourceType, P#ElementType](pred.elementType.sourceType, pred.elementType) with OutArity[P#ElementType#OutArity]

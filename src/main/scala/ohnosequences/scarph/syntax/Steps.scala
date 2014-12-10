@@ -55,15 +55,15 @@ object steps {
 
   class VertexOps[Base <: AnyPath { type OutT <: AnyVertexType }](base: Base) {
 
-    // def inE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](p: P):
-    //   // (implicit c: Composable[Base, InE[P]] { type Out = A }):
-    //     Composition[Base, InE[P]] =
-    // new Composition[Base, InE[P]](base, InE(p))
+    def inE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](p: P):
+      // (implicit c: Composable[Base, InE[P]] { type Out = A }):
+        Composition[Base, InE[P]] =
+    new Composition[Base, InE[P]](base, InE(p))
 
-    // def outE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](p: P):
-    //   // (implicit c: Composable[Base, OutE[P]] { type Out = A }):
-    //     Composition[Base, OutE[P]] =
-    // new Composition[Base, OutE[P]](base, OutE(p))
+    def outE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](p: P):
+      // (implicit c: Composable[Base, OutE[P]] { type Out = A }):
+        Composition[Base, OutE[P]] =
+    new Composition[Base, OutE[P]](base, OutE(p))
   }
 
 }

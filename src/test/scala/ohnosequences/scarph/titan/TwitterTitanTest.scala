@@ -135,11 +135,11 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
       }
     }
 
-    val edu = g.vertex(user)(name)("@eparejatobes")
+    // val edu = g.vertex(user)(name)("@eparejatobes")
     val alexey = g.vertex(user)(name)("@laughedelic")
     val kim = g.vertex(user)(name)("@evdokim")
-    val twt = g.vertex(tweet)(text)("back to twitter :)")
-    val post = g.edge(posted)(time)("13.11.2012")
+    // val twt = g.vertex(tweet)(text)("back to twitter :)")
+    // val post = g.edge(posted)(time)("13.11.2012")
 
     // prepared test queries (they can be reused for different tests)
     val userName = Get(name)
@@ -147,147 +147,129 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     val postAuthorName = postAuthor >=> userName
     // val tweetAuthorName = InE(any(posted)) >=> postAuthorName
 
-    // val edu = Query(user).evalOn(askEdu).head
-    // val post = Query(posted).evalOn(askPost).head
-    // val twt = Query(tweet).evalOn(askTweet).head
+    val edu  = ExactlyOne(user)( Query(user).evalOn(askEdu).value.head )
+    val post = ExactlyOne(posted)( Query(posted).evalOn(askPost).value.head )
+    val twt  = ExactlyOne(tweet)( Query(tweet).evalOn(askTweet).value.head )
   }
 
   test("check what we got from the index queries") {
     import TestContext._, evals._
 
-    // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
-    // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
-    // assert{ kim == graph.vertex(user)(name)("@evdokim") }
-    // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
-    // assert{ post == graph.edge(posted)(time)("13.11.2012") }
+    // // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
+    // // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
+    // // assert{ kim == graph.vertex(user)(name)("@evdokim") }
+    // // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
+    // // assert{ post == graph.edge(posted)(time)("13.11.2012") }
 
-    /* Evaluating steps: */
-    assert{ Get(name).evalOn(edu) == name("@eparejatobes") }
-    assert{ Source(posted).evalOn(post) == edu }
+    // /* Evaluating steps: */
+    // assert{ Get(name).evalOn(edu) == name("@eparejatobes") }
+    // assert{ Source(posted).evalOn(post) == edu }
 
-    /* Composing steps: */
-    val posterName = Source(posted) >=> Get(name)
+    // /* Composing steps: */
+    // val posterName = Source(posted) >=> Get(name)
     
-    assert{ posterName.evalOn(post) == name("@eparejatobes") }
+    // assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
 
-//     val p = tweet in posted
-//     val zzz = p map posted.src
+    import shapeless._, poly._
+    import com.tinkerpop.blueprints.{ Query => BQuery }
 
-//     val pp = tweet in posted map posted.src
-    
-//     // this query returns a list of 4 Edus, so we comare it as a set
-//     assert{ (GetOutEdges(posted) >=> posterName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)).value == Stream() }
+    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)).value == Stream(edu.value) }
 
-//     // testing evaluation of getInVertices as one step
-//     // FIXME: it works ONLY if we have eval for exactly GetInVertices (should work without it too)
-//     assert{ (GetInVertices(posted) >=> GetProperty(name)).evalOn(twt) == name("@eparejatobes") }
+    // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
+    // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
+
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
+    assert{ postAuthor.evalOn(post) == edu }
+
+    assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
+
+    // this query returns a list of 4 Edus, so we comare it as a set
+    // assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+
+    // assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
   }
 
-//   // test("get vertex property") {
-//   //   import TestContext._, impl._
+  test("cool queries dsl") {
+    import TestContext._, evals._
+    import syntax.steps._
 
-//   //   // pure blueprints with string keys and casting:
-//   //   assert(edu.raw.getProperty[Int]("age") == 95)
-//   //   // safe and nifty:
-//   //   assert(edu.get(age).raw == 95)
-//   //   // and it's the same thing
-//   //   assert(edu.raw.getProperty[Int]("age") == edu.get(age).raw)
-//   // }
+    // element op:
+    val userName = user.get(name)
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
 
-//   // test("get OUTgoing edges and their property") {
-//   //   import TestContext._, impl._
+    // edge op:
+    val posterName = posted.source.get(name)
+    // assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
-//   //   assertResult(List(time("15.2.2014"), time("7.2.2014"))) {
-//   //     alexey out posted map { _ get time }
-//   //   }
+    // vertex op:
+    val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
 
-//   // }
+    // testing vertex query
+    val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
+    // assert{ vertexQuery.evalOn(edu) == Stream(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
+  }
 
-//   // test("get INcoming edges and their property") {
-//   //   import TestContext._, impl._
+  // test("get vertex property") {
+  //   import TestContext._, impl._
 
-//   //   assertResult(Some(time("13.11.2012"))) {
-//   //     twt in posted map { _ get time }
-//   //   }
-//   // }
-
-//   // test("get target/source vertices of incoming/outgoing edges") {
-//   //   import TestContext._, impl._
-
-//   //   assert{ post.src == edu }
-//   //   assert{ post.tgt == twt }
-
-//   //   assertResult( Some(name("@eparejatobes")) ) {
-//   //     twt in posted map { _.src } map { _ get name }
-//   //   }
-
-//   //   assert {
-//   //     (edu out follows map { _.tgt }) ==
-//   //     (edu  in follows map { _.src })
-//   //   }
-
-//   //   assertResult( Set(name("@eparejatobes"), name("@laughedelic"), name("@evdokim")) ) {
-//   //     (edu out follows
-//   //       map { _.tgt }
-//   //       flatMap { _ out follows }
-//   //       map { _.tgt }
-//   //       map { _ get name }
-//   //     ).toSet
-//   //   }
-
-//   // }
-
-//   // // test("out + target vs. outV") {
-
-//   // //   assert {
-//   // //     (edu out  follows map { _.tgt }) ==
-//   // //     (edu outV follows)
-//   // //   }
-//   // // }
-
-
-
-
-  //   /* Evaluating steps: */
-  //   import shapeless._, poly._
-  //   import com.tinkerpop.blueprints.{ Query => BQuery }
-
-  //   assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)) == List() }
-  //   assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)) == List(edu) }
-
-  //   assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
-  //   assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
-
-  //   assert{ userName.evalOn(edu) == name("@eparejatobes") }
-  //   assert{ postAuthor.evalOn(post) == edu }
-
-  //   assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
-
-  //   // this query returns a list of 4 Edus, so we comare it as a set
-  //   assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
-
-  //   assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
+  //   // pure blueprints with string keys and casting:
+  //   assert(edu.raw.getProperty[Int]("age") == 95)
+  //   // safe and nifty:
+  //   assert(edu.get(age).raw == 95)
+  //   // and it's the same thing
+  //   assert(edu.raw.getProperty[Int]("age") == edu.get(age).raw)
   // }
 
-  // test("cool queries dsl") {
-  //   import TestContext._, traversers._
-  //   import syntax.steps._
+  // test("get OUTgoing edges and their property") {
+  //   import TestContext._, impl._
 
-  //   // element op:
-  //   val userName = user.get(name)
-  //   assert{ userName.evalOn(edu) == name("@eparejatobes") }
+  //   assertResult(List(time("15.2.2014"), time("7.2.2014"))) {
+  //     alexey out posted map { _ get time }
+  //   }
 
-  //   // edge op:
-  //   val posterName = posted.source.get(name)
-  //   assert{ posterName.evalOn(post) == name("@eparejatobes") }
-
-  //   // vertex op:
-  //   val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
-
-  //   // testing vertex query
-  //   val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
-  //   assert{ vertexQuery.evalOn(edu) == List(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
   // }
 
+  // test("get INcoming edges and their property") {
+  //   import TestContext._, impl._
+
+  //   assertResult(Some(time("13.11.2012"))) {
+  //     twt in posted map { _ get time }
+  //   }
+  // }
+
+  // test("get target/source vertices of incoming/outgoing edges") {
+  //   import TestContext._, impl._
+
+  //   assert{ post.src == edu }
+  //   assert{ post.tgt == twt }
+
+  //   assertResult( Some(name("@eparejatobes")) ) {
+  //     twt in posted map { _.src } map { _ get name }
+  //   }
+
+  //   assert {
+  //     (edu out follows map { _.tgt }) ==
+  //     (edu  in follows map { _.src })
+  //   }
+
+  //   assertResult( Set(name("@eparejatobes"), name("@laughedelic"), name("@evdokim")) ) {
+  //     (edu out follows
+  //       map { _.tgt }
+  //       flatMap { _ out follows }
+  //       map { _.tgt }
+  //       map { _ get name }
+  //     ).toSet
+  //   }
+
+  // }
+
+  // // test("out + target vs. outV") {
+
+  // //   assert {
+  // //     (edu out  follows map { _.tgt }) ==
+  // //     (edu outV follows)
+  // //   }
+  // // }
 }
