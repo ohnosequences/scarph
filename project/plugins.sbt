@@ -1,6 +1,6 @@
 resolvers += "Era7 maven releases" at "https://s3.amazonaws.com/releases.era7.com"
 
-resolvers += "Era7 maven snapshots" at "https://snapshots.era7.com.s3.amazonaws.com"
+resolvers += "Era7 maven snapshots" at "https://s3.amazonaws.com/snapshots.era7.com"
 
 addSbtPlugin("ohnosequences" % "nice-sbt-settings" % "0.5.0-RC1")
 
