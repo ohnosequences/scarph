@@ -1,4 +1,4 @@
-resolvers += "Era7 maven releases" at "https://releases.era7.com.s3.amazonaws.com"
+resolvers += "Era7 maven releases" at "https://s3.amazonaws.com/releases.era7.com"
 
 resolvers += "Era7 maven snapshots" at "https://snapshots.era7.com.s3.amazonaws.com"
 
