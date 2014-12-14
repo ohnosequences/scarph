@@ -1,13 +1,6 @@
 package ohnosequences.scarph.test.titan
 
-import com.thinkaurelius.titan.core._
-import com.thinkaurelius.titan.core.Multiplicity._
-import com.thinkaurelius.titan.core.schema._
-
-import com.tinkerpop.blueprints.Edge
-import com.tinkerpop.blueprints.Vertex
-
-import java.io.File
+import org.scalatest
 
 import ohnosequences.cosas._
 
@@ -15,40 +8,39 @@ import ohnosequences.scarph._, steps._
 import ohnosequences.scarph.impl._, titan.schema._, titan.predicates._
 import ohnosequences.scarph.test._, Twitter._
 
-class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
+import com.thinkaurelius.titan.core._, Multiplicity._
+import com.thinkaurelius.titan.core.schema.TitanManagement
 
-  val graphLocation = new File("/tmp/titanTest")
-  var g: TitanGraph = null
 
-  def cleanDir(f: File) {
-    if (f.isDirectory) f.listFiles.foreach(cleanDir(_))
-    else { println(f.toString); f.delete }
-  }
+trait AnyTitanTestSuite extends scalatest.FunSuite with scalatest.BeforeAndAfterAll {
 
-  // Reusing the graph if possible, else cleaning the directory and creating graph
+  val g: TitanGraph = TitanFactory.open("inmemory")
+
   override def beforeAll() {
-    cleanDir(graphLocation)
-    g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
-
     g.createSchema(Twitter.schema)
 
+    // loading data from a prepared GraphSON file
     import com.tinkerpop.blueprints.util.io.graphson._
     GraphSONReader.inputGraph(g, getClass.getResource("/twitter_graph.json").getPath)
-
-    println("Created Titan graph")
   }
 
   override def afterAll() {
-    if(g != null) {
-      g.shutdown
-      // import com.tinkerpop.blueprints.util.io.graphson._
-      // GraphSONWriter.outputGraph(g, "graph_compact.json", GraphSONMode.COMPACT)
-      println("Shutdown Titan graph")
-    }
+    g.shutdown
+
+    // // NOTE: uncommend if you want to add data to the GraphSON:
+    // import com.tinkerpop.blueprints.util.io.graphson._
+    // GraphSONWriter.outputGraph(g, "graph_compact.json", GraphSONMode.COMPACT)
   }
+}
 
+// class TitanTestSuite extends scalatest.Suites(
+//   new TitanSchemaTestSuite,
+//   new TitanQueriesTestSuite
+// ) with scalatest.SequentialNestedSuiteExecution
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TitanTestSuite extends AnyTitanTestSuite {
 
   // checks existence and arity
   def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET)
