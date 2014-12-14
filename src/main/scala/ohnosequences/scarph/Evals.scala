@@ -1,8 +1,7 @@
 package ohnosequences.scarph
 
 import ohnosequences.cosas._
-import steps._, paths._
-import combinators._
+import paths._, steps._, combinators._
 
 // NOTE: maybe this should be Fn2
 trait AnyEvalPath {
@@ -35,6 +34,7 @@ object AnyEvalPath {
       EvalPathOn[X, IdStep[T], X] =
   new EvalPathOn[X, IdStep[T], X] { def apply(path: Path)(in: In): Out = in }
 
+
   implicit def evalComposition[
     I, 
     F <: AnyPath,
@@ -51,41 +51,60 @@ object AnyEvalPath {
     }
   }
 
-  // TODO: how?
-  // we need to have a map between containers and labels, so that each container is assigned a LabeledBy
-  // with LabeledBys of something inside. Having that, this should be easy (assuming you can map over it)
-  // this is where we would need monads and dist laws for them. PMO should be P#OutC[M#OutC[M#Out]], 
-  // everything labeledby
-  // case class EvalMap[
-  //   I,
-  //   P <: AnyPath, M <: AnyPath { type In = P#OutT },
-  //   O, PO, PMO
-  // ](val evalPrevPath: EvalPathOn[I, P, PO], val evalMappedPath: EvalPathOn[O, M, PMO]) 
-  // extends EvalPathOn[I, Map[P, M], PMO] {
 
-  //   def apply(path: Path)(in: In): Out = ???
-  // }
-
-  // TODO: how?
-  // we need to know something about how to go form labelings on two things to a labeling of one
-  // maybe it could be fixed so that I,O are derived from FI,SI and FO,SO respectively
-  // for our use, adding to labels ops for doing so sounds reasonable (making LabeledBy lax monoidal)
-  // all this applies to Or, but there is a bit more complicated due to the unnaturalness of coproducts in Scala
-  case class EvalPar[
-    I, FI, SI,
-    F <: AnyPath, S <: AnyPath,
-    O, FO, SO
-  ](val evalFirst: EvalPathOn[FI, F, FO], val evalSecond: EvalPathOn[SI, S, SO])
-  extends EvalPathOn[I, Par[F, S], O] {
-
-    def apply(path: Path)(in: In): Out = ???
+  implicit def evalMapOver[
+    P <: AnyPath, C <: AnyContainer,
+    I, F[_], O
+  ](implicit
+    evalInner: EvalPathOn[I, P, O],
+    functor: scalaz.Functor[F]
+  ):  EvalPathOn[F[I], P MapOver C, F[O]] = 
+  new EvalPathOn[F[I], P MapOver C, F[O]] {
+    def apply(path: Path)(in: In): Out = {
+      val inner = path.path
+      outOf(path)(
+        functor.map(in.value){ i => 
+          evalInner(inner)( inOf(inner)(i) ).value 
+        }
+      )
+    }
   }
 
-  // TODO: how??!?!
-  // The only possible way looks to be adding rev as a primitive so to say
-  // each path knows how to reverse itself and return something of type rev
-  // case class EvalRev[I, P <: AnyPath, O]() extends EvalPathOn[I, rev[P], O] {
 
-  //   def apply(path: rev[P])(in: In): Out = ???
-  // }
+  implicit def evalPar[
+    FI, SI,
+    F <: AnyPath, S <: AnyPath,
+    FO, SO
+  ](implicit
+    evalFirst:  EvalPathOn[FI, F, FO], 
+    evalSecond: EvalPathOn[SI, S, SO]
+  ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
+  new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
+    def apply(path: Path)(in: In): Out = {
+      outOf(path)((
+        evalFirst(path.first)( inOf(path.first)(in.value._1) ).value,
+        evalSecond(path.second)( inOf(path.second)(in.value._2) ).value
+      ))
+    }
+  }
+
+
+  import scalaz.\/
+  implicit def evalOr[
+    FI, SI,
+    F <: AnyPath, S <: AnyPath,
+    FO, SO
+  ](implicit
+    evalFirst:  EvalPathOn[FI, F, FO], 
+    evalSecond: EvalPathOn[SI, S, SO]
+  ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
+  new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
+    def apply(path: Path)(in: In): Out = {
+      outOf(path)( in.value.bimap(
+        fi => evalFirst(path.first)( inOf(path.first)(fi) ).value,
+        si => evalSecond(path.second)( inOf(path.second)(si) ).value
+      ))
+    }
+  }
+
 }
