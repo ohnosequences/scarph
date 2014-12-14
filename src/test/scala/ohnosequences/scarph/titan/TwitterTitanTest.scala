@@ -206,11 +206,17 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import TestContext._, evals._
 
     // option functor instance:
-    import scalaz.std.option._
+    import scalaz.std._, option._, list._
 
     assertResult( OneOrNone(user)(Option("@eparejatobes")) ){ 
       MapOver(Get(name), OneOrNone).evalOn( 
         OneOrNone(user)(Option(edu.value))
+      )
+    }
+
+    assertResult( ManyOrNone(OneOrNone(user))(List(Option("@eparejatobes"))) ){ 
+      MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
+        ManyOrNone(OneOrNone(user))(List(Option(edu.value)))
       )
     }
 
