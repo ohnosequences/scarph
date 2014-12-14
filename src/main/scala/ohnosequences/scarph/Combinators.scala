@@ -4,127 +4,131 @@ import paths._
 
 object combinators {
 
-  type ⨁[F <: AnyPath, S <: AnyPath] = Or[F,S]
-  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F,S]
+  type >=>[F <: AnyPath, S <: AnyPath] = Composition[F, S]
+  type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
+  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+}
 
-  // type rev[P <: AnyPath] = Rev[P]
-  // object rev { def apply[P <: AnyPath](p: P): rev[P] = Rev(p) }
+trait CombinatorOf1 extends AnyCombinator {
+
+  type Path <: AnyPath
+  val  path: Path
+}
+
+trait CombinatorOf2 extends AnyCombinator {
+
+  type First <: AnyPath
+  val  first: First
+
+  type Second <: AnyPath
+  val  second: Second
 }
 
 
 /* Sequential composition of two paths */
-trait AnyComposition extends AnyCombinator {
-
-  type First <: AnyPath
-  val  first: First
+trait AnyComposition extends CombinatorOf2 {
 
   type InT = First#InT
-  lazy val inT = first.inT
+  val  inT = first.inT
   type InC = First#InC
-  lazy val inC = first.inC
-
-  type Second <: AnyPath
-  val  second: Second
+  val  inC = first.inC
 
   type OutT = Second#OutT
-  lazy val outT = second.outT 
+  val  outT = second.outT 
   type OutC = Second#OutC
-  lazy val outC = second.outC
+  val  outC = second.outC
 }
 
-case class Composition[
-  F <: AnyPath,
-  S <: AnyPath //{ type In = F#Out }
-](val first: F, val second: S) extends AnyComposition {
+case class Composition[F <: AnyPath, S <: AnyPath] //{ type In = F#Out }
+  (val first: F, val second: S) extends AnyComposition {
 
   type First = F
   type Second = S
-
-  // type Rev = Composition[S#Rev, F#Rev]
 }
 
-/*
-this represents mapping a Path over a container; the path should have InT/OutT matching what the container wraps.
-*/
-trait AnyMap extends AnyCombinator {
+/* Mapping a Path over a container */
+trait AnyMapOver extends CombinatorOf1 {
 
-  // TODO add stuff from map
-  type PrevPath <: AnyPath
-  val  prevPath: PrevPath
+  type Container <: AnyContainer
+  val  container: Container
 
-  type InT = PrevPath#InT
-  lazy val inT: InT = prevPath.inT
-  type InC = PrevPath#InC
-  lazy val inC: InC = prevPath.inC
+  type InT = InOf[Path]
+  val  inT = inOf(path)
+  type InC = Container
+  val  inC = container
 
-  // the path being mapped should have as In the wrapped type
-  type MappedPath <: AnyPath //{ type In = PrevPath#OutT }
-  val  mappedPath: MappedPath
-
-  type OutT = OutOf[MappedPath]
-  lazy val outT: OutT = mappedPath.outC(mappedPath.outT)
-  type OutC = PrevPath#OutC
-  lazy val outC = prevPath.outC
+  type OutT = OutOf[Path]
+  val  outT = outOf(path)
+  type OutC = Container
+  val  outC = container
 }
 
-case class Map[P <: AnyPath, M <: AnyPath { type In = P#OutT }]
-  (val prevPath: P, val mappedPath: M) extends AnyMap {
+case class MapOver[P <: AnyPath, C <: AnyContainer]
+  (val path: P, val container: C) extends AnyMapOver {
 
-  type PrevPath = P
-  type MappedPath = M
+  type Path = P
+  type Container = C
 }
+
+
+/* Mapping a Path over a container */
+trait AnyFlatten extends CombinatorOf1 {
+
+  type Path <: AnyPath { type OutT <: AnyContainerType }
+
+  type InT = Path#InT
+  val  inT = path.inT
+  type InC = Path#InC
+  val  inC = path.inC
+
+  type OutT = Path#OutT#Of
+  val  outT = path.outT.of
+  // TODO: need arities multiplication for this:
+  // type OutC = Path#OutT#Constructor x Path#OutC
+}
+
+// case class Flatten[P <: AnyPath { type OutT <: AnyContainerType }]
+//   (val path: P)(implicit ...) extends AnyFlatten { type Path = P }
 
 
 /* Parallel composition of paths */
-trait AnyPar extends AnyCombinator {
-
-  type First <: AnyPath
-  val  first: First
-
-  type Second <: AnyPath
-  val  second: Second
+trait AnyPar extends CombinatorOf2 {
 
   type InT = ParV[InOf[First], InOf[Second]]
-  lazy val inT: InT = ParV(inOf(first), inOf(second))
+  val  inT = ParV(inOf(first), inOf(second))
   type InC = ExactlyOne.type
-  lazy val inC: InC = ExactlyOne 
+  val  inC = ExactlyOne 
 
   type OutT = ParV[OutOf[First], OutOf[Second]]
-  lazy val outT: OutT = ParV(outOf(first), outOf(second))
+  val  outT = ParV(outOf(first), outOf(second))
   type OutC = ExactlyOne.type
-  lazy val outC: OutC = ExactlyOne
+  val  outC = ExactlyOne
 }
 
-case class Par[F <: AnyPath, S <: AnyPath] (val first: F, val second: S) extends AnyPar {
+case class Par[F <: AnyPath, S <: AnyPath]
+  (val first: F, val second: S) extends AnyPar {
 
   type First = F
   type Second = S
-
-  // type Rev <: Par[F#Rev, S#Rev] // ParV[First#Rev#In <: First#Out, Second#Rev#In <: Second#Out]
 }
 
 
 /* Choice */
-trait AnyOr extends AnyCombinator {
-
-  type First <: AnyPath
-  val  first: First
-
-  type Second <: AnyPath
-  val  second: Second
+trait AnyOr extends CombinatorOf2 {
 
   type InT = OrV[InOf[First], InOf[Second]]
-  lazy val inT: InT = OrV(inOf(first), inOf(second))
+  val  inT = OrV(inOf(first), inOf(second))
   type InC = ExactlyOne.type
-  lazy val inC: InC = ExactlyOne 
+  val  inC = ExactlyOne 
 
   type OutT = OrV[OutOf[First], OutOf[Second]]
-  lazy val outT: OutT = OrV(outOf(first), outOf(second))
+  val  outT = OrV(outOf(first), outOf(second))
   type OutC = ExactlyOne.type
-  lazy val outC: OutC = ExactlyOne
+  val  outC = ExactlyOne
 }
 
-case class Or[F <: AnyPath, S <: AnyPath] (val first: F, val second: S) extends AnyOr {
+case class Or[F <: AnyPath, S <: AnyPath]
+  (val first: F, val second: S) extends AnyOr {
 
   type First = F
   type Second = S

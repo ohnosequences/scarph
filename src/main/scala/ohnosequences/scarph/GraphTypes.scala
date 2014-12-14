@@ -41,22 +41,22 @@ trait AnyEdgeType extends AnyElementType {
   type Source <: AnyVertexType
   val  source: Source
   /* This is the arity for incoming edges */
-  type InC <: AnyConstructor
+  type InC <: AnyContainer
   val  inC: InC
 
   /* The target vertex for this edge */
   type Target <: AnyVertexType
   val  target: Target
   /* This is the arity for outgoing edges */
-  type OutC <: AnyConstructor
+  type OutC <: AnyContainer
   val  outC: OutC
 }
 
 class EdgeType[
   I <: AnyVertexType,
-  InC0 <: AnyConstructor,
+  InC0 <: AnyContainer,
   O <: AnyVertexType,
-  OutC0 <: AnyConstructor
+  OutC0 <: AnyContainer
 ](val inC: InC0,
   val source: I,
   val outC: OutC0,

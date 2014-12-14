@@ -32,12 +32,12 @@ object schema {
 
     implicit def one2many[ET <: AnyEdgeType {
       type InC <: ExactlyOne.type
-      type OutC <: AnyConstructor
+      type OutC <: AnyContainer
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.ONE2MANY }
 
     implicit def many2one[ET <: AnyEdgeType {
-      type InC <: AnyConstructor
+      type InC <: AnyContainer
       type OutC <: ExactlyOne.type
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.MANY2ONE }
@@ -46,8 +46,8 @@ object schema {
   trait EdgeTypeMultiplicity_3 {
 
     implicit def many2many[ET <: AnyEdgeType {
-      type InC <: AnyConstructor
-      type OutC <: AnyConstructor
+      type InC <: AnyContainer
+      type OutC <: AnyContainer
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.MULTI }
   }

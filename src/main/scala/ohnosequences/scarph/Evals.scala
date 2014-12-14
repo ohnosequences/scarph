@@ -56,15 +56,15 @@ object AnyEvalPath {
   // with LabeledBys of something inside. Having that, this should be easy (assuming you can map over it)
   // this is where we would need monads and dist laws for them. PMO should be P#OutC[M#OutC[M#Out]], 
   // everything labeledby
-  case class EvalMap[
-    I,
-    P <: AnyPath, M <: AnyPath { type In = P#OutT },
-    O, PO, PMO
-  ](val evalPrevPath: EvalPathOn[I, P, PO], val evalMappedPath: EvalPathOn[O, M, PMO]) 
-  extends EvalPathOn[I, Map[P, M], PMO] {
+  // case class EvalMap[
+  //   I,
+  //   P <: AnyPath, M <: AnyPath { type In = P#OutT },
+  //   O, PO, PMO
+  // ](val evalPrevPath: EvalPathOn[I, P, PO], val evalMappedPath: EvalPathOn[O, M, PMO]) 
+  // extends EvalPathOn[I, Map[P, M], PMO] {
 
-    def apply(path: Path)(in: In): Out = ???
-  }
+  //   def apply(path: Path)(in: In): Out = ???
+  // }
 
   // TODO: how?
   // we need to know something about how to go form labelings on two things to a labeling of one

@@ -17,13 +17,13 @@ import AnyEvalPath._
 sealed trait AnyPath {
 
   /* Input */
-  type InC <: AnyConstructor
+  type InC <: AnyContainer
   val  inC: InC
   type InT <: AnyLabelType
   val  inT: InT
 
   /* Output */
-  type OutC <: AnyConstructor
+  type OutC <: AnyContainer
   val  outC: OutC
   type OutT <: AnyLabelType
   val  outT: OutT
@@ -35,8 +35,8 @@ sealed trait AnyPath {
 /* Important aliases which combine input/output arity container with its label type */
 object paths {
 
-  type InOf[P <: AnyPath] = P#InC#C[P#InT]
-  type OutOf[P <: AnyPath] = P#OutC#C[P#OutT]
+  type InOf[P <: AnyPath] = P#InC#Of[P#InT]
+  type OutOf[P <: AnyPath] = P#OutC#Of[P#OutT]
 
   def inOf[P <: AnyPath](p: P): InOf[P] = p.inC(p.inT)
   def outOf[P <: AnyPath](p: P): OutOf[P] = p.outC(p.outT)
@@ -52,7 +52,7 @@ trait AnyStep extends AnyPath {
 
 abstract class Step[
   IT <: AnyLabelType,
-  OC <: AnyConstructor,
+  OC <: AnyContainer,
   OT <: AnyLabelType
 ](val inT: IT,
   val outC: OC,
@@ -83,13 +83,12 @@ case class PathOps[P <: AnyPath](val p: P) {
   def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P,S] = Composition(p,s)
   // TODO: add witnesses for composition to workaround P <:!< P { type In = P#In }
   // def ∘[F <: AnyPath { type Out = P#In }](f: F): Composition[F,P] 
-  def map[G <: AnyPath { type In = P#OutT }](g: G): Map[P,G] = ohnosequences.scarph.Map[P,G](p,g)
+  // def map[G <: AnyPath { type In = P#OutT }](g: G): Map[P,G] = ohnosequences.scarph.Map[P,G](p,g)
 
   import combinators._
 
   def ⨁[G <: AnyPath](g: G): (P ⨁ G) = Or(p,g)
   def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
-  // def rev: rev[P] = Rev(p)
 
   def evalOn[I, O](input: I LabeledBy InOf[P])
     (implicit eval: EvalPathOn[I, P, O]): O LabeledBy OutOf[P] = eval(p)(input)
