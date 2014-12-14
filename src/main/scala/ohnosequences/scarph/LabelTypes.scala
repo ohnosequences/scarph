@@ -37,5 +37,6 @@ trait LabeledValue[V, T <: AnyLabelType] extends Any with AnyValueLabeledBy[T] {
 final class LabeledBy[V, T <: AnyLabelType](val value: V) extends AnyVal with LabeledValue[V, T] {
 
   // NOTE: it may be confusing:
+  // TODO: an implicit show instance for T here
   override def toString = value.toString
 }
