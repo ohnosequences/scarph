@@ -2,6 +2,7 @@ package ohnosequences.scarph
 
 
 /* This is a label type containing another label type */
+// TODO: this name is pretty unintuitive
 sealed trait AnyContainerType extends AnyLabelType {
 
   type Of <: AnyLabelType
@@ -22,15 +23,15 @@ case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)
 /* These are 4 types of arity containers that we can use for wrapping label types */
 sealed trait AnyContainer {
 
-  type Of[T <: AnyLabelType] <: AnyContainerType
+  type Of[T <: AnyLabelType] <: AnyLabelType
   def apply[T <: AnyLabelType](t: T): Of[T]
 }
 
 
 object ExactlyOne extends AnyContainer { 
 
-  type Of[T <: AnyLabelType] = ExactlyOneOf[T]
-  def apply[T <: AnyLabelType](t: T): Of[T] = ExactlyOneOf[T](t)
+  type Of[T <: AnyLabelType] = T
+  def apply[T <: AnyLabelType](t: T): Of[T] = t
 }
 
 object OneOrNone extends AnyContainer  { 
