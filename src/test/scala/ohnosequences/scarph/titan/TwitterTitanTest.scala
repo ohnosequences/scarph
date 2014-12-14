@@ -119,10 +119,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // low level querying:
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy ExactlyOne.Of[V] = {
+      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
         ExactlyOne(v)( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy ExactlyOne.Of[E] = {
+      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
         ExactlyOne(e)( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
@@ -163,8 +163,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
 
-    import shapeless._, poly._
-    import com.tinkerpop.blueprints.{ Query => BQuery }
+    // import shapeless._, poly._
 
     assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)).value == Stream() }
     assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)).value == Stream(edu.value) }
@@ -201,6 +200,20 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // testing vertex query
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
     // assert{ vertexQuery.evalOn(edu) == Stream(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
+  }
+
+  test("evaluating MapOver") {
+    import TestContext._, evals._
+
+    // option functor instance:
+    import scalaz.std.option._
+
+    assertResult( OneOrNone(user)(Option("@eparejatobes")) ){ 
+      MapOver(Get(name), OneOrNone).evalOn( 
+        OneOrNone(user)(Option(edu.value))
+      )
+    }
+
   }
 
   // test("get vertex property") {
