@@ -17,11 +17,10 @@ libraryDependencies += {
   }
 }
 
-resolvers += "restlet-releases" at "https://maven.restlet.org/"
-
 libraryDependencies ++= Seq(
-  "ohnosequences"           %%  "cosas"       % "0.6.0-SNAPSHOT",
-  "com.thinkaurelius.titan" %   "titan-all"   % "0.5.0",
-  "org.scalaz"              %%  "scalaz-core" % "7.1.0",
-  "org.scalatest"           %%  "scalatest"   % "2.2.2"             % "test"
+  "ohnosequences"           %% "cosas"            % "0.6.0-SNAPSHOT",
+  "org.scalaz"              %% "scalaz-core"      % "7.1.0",
+  "com.thinkaurelius.titan" %  "titan-core"       % "0.5.2",
+  "com.thinkaurelius.titan" %  "titan-berkeleyje" % "0.5.2"           % "test",
+  "org.scalatest"           %% "scalatest"        % "2.2.2"           % "test"
 )

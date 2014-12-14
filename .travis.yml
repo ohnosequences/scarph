@@ -1,8 +1,15 @@
 language: scala
 scala:
-  - 2.10.4
   - 2.11.4
+  - 2.10.4
 jdk:
-  - oraclejdk7
   - oraclejdk8
+  - oraclejdk7
 script: sbt test
+matrix:
+  fast_finish: true
+  allow_failures:
+    jdk:
+      - oraclejdk7
+    scala:
+      - 2.10.4
