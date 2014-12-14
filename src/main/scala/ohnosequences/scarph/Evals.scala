@@ -1,7 +1,7 @@
 package ohnosequences.scarph
 
 import ohnosequences.cosas._
-import steps._, AnyPath._
+import steps._, paths._
 import combinators._
 
 // NOTE: maybe this should be Fn2
@@ -84,8 +84,8 @@ object AnyEvalPath {
   // TODO: how??!?!
   // The only possible way looks to be adding rev as a primitive so to say
   // each path knows how to reverse itself and return something of type rev
-  case class EvalRev[I, P <: AnyPath, O]() extends EvalPathOn[I, rev[P], O] {
+  // case class EvalRev[I, P <: AnyPath, O]() extends EvalPathOn[I, rev[P], O] {
 
-    def apply(path: rev[P])(in: In): Out = ???
-  }
+  //   def apply(path: rev[P])(in: In): Out = ???
+  // }
 }

@@ -74,16 +74,8 @@ class EdgeType[
 
 
 // TODO: HList-like with bound on vertices, another for paths etc
-// trait AnyPar extends AnyLabelType {
 
-//   type First <: AnyLabelType
-//   val  first: First
-
-//   type Second <: AnyLabelType
-//   val  second: Second
-// }
-
-trait AnyOr extends AnyLabelType {
+trait AnyParV extends AnyLabelType {
 
   type First <: AnyLabelType
   val  first: First
@@ -92,15 +84,25 @@ trait AnyOr extends AnyLabelType {
   val  second: Second
 }
 
-case class ParV[+F <: AnyLabelType, +S <: AnyLabelType](val first: F, val second: S) extends AnyLabelType {
+case class ParV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyParV {
 
-  type First <: F
-  type Second <: S
+  type First = F
+  type Second = S
 
   val label = this.toString
 }
 
-case class OrV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyOr {
+
+trait AnyOrV extends AnyLabelType {
+
+  type First <: AnyLabelType
+  val  first: First
+
+  type Second <: AnyLabelType
+  val  second: Second
+}
+
+case class OrV[F <: AnyLabelType, S <: AnyLabelType](val first: F, val second: S) extends AnyOrV {
 
   type First = F
   type Second = S
