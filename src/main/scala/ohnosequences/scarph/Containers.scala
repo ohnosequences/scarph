@@ -10,8 +10,8 @@ sealed trait AnyContainerType extends AnyLabelType {
 }
 
 abstract class ContainerTypeOf[T <: AnyLabelType](val of: T)(lbl: String) extends AnyContainerType { 
-  type Of = T 
-  val label = s"${lbl}(${of.label})"
+  type Of = T
+  lazy val label = s"${lbl}(${of.label})"
 }
 
 case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")

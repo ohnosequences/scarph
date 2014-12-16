@@ -226,7 +226,8 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // }
   }
 
-  test("") {
+  test("labeling with containers") {
+
     assert {
       ManyOrNone(user)(Stream("@eparejatobes")) ==
       OneOrNone(user)(Stream("@eparejatobes"))
