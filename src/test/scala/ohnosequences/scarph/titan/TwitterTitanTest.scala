@@ -214,13 +214,29 @@ class TitanTestSuite extends AnyTitanTestSuite {
       )
     }
 
-  test("labeling with containers") {
-
-    assert {
-      ManyOrNone(user)(Stream("@eparejatobes")) ==
-      OneOrNone(user)(Stream("@eparejatobes"))
+    assertResult( ManyOrNone(OneOrNone(user))(List(Option("@eparejatobes"))) ){ 
+      MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
+        ManyOrNone(OneOrNone(user))(List(Option(edu.value)))
+      )
     }
 
+  }
+
+  test("type-safe equality for labeled values") {
+
+    import shapeless.test.illTyped
+
+    illTyped("""
+      ManyOrNone(user)("hola") ≅ ExactlyOne(user)("hola")
+    """)
+
+    illTyped("""
+      name("hola") ≅ id("hola")
+    """)
+
+    illTyped("""
+      ManyOrNone(user)("yuhuu") ≅ ManyOrNone(user)(12)
+    """)
   }
 
   // test("get vertex property") {

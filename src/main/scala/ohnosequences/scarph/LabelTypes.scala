@@ -40,3 +40,12 @@ final class LabeledBy[V, T <: AnyLabelType](val value: V) extends AnyVal with La
   // TODO: an implicit show instance for T here
   override def toString = value.toString
 }
+
+object LabeledBy {
+
+  implicit def eqForLabeledBy[V, T <: AnyLabelType](labeled: V LabeledBy T): Eq[V,T] = new Eq(labeled.value)
+  final class Eq[V, T <: AnyLabelType](val shouldBeLabeled: V) extends AnyVal {
+
+    def ≅(other: V LabeledBy T): Boolean = shouldBeLabeled == other.value
+  }
+}

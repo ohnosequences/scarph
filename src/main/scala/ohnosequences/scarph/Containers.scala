@@ -14,10 +14,10 @@ abstract class ContainerTypeOf[T <: AnyLabelType](val of: T)(val lbl: String) ex
   lazy val label = s"${lbl}(${of.label})"
 }
 
-case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)
-case class  OneOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t) 
-case class ManyOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t) 
-case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t) 
+case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")
+case class  OneOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("OneOrNone")
+case class ManyOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ManyOrNone")
+case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("AtLeastOne")
 
 
 /* These are 4 types of arity containers that we can use for wrapping label types */
