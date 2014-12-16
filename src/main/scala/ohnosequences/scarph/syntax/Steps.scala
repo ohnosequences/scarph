@@ -4,7 +4,10 @@ import ohnosequences.scarph._
 
 /* This is an example gremlin-like syntax for paths construction */
 object steps {
+  import ohnosequences.scarph.paths._
   import ohnosequences.scarph.steps._
+  import ohnosequences.scarph.combinators._
+
 
   /* Element types */
   implicit def fromElement[E <: AnyElementType](e: E):
@@ -64,6 +67,28 @@ object steps {
       // (implicit c: Composable[Base, OutE[P]] { type Out = A }):
         Composition[Base, OutE[P]] =
     new Composition[Base, OutE[P]](base, OutE(p))
+  }
+
+  /* Any paths */
+  implicit def fromElementToPath[E <: AnyElementType](e: E):
+        PathOps[IdStep[E]] =
+    new PathOps[IdStep[E]](IdStep(e))
+  implicit def fromPath[T <: AnyPath](t: T): PathOps[T] = new PathOps[T](t)
+
+  class PathOps[Base <: AnyPath](base: Base) {
+
+    // TODO: add witnesses for composition to workaround P <:!< P { type In = P#In }
+    // def ∘[F <: AnyPath { type Out = P#In }](f: F): Composition[F,P] 
+
+    def map[P <: AnyPath { type InC = ExactlyOne.type; type InT = Base#OutT }](p: P): 
+      Composition[Base, P MapOver Base#OutC] = 
+      Composition[Base, P MapOver Base#OutC](base, MapOver(p, base.outC))
+
+    def or[P <: AnyPath](p: P): (Base ⨁ P) = Or(base, p)
+    def ⨁[P <: AnyPath](p: P): (Base ⨁ P) = Or(base, p)
+
+    def par[P <: AnyPath](p: P): (Base ⨂ P) = Par(base, p)
+    def ⨂[P <: AnyPath](p: P): (Base ⨂ P) = Par(base, p)
   }
 
 }

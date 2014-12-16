@@ -204,8 +204,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("evaluating MapOver") {
     import TestContext._, evals._
-
-    // option functor instance:
+    // functor instances:
     import scalaz.std._, option._, list._
 
     assertResult( OneOrNone(user)(Option("@eparejatobes")) ){ 
@@ -218,6 +217,20 @@ class TitanTestSuite extends AnyTitanTestSuite {
       MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
         ManyOrNone(OneOrNone(user))(List(Option(edu.value)))
       )
+    }
+
+  }
+
+  test("checking combination of Composition and MapOver") {
+    import TestContext._, evals._
+    import scalaz.std._, option._, list._, stream._
+    import syntax.steps._
+
+    assertResult( ManyOrNone(user)(Stream("@eparejatobes")) ){ 
+      // val q = Query(user)
+      // (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
+
+      Query(user).map(Get(name)).evalOn( askEdu )
     }
 
   }
