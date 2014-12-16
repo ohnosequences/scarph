@@ -119,10 +119,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // low level querying:
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
+      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy ExactlyOne.Of[V] = {
         ExactlyOne(v)( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
+      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy ExactlyOne.Of[E] = {
         ExactlyOne(e)( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
@@ -171,7 +171,8 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
     // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
 
-    assert{ userName.evalOn(edu) == name("@eparejatobes") }
+    // assert( name("foo").toString == ExactlyOne(name)("foo").toString )
+    assert{ userName.evalOn(edu) == ExactlyOne(name)("@eparejatobes") }
     assert{ postAuthor.evalOn(post) == edu }
 
     assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
@@ -206,20 +207,32 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import TestContext._, evals._
 
     // option functor instance:
-    import scalaz.std._, option._, list._
+    import scalaz.std._, option._, list._, stream._
 
-    assertResult( OneOrNone(user)(Option("@eparejatobes")) ){ 
-      MapOver(Get(name), OneOrNone).evalOn( 
-        OneOrNone(user)(Option(edu.value))
-      )
+    // assertResult( OneOrNone(user)(Option("@eparejatobes")) ){ 
+    //   MapOver(Get(name), OneOrNone).evalOn( 
+    //     OneOrNone(user)(Option(edu.value))
+    //   )
+    // }
+
+    // assertResult( ManyOrNone(OneOrNone(user))(List(Option("@eparejatobes"))) ){ 
+    //   MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
+    //     ManyOrNone(OneOrNone(user))(List(Option(edu.value)))
+    //   )
+    // }
+
+    // assertResult( ManyOrNone(user)(Stream("@eparejatobes")) ){ 
+    //   Query(user).map(Get(name)).evalOn( askEdu )
+    // }
+  }
+
+  test("") {
+    assert {
+      ManyOrNone(user)(Stream("@eparejatobes")) ==
+      OneOrNone(user)(Stream("@eparejatobes"))
     }
 
-    assertResult( ManyOrNone(OneOrNone(user))(List(Option("@eparejatobes"))) ){ 
-      MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
-        ManyOrNone(OneOrNone(user))(List(Option(edu.value)))
-      )
-    }
-
+    assert { name("foo").toString == text("foo").toString }
   }
 
   // test("get vertex property") {

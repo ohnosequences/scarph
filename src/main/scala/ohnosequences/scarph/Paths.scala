@@ -80,15 +80,19 @@ case class PathOps[P <: AnyPath](val p: P) {
   // val in: InOf[P] = inOf(p)
   // val out: OutOf[P] = outOf(p)
 
-  def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P,S] = Composition(p,s)
+  def >=>[Q <: AnyPath { type InC = P#OutC; type InT = P#OutT }](q: Q): Composition[P, Q] = Composition(p, q)
   // TODO: add witnesses for composition to workaround P <:!< P { type In = P#In }
   // def ∘[F <: AnyPath { type Out = P#In }](f: F): Composition[F,P] 
-  // def map[G <: AnyPath { type In = P#OutT }](g: G): Map[P,G] = ohnosequences.scarph.Map[P,G](p,g)
+
+  /* This is a combination of composition and mapOver */
+  // TODO: move this to syntax
+  def map[Q <: AnyPath { type InC = ExactlyOne.type; type InT = P#OutT }](q: Q): Composition[P, Q MapOver P#OutC] =
+    Composition(p, MapOver(q, p.outC))
 
   import combinators._
 
-  def ⨁[G <: AnyPath](g: G): (P ⨁ G) = Or(p,g)
-  def ⨂[G <: AnyPath](g: G): (P ⨂ G) = Par(p,g)
+  def ⨁[Q <: AnyPath](q: Q): (P ⨁ Q) = Or(p, q)
+  def ⨂[Q <: AnyPath](q: Q): (P ⨂ Q) = Par(p, q)
 
   def evalOn[I, O](input: I LabeledBy InOf[P])
     (implicit eval: EvalPathOn[I, P, O]): O LabeledBy OutOf[P] = eval(p)(input)
