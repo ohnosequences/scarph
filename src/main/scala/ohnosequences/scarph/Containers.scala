@@ -14,7 +14,7 @@ abstract class ContainerTypeOf[T <: AnyLabelType](val of: T)(val lbl: String) ex
   lazy val label = s"${lbl}(${of.label})"
 }
 
-case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")
+// case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")
 case class  OneOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("OneOrNone")
 case class ManyOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ManyOrNone")
 case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("AtLeastOne")

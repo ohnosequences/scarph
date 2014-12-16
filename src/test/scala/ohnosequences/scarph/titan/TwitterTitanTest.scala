@@ -224,17 +224,15 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("type-safe equality for labeled values") {
 
-    import shapeless.test.illTyped
-
-    illTyped("""
+    assertTypeError("""
       ManyOrNone(user)("hola") ≅ ExactlyOne(user)("hola")
     """)
 
-    illTyped("""
+    assertTypeError("""
       name("hola") ≅ id("hola")
     """)
 
-    illTyped("""
+    assertTypeError("""
       ManyOrNone(user)("yuhuu") ≅ ManyOrNone(user)(12)
     """)
   }
