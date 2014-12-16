@@ -9,15 +9,15 @@ sealed trait AnyContainerType extends AnyLabelType {
   val  of: Of
 }
 
-abstract class ContainerTypeOf[T <: AnyLabelType](val of: T)(lbl: String) extends AnyContainerType { 
+abstract class ContainerTypeOf[T <: AnyLabelType](val of: T)(val lbl: String) extends AnyContainerType { 
   type Of = T
   lazy val label = s"${lbl}(${of.label})"
 }
 
-case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")
-case class  OneOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("OneOrNone")
-case class ManyOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ManyOrNone")
-case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("AtLeastOne")
+case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)
+case class  OneOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t) 
+case class ManyOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t) 
+case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t) 
 
 
 /* These are 4 types of arity containers that we can use for wrapping label types */
@@ -30,8 +30,8 @@ sealed trait AnyContainer {
 
 object ExactlyOne extends AnyContainer { 
 
-  type Of[T <: AnyLabelType] = ExactlyOneOf[T]
-  def apply[T <: AnyLabelType](t: T): Of[T] = ExactlyOneOf[T](t)
+  type Of[T <: AnyLabelType] = T
+  def apply[T <: AnyLabelType](t: T): Of[T] = t
 }
 
 object OneOrNone extends AnyContainer  { 

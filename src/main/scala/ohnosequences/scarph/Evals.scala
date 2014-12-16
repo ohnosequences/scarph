@@ -71,40 +71,40 @@ object AnyEvalPath {
   }
 
 
-  // implicit def evalPar[
-  //   FI, SI,
-  //   F <: AnyPath, S <: AnyPath,
-  //   FO, SO
-  // ](implicit
-  //   evalFirst:  EvalPathOn[FI, F, FO], 
-  //   evalSecond: EvalPathOn[SI, S, SO]
-  // ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
-  // new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
-  //   def apply(path: Path)(in: In): Out = {
-  //     outOf(path)((
-  //       evalFirst(path.first)( inOf(path.first)(in.value._1) ).value,
-  //       evalSecond(path.second)( inOf(path.second)(in.value._2) ).value
-  //     ))
-  //   }
-  // }
+  implicit def evalPar[
+    FI, SI,
+    F <: AnyPath, S <: AnyPath,
+    FO, SO
+  ](implicit
+    evalFirst:  EvalPathOn[FI, F, FO], 
+    evalSecond: EvalPathOn[SI, S, SO]
+  ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
+  new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
+    def apply(path: Path)(in: In): Out = {
+      outOf(path)((
+        evalFirst(path.first)( inOf(path.first)(in.value._1) ).value,
+        evalSecond(path.second)( inOf(path.second)(in.value._2) ).value
+      ))
+    }
+  }
 
 
-  // import scalaz.\/
-  // implicit def evalOr[
-  //   FI, SI,
-  //   F <: AnyPath, S <: AnyPath,
-  //   FO, SO
-  // ](implicit
-  //   evalFirst:  EvalPathOn[FI, F, FO], 
-  //   evalSecond: EvalPathOn[SI, S, SO]
-  // ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
-  // new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
-  //   def apply(path: Path)(in: In): Out = {
-  //     outOf(path)( in.value.bimap(
-  //       fi => evalFirst(path.first)( inOf(path.first)(fi) ).value,
-  //       si => evalSecond(path.second)( inOf(path.second)(si) ).value
-  //     ))
-  //   }
-  // }
+  import scalaz.\/
+  implicit def evalOr[
+    FI, SI,
+    F <: AnyPath, S <: AnyPath,
+    FO, SO
+  ](implicit
+    evalFirst:  EvalPathOn[FI, F, FO], 
+    evalSecond: EvalPathOn[SI, S, SO]
+  ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
+  new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
+    def apply(path: Path)(in: In): Out = {
+      outOf(path)( in.value.bimap(
+        fi => evalFirst(path.first)( inOf(path.first)(fi) ).value,
+        si => evalSecond(path.second)( inOf(path.second)(si) ).value
+      ))
+    }
+  }
 
 }
