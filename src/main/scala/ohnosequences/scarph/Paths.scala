@@ -67,6 +67,23 @@ abstract class Step[
 /* See available combinators in [Combinators.scala] */
 trait AnyCombinator extends AnyPath
 
+// ok, this is not a step, but it's similar
+case class Flatten[IC <: AnyContainer, T <: AnyContainerType, OC <: AnyContainer](val ic: IC, val t: T)
+  (implicit val mul: (IC x T#Container) { type Out = OC })
+  extends AnyPath {
+
+  type InC = IC
+  val  inC = ic
+  type InT = T
+  val  inT = t
+
+  type OutC = OC
+  val  outC = mul(ic, t.container)
+  type OutT = T#Of
+  val  outT = t.of
+
+}
+
 
 /* Adding useful methods */
 object AnyPath {

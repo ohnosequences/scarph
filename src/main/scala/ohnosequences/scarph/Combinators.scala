@@ -71,33 +71,22 @@ case class MapOver[P <: AnyPath, C <: AnyContainer]
 }
 
 
-/* Mapping a Path over a container */
-trait AnyFlatten extends CombinatorOf1 {
+// /* Mapping a Path over a container */
+// trait AnyFlatten extends CombinatorOf1 {
 
-  type Path <: AnyPath { type OutT <: AnyContainerType }
+//   type Path <: AnyPath { type OutT <: AnyContainerType }
 
-  type InT = Path#InT
-  val  inT = path.inT
-  type InC = Path#InC
-  val  inC = path.inC
+//   type InT = Path#InT
+//   val  inT = path.inT
+//   type InC = Path#InC
+//   val  inC = path.inC
 
-  type OutT = Path#OutT#Of
-  val  outT = path.outT.of
+//   type OutT = Path#OutT#Of
+//   val  outT = path.outT.of
 
-  // we will get OutC through this implicit on construction:
-  val mul: Path#OutC x Path#OutT#Container
-}
-
-case class Flatten[P <: AnyPath { type OutT <: AnyContainerType }, C <: AnyContainer]
-  (val path: P)
-  (implicit val mul: (P#OutC x P#OutT#Container) { type Out = C })
-  extends AnyFlatten {
-
-    type Path = P 
-
-    type OutC = C
-    val  outC = mul(path.outC, path.outT.container)
-  }
+//   // we will get OutC through this implicit on construction:
+//   val mul: Path#OutC x Path#OutT#Container
+// }
 
 
 /* Parallel composition of paths */
