@@ -2,50 +2,50 @@ package ohnosequences.scarph
 
 // TODO: use this thing from cosas
 
-trait AnyLabelType {
-  val label: String
-}
+// trait AnyLabelType {
+//   val label: String
+// }
 
-object AnyLabelType {
+// object AnyLabelType {
 
-  implicit def labelTypeOps[T <: AnyLabelType](t: T): LabelTypeOps[T] = new LabelTypeOps[T](t)
-}
+//   implicit def labelTypeOps[T <: AnyLabelType](t: T): LabelTypeOps[T] = new LabelTypeOps[T](t)
+// }
 
-class LabelTypeOps[ T <: AnyLabelType](t: T) {
+// class LabelTypeOps[ T <: AnyLabelType](t: T) {
 
-  def apply[V](v: V): V LabeledBy T = new LabeledBy(v)
-}
+//   def apply[V](v: V): V LabeledBy T = new LabeledBy(v)
+// }
 
 
-sealed trait AnyLabeledValue extends Any {
+// sealed trait AnyLabeledValue extends Any {
 
-  type Tpe <: AnyLabelType
-  // val  tpe: Tpe
+//   type Tpe <: AnyLabelType
+//   // val  tpe: Tpe
 
-  type Value
-  // val  value: Value
-}
+//   type Value
+//   // val  value: Value
+// }
 
-trait AnyValueLabeledBy[T <: AnyLabelType] extends Any with AnyLabeledValue {
-  type Tpe = T
-}
+// trait AnyValueLabeledBy[T <: AnyLabelType] extends Any with AnyLabeledValue {
+//   type Tpe = T
+// }
 
-trait LabeledValue[V, T <: AnyLabelType] extends Any with AnyValueLabeledBy[T] {
-  type Value = V
-}
+// trait LabeledValue[V, T <: AnyLabelType] extends Any with AnyValueLabeledBy[T] {
+//   type Value = V
+// }
 
-final class LabeledBy[V, T <: AnyLabelType](val value: V) extends AnyVal with LabeledValue[V, T] {
+// final class LabeledBy[V, T <: AnyLabelType](val value: V) extends AnyVal with LabeledValue[V, T] {
 
-  // NOTE: it may be confusing:
-  // TODO: an implicit show instance for T here
-  override def toString = value.toString
-}
+//   // NOTE: it may be confusing:
+//   // TODO: an implicit show instance for T here
+//   override def toString = value.toString
+// }
 
-object LabeledBy {
+// object LabeledBy {
 
-  implicit def eqForLabeledBy[V, T <: AnyLabelType](labeled: V LabeledBy T): Eq[V,T] = new Eq(labeled.value)
-  final class Eq[V, T <: AnyLabelType](val shouldBeLabeled: V) extends AnyVal {
+//   implicit def eqForLabeledBy[V, T <: AnyLabelType](labeled: V LabeledBy T): Eq[V,T] = new Eq(labeled.value)
+//   final class Eq[V, T <: AnyLabelType](val shouldBeLabeled: V) extends AnyVal {
 
-    def ≅(other: V LabeledBy T): Boolean = shouldBeLabeled == other.value
-  }
-}
+//     def ≅(other: V LabeledBy T): Boolean = shouldBeLabeled == other.value
+//   }
+// }

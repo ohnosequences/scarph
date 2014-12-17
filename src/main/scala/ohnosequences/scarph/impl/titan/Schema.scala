@@ -2,7 +2,7 @@ package ohnosequences.scarph.impl.titan
 
 // Schema stuff:
 
-import ohnosequences.cosas._, AnyTypeSet._, AnyFn._, AnyWrap._
+import ohnosequences.cosas._, AnyTypeSet._, AnyFn._
 import ohnosequences.cosas.ops.typeSet._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
