@@ -192,7 +192,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // edge op:
     val posterName = posted.source.get(name)
-    // FIXME: smth's wrong here:
+    // FIXME: smth's wrong here (probably related to IdStep):
     // assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // vertex op:
@@ -242,13 +242,13 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import scalaz.std._, option._, list._, stream._
     import syntax.steps._
 
-    assertResult( ManyOrNone(user)(Stream("@eparejatobes")) ){ 
-      val u = Query(user)
-      val followEdges = MapOver(OutE(any(follows)), u.outC)
-      // val users = MapOver(Target(follows), followEdges.outC)
-      (Flatten(u >=> followEdges) ).evalOn( askEdu )
+    assertResult( ManyOrNone(name)(Stream("@laughedelic", "@evdokim")) ){ 
+      Flatten(
+        Query(user)
+          .map( OutE(any(follows)) )
+      ).map( Target(follows).get(name) )
+      .evalOn( askEdu )
 
-      // user.map( user.outE(any(follows)) ).evalOn( edu )
     }
 
   }

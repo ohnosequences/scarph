@@ -71,6 +71,28 @@ object AnyEvalPath {
   }
 
 
+  // FIXME: this compiles and works, but it's not what we need:
+  // it returns the inner value-container G when it should return
+  // some container corresponding to C (i.e. OneOrNone -> Option)
+  implicit def evalFlatten[
+    P <: AnyPath { type OutT <: AnyContainerType }, 
+    C <: AnyContainer,
+    I, F[_], G[_], O
+  ](implicit
+    evalInner: EvalPathOn[I, P, F[G[O]]],
+    foldableF: scalaz.Foldable[F],
+    monoidG: scalaz.Monoid[G[O]] // or PlusEmpty?
+  ):  EvalPathOn[I, Flatten[P, C], G[O]] = 
+  new EvalPathOn[I, Flatten[P, C], G[O]] {
+    def apply(path: Path)(in: In): Out = {
+      val nested = evalInner(path.path)(in).value
+      outOf(path)(
+        foldableF.fold[G[O]](nested)(monoidG)
+      )
+    }
+  }
+
+
   implicit def evalPar[
     FI, SI,
     F <: AnyPath, S <: AnyPath,
