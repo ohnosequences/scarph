@@ -246,7 +246,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
       val u = Query(user)
       val followEdges = MapOver(OutE(any(follows)), u.outC)
       // val users = MapOver(Target(follows), followEdges.outC)
-      ( u >=> followEdges >=> Flatten(ManyOrNone, ManyOrNone(follows)) ).evalOn( askEdu )
+      (Flatten(u >=> followEdges) ).evalOn( askEdu )
 
       // user.map( user.outE(any(follows)) ).evalOn( edu )
     }

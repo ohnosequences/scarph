@@ -97,7 +97,7 @@ object steps {
   class NestedPathOps[Base <: AnyPath { type OutT <: AnyContainerType }](base: Base) {
 
     def flatten[C <: AnyContainer](implicit mul: (Base#OutC x Base#OutT#Container) { type Out = C }): 
-      Composition[Base, Flatten[Base#OutC, Base#OutT, C]] =
-      Composition(base, Flatten[Base#OutC, Base#OutT, C](base.outC, base.outT)(mul))
+      Flatten[Base, C] =
+      Flatten[Base, C](base)(mul)
   }
 }
