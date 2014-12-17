@@ -157,10 +157,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // assert{ Get(name).evalOn(edu) == name("@eparejatobes") }
     // assert{ Source(posted).evalOn(post) == edu }
 
-    // /* Composing steps: */
-    // val posterName = Source(posted) >=> Get(name)
+    /* Composing steps: */
+    val posterName = Source(posted) >=> Get(name)
     
-    // assert{ posterName.evalOn(post) == name("@eparejatobes") }
+    assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
 
     // import shapeless._, poly._
@@ -192,6 +192,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // edge op:
     val posterName = posted.source.get(name)
+    // FIXME: smth's wrong here:
     // assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // vertex op:
@@ -199,6 +200,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // testing vertex query
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
+    // FIXME: smth's wrong here:
     // assert{ vertexQuery.evalOn(edu) == Stream(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
@@ -231,6 +233,22 @@ class TitanTestSuite extends AnyTitanTestSuite {
       // (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
 
       Query(user).map(Get(name)).evalOn( askEdu )
+    }
+
+  }
+
+  test("flattening after double map") {
+    import TestContext._, evals._
+    import scalaz.std._, option._, list._, stream._
+    import syntax.steps._
+
+    assertResult( ManyOrNone(user)(Stream("@eparejatobes")) ){ 
+      val u = Query(user)
+      val followEdges = MapOver(OutE(any(follows)), u.outC)
+      // val users = MapOver(Target(follows), followEdges.outC)
+      (Flatten(u >=> followEdges) ).evalOn( askEdu )
+
+      // user.map( user.outE(any(follows)) ).evalOn( edu )
     }
 
   }

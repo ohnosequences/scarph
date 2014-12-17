@@ -83,12 +83,21 @@ trait AnyFlatten extends CombinatorOf1 {
 
   type OutT = Path#OutT#Of
   val  outT = path.outT.of
-  // TODO: need arities multiplication for this:
-  // type OutC = Path#OutT#Constructor x Path#OutC
+
+  // we will get OutC through this implicit on construction:
+  val mul: Path#OutC x Path#OutT#Container
 }
 
-// case class Flatten[P <: AnyPath { type OutT <: AnyContainerType }]
-//   (val path: P)(implicit ...) extends AnyFlatten { type Path = P }
+case class Flatten[P <: AnyPath { type OutT <: AnyContainerType }, C <: AnyContainer]
+  (val path: P)
+  (implicit val mul: (P#OutC x P#OutT#Container) { type Out = C })
+  extends AnyFlatten {
+
+    type Path = P 
+
+    type OutC = C
+    val  outC = mul(path.outC, path.outT.container)
+  }
 
 
 /* Parallel composition of paths */

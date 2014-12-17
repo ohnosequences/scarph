@@ -91,4 +91,13 @@ object steps {
     def ⨂[P <: AnyPath](p: P): (Base ⨂ P) = Par(base, p)
   }
 
+
+  implicit def nextedPathOps[T <: AnyPath { type OutT <: AnyContainerType }](t: T): NestedPathOps[T] = new NestedPathOps[T](t)
+
+  class NestedPathOps[Base <: AnyPath { type OutT <: AnyContainerType }](base: Base) {
+
+    def flatten[C <: AnyContainer](implicit mul: (Base#OutC x Base#OutT#Container) { type Out = C }): 
+      Flatten[Base, C] =
+      Flatten[Base, C](base)(mul)
+  }
 }
