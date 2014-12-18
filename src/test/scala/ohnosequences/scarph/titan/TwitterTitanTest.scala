@@ -195,15 +195,16 @@ class TitanTestSuite extends AnyTitanTestSuite {
     assert{ posterName.evalOn(post) === name("@eparejatobes") }
 
     // vertex op:
-    // FIXME: map
-    // val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
+    val friendsPosts =
+      user.outE( any(follows) ).map( follows.target )
+          .map( user.outE( any(posted) ).map( posted.target ) )
 
     import scalaz.Scalaz._
     // testing vertex query
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
-    // println(paths.outOf(vertexQuery))
-    // FIXME: 
-    assert{ vertexQuery.evalOn(edu) === ManyOrNone(url).denoteWith(Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
+    assert{ paths.outOf(vertexQuery) == ManyOrNone(url) }
+    assert{ vertexQuery.evalOn(edu) == ManyOrNone(url).denoteWith(Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
   test("evaluating MapOver") {
