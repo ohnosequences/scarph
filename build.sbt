@@ -17,8 +17,8 @@ libraryDependencies ++= Seq(
   "ohnosequences"           %% "cosas"       % "0.6.0-SNAPSHOT",
   "org.scalaz"              %% "scalaz-core" % "7.1.0",
   "com.thinkaurelius.titan" %  "titan-core"  % "0.5.2",
-  "org.scalatest"           %% "scalatest"   % "2.2.2"           % "test",
-  "org.slf4j"               %  "slf4j-nop"   % "1.7.5"           % "test"
+  "org.scalatest"           %% "scalatest"   % "2.2.2" % Test,
+  "org.slf4j"               %  "slf4j-nop"   % "1.7.5" % Test
   // ^ getting rid of the annoying warning about logging ^
 )
 

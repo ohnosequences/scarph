@@ -11,26 +11,22 @@ trait AnyEvalPath {
   type InVal
   type OutVal
 
-  type In = InVal LabeledBy InOf[Path]
-  type Out = OutVal LabeledBy OutOf[Path]
+  type In = InVal Denotes InOf[Path]
+  type Out = OutVal Denotes OutOf[Path]
 
   def apply(path: Path)(in: In): Out
 }
 
-trait AnyEvalPathOn[I, O] extends AnyEvalPath {
+trait EvalPathOn[I, P <: AnyPath, O] extends AnyEvalPath {
 
   type InVal = I
   type OutVal = O
-}
-
-trait EvalPathOn[I, P <: AnyPath, O] extends AnyEvalPathOn[I, O] {
-
   type Path = P
 }
 
 object AnyEvalPath {
 
-  implicit def evalIdStep[T <: AnyLabelType, X]:
+  implicit def evalIdStep[T <: AnyGraphType, X]:
       EvalPathOn[X, IdStep[T], X] =
   new EvalPathOn[X, IdStep[T], X] { def apply(path: Path)(in: In): Out = in }
 
@@ -62,9 +58,10 @@ object AnyEvalPath {
   new EvalPathOn[F[I], P MapOver C, F[O]] {
     def apply(path: Path)(in: In): Out = {
       val inner = path.path
-      outOf(path)(
+
+      outOf(path) denoteWith (
         functor.map(in.value){ i => 
-          evalInner(inner)( inOf(inner)(i) ).value 
+          evalInner(inner)( inOf(inner) denoteWith i ).value 
         }
       )
     }
@@ -86,7 +83,7 @@ object AnyEvalPath {
   new EvalPathOn[I, Flatten[P, C], G[O]] {
     def apply(path: Path)(in: In): Out = {
       val nested = evalInner(path.path)(in).value
-      outOf(path)(
+      outOf(path) denoteWith (
         foldableF.fold[G[O]](nested)(monoidG)
       )
     }
@@ -103,9 +100,9 @@ object AnyEvalPath {
   ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
   new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
     def apply(path: Path)(in: In): Out = {
-      outOf(path)((
-        evalFirst(path.first)( inOf(path.first)(in.value._1) ).value,
-        evalSecond(path.second)( inOf(path.second)(in.value._2) ).value
+      outOf(path) denoteWith ((
+        evalFirst(path.first)( inOf(path.first) denoteWith (in.value._1) ).value,
+        evalSecond(path.second)( inOf(path.second) denoteWith (in.value._2) ).value
       ))
     }
   }
@@ -122,9 +119,9 @@ object AnyEvalPath {
   ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
   new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
     def apply(path: Path)(in: In): Out = {
-      outOf(path)( in.value.bimap(
-        fi => evalFirst(path.first)( inOf(path.first)(fi) ).value,
-        si => evalSecond(path.second)( inOf(path.second)(si) ).value
+      outOf(path) denoteWith ( in.value.bimap(
+        fi => evalFirst(path.first)( inOf(path.first) denoteWith (fi) ).value,
+        si => evalSecond(path.second)( inOf(path.second) denoteWith (si) ).value
       ))
     }
   }

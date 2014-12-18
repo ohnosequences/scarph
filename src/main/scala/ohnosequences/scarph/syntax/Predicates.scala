@@ -1,5 +1,6 @@
 package ohnosequences.scarph.syntax
 
+import ohnosequences.cosas._
 import ohnosequences.scarph._
 
 object predicates {
@@ -11,12 +12,12 @@ object predicates {
 
   /* Every predicate already knows it's own label type, so let's make this labeling implicit */
   implicit def labeledPredicate[E <: AnyElementType, P <: AnyPredicate { type ElementType = E }](p: P):
-      (P LabeledBy PredicateType[E]) =
-  new (P LabeledBy PredicateType[E])(p)
+      (P Denotes PredicateType[E]) =
+  new (P Denotes PredicateType[E])(p)
 
   // implicit def elementLabeledPredicate[E <: AnyElementType](e: E):
-  //     (EmptyPredicate[E] LabeledBy PredicateType[E]) =
-  // new (EmptyPredicate[E] LabeledBy PredicateType[E])(new EmptyPredicate[E](e))
+  //     (EmptyPredicate[E] Denotes PredicateType[E]) =
+  // new (EmptyPredicate[E] Denotes PredicateType[E])(new EmptyPredicate[E](e))
 
 
   /* A way of building a predicate from an element */

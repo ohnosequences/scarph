@@ -19,7 +19,7 @@ object steps {
 
   class ElementOps[Base <: AnyPath { type OutT <: AnyElementType }](base: Base) {
 
-    def get[P <: AnyProp](p: P):
+    def get[P <: AnyGraphProperty](p: P):
       // (implicit c: Composable[Base, Get[P]] { type Out = Base#OutArity }):
         Composition[Base, Get[P]] =
     new Composition[Base, Get[P]](base, Get(p))

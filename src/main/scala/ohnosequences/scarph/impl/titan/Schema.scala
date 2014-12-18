@@ -2,7 +2,7 @@ package ohnosequences.scarph.impl.titan
 
 // Schema stuff:
 
-import ohnosequences.cosas._, AnyTypeSet._, AnyFn._, AnyWrap._
+import ohnosequences.cosas._, AnyTypeSet._, AnyFn._
 import ohnosequences.cosas.ops.typeSet._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
@@ -59,7 +59,7 @@ object schema {
      later on the schema type-sets.
   */
   object addPropertyKey extends Poly1 {
-    implicit def default[P <: AnyProp](implicit cc: ClassTag[P#Raw]) = 
+    implicit def default[P <: AnyGraphProperty](implicit cc: ClassTag[P#Raw]) = 
       at[P]{ (prop: P) =>
         { (m: TitanManagement) =>
           val clazz = cc.runtimeClass.asInstanceOf[Class[P#Raw]]
@@ -81,7 +81,7 @@ object schema {
   }
 
   object propertyLabel extends Poly1 {
-    implicit def default[P <: AnyProp] = at[P]{ _.label }
+    implicit def default[P <: AnyGraphProperty] = at[P]{ _.label }
   }
 
   object addIndex extends Poly1 {

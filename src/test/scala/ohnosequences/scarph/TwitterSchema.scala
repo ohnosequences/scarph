@@ -6,16 +6,16 @@ import ohnosequences.cosas._, AnyTypeSet._
 object Twitter {
 
   case object user extends VertexType
-  case object name extends PropertyOf(user) { type Raw = String }
-  case object age  extends PropertyOf(user) { type Raw = Integer }
+  case object name extends PropertyOf(user) { override type Raw = String }
+  case object age  extends PropertyOf(user) { override type Raw = Integer }
 
   case object tweet extends VertexType
-  case object text extends PropertyOf(tweet) { type Raw = String }
+  case object text extends PropertyOf(tweet) { override type Raw = String }
 
   case object posted extends EdgeType(ExactlyOne, user, ManyOrNone, tweet)
 
-  case object time extends PropertyOf(posted) { type Raw = String }
-  case object url  extends PropertyOf(posted) { type Raw = String }
+  case object time extends PropertyOf(posted) { override type Raw = String }
+  case object url  extends PropertyOf(posted) { override type Raw = String }
 
   case object follows extends EdgeType(ManyOrNone, user, ManyOrNone, user)
   case object liked extends EdgeType(ManyOrNone, user, ManyOrNone, tweet) 

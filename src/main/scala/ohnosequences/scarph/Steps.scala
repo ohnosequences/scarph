@@ -5,10 +5,10 @@ import AnyEvalPath._
 /* Basic steps: */
 object steps {
 
-  case class IdStep[T <: AnyLabelType](t: T) 
+  case class IdStep[T <: AnyGraphType](t: T) 
     extends Step[T, ExactlyOne.type, T](t, ExactlyOne, t)
 
-  case class Get[P <: AnyProp](val property: P) 
+  case class Get[P <: AnyGraphProperty](val property: P) 
     extends Step[P#Owner, ExactlyOne.type, P](property.owner, ExactlyOne, property)
 
   case class InE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
