@@ -26,11 +26,6 @@ trait EvalPathOn[I, P <: AnyPath, O] extends AnyEvalPath {
 
 object AnyEvalPath {
 
-  implicit def evalIdStep[T <: AnyGraphType, X]:
-      EvalPathOn[X, IdStep[T], X] =
-  new EvalPathOn[X, IdStep[T], X] { def apply(path: Path)(in: In): Out = in }
-
-
   implicit def evalComposition[
     I, 
     F <: AnyPath,

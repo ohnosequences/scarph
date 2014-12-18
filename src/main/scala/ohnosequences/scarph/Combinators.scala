@@ -4,7 +4,7 @@ import paths._
 
 object combinators {
 
-  type >=>[F <: AnyPath, S <: AnyPath] = Composition[F, S]
+  // type >=>[F <: AnyPath, S <: AnyPath] = Composition[F, S]
   type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
   type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
 }
@@ -39,7 +39,7 @@ trait AnyComposition extends CombinatorOf2 {
   val  outC = second.outC
 }
 
-case class Composition[F <: AnyPath, S <: AnyPath] //{ type In = F#Out }
+case class Composition[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }]
   (val first: F, val second: S) extends AnyComposition {
 
   type First = F
