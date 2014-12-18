@@ -19,13 +19,13 @@ sealed trait AnyPath {
   /* Input */
   type InC <: AnyContainer
   val  inC: InC
-  type InT <: AnyLabelType
+  type InT <: AnyGraphType
   val  inT: InT
 
   /* Output */
   type OutC <: AnyContainer
   val  outC: OutC
-  type OutT <: AnyLabelType
+  type OutT <: AnyGraphType
   val  outT: OutT
 
   // NOTE: we will need to forget about these bounds at some point
@@ -51,9 +51,9 @@ trait AnyStep extends AnyPath {
 }
 
 abstract class Step[
-  IT <: AnyLabelType,
+  IT <: AnyGraphType,
   OC <: AnyContainer,
-  OT <: AnyLabelType
+  OT <: AnyGraphType
 ](val inT: IT,
   val outC: OC,
   val outT: OT
@@ -83,6 +83,6 @@ case class PathOps[P <: AnyPath](val p: P) {
   // it's left here and not moved to syntax, because using syntax you shouldn't need it
   def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P, S] = Composition(p, s)
 
-  def evalOn[I, O](input: I LabeledBy InOf[P])
-    (implicit eval: EvalPathOn[I, P, O]): O LabeledBy OutOf[P] = eval(p)(input)
+  def evalOn[I, O](input: I Denotes InOf[P])
+    (implicit eval: EvalPathOn[I, P, O]): O Denotes OutOf[P] = eval(p)(input)
 }

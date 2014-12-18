@@ -13,7 +13,7 @@ import ohnosequences.cosas._, AnyTypeSet._
 
 
 /* ## Indexes */
-trait AnyIndex extends AnyLabelType {
+trait AnyIndex extends AnyGraphType {
 
   type IndexedType <: AnyElementType
   val  indexedType: IndexedType

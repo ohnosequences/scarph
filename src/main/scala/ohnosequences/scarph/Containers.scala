@@ -3,59 +3,60 @@ package ohnosequences.scarph
 
 /* This is a label type containing another label type */
 // TODO: this name is pretty unintuitive
-sealed trait AnyContainerType extends AnyLabelType {
+sealed trait AnyContainerType extends AnyGraphType {
 
   type Container <: AnyContainer
   val  container: Container
 
-  type Of <: AnyLabelType
+  type Of <: AnyGraphType
   val  of: Of
 }
 
-abstract class ContainerTypeOf[T <: AnyLabelType, C <: AnyContainer](val of: T)
+abstract class ContainerTypeOf[T <: AnyGraphType, C <: AnyContainer](val of: T)
   (val container: C, val lbl: String) extends AnyContainerType { 
 
+  
   type Container = C
   type Of = T
   lazy val label = s"${lbl}(${of.label})"
 }
 
-// case class ExactlyOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")
-case class  OneOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf(t)(OneOrNone, "OneOrNone")
-case class ManyOrNoneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf(t)(ManyOrNone, "ManyOrNone")
-case class AtLeastOneOf[T <: AnyLabelType](t: T) extends ContainerTypeOf(t)(AtLeastOne, "AtLeastOne")
+// case class ExactlyOneOf[T <: AnyGraphType](t: T) extends ContainerTypeOf[T](t)("ExactlyOne")
+case class  OneOrNoneOf[T <: AnyGraphType](t: T) extends ContainerTypeOf(t)(OneOrNone, "OneOrNone")
+case class ManyOrNoneOf[T <: AnyGraphType](t: T) extends ContainerTypeOf(t)(ManyOrNone, "ManyOrNone")
+case class AtLeastOneOf[T <: AnyGraphType](t: T) extends ContainerTypeOf(t)(AtLeastOne, "AtLeastOne")
 
 
 /* These are 4 types of arity containers that we can use for wrapping label types */
 sealed trait AnyContainer {
 
-  type Of[T <: AnyLabelType] <: AnyLabelType
-  def apply[T <: AnyLabelType](t: T): Of[T]
+  type Of[T <: AnyGraphType] <: AnyGraphType
+  def apply[T <: AnyGraphType](t: T): Of[T]
 }
 
 
 object ExactlyOne extends AnyContainer { 
 
-  type Of[T <: AnyLabelType] = T
-  def apply[T <: AnyLabelType](t: T): Of[T] = t
+  type Of[T <: AnyGraphType] = T
+  def apply[T <: AnyGraphType](t: T): Of[T] = t
 }
 
 object OneOrNone extends AnyContainer  { 
 
-  type Of[T <: AnyLabelType] = OneOrNoneOf[T]  
-  def apply[T <: AnyLabelType](t: T): Of[T] = OneOrNoneOf[T](t)
+  type Of[T <: AnyGraphType] = OneOrNoneOf[T]  
+  def apply[T <: AnyGraphType](t: T): Of[T] = OneOrNoneOf[T](t)
 }
 
 object ManyOrNone extends AnyContainer { 
 
-  type Of[T <: AnyLabelType] = ManyOrNoneOf[T] 
-  def apply[T <: AnyLabelType](t: T): Of[T] = ManyOrNoneOf[T](t)
+  type Of[T <: AnyGraphType] = ManyOrNoneOf[T] 
+  def apply[T <: AnyGraphType](t: T): Of[T] = ManyOrNoneOf[T](t)
 }
 
 object AtLeastOne extends AnyContainer { 
 
-  type Of[T <: AnyLabelType] = AtLeastOneOf[T] 
-  def apply[T <: AnyLabelType](t: T): Of[T] = AtLeastOneOf[T](t)
+  type Of[T <: AnyGraphType] = AtLeastOneOf[T] 
+  def apply[T <: AnyGraphType](t: T): Of[T] = AtLeastOneOf[T](t)
 }
 
 
