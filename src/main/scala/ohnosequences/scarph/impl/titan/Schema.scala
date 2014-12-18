@@ -59,7 +59,7 @@ object schema {
      later on the schema type-sets.
   */
   object addPropertyKey extends Poly1 {
-    implicit def default[P <: AnyProp](implicit cc: ClassTag[P#Raw]) = 
+    implicit def default[P <: AnyGraphProperty](implicit cc: ClassTag[P#Raw]) = 
       at[P]{ (prop: P) =>
         { (m: TitanManagement) =>
           val clazz = cc.runtimeClass.asInstanceOf[Class[P#Raw]]
@@ -81,7 +81,7 @@ object schema {
   }
 
   object propertyLabel extends Poly1 {
-    implicit def default[P <: AnyProp] = at[P]{ _.label }
+    implicit def default[P <: AnyGraphProperty] = at[P]{ _.label }
   }
 
   object addIndex extends Poly1 {

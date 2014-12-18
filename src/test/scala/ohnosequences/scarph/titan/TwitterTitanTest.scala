@@ -12,7 +12,7 @@ import com.thinkaurelius.titan.core._, Multiplicity._
 import com.thinkaurelius.titan.core.schema.TitanManagement
 
 
-trait AnyTitanTestSuite extends scalatest.FunSuite with scalatest.BeforeAndAfterAll {
+trait AnyTitanTestSuite extends scalatest.FunSuite with scalatest.BeforeAndAfterAll with ScalazEquality {
 
   val g: TitanGraph = TitanFactory.open("inmemory")
 
@@ -54,7 +54,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   }
 
   // checks existence and dataType
-  def checkPropertyKey[P <: AnyProp](mgmt: TitanManagement, p: P)
+  def checkPropertyKey[P <: AnyGraphProperty](mgmt: TitanManagement, p: P)
     (implicit cc: scala.reflect.ClassTag[P#Raw]) = {
 
     assert{ mgmt.containsRelationType(p.label) }
@@ -119,10 +119,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // low level querying:
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex Denotes V = {
+      def vertex[V <: AnyVertexType, P <: AnyGraphProperty](v: V)(p: P)(pval: P#Raw): TitanVertex Denotes V = {
         ExactlyOne(v) denoteWith ( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
-      def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge Denotes E = {
+      def edge[E <: AnyEdgeType, P <: AnyGraphProperty](e: E)(p: P)(pval: P#Raw): TitanEdge Denotes E = {
         ExactlyOne(e) denoteWith ( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
@@ -172,7 +172,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
 
     assert{ userName.evalOn(edu) === name("@eparejatobes") }
-    assert{ postAuthor.evalOn(post) === edu }
+    // assert{ postAuthor.evalOn(post) === edu }
 
     assert{ postAuthorName.evalOn(post) === name("@eparejatobes") }
 
@@ -242,7 +242,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import scalaz.std._, option._, list._, stream._
     import syntax.steps._
 
-    assertResult( ManyOrNone(name) denoteWith (Stream("@laughedelic", "@evdokim")) ){ 
+    assertResult( ManyOrNone(name).denoteWith(Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
         Query(user)
           .map( OutE(any(follows)) )
@@ -256,15 +256,15 @@ class TitanTestSuite extends AnyTitanTestSuite {
   test("type-safe equality for labeled values") {
 
     assertTypeError("""
-      ManyOrNone(user) denoteWith ("hola") ≅ ExactlyOne(user) denoteWith ("hola")
+      ManyOrNone(user).denoteWith("hola") === ExactlyOne(user).denoteWith("hola")
     """)
 
     assertTypeError("""
-      name("hola") ≅ id("hola")
+      name("hola") === text("hola")
     """)
 
     assertTypeError("""
-      ManyOrNone(user) denoteWith ("yuhuu") ≅ ManyOrNone(user) denoteWith (12)
+      ManyOrNone(user).denoteWith("yuhuu") === ManyOrNone(user).denoteWith(12)
     """)
   }
 

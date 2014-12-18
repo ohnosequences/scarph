@@ -5,7 +5,7 @@ import ohnosequences.cosas._, AnyTypeSet._
 
 trait AnySchema {
 
-  type Properties <: AnyTypeSet.Of[AnyProp]
+  type Properties <: AnyTypeSet.Of[AnyGraphProperty]
   val  properties: Properties
 
   type VertexTypes <: AnyTypeSet.Of[AnyVertexType]
@@ -19,7 +19,7 @@ trait AnySchema {
 }
 
 case class Schema[
-    Ps <: AnyTypeSet.Of[AnyProp],
+    Ps <: AnyTypeSet.Of[AnyGraphProperty],
     Vs <: AnyTypeSet.Of[AnyVertexType],
     Es <: AnyTypeSet.Of[AnyEdgeType],
     Is <: AnyTypeSet.Of[AnyIndex]

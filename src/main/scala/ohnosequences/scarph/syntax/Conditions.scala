@@ -5,11 +5,11 @@ import ohnosequences.scarph._
 object conditions {
 
   /* Method aliases for predicate constructors */
-  implicit def compareConditionOps[A <: AnyProp](property: A):
+  implicit def compareConditionOps[A <: AnyGraphProperty](property: A):
       CompareConditionOps[A] = 
       CompareConditionOps[A](property)
 
-  case class CompareConditionOps[A <: AnyProp](property: A) {
+  case class CompareConditionOps[A <: AnyGraphProperty](property: A) {
 
     final def ===(value: A#Raw): Equal[A] = Equal(property, value)
     final def =/=(value: A#Raw): NotEqual[A] = NotEqual(property, value)

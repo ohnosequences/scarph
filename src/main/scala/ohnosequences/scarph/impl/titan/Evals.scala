@@ -42,13 +42,13 @@ case class evals(val graph: TitanGraph) {
 
   import com.tinkerpop.blueprints.Direction
 
-  implicit def evalVertexGet[P <: AnyProp { type Owner <: AnyVertexType }]:
+  implicit def evalVertexGet[P <: AnyGraphProperty { type Owner <: AnyVertexType }]:
       EvalPathOn[TitanVertex, Get[P], P#Raw] =
   new EvalPathOn[TitanVertex, Get[P], P#Raw] {
     def apply(path: Path)(in: In): Out = ExactlyOne(path.property) denoteWith ( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
-  implicit def evalEdgeGet[P <: AnyProp { type Owner <: AnyEdgeType }]:
+  implicit def evalEdgeGet[P <: AnyGraphProperty { type Owner <: AnyEdgeType }]:
       EvalPathOn[TitanEdge, Get[P], P#Raw] =
   new EvalPathOn[TitanEdge, Get[P], P#Raw] {
     def apply(path: Path)(in: In): Out = ExactlyOne(path.property) denoteWith ( in.value.getProperty[path.property.Raw](path.property.label) )
