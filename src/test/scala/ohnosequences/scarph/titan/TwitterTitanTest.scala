@@ -192,22 +192,23 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // edge op:
     val posterName = posted.source.get(name)
-    // FIXME: smth's wrong here (probably related to IdStep):
-    // assert{ posterName.evalOn(post) == name("@eparejatobes") }
+    assert{ posterName.evalOn(post) === name("@eparejatobes") }
 
     // vertex op:
-    val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
+    // FIXME: map
+    // val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
 
+    import scalaz.Scalaz._
     // testing vertex query
-    val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
-    // FIXME: smth's wrong here:
-    // assert{ vertexQuery.evalOn(edu) == Stream(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
+    // println(paths.outOf(vertexQuery))
+    // FIXME: 
+    assert{ vertexQuery.evalOn(edu) === ManyOrNone(url).denoteWith(Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
   test("evaluating MapOver") {
     import TestContext._, evals._
-    // functor instances:
-    import scalaz.std._, option._, list._
+    import scalaz.Scalaz._
 
     assertResult( OneOrNone(user) denoteWith (Option("@eparejatobes")) ){ 
       MapOver(Get(name), OneOrNone).evalOn( 
@@ -215,9 +216,9 @@ class TitanTestSuite extends AnyTitanTestSuite {
       )
     }
 
-    assertResult( ManyOrNone(OneOrNone(user)) denoteWith (List(Option("@eparejatobes"))) ){ 
+    assertResult( ManyOrNone(OneOrNone(user)) denoteWith (Stream(Option("@eparejatobes"))) ){ 
       MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
-        ManyOrNone(OneOrNone(user)) denoteWith (List(Option(edu.value)))
+        ManyOrNone(OneOrNone(user)) denoteWith (Stream(Option(edu.value)))
       )
     }
 
@@ -239,7 +240,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("flattening after double map") {
     import TestContext._, evals._
-    import scalaz.std._, option._, list._, stream._
+    import scalaz.Scalaz._
     import syntax.steps._
 
     assertResult( ManyOrNone(name).denoteWith(Stream("@laughedelic", "@evdokim")) ){ 
@@ -282,7 +283,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   // test("get OUTgoing edges and their property") {
   //   import TestContext._, impl._
 
-  //   assertResult(List(time("15.2.2014"), time("7.2.2014"))) {
+  //   assertResult(Stream(time("15.2.2014"), time("7.2.2014"))) {
   //     alexey out posted map { _ get time }
   //   }
 

@@ -57,13 +57,13 @@ case class evals(val graph: TitanGraph) {
   implicit def evalSource[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Source[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Source[E], TitanVertex] {
-    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).source) denoteWith ( in.value.getVertex(Direction.OUT) )
+    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).inT) denoteWith ( in.value.getVertex(Direction.OUT) )
   }
 
   implicit def evalTarget[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Target[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Target[E], TitanVertex] {
-    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).target) denoteWith ( in.value.getVertex(Direction.IN) )
+    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).outT) denoteWith ( in.value.getVertex(Direction.IN) )
   }
 
   implicit def evalInE[

@@ -10,30 +10,44 @@ object steps {
 
 
   /* Element types */
-  implicit def fromElement[E <: AnyElementType](e: E):
-        ElementOps[IdStep[E]] =
-    new ElementOps[IdStep[E]](IdStep(e))
-  implicit def fromElementPath[B <: AnyPath { type OutT <: AnyElementType }](b: B):
-        ElementOps[B] =
-    new ElementOps[B](b)
+  implicit def elementOps[E <: AnyElementType](e: E):
+        ElementOps[E] =
+    new ElementOps[E](e)
 
-  class ElementOps[Base <: AnyPath { type OutT <: AnyElementType }](base: Base) {
+  class ElementOps[E <: AnyElementType](e: E) {
 
-    def get[P <: AnyGraphProperty](p: P):
+    def get[P <: AnyGraphProperty { type Owner = E }](p: P): Get[P] = Get(p)
+    // def get[P <: PropertyOf[E]](p: P): Get[P] = Get(p)
+  }
+
+  implicit def pathElementOps[B <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyElementType }](b: B):
+        PathElementOps[B] =
+    new PathElementOps[B](b)
+
+  class PathElementOps[Base <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyElementType }](base: Base) {
+
+    def get[P <: AnyGraphProperty { type Owner = Base#OutT }](p: P):
       // (implicit c: Composable[Base, Get[P]] { type Out = Base#OutArity }):
         Composition[Base, Get[P]] =
     new Composition[Base, Get[P]](base, Get(p))
   }
 
   /* Edge types */
-  implicit def fromEdge[E <: AnyEdgeType](e: E):
-        EdgeOps[IdStep[E]] =
-    new EdgeOps[IdStep[E]](IdStep(e))
-  implicit def fromEdgePath[B <: AnyPath { type OutT <: AnyEdgeType }](b: B):
-        EdgeOps[B] =
-    new EdgeOps[B](b)
+  implicit def edgeOps[E <: AnyEdgeType](e: E):
+        EdgeOps[E] =
+    new EdgeOps[E](e)
 
-  class EdgeOps[Base <: AnyPath { type OutT <: AnyEdgeType }](base: Base) {
+  class EdgeOps[E <: AnyEdgeType](e: E) {
+
+    def source: Source[E] = ohnosequences.scarph.steps.Source(e)
+    def target: Target[E] = ohnosequences.scarph.steps.Target(e)
+  }
+
+  implicit def pathEdgeOps[B <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyEdgeType }](b: B):
+        PathEdgeOps[B] =
+    new PathEdgeOps[B](b)
+
+  class PathEdgeOps[Base <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyEdgeType }](base: Base) {
 
     // NOTE: in gremlin this is called .outV
     def source:
@@ -49,31 +63,47 @@ object steps {
   }
 
   /* Vertex types */
-  implicit def fromVertex[E <: AnyVertexType](e: E):
-        VertexOps[IdStep[E]] =
-    new VertexOps[IdStep[E]](IdStep(e))
-  implicit def fromVertexPath[B <: AnyPath { type OutT <: AnyVertexType }](b: B):
-        VertexOps[B] =
-    new VertexOps[B](b)
+  implicit def vertexOps[V <: AnyVertexType](v: V):
+        VertexOps[V] =
+    new VertexOps[V](v)
 
-  class VertexOps[Base <: AnyPath { type OutT <: AnyVertexType }](base: Base) {
+  class VertexOps[V <: AnyVertexType](v: V) {
 
-    def inE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](p: P):
+    def inE[P <: AnyPredicate { 
+        type ElementType <: AnyEdgeType { type OutT = V }
+      }](p: P): InE[P] = InE(p)
+
+    def outE[P <: AnyPredicate { 
+        type ElementType <: AnyEdgeType { type InT = V }
+      }](p: P): OutE[P] = OutE(p)
+
+    // def outE[E <: AnyEdgeType { type Source = V }](e: E): OutE[EmptyPredicate[E]] = OutE(new EmptyPredicate(e))
+  }
+
+  implicit def pathVertexOps[B <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyVertexType }](b: B):
+        PathVertexOps[B] =
+    new PathVertexOps[B](b)
+
+  class PathVertexOps[Base <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyVertexType }](base: Base) {
+
+    def inE[P <: AnyPredicate { type ElementType <: AnyEdgeType { type OutT = Base#OutT } }](p: P):
       // (implicit c: Composable[Base, InE[P]] { type Out = A }):
         Composition[Base, InE[P]] =
     new Composition[Base, InE[P]](base, InE(p))
 
-    def outE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](p: P):
+    def outE[P <: AnyPredicate { type ElementType <: AnyEdgeType { type InT = Base#OutT } }](p: P):
       // (implicit c: Composable[Base, OutE[P]] { type Out = A }):
         Composition[Base, OutE[P]] =
     new Composition[Base, OutE[P]](base, OutE(p))
   }
 
   /* Any paths */
-  implicit def fromElementToPath[E <: AnyElementType](e: E):
-        PathOps[IdStep[E]] =
-    new PathOps[IdStep[E]](IdStep(e))
-  implicit def fromPath[T <: AnyPath](t: T): PathOps[T] = new PathOps[T](t)
+  // implicit def fromElementToPath[E <: AnyElementType](e: E):
+  //       PathOps[E] =
+  //   new PathOps[E](e)
+  implicit def pathOps[T <: AnyPath](t: T): 
+        PathOps[T] =
+    new PathOps[T](t)
 
   class PathOps[Base <: AnyPath](base: Base) {
 
@@ -88,11 +118,13 @@ object steps {
     def ⨁[P <: AnyPath](p: P): (Base ⨁ P) = Or(base, p)
 
     def par[P <: AnyPath](p: P): (Base ⨂ P) = Par(base, p)
-    def ⨂[P <: AnyPath](p: P): (Base ⨂ P) = Par(base, p)
+    def  ⨂[P <: AnyPath](p: P): (Base ⨂ P) = Par(base, p)
   }
 
 
-  implicit def nextedPathOps[T <: AnyPath { type OutT <: AnyContainerType }](t: T): NestedPathOps[T] = new NestedPathOps[T](t)
+  implicit def nestedPathOps[T <: AnyPath { type OutT <: AnyContainerType }](t: T): 
+        NestedPathOps[T] = 
+    new NestedPathOps[T](t)
 
   class NestedPathOps[Base <: AnyPath { type OutT <: AnyContainerType }](base: Base) {
 

@@ -35,40 +35,42 @@ abstract class VertexType extends AnyVertexType {
 }
 
 /* Edges connect vertices and have in/out arities */
-trait AnyEdgeType extends AnyElementType {
+trait AnyEdgeType extends AnyElementType with AnyPath {
 
+  type InT <: AnyVertexType
+  type OutT <: AnyVertexType
   
-  /* The source vertex for this edge */
-  type Source <: AnyVertexType
-  val  source: Source
-  /* This is the arity for incoming edges */
-  type InC <: AnyContainer
-  val  inC: InC
+  // /* The source vertex for this edge */
+  // type Source <: AnyVertexType
+  // val  source: Source
+  // /* This is the arity for incoming edges */
+  // type InC <: AnyContainer
+  // val  inC: InC
 
-  /* The target vertex for this edge */
-  type Target <: AnyVertexType
-  val  target: Target
-  /* This is the arity for outgoing edges */
-  type OutC <: AnyContainer
-  val  outC: OutC
+  // /* The target vertex for this edge */
+  // type Target <: AnyVertexType
+  // val  target: Target
+  // /* This is the arity for outgoing edges */
+  // type OutC <: AnyContainer
+  // val  outC: OutC
 }
 
 class EdgeType[
   IC <: AnyContainer,
-  I  <: AnyVertexType,
+  IT <: AnyVertexType,
   OC <: AnyContainer,
-  O  <: AnyVertexType
+  OT <: AnyVertexType
 ](val inC: IC,
-  val source: I,
+  val inT: IT,
   val outC: OC,
-  val target: O
+  val outT: OT
 ) extends AnyEdgeType {
 
   type InC = IC
-  type Source = I
+  type InT = IT
 
   type OutC = OC
-  type Target = O
+  type OutT = OT
 
   val label = this.toString
 }

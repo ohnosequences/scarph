@@ -14,7 +14,7 @@ import AnyEvalPath._
   - `C` suffix means (arity) _Container_
   - `T` suffix means (label) _Type_
 */
-sealed trait AnyPath {
+trait AnyPath {
 
   /* Input */
   type InC <: AnyContainer
