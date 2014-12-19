@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, types._, fns._
 import paths._, steps._, combinators._
 
 // NOTE: maybe this should be Fn2
@@ -54,14 +54,15 @@ object AnyEvalPath {
     def apply(path: Path)(in: In): Out = {
       val inner = path.path
 
-      outOf(path) denoteWith (
+      outOf(path) := (
         functor.map(in.value){ i => 
-          evalInner(inner)( inOf(inner) denoteWith i ).value 
+          evalInner(inner)( inOf(inner) := i ).value 
         }
       )
     }
   }
 
+  trait FlattenVals[F[_], G[_], X] extends Fn1[F[G[X]]]
 
   // FIXME: this compiles and works, but it's not what we need:
   // it returns the inner value-container G when it should return
@@ -69,18 +70,16 @@ object AnyEvalPath {
   implicit def evalFlatten[
     P <: AnyPath { type OutT <: AnyContainerType }, 
     C <: AnyContainer,
-    I, F[_], G[_], O
+    I, F[_], G[_], O, FGO
   ](implicit
     evalInner: EvalPathOn[I, P, F[G[O]]],
-    foldableF: scalaz.Foldable[F],
-    monoidG: scalaz.Monoid[G[O]] // or PlusEmpty?
-  ):  EvalPathOn[I, Flatten[P, C], G[O]] = 
-  new EvalPathOn[I, Flatten[P, C], G[O]] {
+    // NOTE: this should be provided for particular F, G, H by implementation:
+    flatten: FlattenVals[F, G, O] { type Out = FGO }
+  ):  EvalPathOn[I, Flatten[P, C], FGO] = 
+  new EvalPathOn[I, Flatten[P, C], FGO] {
     def apply(path: Path)(in: In): Out = {
       val nested = evalInner(path.path)(in).value
-      outOf(path) denoteWith (
-        foldableF.fold[G[O]](nested)(monoidG)
-      )
+      outOf(path) := flatten(nested)
     }
   }
 
@@ -95,9 +94,9 @@ object AnyEvalPath {
   ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
   new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
     def apply(path: Path)(in: In): Out = {
-      outOf(path) denoteWith ((
-        evalFirst(path.first)( inOf(path.first) denoteWith (in.value._1) ).value,
-        evalSecond(path.second)( inOf(path.second) denoteWith (in.value._2) ).value
+      outOf(path) := ((
+        evalFirst(path.first)( inOf(path.first) := (in.value._1) ).value,
+        evalSecond(path.second)( inOf(path.second) := (in.value._2) ).value
       ))
     }
   }
@@ -114,9 +113,9 @@ object AnyEvalPath {
   ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
   new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
     def apply(path: Path)(in: In): Out = {
-      outOf(path) denoteWith ( in.value.bimap(
-        fi => evalFirst(path.first)( inOf(path.first) denoteWith (fi) ).value,
-        si => evalSecond(path.second)( inOf(path.second) denoteWith (si) ).value
+      outOf(path) := ( in.value.bimap(
+        fi => evalFirst(path.first)( inOf(path.first) := (fi) ).value,
+        si => evalSecond(path.second)( inOf(path.second) := (si) ).value
       ))
     }
   }

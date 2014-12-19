@@ -1,6 +1,6 @@
 package ohnosequences.scarph.syntax
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, types._
 import ohnosequences.scarph._
 
 object predicates {

@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._, AnyTypeSet._
+import ohnosequences.cosas._, typeSets._
 
 // trait AnyDirection
 // case object InDirection extends AnyDirection

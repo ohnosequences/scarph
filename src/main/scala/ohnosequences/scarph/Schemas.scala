@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._, AnyTypeSet._
+import ohnosequences.cosas._, typeSets._
 // import ohnosequences.cosas.ops.typeSet._
 
 trait AnySchema {

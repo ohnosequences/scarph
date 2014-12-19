@@ -2,7 +2,7 @@ package ohnosequences.scarph.test.titan
 
 import org.scalatest
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, types._
 
 import ohnosequences.scarph._, steps._
 import ohnosequences.scarph.impl._, titan.schema._, titan.predicates._
@@ -120,10 +120,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // low level querying:
     implicit class graphOps(tg: TitanGraph) {
       def vertex[V <: AnyVertexType, P <: AnyGraphProperty](v: V)(p: P)(pval: P#Raw): TitanVertex Denotes V = {
-        ExactlyOne(v) denoteWith ( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
+        ExactlyOne(v) := ( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
       def edge[E <: AnyEdgeType, P <: AnyGraphProperty](e: E)(p: P)(pval: P#Raw): TitanEdge Denotes E = {
-        ExactlyOne(e) denoteWith ( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
+        ExactlyOne(e) := ( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
 
@@ -139,9 +139,9 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val postAuthorName = postAuthor >=> userName
     // val tweetAuthorName = InE(any(posted)) >=> postAuthorName
 
-    val edu  = ExactlyOne(user) denoteWith ( Query(user).evalOn(askEdu).value.head )
-    val post = ExactlyOne(posted) denoteWith ( Query(posted).evalOn(askPost).value.head )
-    val twt  = ExactlyOne(tweet) denoteWith ( Query(tweet).evalOn(askTweet).value.head )
+    val edu  = ExactlyOne(user) := ( Query(user).evalOn(askEdu).value.head )
+    val post = ExactlyOne(posted) := ( Query(posted).evalOn(askPost).value.head )
+    val twt  = ExactlyOne(tweet) := ( Query(tweet).evalOn(askTweet).value.head )
   }
 
   test("check what we got from the index queries") {
@@ -160,7 +160,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     /* Composing steps: */
     val posterName = Source(posted) >=> Get(name)
     
-    assert{ posterName.evalOn(post) === (name denoteWith "@eparejatobes") }
+    assert{ posterName.evalOn(post) == (name := "@eparejatobes") }
 
 
     // import shapeless._, poly._
@@ -171,10 +171,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
     // assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
 
-    assert{ userName.evalOn(edu) === name("@eparejatobes") }
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
     // assert{ postAuthor.evalOn(post) === edu }
 
-    assert{ postAuthorName.evalOn(post) === name("@eparejatobes") }
+    assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
 
     // this query returns a list of 4 Edus, so we comare it as a set
     // assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
@@ -188,11 +188,11 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // element op:
     val userName = user.get(name)
-    assert{ userName.evalOn(edu) === name("@eparejatobes") }
+    assert{ userName.evalOn(edu) == name("@eparejatobes") }
 
     // edge op:
     val posterName = posted.source.get(name)
-    assert{ posterName.evalOn(post) === name("@eparejatobes") }
+    assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // vertex op:
     val friendsPosts =
@@ -204,22 +204,22 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
     // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
     assert{ paths.outOf(vertexQuery) == ManyOrNone(url) }
-    assert{ vertexQuery.evalOn(edu) == ManyOrNone(url).denoteWith(Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    assert{ vertexQuery.evalOn(edu) == (ManyOrNone(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
   test("evaluating MapOver") {
     import TestContext._, evals._
     import scalaz.Scalaz._
 
-    assertResult( OneOrNone(user) denoteWith (Option("@eparejatobes")) ){ 
+    assertResult( OneOrNone(user) := (Option("@eparejatobes")) ){ 
       MapOver(Get(name), OneOrNone).evalOn( 
-        OneOrNone(user) denoteWith (Option(edu.value))
+        OneOrNone(user) := (Option(edu.value))
       )
     }
 
-    assertResult( ManyOrNone(OneOrNone(user)) denoteWith (Stream(Option("@eparejatobes"))) ){ 
+    assertResult( ManyOrNone(OneOrNone(user)) := (Stream(Option("@eparejatobes"))) ){ 
       MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
-        ManyOrNone(OneOrNone(user)) denoteWith (Stream(Option(edu.value)))
+        ManyOrNone(OneOrNone(user)) := (Stream(Option(edu.value)))
       )
     }
 
@@ -230,7 +230,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import scalaz.std._, option._, list._, stream._
     import syntax.steps._
 
-    assertResult( ManyOrNone(user) denoteWith (Stream("@eparejatobes")) ){ 
+    assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
       // val q = Query(user)
       // (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
 
@@ -244,7 +244,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import scalaz.Scalaz._
     import syntax.steps._
 
-    assertResult( ManyOrNone(name).denoteWith(Stream("@laughedelic", "@evdokim")) ){ 
+    assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
         Query(user)
           .map( OutE(any(follows)) )
@@ -258,7 +258,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   test("type-safe equality for labeled values") {
 
     assertTypeError("""
-      ManyOrNone(user).denoteWith("hola") === ExactlyOne(user).denoteWith("hola")
+      (ManyOrNone(user) := "hola") === (ExactlyOne(user) := "hola")
     """)
 
     assertTypeError("""
@@ -266,7 +266,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     """)
 
     assertTypeError("""
-      ManyOrNone(user).denoteWith("yuhuu") === ManyOrNone(user).denoteWith(12)
+      (ManyOrNone(user) := "yuhuu") === (ManyOrNone(user) := 12)
     """)
   }
 

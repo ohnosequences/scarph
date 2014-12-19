@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, properties._
 
 /* Condition is some restriction on the property values */
 trait AnyCondition { 

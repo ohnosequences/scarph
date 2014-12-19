@@ -1,15 +1,31 @@
 package ohnosequences.scarph.impl.titan
 
 import shapeless._
-import ohnosequences.cosas._, AnyFn._ 
-import ohnosequences.cosas.ops.typeSet._
+
 import com.thinkaurelius.titan.core._, schema._
 import scala.collection.JavaConversions._
+
+import ohnosequences.cosas._, fns._, types._
+import ohnosequences.cosas.ops.typeSets._
 
 import ohnosequences.scarph._, steps._, AnyEvalPath._
 import ohnosequences.scarph.impl.titan.predicates._
 
 case class evals(val graph: TitanGraph) {
+
+  implicit def flattenSS[X]: 
+        FlattenVals[Stream, Stream, X] with Out[Stream[X]] =
+    new FlattenVals[Stream, Stream, X] with Out[Stream[X]] { def apply(in: In1): Out = in.flatten }
+  implicit def flattenSO[X]: 
+        FlattenVals[Stream, Option, X] with Out[Stream[X]] =
+    new FlattenVals[Stream, Option, X] with Out[Stream[X]] { def apply(in: In1): Out = in.flatten }
+  implicit def flattenOS[X]: 
+        FlattenVals[Option, Stream, X] with Out[Stream[X]] =
+    new FlattenVals[Option, Stream, X] with Out[Stream[X]] { def apply(in: In1): Out = in.getOrElse(Stream[X]()) }
+  implicit def flattenOO[X]: 
+        FlattenVals[Option, Option, X] with Out[Option[X]] =
+    new FlattenVals[Option, Option, X] with Out[Option[X]] { def apply(in: In1): Out = in.flatten }
+  // TODO: add NEList
 
   implicit def evalVertexQuery[
     V <: AnyVertexType,
@@ -18,7 +34,7 @@ case class evals(val graph: TitanGraph) {
       EvalPathOn[P, Query[V], Stream[TitanVertex]] =
   new EvalPathOn[P, Query[V], Stream[TitanVertex]] {
     def apply(path: Path)(in: In): Out = {
-      ManyOrNone(path.elem) denoteWith (
+      ManyOrNone(path.elem) := (
         transform(in.value, graph.query).vertices
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]].toStream
       )
@@ -32,7 +48,7 @@ case class evals(val graph: TitanGraph) {
       EvalPathOn[P, Query[E], Stream[TitanEdge]] =
   new EvalPathOn[P, Query[E], Stream[TitanEdge]] {
     def apply(path: Path)(in: In): Out = {
-      ManyOrNone(path.elem)denoteWith (
+      ManyOrNone(path.elem) := (
         transform(in.value, graph.query).edges
           .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
       )
@@ -45,25 +61,25 @@ case class evals(val graph: TitanGraph) {
   implicit def evalVertexGet[P <: AnyGraphProperty { type Owner <: AnyVertexType }]:
       EvalPathOn[TitanVertex, Get[P], P#Raw] =
   new EvalPathOn[TitanVertex, Get[P], P#Raw] {
-    def apply(path: Path)(in: In): Out = ExactlyOne(path.property) denoteWith ( in.value.getProperty[path.property.Raw](path.property.label) )
+    def apply(path: Path)(in: In): Out = ExactlyOne(path.property) := ( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
   implicit def evalEdgeGet[P <: AnyGraphProperty { type Owner <: AnyEdgeType }]:
       EvalPathOn[TitanEdge, Get[P], P#Raw] =
   new EvalPathOn[TitanEdge, Get[P], P#Raw] {
-    def apply(path: Path)(in: In): Out = ExactlyOne(path.property) denoteWith ( in.value.getProperty[path.property.Raw](path.property.label) )
+    def apply(path: Path)(in: In): Out = ExactlyOne(path.property) := ( in.value.getProperty[path.property.Raw](path.property.label) )
   }
 
   implicit def evalSource[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Source[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Source[E], TitanVertex] {
-    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).inT) denoteWith ( in.value.getVertex(Direction.OUT) )
+    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).inT) := ( in.value.getVertex(Direction.OUT) )
   }
 
   implicit def evalTarget[E <: AnyEdgeType]:
       EvalPathOn[TitanEdge, Target[E], TitanVertex] =
   new EvalPathOn[TitanEdge, Target[E], TitanVertex] {
-    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).outT) denoteWith ( in.value.getVertex(Direction.IN) )
+    def apply(path: Path)(in: In): Out = ExactlyOne((path.edge: E).outT) := ( in.value.getVertex(Direction.IN) )
   }
 
   implicit def evalInE[
@@ -74,7 +90,7 @@ case class evals(val graph: TitanGraph) {
     def apply(path: Path)(in: In): Out = {
       type E = P#ElementType
       val elem: E = path.pred.elementType
-      (elem.inC: E#InC)(elem: E) denoteWith (
+      (elem.inC: E#InC)(elem: E) := (
         transform(path.pred, 
           in.value.query
             .labels(path.pred.elementType.label)
@@ -93,7 +109,7 @@ case class evals(val graph: TitanGraph) {
     def apply(path: Path)(in: In): Out = {
       type E = P#ElementType
       val elem: E = path.pred.elementType
-      (elem.outC: E#OutC)(elem: E) denoteWith (
+      (elem.outC: E#OutC)(elem: E) := (
         transform(path.pred, 
           in.value.query
             .labels(path.pred.elementType.label)

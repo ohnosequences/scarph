@@ -60,7 +60,7 @@ object AtLeastOne extends AnyContainer {
 }
 
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, fns._
 
 /* Arities multiplication */
 // not the best name, but it may look cool: A x B

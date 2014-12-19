@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, types._, properties._
 import ohnosequences.scarph.steps._
 
 trait AnyGraphType extends AnyType
