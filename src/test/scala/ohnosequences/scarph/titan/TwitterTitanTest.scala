@@ -250,7 +250,15 @@ class TitanTestSuite extends AnyTitanTestSuite {
           .map( OutE(any(follows)) )
       ).map( Target(follows).get(name) )
       .evalOn( askEdu )
+    }
 
+    // Same with .flatten syntax:
+    assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      Query(user)
+        .map( OutE(any(follows)) )
+        .flatten
+        .map( Target(follows).get(name) )
+      .evalOn( askEdu )
     }
 
   }

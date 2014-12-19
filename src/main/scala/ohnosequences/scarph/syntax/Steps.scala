@@ -114,6 +114,14 @@ object steps {
       Composition[Base, P MapOver Base#OutC] = 
       Composition[Base, P MapOver Base#OutC](base, MapOver(p, base.outC))
 
+    // def flatMap[P <: AnyPath { 
+    //     type InC = ExactlyOne.type
+    //     type InT = Base#OutT 
+    //   }, C <: AnyContainer
+    // ](p: P)(implicit mul: (Base#OutC x P#OutC) { type Out = C }):
+    //   Flatten[Composition[Base, P MapOver Base#OutC], C] = 
+    //   Flatten[Composition[Base, P MapOver Base#OutC], C](base.map(p))(mul)
+
     def or[P <: AnyPath](p: P): (Base ⨁ P) = Or(base, p)
     def ⨁[P <: AnyPath](p: P): (Base ⨁ P) = Or(base, p)
 
@@ -128,7 +136,7 @@ object steps {
 
   class NestedPathOps[Base <: AnyPath { type OutT <: AnyContainerType }](base: Base) {
 
-    def flatten[C <: AnyContainer](implicit mul: (Base#OutC x Base#OutT#Container) { type Out = C }): 
+    def flatten[C <: AnyContainer](implicit mul: (Base#OutC x Base#OutT#Container) { type Out = C }):
       Flatten[Base, C] =
       Flatten[Base, C](base)(mul)
   }

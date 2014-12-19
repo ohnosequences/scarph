@@ -11,6 +11,9 @@ import ohnosequences.cosas.ops.typeSets._
 import ohnosequences.scarph._, steps._, AnyEvalPath._
 import ohnosequences.scarph.impl.titan.predicates._
 
+import scalaz.{ NonEmptyList => NEList }
+// TODO: use scalaz.EphemeralStream instead of Stream
+
 case class evals(val graph: TitanGraph) {
 
   implicit def flattenSS[X]: 
@@ -25,7 +28,21 @@ case class evals(val graph: TitanGraph) {
   implicit def flattenOO[X]: 
         FlattenVals[Option, Option, X] with Out[Option[X]] =
     new FlattenVals[Option, Option, X] with Out[Option[X]] { def apply(in: In1): Out = in.flatten }
-  // TODO: add NEList
+  implicit def flattenNN[X]: 
+        FlattenVals[NEList, NEList, X] with Out[NEList[X]] =
+    new FlattenVals[NEList, NEList, X] with Out[NEList[X]] { def apply(in: In1): Out = in.flatMap(s => s) }
+  implicit def flattenNS[X]: 
+        FlattenVals[NEList, Stream, X] with Out[Stream[X]] =
+    new FlattenVals[NEList, Stream, X] with Out[Stream[X]] { def apply(in: In1): Out = in.stream.flatten }
+  implicit def flattenSN[X]: 
+        FlattenVals[Stream, NEList, X] with Out[Stream[X]] =
+    new FlattenVals[Stream, NEList, X] with Out[Stream[X]] { def apply(in: In1): Out = in.flatMap(s => s.stream) }
+  implicit def flattenNO[X]: 
+        FlattenVals[NEList, Option, X] with Out[Stream[X]] =
+    new FlattenVals[NEList, Option, X] with Out[Stream[X]] { def apply(in: In1): Out = in.stream.flatten }
+  implicit def flattenON[X]: 
+        FlattenVals[Option, NEList, X] with Out[Stream[X]] =
+    new FlattenVals[Option, NEList, X] with Out[Stream[X]] { def apply(in: In1): Out = in.map(_.stream).getOrElse(Stream[X]()) }
 
   implicit def evalVertexQuery[
     V <: AnyVertexType,
