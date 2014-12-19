@@ -184,7 +184,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("cool queries dsl") {
     import TestContext._, evals._
-    import syntax.steps._
+    import syntax.paths._
 
     // element op:
     val userName = user.get(name)
@@ -225,7 +225,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   test("checking combination of Composition and MapOver") {
     import TestContext._, evals._
     import scalaz.Scalaz._
-    import syntax.steps._
+    import syntax.paths._
 
     assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
       val q = Query(user)
@@ -241,7 +241,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   test("flattening after double map") {
     import TestContext._, evals._
     import scalaz.Scalaz._
-    import syntax.steps._
+    import syntax.paths._
 
     assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(

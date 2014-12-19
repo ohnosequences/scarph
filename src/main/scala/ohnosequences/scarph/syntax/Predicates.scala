@@ -16,8 +16,8 @@ object predicates {
   new (P Denotes ExactlyOne.Of[PredicateType[E]])(p)
 
   // implicit def elementLabeledPredicate[E <: AnyElementType](e: E):
-  //     (EmptyPredicate[E] Denotes PredicateType[E]) =
-  // new (EmptyPredicate[E] Denotes PredicateType[E])(new EmptyPredicate[E](e))
+  //     (EmptyPredicate[E] Denotes ExactlyOne.Of[PredicateType[E]]) =
+  // new (EmptyPredicate[E] Denotes ExactlyOne.Of[PredicateType[E]])(new EmptyPredicate[E](e))
 
 
   /* A way of building a predicate from an element */

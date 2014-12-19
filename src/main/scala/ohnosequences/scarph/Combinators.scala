@@ -4,7 +4,7 @@ import paths._
 
 object combinators {
 
-  // type >=>[F <: AnyPath, S <: AnyPath] = Composition[F, S]
+  type >=>[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }] = Composition[F, S]
   type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
   type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
 }
