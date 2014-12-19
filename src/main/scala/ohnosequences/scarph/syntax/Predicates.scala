@@ -12,8 +12,8 @@ object predicates {
 
   /* Every predicate already knows it's own label type, so let's make this labeling implicit */
   implicit def labeledPredicate[E <: AnyElementType, P <: AnyPredicate { type ElementType = E }](p: P):
-      (P Denotes PredicateType[E]) =
-  new (P Denotes PredicateType[E])(p)
+      (P Denotes ExactlyOne.Of[PredicateType[E]]) =
+  new (P Denotes ExactlyOne.Of[PredicateType[E]])(p)
 
   // implicit def elementLabeledPredicate[E <: AnyElementType](e: E):
   //     (EmptyPredicate[E] Denotes PredicateType[E]) =

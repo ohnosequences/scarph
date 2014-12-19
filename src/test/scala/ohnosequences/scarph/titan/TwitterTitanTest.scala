@@ -119,10 +119,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // low level querying:
     implicit class graphOps(tg: TitanGraph) {
-      def vertex[V <: AnyVertexType, P <: AnyGraphProperty](v: V)(p: P)(pval: P#Raw): TitanVertex Denotes V = {
+      def vertex[V <: AnyVertexType, P <: AnyGraphProperty](v: V)(p: P)(pval: P#Raw): TitanVertex Denotes ExactlyOne.Of[V] = {
         ExactlyOne(v) := ( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
       }
-      def edge[E <: AnyEdgeType, P <: AnyGraphProperty](e: E)(p: P)(pval: P#Raw): TitanEdge Denotes E = {
+      def edge[E <: AnyEdgeType, P <: AnyGraphProperty](e: E)(p: P)(pval: P#Raw): TitanEdge Denotes ExactlyOne.Of[E] = {
         ExactlyOne(e) := ( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
       }
     }
@@ -196,15 +196,18 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // vertex op:
     val friendsPosts =
-      user.outE( any(follows) ).map( follows.target )
-          .map( user.outE( any(posted) ).map( posted.target ) )
+      user.outE( any(follows) )
+          .flatMap( follows.target )
+          .flatMap( user.outE( any(posted) )
+          .flatMap( posted.target ) )
+    assert{ paths.outOf(friendsPosts) == ManyOrNone(tweet) }
 
     import scalaz.Scalaz._
     // testing vertex query
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
     // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
-    assert{ paths.outOf(vertexQuery) == ManyOrNone(url) }
-    assert{ vertexQuery.evalOn(edu) == (ManyOrNone(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    assert{ paths.outOf(vertexQuery) == ManyOrNone(ExactlyOne(url)) }
+    assert{ vertexQuery.evalOn(edu) == (ManyOrNone(ExactlyOne(url)) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
   test("evaluating MapOver") {
@@ -217,23 +220,19 @@ class TitanTestSuite extends AnyTitanTestSuite {
       )
     }
 
-    assertResult( ManyOrNone(OneOrNone(user)) := (Stream(Option("@eparejatobes"))) ){ 
-      MapOver(MapOver(Get(name), OneOrNone), ManyOrNone).evalOn( 
-        ManyOrNone(OneOrNone(user)) := (Stream(Option(edu.value)))
-      )
-    }
-
   }
 
   test("checking combination of Composition and MapOver") {
     import TestContext._, evals._
-    import scalaz.std._, option._, list._, stream._
+    import scalaz.Scalaz._
     import syntax.steps._
 
     assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
-      // val q = Query(user)
-      // (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
+      val q = Query(user)
+      (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
+    }
 
+    assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
       Query(user).map(Get(name)).evalOn( askEdu )
     }
 
@@ -246,20 +245,29 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
-        Query(user)
-          .map( OutE(any(follows)) )
-      ).map( Target(follows).get(name) )
+        Query(user).map( user.outE(any(follows)) )
+      ).map( follows.target.get(name) )
       .evalOn( askEdu )
     }
 
     // Same with .flatten syntax:
     assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Query(user)
-        .map( OutE(any(follows)) )
+        .map( user.outE(any(follows)) )
         .flatten
-        .map( Target(follows).get(name) )
+        .map( follows.target.get(name) )
       .evalOn( askEdu )
     }
+
+    // Same with .flatMap syntax:
+    assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      Query(user)
+        .flatMap( user.outE(any(follows)) )
+        .map( follows.target.get(name) )
+      .evalOn( askEdu )
+    }
+
+    // TODO: test all container combinations
 
   }
 

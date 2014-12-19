@@ -49,11 +49,13 @@ case class Composition[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT 
 /* Mapping a Path over a container */
 trait AnyMapOver extends CombinatorOf1 {
 
+  type Path <: AnyPath { type InC = ExactlyOne.type }
+
   type Container <: AnyContainer
   val  container: Container
 
-  type InT = InOf[Path]
-  val  inT = inOf(path)
+  type InT = Path#InT
+  val  inT = path.inT
   type InC = Container
   val  inC = container
 
@@ -63,7 +65,7 @@ trait AnyMapOver extends CombinatorOf1 {
   val  outC = container
 }
 
-case class MapOver[P <: AnyPath, C <: AnyContainer]
+case class MapOver[P <: AnyPath { type InC = ExactlyOne.type }, C <: AnyContainer]
   (val path: P, val container: C) extends AnyMapOver {
 
   type Path = P

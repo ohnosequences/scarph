@@ -44,7 +44,7 @@ object AnyEvalPath {
 
 
   implicit def evalMapOver[
-    P <: AnyPath, C <: AnyContainer,
+    P <: AnyPath { type InC = ExactlyOne.type }, C <: AnyContainer,
     I, F[_], O
   ](implicit
     evalInner: EvalPathOn[I, P, O],
