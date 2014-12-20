@@ -1,10 +1,10 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._, AnyTypeSet._
+import ohnosequences.cosas._, typeSets._
 
 
 /* Predicate is a restriction on properties of an element type */
-trait AnyPredicateType extends AnyLabelType {
+trait AnyPredicateType extends AnyGraphType {
   
   type ElementType <: AnyElementType
   val  elementType: ElementType

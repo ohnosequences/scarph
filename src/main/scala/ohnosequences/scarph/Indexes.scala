@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._, AnyTypeSet._
+import ohnosequences.cosas._, typeSets._
 
 // trait AnyDirection
 // case object InDirection extends AnyDirection
@@ -13,7 +13,7 @@ import ohnosequences.cosas._, AnyTypeSet._
 
 
 /* ## Indexes */
-trait AnyIndex extends AnyLabelType {
+trait AnyIndex extends AnyGraphType {
 
   type IndexedType <: AnyElementType
   val  indexedType: IndexedType

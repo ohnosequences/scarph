@@ -2,8 +2,8 @@ package ohnosequences.scarph.impl.titan
 
 // Schema stuff:
 
-import ohnosequences.cosas._, AnyTypeSet._, AnyFn._, AnyWrap._
-import ohnosequences.cosas.ops.typeSet._
+import ohnosequences.cosas._, typeSets._, fns._
+import ohnosequences.cosas.ops.typeSets._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._
 import com.thinkaurelius.titan.core.Multiplicity
@@ -19,29 +19,35 @@ object schema {
   /* This takes an edge type and returns Titan `Multiplicity` (i.e. edge arities) */
   trait EdgeTypeMultiplicity[ET <: AnyEdgeType] extends Fn1[ET] with Out[Multiplicity]
 
-  object EdgeTypeMultiplicity {
+  object EdgeTypeMultiplicity extends EdgeTypeMultiplicity_2 {
 
     implicit def one2one[ET <: AnyEdgeType { 
-      type InArity <: AnyOneArity
-      type OutArity <: AnyOneArity
+      type InC <: ExactlyOne.type
+      type OutC <: ExactlyOne.type
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.ONE2ONE }
+  }
+
+  trait EdgeTypeMultiplicity_2 extends EdgeTypeMultiplicity_3 {
 
     implicit def one2many[ET <: AnyEdgeType {
-      type InArity <: AnyOneArity
-      type OutArity <: AnyManyArity
+      type InC <: ExactlyOne.type
+      type OutC <: AnyContainer
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.ONE2MANY }
 
     implicit def many2one[ET <: AnyEdgeType {
-      type InArity <: AnyManyArity
-      type OutArity <: AnyOneArity
+      type InC <: AnyContainer
+      type OutC <: ExactlyOne.type
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.MANY2ONE }
+  }
+
+  trait EdgeTypeMultiplicity_3 {
 
     implicit def many2many[ET <: AnyEdgeType {
-      type InArity <: AnyManyArity
-      type OutArity <: AnyManyArity
+      type InC <: AnyContainer
+      type OutC <: AnyContainer
     }]: EdgeTypeMultiplicity[ET] =
     new EdgeTypeMultiplicity[ET] { def apply(et: In1): Out = Multiplicity.MULTI }
   }
@@ -53,7 +59,7 @@ object schema {
      later on the schema type-sets.
   */
   object addPropertyKey extends Poly1 {
-    implicit def default[P <: AnyProp](implicit cc: ClassTag[P#Raw]) = 
+    implicit def default[P <: AnyGraphProperty](implicit cc: ClassTag[P#Raw]) = 
       at[P]{ (prop: P) =>
         { (m: TitanManagement) =>
           val clazz = cc.runtimeClass.asInstanceOf[Class[P#Raw]]
@@ -75,7 +81,7 @@ object schema {
   }
 
   object propertyLabel extends Poly1 {
-    implicit def default[P <: AnyProp] = at[P]{ _.label }
+    implicit def default[P <: AnyGraphProperty] = at[P]{ _.label }
   }
 
   object addIndex extends Poly1 {

@@ -1,8 +1,8 @@
 package ohnosequences.scarph.impl.titan
 
 import shapeless._
-import ohnosequences.cosas._, AnyFn._ 
-import ohnosequences.cosas.ops.typeSet._
+import ohnosequences.cosas._, fns._ 
+import ohnosequences.cosas.ops.typeSets._
 import ohnosequences.scarph._
 import com.thinkaurelius.titan.core._, schema._
 import scala.collection.JavaConversions._

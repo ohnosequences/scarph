@@ -1,90 +1,87 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._
+import ohnosequences.cosas._, types._
 
-trait AnyPath extends HasOutArity {
+import AnyEvalPath._
 
-  type InT <: AnyLabelType
+/* 
+  _Path_ describes some graph traversal. It contains of steps that are combined in various ways.
+
+  Note that `AnyPath` hierarchy is sealed, meaning that a path is either a step or a combinator.
+  You can create steps and combinators extending `AnyStep` and `AnyCombinator` correspondingly.
+
+  In the following code there is a naming convention:
+  - `C` suffix means (arity) _Container_
+  - `T` suffix means (label) _Type_
+*/
+trait AnyPath {
+
+  /* Input */
+  type InC <: AnyContainer
+  val  inC: InC
+  type InT <: AnyGraphType
   val  inT: InT
 
-  type OutT <: AnyLabelType
+  /* Output */
+  type OutC <: AnyContainer
+  val  outC: OutC
+  type OutT <: AnyGraphType
   val  outT: OutT
+
+  // TODO: add Reverse member
 }
 
-abstract class Path[I <: AnyLabelType, O <: AnyLabelType](val inT: I, val outT: O) extends AnyPath {
+/* Important aliases which combine input/output arity container with its label type */
+object paths {
 
-  type InT = I
-  type OutT = O
+  type InOf[P <: AnyPath] = P#InC#Of[P#InT]
+  type OutOf[P <: AnyPath] = P#OutC#Of[P#OutT]
+
+  def inOf[P <: AnyPath](p: P): InOf[P] = p.inC(p.inT)
+  def outOf[P <: AnyPath](p: P): OutOf[P] = p.outC(p.outT)
 }
 
+/* A _step_ is a simple atomic _path_ which can be evaluated directly.
+   Note that it always has form "ExactlyOne to something". */
+trait AnyStep extends AnyPath {
 
-/* A step is a minimal unit of path */
-trait AnyStep extends AnyPath
-
-abstract class Step[I <: AnyLabelType, O <: AnyLabelType](i: I, o: O) 
-  extends Path[I, O](i, o) with AnyStep
-
-/* Path is a composition of other paths */
-trait AnyComposition extends AnyPath {
-
-  type First <: AnyPath
-  val  first: First
-
-  type Second <: AnyPath //{ type InT = First#OutT }
-  val  second: Second
-
-  type InT = First#InT
-  val  inT = first.inT
-
-  type OutT = Second#OutT
-  val  outT = second.outT
-
-  // should be provided implicitly:
-  val canCompose: Composable[First, Second]
+  type InC = ExactlyOne.type
+  val  inC = ExactlyOne
 }
 
-class Compose[F <: AnyPath, S <: AnyPath, A <: AnyArity]
-  (val first: F, val second: S)
-  (implicit val canCompose: Composable[F, S] { type Out = A })
-  extends AnyComposition {
+abstract class Step[
+  IT <: AnyGraphType,
+  OC <: AnyContainer,
+  OT <: AnyGraphType
+](val inT: IT,
+  val outC: OC,
+  val outT: OT
+) extends AnyStep {
 
-  type First = F
-  type Second = S
-
-  type OutArity = A
+  type InT = IT
+  type OutC = OC
+  type OutT = OT
 }
 
+/* See available combinators in [Combinators.scala] */
+trait AnyCombinator extends AnyPath
 
+
+/* Adding useful methods */
 object AnyPath {
 
-  implicit def pathOps[T <: AnyPath](t: T): PathOps[T] = new PathOps(t)
+  implicit def pathOps[T <: AnyPath](t: T) = PathOps(t)
 }
 
-/* This checks that the paths are composable and multiplies their out-arities */
-@annotation.implicitNotFound(msg = "Can't compose ${F} with ${S}")
-trait Composable[F <: AnyPath, S <: AnyPath] extends AnyFn with OutBound[AnyArity] {
-  val mutlipliedArities: (F#OutArity x S#OutArity)
-}
+case class PathOps[P <: AnyPath](val p: P) {
+  import paths._
 
-object Composable {
+  val in: InOf[P] = inOf(p)
+  val out: OutOf[P] = outOf(p)
 
-  implicit def can[F <: AnyPath, S <: AnyPath { type InT = F#OutT }, A <: AnyArity]
-    (implicit m: (F#OutArity x S#OutArity) { type Out = A }): 
-        Composable[F, S] with Out[A] =
-    new Composable[F, S] with Out[A] { val mutlipliedArities = m }
-}
+  // it's left here and not moved to syntax, because using syntax you shouldn't need it
+  def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P, S] = Composition(p, s)
 
-class PathOps[F <: AnyPath](val t: F) {
-
-  /* Just a synonim for composition */
-  def >=>[S <: AnyPath, A <: AnyArity](s: S)
-    (implicit c: Composable[F, S] { type Out = A }): 
-        Compose[F, S, A] = 
-    new Compose[F, S, A](t, s)(c)
-
-  def evalOn[I, O, PackedOut](i: I LabeledBy F#InT)
-    (implicit 
-      ev: Traverser[I, F, O],
-      pack: Pack[O LabeledBy F#OutT, F#OutArity] { type Out = PackedOut }
-    ): PackedOut = pack(ev(i, t))
+  def evalOn[I, O](input: I Denotes InOf[P])
+    (implicit eval: EvalPathOn[I, P, O]): O Denotes OutOf[P] = eval(p)(input)
 }

@@ -1,54 +1,46 @@
 package ohnosequences.scarph.test.titan
 
-import com.thinkaurelius.titan.core._
-import com.thinkaurelius.titan.core.Multiplicity._
-import com.thinkaurelius.titan.core.schema._
+import org.scalatest
 
-import com.tinkerpop.blueprints.Edge
-import com.tinkerpop.blueprints.Vertex
-
-import java.io.File
-
-import ohnosequences.cosas._
+import ohnosequences.cosas._, types._
 
 import ohnosequences.scarph._, steps._
 import ohnosequences.scarph.impl._, titan.schema._, titan.predicates._
 import ohnosequences.scarph.test._, Twitter._
 
-class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfterAll {
+import com.thinkaurelius.titan.core.{ TitanFactory, TitanGraph, TitanVertex, TitanEdge }
+import com.thinkaurelius.titan.core.schema.TitanManagement
 
-  val graphLocation = new File("/tmp/titanTest")
-  var g: TitanGraph = null
 
-  def cleanDir(f: File) {
-    if (f.isDirectory) f.listFiles.foreach(cleanDir(_))
-    else { println(f.toString); f.delete }
-  }
+trait AnyTitanTestSuite extends scalatest.FunSuite with scalatest.BeforeAndAfterAll with ScalazEquality {
 
-  // Reusing the graph if possible, else cleaning the directory and creating graph
+  val g: TitanGraph = TitanFactory.open("inmemory")
+
   override def beforeAll() {
-    cleanDir(graphLocation)
-    g = TitanFactory.open("berkeleyje:" + graphLocation.getAbsolutePath)
-
     g.createSchema(Twitter.schema)
 
+    // loading data from a prepared GraphSON file
     import com.tinkerpop.blueprints.util.io.graphson._
     GraphSONReader.inputGraph(g, getClass.getResource("/twitter_graph.json").getPath)
-
-    println("Created Titan graph")
   }
 
   override def afterAll() {
-    if(g != null) {
-      g.shutdown
-      // import com.tinkerpop.blueprints.util.io.graphson._
-      // GraphSONWriter.outputGraph(g, "graph_compact.json", GraphSONMode.COMPACT)
-      println("Shutdown Titan graph")
-    }
+    g.shutdown
+
+    // // NOTE: uncommend if you want to add data to the GraphSON:
+    // import com.tinkerpop.blueprints.util.io.graphson._
+    // GraphSONWriter.outputGraph(g, "graph_compact.json", GraphSONMode.COMPACT)
   }
+}
 
+// class TitanTestSuite extends scalatest.Suites(
+//   new TitanSchemaTestSuite,
+//   new TitanQueriesTestSuite
+// ) with scalatest.SequentialNestedSuiteExecution
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TitanTestSuite extends AnyTitanTestSuite {
 
   // checks existence and arity
   def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET)
@@ -62,7 +54,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   }
 
   // checks existence and dataType
-  def checkPropertyKey[P <: AnyProp](mgmt: TitanManagement, p: P)
+  def checkPropertyKey[P <: AnyGraphProperty](mgmt: TitanManagement, p: P)
     (implicit cc: scala.reflect.ClassTag[P#Raw]) = {
 
     assert{ mgmt.containsRelationType(p.label) }
@@ -113,7 +105,7 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
   import syntax.predicates._
 
   object TestContext {
-    val traversers = impl.titan.traversers(g); import traversers._
+    val evals = impl.titan.evals(g); import evals._
 
     // predicates for quering vertices
     val askEdu = user ? (name === "@eparejatobes")
@@ -125,51 +117,29 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     // predicates for quering edges
     val askPost = posted ? (time === "13.11.2012")
 
-    // low level querying:
-    // implicit class graphOps(tg: TitanGraph) {
-    //   def vertex[V <: AnyVertexType, P <: AnyProp](v: V)(p: P)(pval: P#Raw): TitanVertex LabeledBy V = {
-    //     v( tg.getVertices(p.label, pval).iterator.next.asInstanceOf[TitanVertex] )
-    //   }
-    //   def edge[E <: AnyEdgeType, P <: AnyProp](e: E)(p: P)(pval: P#Raw): TitanEdge LabeledBy E = {
-    //     e( tg.getEdges(p.label, pval).iterator.next.asInstanceOf[TitanEdge] )
-    //   }
-    // }
-
-    // val edu = g.vertex(user)(name)("@eparejatobes")
-    // val alexey = g.vertex(user)(name)("@laughedelic")
-    // val kim = g.vertex(user)(name)("@evdokim")
-    // val twt = g.vertex(tweet)(text)("back to twitter :)")
-    // val post = g.edge(posted)(time)("13.11.2012")
-
     // prepared test queries (they can be reused for different tests)
     val userName = Get(name)
     val postAuthor = Source(posted)
     val postAuthorName = postAuthor >=> userName
-    val tweetAuthorName = InE(any(posted)) >=> postAuthorName
 
-    val edu = Query(user).evalOn(askEdu).head
-    val post = Query(posted).evalOn(askPost).head
-    val twt = Query(tweet).evalOn(askTweet).head
+    val edu  = ExactlyOne(user) := ( Query(user).evalOn(askEdu).value.head )
+    val post = ExactlyOne(posted) := ( Query(posted).evalOn(askPost).value.head )
+    val twt  = ExactlyOne(tweet) := ( Query(tweet).evalOn(askTweet).value.head )
   }
 
   test("check what we got from the index queries") {
-    import TestContext._, traversers._
-
-    // assert{ edu == graph.vertex(user)(name)("@eparejatobes") }
-    // assert{ alexey == graph.vertex(user)(name)("@laughedelic") }
-    // assert{ kim == graph.vertex(user)(name)("@evdokim") }
-    // assert{ twt == graph.vertex(tweet)(text)("back to twitter :)") }
-    // assert{ post == graph.edge(posted)(time)("13.11.2012") }
+    import TestContext._, evals._
 
     /* Evaluating steps: */
-    import shapeless._, poly._
-    import com.tinkerpop.blueprints.{ Query => BQuery }
+    assert{ Get(name).evalOn(edu) == name("@eparejatobes") }
+    assert{ Source(posted).evalOn(post) == edu }
 
-    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)) == List() }
-    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)) == List(edu) }
+    /* Composing steps: */
+    val posterName = Source(posted) >=> Get(name)
+    assert{ posterName.evalOn(post) == (name := "@eparejatobes") }
 
-    assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80)).toSet == Set(age(22), age(5)) }
-    assert{ (Query(user) >=> Get(age)).evalOn(user ? (age < 80) and (age > 10)).toSet == Set(age(22)) }
+    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)).value == Stream() }
+    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)).value == Stream(edu.value) }
 
     assert{ userName.evalOn(edu) == name("@eparejatobes") }
     assert{ postAuthor.evalOn(post) == edu }
@@ -177,14 +147,14 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
 
     // this query returns a list of 4 Edus, so we comare it as a set
-    assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
+    // assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
 
-    assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
+    // assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
   }
 
   test("cool queries dsl") {
-    import TestContext._, traversers._
-    import syntax.steps._
+    import TestContext._, evals._
+    import syntax.paths._
 
     // element op:
     val userName = user.get(name)
@@ -195,11 +165,128 @@ class TitanSuite extends org.scalatest.FunSuite with org.scalatest.BeforeAndAfte
     assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
     // vertex op:
-    val friendsPosts = user.outE(any(follows)).target.outE(any(posted)).target
+    val friendsPosts =
+      user.outE( any(follows) )
+          .flatMap( follows.target )
+          .flatMap( user.outE( any(posted) )
+          .flatMap( posted.target ) )
+    assert{ friendsPosts.out == ManyOrNone(tweet) }
 
+    import scalaz.Scalaz._
     // testing vertex query
-    val vertexQuery = user.outE(posted ? (time === "27.10.2013")).get(url)
-    assert{ vertexQuery.evalOn(edu) == List(url("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
+    // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
+    assert{ vertexQuery.out == ManyOrNone(ExactlyOne(url)) }
+    assert{ vertexQuery.evalOn(edu) == (ManyOrNone(ExactlyOne(url)) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+  }
+
+  test("evaluating MapOver") {
+    import TestContext._, evals._
+    import scalaz.Scalaz._
+
+    assertResult( OneOrNone(user) := (Option("@eparejatobes")) ){ 
+      MapOver(Get(name), OneOrNone).evalOn( 
+        OneOrNone(user) := (Option(edu.value))
+      )
+    }
+
+  }
+
+  test("checking combination of Composition and MapOver") {
+    import TestContext._, evals._
+    import scalaz.Scalaz._
+    import syntax.paths._
+
+    assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
+      val q = Query(user)
+      (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
+    }
+
+    assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
+      Query(user).map(Get(name)).evalOn( askEdu )
+    }
+
+    val userAges = Query(user).map( Get(age) )
+    assert{ userAges.out == ManyOrNone(ExactlyOne(age)) }
+
+    assertResult( ManyOrNone(ExactlyOne(age)) := Stream(5, 22) ){ 
+      userAges.evalOn(user ? (age < 80))
+    }
+    assertResult( ManyOrNone(ExactlyOne(age)) := Stream(22) ){ 
+      userAges.evalOn(user ? (age < 80) and (age > 10))
+    }
+
+  }
+
+  test("flattening after double map") {
+    import TestContext._, evals._
+    import scalaz.Scalaz._
+    import syntax.paths._
+
+    assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      Flatten(
+        Query(user).map( user.outE(any(follows)) )
+      ).map( follows.target.get(name) )
+      .evalOn( askEdu )
+    }
+
+    // Same with .flatten syntax:
+    assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      Query(user)
+        .map( user.outE(any(follows)) )
+        .flatten
+        .map( follows.target.get(name) )
+      .evalOn( askEdu )
+    }
+
+    // Same with .flatMap syntax:
+    assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      Query(user)
+        .flatMap( user.outE(any(follows)) )
+        .map( follows.target.get(name) )
+      .evalOn( askEdu )
+    }
+
+    // with ExactlyOne:
+    val followersNames = user
+      .outE( any(follows) )
+      .map( follows.target.get(name) )
+
+    assert{ followersNames.out == ManyOrNone(ExactlyOne(name)) }
+
+    assertResult( ManyOrNone(name) := Stream("@laughedelic", "@evdokim") ){ 
+      followersNames.flatten.evalOn( edu )
+    }
+
+    // NOTE: this doesn't evaluate, because the map is unnecessary
+    // therefore there are no sensible situations when you want to flatten Id[Id[]]
+    val posterName = posted
+      .source
+      .map( user.get(name) )
+
+    assert{ posterName.out == ExactlyOne(ExactlyOne(name)) }
+
+    // assertResult( ExactlyOne(name) := Stream("@eparejatobes") ){ 
+    //   posterName.evalOn( post )
+    // }
+
+    // TODO: test all container combinations
+
+  }
+
+  test("type-safe equality for labeled values") {
+
+    assertTypeError("""
+      (ManyOrNone(user) := "hola") === (ExactlyOne(user) := "hola")
+    """)
+
+    assertTypeError("""
+      name("hola") === text("hola")
+    """)
+
+    assertTypeError("""
+      (ManyOrNone(user) := "yuhuu") === (ManyOrNone(user) := 12)
+    """)
   }
 
 }
