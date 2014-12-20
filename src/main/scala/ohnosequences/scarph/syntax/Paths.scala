@@ -4,10 +4,8 @@ package ohnosequences.scarph.syntax
 /* This is an example gremlin-like syntax for paths construction */
 object paths {
 
-  import ohnosequences.scarph._
-  import ohnosequences.scarph.paths._
-  import ohnosequences.scarph.steps._
-  import ohnosequences.scarph.combinators._
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._
 
 
   /* Element types */
@@ -38,8 +36,8 @@ object paths {
 
   class EdgeOps[E <: AnyEdgeType](e: E) {
 
-    def source: Source[E] = steps.Source(e)
-    def target: Target[E] = steps.Target(e)
+    def source: Source[E] = s.steps.Source(e)
+    def target: Target[E] = s.steps.Target(e)
   }
 
   implicit def pathEdgeOps[F <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyEdgeType }](f: F):

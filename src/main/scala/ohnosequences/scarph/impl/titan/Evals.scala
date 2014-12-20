@@ -1,20 +1,22 @@
 package ohnosequences.scarph.impl.titan
 
-import shapeless._
+case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
 
-import com.thinkaurelius.titan.core._, schema._
-import scala.collection.JavaConversions._
+  import shapeless._
 
-import ohnosequences.cosas._, fns._, types._
-import ohnosequences.cosas.ops.typeSets._
+  import com.thinkaurelius.titan.core._, schema._
+  import scala.collection.JavaConversions._
 
-import ohnosequences.scarph._, steps._, paths._, AnyEvalPath._
-import ohnosequences.scarph.impl.titan.predicates._
+  import ohnosequences.cosas._, fns._, types._
+  // import cosas.ops.typeSets._
 
-import scalaz.{ NonEmptyList => NEList }
-import java.lang.{ Iterable => JIterable }
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.steps._, s.paths._, s.containers._, s.combinators._, s.evals._, s.predicates._
+  import s.impl.titan.predicates._
 
-case class evals(val graph: TitanGraph) {
+  import scalaz.{ NonEmptyList => NEList }
+  import java.lang.{ Iterable => JIterable }
+
 
   // TODO: if it's possible to avoid Id, why not?
   implicit def containerId[X]:

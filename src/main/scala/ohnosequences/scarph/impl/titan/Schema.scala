@@ -1,20 +1,21 @@
 package ohnosequences.scarph.impl.titan
 
-// Schema stuff:
-
-import ohnosequences.cosas._, typeSets._, fns._
-import ohnosequences.cosas.ops.typeSets._
-import ohnosequences.scarph._
-import com.thinkaurelius.titan.core._
-import com.thinkaurelius.titan.core.Multiplicity
-import com.tinkerpop.blueprints.Direction
-import com.thinkaurelius.titan.core.schema._
-import shapeless._, poly._
-import scala.reflect._
-
-
 /* Here are methods for creating Titan schema from an abstract schema description */
 object schema {
+
+  import shapeless._, poly._
+
+  import com.thinkaurelius.titan.core._, Multiplicity._
+  import com.thinkaurelius.titan.core.schema._
+  import com.tinkerpop.blueprints.Direction
+  import scala.reflect._
+
+  import ohnosequences.cosas._, typeSets._, fns._
+  import ohnosequences.cosas.ops.typeSets._
+
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.containers._, s.indexes._, s.schemas._
+
 
   /* This takes an edge type and returns Titan `Multiplicity` (i.e. edge arities) */
   trait EdgeTypeMultiplicity[ET <: AnyEdgeType] extends Fn1[ET] with Out[Multiplicity]

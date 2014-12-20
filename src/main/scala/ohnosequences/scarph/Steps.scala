@@ -1,9 +1,11 @@
 package ohnosequences.scarph
 
-import AnyEvalPath._
 
 /* Basic steps: */
 object steps {
+
+  import graphTypes._, paths._, containers._, predicates._
+
 
   // case class IdStep[T <: AnyGraphType](t: T) 
   //   extends Step[T, ExactlyOne.type, T](t, ExactlyOne, t)

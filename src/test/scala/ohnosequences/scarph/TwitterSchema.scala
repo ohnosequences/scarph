@@ -1,9 +1,12 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, steps._, combinators._
-import ohnosequences.cosas._, typeSets._
-
 object Twitter {
+
+  import ohnosequences.cosas._, typeSets._
+
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
+
 
   case object user extends VertexType
   case object name extends PropertyOf(user) { type Raw = String }

@@ -1,9 +1,12 @@
 package ohnosequences.scarph.syntax
 
-import ohnosequences.cosas._, types._
-import ohnosequences.scarph._
-
 object predicates {
+
+  import ohnosequences.cosas._, types._
+
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.containers._, s.conditions._, s.predicates._
+
 
   /* When you don't want to restrict the query anyhow (let's imagine it makes sence),
      you can just say: `query(user).out(..).blah.evalOn(any(user))` */

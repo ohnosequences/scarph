@@ -1,8 +1,10 @@
 package ohnosequences.scarph.syntax
 
-import ohnosequences.scarph._
-
 object conditions {
+
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.conditions._
+
 
   /* Method aliases for predicate constructors */
   implicit def compareConditionOps[A <: AnyGraphProperty](property: A):
