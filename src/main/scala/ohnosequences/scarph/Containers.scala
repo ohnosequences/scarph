@@ -5,8 +5,7 @@ object containers {
   import graphTypes._
 
 
-  /* This is a label type containing another label type */
-  // TODO: this name is pretty unintuitive
+  /* This is a graph type containing another graph type */
   sealed trait AnyNestedGraphType extends AnyGraphType {
 
     type Container <: AnyContainer
@@ -32,7 +31,7 @@ object containers {
   private[containers] case class AtLeastOneOf[T <: AnyGraphType](t: T) extends NestedGraphType(AtLeastOne, t)
 
 
-  /* These are 4 types of arity containers that we can use for wrapping label types */
+  /* Here are 4 types of arity containers that we can use for wrapping graph types */
   sealed trait AnyContainer {
 
     type Of[T <: AnyGraphType] <: AnyNestedGraphType
@@ -73,7 +72,7 @@ object containers {
   trait ValueContainer[C <: AnyContainer, X] extends Fn1[X]
 
 
-  /* Containers multiplication */
+  /* Containers multiplication (`\times` symbol)*/
   trait ×[A <: AnyContainer, B <: AnyContainer] extends Fn2[A, B] with OutBound[AnyContainer]
 
   object × extends x_2 {
@@ -83,39 +82,25 @@ object containers {
   }
 
   trait x_2 extends x_3 {
-    implicit def unitL[A <: AnyContainer]: 
-        (ExactlyOne × A) with Out[A] = 
-    new (ExactlyOne × A) with Out[A] { def apply(a: In1, b: In2): Out = b }
+    implicit def unitL[B <: AnyContainer]: 
+        (ExactlyOne × B) with Out[B] = 
+    new (ExactlyOne × B) with Out[B] { def apply(a: In1, b: In2): Out = b }
 
     implicit def unitR[A <: AnyContainer]: 
         (A × ExactlyOne) with Out[A] = 
     new (A × ExactlyOne) with Out[A] { def apply(a: In1, b: In2): Out = a }
   }
 
-  trait x_3 extends x_4 {
-    implicit def oneornoneL[A <: AnyContainer]: 
-        (OneOrNone × A) with Out[ManyOrNone] = 
-    new (OneOrNone × A) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
-
-    implicit def oneornoneR[A <: AnyContainer]: 
-        (A × OneOrNone) with Out[ManyOrNone] = 
-    new (A × OneOrNone) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
-  }
-
-  trait x_4 {
-    implicit def atleastoneL[A <: AnyContainer]: 
-        (AtLeastOne × A) with Out[AtLeastOne] = 
-    new (AtLeastOne × A) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
-
-    implicit def atleastoneR[A <: AnyContainer]: 
-        (A × AtLeastOne) with Out[AtLeastOne] = 
-    new (A × AtLeastOne) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+  trait x_3 {
+    implicit def rest[A <: AnyContainer, B <: AnyContainer]: 
+        (A × B) with Out[ManyOrNone] = 
+    new (A × B) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
   }
 
 
   // TODO: HList-like with bound on vertices, another for paths etc
 
-  trait AnyParV extends AnyGraphType {
+  trait AnyParType extends AnyGraphType {
 
     type First <: AnyGraphType
     val  first: First
@@ -124,7 +109,7 @@ object containers {
     val  second: Second
   }
 
-  case class ParV[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParV {
+  case class ParType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParType {
 
     type First = F
     type Second = S
@@ -133,7 +118,7 @@ object containers {
   }
 
 
-  trait AnyOrV extends AnyGraphType {
+  trait AnyOrType extends AnyGraphType {
 
     type First <: AnyGraphType
     val  first: First
@@ -142,7 +127,7 @@ object containers {
     val  second: Second
   }
 
-  case class OrV[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrV {
+  case class OrType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrType {
 
     type First = F
     type Second = S

@@ -29,15 +29,15 @@ object combinators {
       type InT = First#OutT 
     }
 
-    type InT = First#InT
-    val  inT = first.inT
     type InC = First#InC
     val  inC = first.inC
+    type InT = First#InT
+    val  inT = first.inT
 
-    type OutT = Second#OutT
-    val  outT = second.outT 
     type OutC = Second#OutC
     val  outC = second.outC
+    type OutT = Second#OutT
+    val  outT = second.outT 
   }
 
   case class Composition[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }]
@@ -60,15 +60,15 @@ object combinators {
     type Container <: AnyContainer
     val  container: Container
 
-    type InT = Inner#InT
-    val  inT = inner.inT
     type InC = Container
     val  inC = container
+    type InT = Inner#InT
+    val  inT = inner.inT
 
-    type OutT = OutOf[Inner]
-    val  outT = outOf(inner)
     type OutC = Container
     val  outC = container
+    type OutT = OutOf[Inner]
+    val  outT = outOf(inner)
   }
 
   case class MapOver[P <: AnyPath { type InC = ExactlyOne }, C <: AnyContainer]
@@ -86,10 +86,10 @@ object combinators {
       type OutT <: AnyNestedGraphType
     }
 
-    type InT = Inner#InT
-    val  inT = inner.inT
     type InC = Inner#InC
     val  inC = inner.inC
+    type InT = Inner#InT
+    val  inT = inner.inT
 
     type OutT = Inner#OutT#Inside
     val  outT = inner.outT.inside
@@ -113,15 +113,15 @@ object combinators {
   /* Parallel composition of paths */
   trait AnyPar extends CombinatorOf2Paths {
 
-    type InT = ParV[InOf[First], InOf[Second]]
-    val  inT = ParV(inOf(first), inOf(second))
     type InC = ExactlyOne
     val  inC = ExactlyOne 
+    type InT = ParType[InOf[First], InOf[Second]]
+    val  inT = ParType(inOf(first), inOf(second))
 
-    type OutT = ParV[OutOf[First], OutOf[Second]]
-    val  outT = ParV(outOf(first), outOf(second))
     type OutC = ExactlyOne
     val  outC = ExactlyOne
+    type OutT = ParType[OutOf[First], OutOf[Second]]
+    val  outT = ParType(outOf(first), outOf(second))
   }
 
   case class Par[F <: AnyPath, S <: AnyPath]
@@ -131,21 +131,21 @@ object combinators {
     type Second = S
   }
 
-  type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
+  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
 
 
   /* Choice */
   trait AnyOr extends CombinatorOf2Paths {
 
-    type InT = OrV[InOf[First], InOf[Second]]
-    val  inT = OrV(inOf(first), inOf(second))
     type InC = ExactlyOne
     val  inC = ExactlyOne 
+    type InT = OrType[InOf[First], InOf[Second]]
+    val  inT = OrType(inOf(first), inOf(second))
 
-    type OutT = OrV[OutOf[First], OutOf[Second]]
-    val  outT = OrV(outOf(first), outOf(second))
     type OutC = ExactlyOne
     val  outC = ExactlyOne
+    type OutT = OrType[OutOf[First], OutOf[Second]]
+    val  outT = OrType(outOf(first), outOf(second))
   }
 
   case class Or[F <: AnyPath, S <: AnyPath]
@@ -155,6 +155,6 @@ object combinators {
     type Second = S
   }
 
-  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+  type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
 
 }
