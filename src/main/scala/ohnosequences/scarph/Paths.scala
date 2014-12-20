@@ -28,8 +28,7 @@ trait AnyPath {
   type OutT <: AnyGraphType
   val  outT: OutT
 
-  // NOTE: we will need to forget about these bounds at some point
-  // type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
+  // TODO: add Reverse member
 }
 
 /* Important aliases which combine input/output arity container with its label type */

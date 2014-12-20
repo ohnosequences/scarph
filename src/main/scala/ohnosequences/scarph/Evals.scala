@@ -94,13 +94,12 @@ object AnyEvalPath {
   }
 
   implicit def evalFlattenWithInnerId[
-    P <: AnyPath { type OutT <: ExactlyOneOf[_] }, 
-    C <: AnyContainer,
+    P <: AnyPath { type OutT <: AnyContainerType { type Container = ExactlyOne.type } }, 
     I, O
   ](implicit
     evalInner: EvalPathOn[I, P, O]
-  ):  EvalPathOn[I, Flatten[P, C], O] = 
-  new EvalPathOn[I, Flatten[P, C], O] {
+  ):  EvalPathOn[I, Flatten[P, P#OutC], O] = 
+  new EvalPathOn[I, Flatten[P, P#OutC], O] {
     def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
   }
 
