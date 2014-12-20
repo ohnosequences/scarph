@@ -32,10 +32,10 @@ object schemas {
       val indexes: Is
     ) extends AnySchema {
 
-    type Properties  = Ps
+    type Properties = Ps
     type Vertices = Vs
-    type Edges   = Es
-    type Indexes     = Is
+    type Edges = Es
+    type Indexes = Is
   }
 
   object AnySchemaType {

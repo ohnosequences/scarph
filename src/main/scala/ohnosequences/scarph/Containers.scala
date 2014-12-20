@@ -44,8 +44,6 @@ object containers {
     def  of[T <: AnyGraphType](t: T): Of[T] = ExactlyOneOf[T](t)
   }
   type ExactlyOne = ExactlyOne.type
-  // NOTE: not sure that such synonyms are needed:
-  // def  exactlyOne[T <: AnyGraphType](t: T): ExactlyOne.Of[T] = ExactlyOne.of(t)
 
   object OneOrNone extends AnyContainer { 
     type Of[T <: AnyGraphType] = OneOrNoneOf[T]  
