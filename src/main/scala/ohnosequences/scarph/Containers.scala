@@ -61,6 +61,9 @@ object AtLeastOne extends AnyContainer {
 
 import ohnosequences.cosas._, fns._
 
+/* This is for mapping (in implementation) ManyOrNone to List, OneOrNone to Option, etc. */
+trait ContainerVal[C <: AnyContainer, X] extends Fn1[X]
+
 /* Arities multiplication */
 // not the best name, but it may look cool: A x B
 trait x[A <: AnyContainer, B <: AnyContainer] extends Fn2[A, B] with OutBound[AnyContainer]

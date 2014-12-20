@@ -62,11 +62,9 @@ object AnyEvalPath {
     }
   }
 
+
   trait FlattenVals[F[_], G[_], X] extends Fn1[F[G[X]]]
 
-  // FIXME: this compiles and works, but it's not what we need:
-  // it returns the inner value-container G when it should return
-  // some container corresponding to C (i.e. OneOrNone -> Option)
   implicit def evalFlatten[
     P <: AnyPath { type OutT <: AnyContainerType }, 
     C <: AnyContainer,
@@ -81,6 +79,29 @@ object AnyEvalPath {
       val nested = evalInner(path.path)(in).value
       outOf(path) := flatten(nested)
     }
+  }
+
+  // NOTE: this is the same a general thing, but then there is no secod container (i.e. it's virtual Id[])
+  // it is an experiment, let's see how it works (we need more tests for flatten)
+  implicit def evalFlattenWithOuterId[
+    P <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyContainerType }, 
+    I, O
+  ](implicit
+    evalInner: EvalPathOn[I, P, O]
+  ):  EvalPathOn[I, Flatten[P, P#OutT#Container], O] = 
+  new EvalPathOn[I, Flatten[P, P#OutT#Container], O] {
+    def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
+  }
+
+  implicit def evalFlattenWithInnerId[
+    P <: AnyPath { type OutT <: ExactlyOneOf[_] }, 
+    C <: AnyContainer,
+    I, O
+  ](implicit
+    evalInner: EvalPathOn[I, P, O]
+  ):  EvalPathOn[I, Flatten[P, C], O] = 
+  new EvalPathOn[I, Flatten[P, C], O] {
+    def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
   }
 
 

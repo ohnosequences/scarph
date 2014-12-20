@@ -8,13 +8,36 @@ import scala.collection.JavaConversions._
 import ohnosequences.cosas._, fns._, types._
 import ohnosequences.cosas.ops.typeSets._
 
-import ohnosequences.scarph._, steps._, AnyEvalPath._
+import ohnosequences.scarph._, steps._, paths._, AnyEvalPath._
 import ohnosequences.scarph.impl.titan.predicates._
 
 import scalaz.{ NonEmptyList => NEList }
-// TODO: use scalaz.EphemeralStream instead of Stream
+import java.lang.{ Iterable => JIterable }
 
 case class evals(val graph: TitanGraph) {
+
+  // TODO: if it's possible to avoid Id, why not?
+  implicit def containerId[X]:
+        ContainerVal[ExactlyOne.type, JIterable[X]] with Out[X] =
+    new ContainerVal[ExactlyOne.type, JIterable[X]] with Out[X] { def apply(in: In1): Out = in.head }
+
+  implicit def containerOption[X]:
+        ContainerVal[OneOrNone.type, JIterable[X]] with Out[Option[X]] =
+    new ContainerVal[OneOrNone.type, JIterable[X]] with Out[Option[X]] { def apply(in: In1): Out = in.headOption }
+
+  // TODO: use scalaz.EphemeralStream instead of Stream
+  implicit def containerStream[X]:
+        ContainerVal[ManyOrNone.type, JIterable[X]] with Out[Stream[X]] =
+    new ContainerVal[ManyOrNone.type, JIterable[X]] with Out[Stream[X]] { def apply(in: In1): Out = in.toStream }
+
+  implicit def containerNEList[X]:
+        ContainerVal[AtLeastOne.type, JIterable[X]] with Out[NEList[X]] =
+    new ContainerVal[AtLeastOne.type, JIterable[X]] with Out[NEList[X]] { 
+      def apply(in: In1): Out = {
+        val l = in.toList
+        NEList.nel(l.head, l.tail) 
+      }
+    }
 
   implicit def flattenSS[X]: 
         FlattenVals[Stream, Stream, X] with Out[Stream[X]] =
@@ -44,6 +67,7 @@ case class evals(val graph: TitanGraph) {
         FlattenVals[Option, NEList, X] with Out[Stream[X]] =
     new FlattenVals[Option, NEList, X] with Out[Stream[X]] { def apply(in: In1): Out = in.map(_.stream).getOrElse(Stream[X]()) }
 
+
   implicit def evalVertexQuery[
     V <: AnyVertexType,
     P <: AnyPredicate.On[V]
@@ -53,7 +77,7 @@ case class evals(val graph: TitanGraph) {
     def apply(path: Path)(in: In): Out = {
       ManyOrNone(path.elem) := (
         transform(in.value, graph.query).vertices
-          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]].toStream
+          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanVertex]].toStream
       )
     }
   }
@@ -67,7 +91,7 @@ case class evals(val graph: TitanGraph) {
     def apply(path: Path)(in: In): Out = {
       ManyOrNone(path.elem) := (
         transform(in.value, graph.query).edges
-          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
       )
     }
   }
@@ -100,39 +124,43 @@ case class evals(val graph: TitanGraph) {
   }
 
   implicit def evalInE[
-    P <: AnyPredicate { type ElementType <: AnyEdgeType }
-  ](implicit transform: ToBlueprintsPredicate[P]): 
-      EvalPathOn[TitanVertex, InE[P], Stream[TitanEdge]] =
-  new EvalPathOn[TitanVertex, InE[P], Stream[TitanEdge]] {
+    P <: AnyPredicate { type ElementType <: AnyEdgeType }, O
+  ](implicit 
+    transform: ToBlueprintsPredicate[P],
+    containerVal: ContainerVal[InE[P]#OutC, JIterable[TitanEdge]] { type Out = O }
+  ):  EvalPathOn[TitanVertex, InE[P], O] =
+  new EvalPathOn[TitanVertex, InE[P], O] {
     def apply(path: Path)(in: In): Out = {
       type E = P#ElementType
       val elem: E = path.pred.elementType
-      (elem.inC: E#InC)(elem: E) := (
+      (elem.inC: E#InC)(elem: E) := containerVal(
         transform(path.pred, 
           in.value.query
             .labels(path.pred.elementType.label)
             .direction(Direction.IN)
           ).edges
-          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]]
       )
     }
   }
 
   implicit def evalOutE[
-    P <: AnyPredicate { type ElementType <: AnyEdgeType }
-  ](implicit transform: ToBlueprintsPredicate[P]): 
-      EvalPathOn[TitanVertex, OutE[P], Stream[TitanEdge]] =
-  new EvalPathOn[TitanVertex, OutE[P], Stream[TitanEdge]] {
+    P <: AnyPredicate { type ElementType <: AnyEdgeType }, O
+  ](implicit
+    transform: ToBlueprintsPredicate[P],
+    containerVal: ContainerVal[OutE[P]#OutC, JIterable[TitanEdge]] { type Out = O }
+  ):  EvalPathOn[TitanVertex, OutE[P], O] =
+  new EvalPathOn[TitanVertex, OutE[P], O] {
     def apply(path: Path)(in: In): Out = {
       type E = P#ElementType
       val elem: E = path.pred.elementType
-      (elem.outC: E#OutC)(elem: E) := (
+      (elem.outC: E#OutC)(elem: E) := containerVal(
         transform(path.pred, 
           in.value.query
             .labels(path.pred.elementType.label)
             .direction(Direction.OUT)
           ).edges
-          .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]]
       )
     }
   }
@@ -144,7 +172,7 @@ case class evals(val graph: TitanGraph) {
   //   def apply(path: Path)(in: In): Out = {
   //     in.value
   //       .getVertices(Direction.OUT, path.edge.label)
-  //       .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+  //       .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanVertex]]
   //       .toList.map{ new Denotes[TitanVertex, E#TargetType]( _ ) }
   //   }
   // }
@@ -155,7 +183,7 @@ case class evals(val graph: TitanGraph) {
   //   def apply(path: Path)(in: In): Out = {
   //     in.value
   //       .getVertices(Direction.IN, path.edge.label)
-  //       .asInstanceOf[java.lang.Iterable[com.thinkaurelius.titan.core.TitanVertex]]
+  //       .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanVertex]]
   //       .toList.map{ new Denotes[TitanVertex, E#SourceType]( _ ) }
   //   }
   // }

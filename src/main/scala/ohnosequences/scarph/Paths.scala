@@ -77,8 +77,8 @@ object AnyPath {
 case class PathOps[P <: AnyPath](val p: P) {
   import paths._
 
-  // val in: InOf[P] = inOf(p)
-  // val out: OutOf[P] = outOf(p)
+  val in: InOf[P] = inOf(p)
+  val out: OutOf[P] = outOf(p)
 
   // it's left here and not moved to syntax, because using syntax you shouldn't need it
   def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P, S] = Composition(p, s)
