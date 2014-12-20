@@ -13,15 +13,14 @@ object Twitter {
   case object age  extends PropertyOf(user) { type Raw = Integer }
 
   case object tweet extends Vertex
-  case object text extends PropertyOf(tweet) { type Raw = String }
+  case object text  extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends Edge(ExactlyOne, user, ManyOrNone, tweet)
-
+  case object posted extends Edge(ExactlyOne.of(user) -> ManyOrNone.of(tweet))
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object follows extends Edge(ManyOrNone, user, ManyOrNone, user)
-  case object liked extends Edge(ManyOrNone, user, ManyOrNone, tweet) 
+  case object follows extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(user))
+  case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
 
   // case object posted extends Edge(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone]
   // case object time extends PropertyOf(posted) { type Raw = String }

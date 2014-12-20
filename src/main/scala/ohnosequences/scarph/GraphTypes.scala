@@ -38,17 +38,24 @@ object graphTypes {
     val  outC: OutC
   }
 
+  /* This constructor encourages to use this syntax: Edge( ExactlyOne.of(user) -> ManyOrNone.of(tweet) ) */
   abstract class Edge[
-    IC <: AnyContainer, IT <: AnyVertex,
-    OC <: AnyContainer, OT <: AnyVertex
-  ](val inC: IC,
-    val inT: IT,
-    val outC: OC,
-    val outT: OT
-  ) extends AnyEdge {
+    In  <: AnyNestedGraphType { type Inside <: AnyVertex },
+    Out <: AnyNestedGraphType { type Inside <: AnyVertex }
+  ]( inout: (In, Out) ) extends AnyEdge {
 
-    type InC  = IC; type InT  = IT
-    type OutC = OC; type OutT = OT
+    private[Edge] val in  = inout._1
+    private[Edge] val out = inout._2
+
+    type InC = In#Container
+    val  inC = in.container
+    type InT = In#Inside
+    val  inT = in.inside
+
+    type OutC = Out#Container
+    val  outC = out.container
+    type OutT = Out#Inside
+    val  outT = out.inside
 
     val label = this.toString
   }
