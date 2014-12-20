@@ -1,51 +1,55 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._, typeSets._
-// import ohnosequences.cosas.ops.typeSet._
+object schemas {
 
-trait AnySchema {
+  import ohnosequences.cosas._, typeSets._
+  import graphTypes._, indexes._
 
-  type Properties <: AnyTypeSet.Of[AnyGraphProperty]
-  val  properties: Properties
+  trait AnySchema {
 
-  type VertexTypes <: AnyTypeSet.Of[AnyVertexType]
-  val  vertexTypes: VertexTypes
+    type Properties <: AnyTypeSet.Of[AnyGraphProperty]
+    val  properties: Properties
 
-  type EdgeTypes <: AnyTypeSet.Of[AnyEdgeType]
-  val  edgeTypes: EdgeTypes
+    type Vertices <: AnyTypeSet.Of[AnyVertex]
+    val  vertices: Vertices
 
-  type Indexes <: AnyTypeSet.Of[AnyIndex]
-  val  indexes: Indexes
-}
+    type Edges <: AnyTypeSet.Of[AnyEdge]
+    val  edges: Edges
 
-case class Schema[
-    Ps <: AnyTypeSet.Of[AnyGraphProperty],
-    Vs <: AnyTypeSet.Of[AnyVertexType],
-    Es <: AnyTypeSet.Of[AnyEdgeType],
-    Is <: AnyTypeSet.Of[AnyIndex]
-  ](val label: String,
-    val properties: Ps,
-    val vertexTypes: Vs,
-    val edgeTypes: Es,
-    val indexes: Is
-  ) extends AnySchema {
+    type Indexes <: AnyTypeSet.Of[AnyIndex]
+    val  indexes: Indexes
+  }
 
-  type Properties  = Ps
-  type VertexTypes = Vs
-  type EdgeTypes   = Es
-  type Indexes     = Is
-}
+  case class Schema[
+      Ps <: AnyTypeSet.Of[AnyGraphProperty],
+      Vs <: AnyTypeSet.Of[AnyVertex],
+      Es <: AnyTypeSet.Of[AnyEdge],
+      Is <: AnyTypeSet.Of[AnyIndex]
+    ](val label: String,
+      val properties: Ps,
+      val vertices: Vs,
+      val edges: Es,
+      val indexes: Is
+    ) extends AnySchema {
 
-object AnySchemaType {
+    type Properties = Ps
+    type Vertices = Vs
+    type Edges = Es
+    type Indexes = Is
+  }
 
-  implicit def schemaOps[GS <: AnySchema](gs: GS):
-        SchemaOps[GS] =
-    new SchemaOps[GS](gs)
-}
+  object AnySchemaType {
 
-class SchemaOps[GS <: AnySchema](gs: GS) {
+    implicit def schemaOps[GS <: AnySchema](gs: GS):
+          SchemaOps[GS] =
+      new SchemaOps[GS](gs)
+  }
 
-  // TODO: filter schema properties by an owner
-  // def propertiesOf[E <: AnyElementType](e: E)
-  //   (implicit filter: ???): props.Out = props(gs)
+  class SchemaOps[GS <: AnySchema](gs: GS) {
+
+    // TODO: filter schema properties by an owner
+    // def propertiesOf[E <: AnyGraphElement](e: E)
+    //   (implicit filter: ???): props.Out = props(gs)
+  }
+
 }
