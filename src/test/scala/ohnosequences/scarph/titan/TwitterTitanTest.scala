@@ -47,7 +47,7 @@ object titan {
   class TitanTestSuite extends AnyTitanTestSuite {
 
     // checks existence and arity
-    def checkEdgeLabel[ET <: AnyEdgeType](mgmt: TitanManagement, et: ET)
+    def checkEdgeLabel[ET <: AnyEdge](mgmt: TitanManagement, et: ET)
       (implicit multi: EdgeTypeMultiplicity[ET]) = {
 
       assert{ mgmt.containsRelationType(et.label) }
@@ -126,9 +126,9 @@ object titan {
       val postAuthor = Source(posted)
       val postAuthorName = postAuthor >=> userName
 
-      val edu  = ExactlyOne(user) := ( Query(user).evalOn(askEdu).value.head )
-      val post = ExactlyOne(posted) := ( Query(posted).evalOn(askPost).value.head )
-      val twt  = ExactlyOne(tweet) := ( Query(tweet).evalOn(askTweet).value.head )
+      val edu  = ExactlyOne.of(user) := ( Query(user).evalOn(askEdu).value.head )
+      val post = ExactlyOne.of(posted) := ( Query(posted).evalOn(askPost).value.head )
+      val twt  = ExactlyOne.of(tweet) := ( Query(tweet).evalOn(askTweet).value.head )
     }
 
     test("check what we got from the index queries") {
@@ -174,23 +174,23 @@ object titan {
             .flatMap( follows.target )
             .flatMap( user.outE( any(posted) )
             .flatMap( posted.target ) )
-      assert{ friendsPosts.out == ManyOrNone(tweet) }
+      assert{ friendsPosts.out == ManyOrNone.of(tweet) }
 
       import scalaz.Scalaz._
       // testing vertex query
       val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
       // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
-      assert{ vertexQuery.out == ManyOrNone(ExactlyOne(url)) }
-      assert{ vertexQuery.evalOn(edu) == (ManyOrNone(ExactlyOne(url)) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+      assert{ vertexQuery.out == ManyOrNone.of(ExactlyOne.of(url)) }
+      assert{ vertexQuery.evalOn(edu) == (ManyOrNone.of(ExactlyOne.of(url)) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
     }
 
     test("evaluating MapOver") {
       import TestContext._, evals._
       import scalaz.Scalaz._
 
-      assertResult( OneOrNone(user) := (Option("@eparejatobes")) ){ 
+      assertResult( OneOrNone.of(user) := (Option("@eparejatobes")) ){ 
         MapOver(Get(name), OneOrNone).evalOn( 
-          OneOrNone(user) := (Option(edu.value))
+          OneOrNone.of(user) := (Option(edu.value))
         )
       }
 
@@ -201,22 +201,22 @@ object titan {
       import scalaz.Scalaz._
       import syntax.paths._
 
-      assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
+      assertResult( ManyOrNone.of(user) := (Stream("@eparejatobes")) ){ 
         val q = Query(user)
         (q >=> MapOver(Get(name), q.outC)).evalOn( askEdu )
       }
 
-      assertResult( ManyOrNone(user) := (Stream("@eparejatobes")) ){ 
+      assertResult( ManyOrNone.of(user) := (Stream("@eparejatobes")) ){ 
         Query(user).map(Get(name)).evalOn( askEdu )
       }
 
       val userAges = Query(user).map( Get(age) )
-      assert{ userAges.out == ManyOrNone(ExactlyOne(age)) }
+      assert{ userAges.out == ManyOrNone.of(ExactlyOne.of(age)) }
 
-      assertResult( ManyOrNone(ExactlyOne(age)) := Stream(5, 22) ){ 
+      assertResult( ManyOrNone.of(ExactlyOne.of(age)) := Stream(5, 22) ){ 
         userAges.evalOn(user ? (age < 80))
       }
-      assertResult( ManyOrNone(ExactlyOne(age)) := Stream(22) ){ 
+      assertResult( ManyOrNone.of(ExactlyOne.of(age)) := Stream(22) ){ 
         userAges.evalOn(user ? (age < 80) and (age > 10))
       }
 
@@ -227,7 +227,7 @@ object titan {
       import scalaz.Scalaz._
       import syntax.paths._
 
-      assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
         Flatten(
           Query(user).map( user.outE(any(follows)) )
         ).map( follows.target.get(name) )
@@ -235,7 +235,7 @@ object titan {
       }
 
       // Same with .flatten syntax:
-      assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
         Query(user)
           .map( user.outE(any(follows)) )
           .flatten
@@ -244,7 +244,7 @@ object titan {
       }
 
       // Same with .flatMap syntax:
-      assertResult( (ManyOrNone(name) := Stream("@laughedelic", "@evdokim")) ){ 
+      assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
         Query(user)
           .flatMap( user.outE(any(follows)) )
           .map( follows.target.get(name) )
@@ -256,9 +256,9 @@ object titan {
         .outE( any(follows) )
         .map( follows.target.get(name) )
 
-      assert{ followersNames.out == ManyOrNone(ExactlyOne(name)) }
+      assert{ followersNames.out == ManyOrNone.of(ExactlyOne.of(name)) }
 
-      assertResult( ManyOrNone(name) := Stream("@laughedelic", "@evdokim") ){ 
+      assertResult( ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim") ){ 
         followersNames.flatten.evalOn( edu )
       }
 
@@ -268,7 +268,7 @@ object titan {
         .source
         .map( user.get(name) )
 
-      assert{ posterName.out == ExactlyOne(ExactlyOne(name)) }
+      assert{ posterName.out == ExactlyOne.of(ExactlyOne.of(name)) }
 
       // assertResult( ExactlyOne(name) := Stream("@eparejatobes") ){ 
       //   posterName.evalOn( post )

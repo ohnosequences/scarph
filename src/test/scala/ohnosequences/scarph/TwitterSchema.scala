@@ -8,28 +8,28 @@ object Twitter {
   import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
 
 
-  case object user extends VertexType
+  case object user extends Vertex
   case object name extends PropertyOf(user) { type Raw = String }
   case object age  extends PropertyOf(user) { type Raw = Integer }
 
-  case object tweet extends VertexType
+  case object tweet extends Vertex
   case object text extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends EdgeType(ExactlyOne, user, ManyOrNone, tweet)
+  case object posted extends Edge(ExactlyOne, user, ManyOrNone, tweet)
 
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object follows extends EdgeType(ManyOrNone, user, ManyOrNone, user)
-  case object liked extends EdgeType(ManyOrNone, user, ManyOrNone, tweet) 
+  case object follows extends Edge(ManyOrNone, user, ManyOrNone, user)
+  case object liked extends Edge(ManyOrNone, user, ManyOrNone, tweet) 
 
-  // case object posted extends EdgeType(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone]
+  // case object posted extends Edge(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone]
   // case object time extends PropertyOf(posted) { type Raw = String }
   // case object url  extends PropertyOf(posted) { type Raw = String }
 
-  // case object follows extends EdgeType(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
+  // case object follows extends Edge(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
-  // case object liked extends EdgeType(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
+  // case object liked extends Edge(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
   // simple indexes
   case object userByName extends SimpleIndex(user, name)
@@ -44,8 +44,8 @@ object Twitter {
 
   val schema = Schema(label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,
-    vertexTypes =  user :~: tweet :~: ∅,
-    edgeTypes = posted :~: follows :~: liked :~: ∅,
+    vertices =  user :~: tweet :~: ∅,
+    edges = posted :~: follows :~: liked :~: ∅,
     indexes = 
       userByName :~: userByNameAndAge :~:
       tweetByText :~: 

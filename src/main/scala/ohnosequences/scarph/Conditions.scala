@@ -19,7 +19,7 @@ object conditions {
   object AnyCondition {
 
     type OnProperty[P <: AnyGraphProperty] = AnyCondition { type Property = P }
-    type OnElementType[E <: AnyElementType] = AnyCondition { type ElementType = E }
+    type OnElementType[E <: AnyGraphElement] = AnyCondition { type ElementType = E }
   }
 
 

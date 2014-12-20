@@ -10,13 +10,13 @@ object paths {
     _Path_ describes some graph traversal. It contains of steps that are combined in various ways.
 
     Note that `AnyPath` hierarchy is sealed, meaning that a path is either a step or a combinator.
-    You can create steps and combinators extending `AnyStep` and `AnyCombinator` correspondingly.
+    You can create steps and combinators extending `AnyStep` and `AnyPathCombinator` correspondingly.
 
     In the following code there is a naming convention:
     - `C` suffix means (arity) _Container_
     - `T` suffix means (label) _Type_
   */
-  trait AnyPath {
+  sealed trait AnyPath {
 
     /* Input */
     type InC <: AnyContainer
@@ -37,15 +37,15 @@ object paths {
   type InOf[P <: AnyPath] = P#InC#Of[P#InT]
   type OutOf[P <: AnyPath] = P#OutC#Of[P#OutT]
 
-  def inOf[P <: AnyPath](p: P): InOf[P] = p.inC(p.inT)
-  def outOf[P <: AnyPath](p: P): OutOf[P] = p.outC(p.outT)
+  def inOf[P <: AnyPath](p: P): InOf[P] = p.inC.of(p.inT)
+  def outOf[P <: AnyPath](p: P): OutOf[P] = p.outC.of(p.outT)
 
 
   /* A _step_ is a simple atomic _path_ which can be evaluated directly.
      Note that it always has form "ExactlyOne to something". */
   trait AnyStep extends AnyPath {
 
-    type InC = ExactlyOne.type
+    type InC = ExactlyOne
     val  inC = ExactlyOne
   }
 
@@ -65,7 +65,7 @@ object paths {
 
 
   /* See available combinators in [Combinators.scala] */
-  trait AnyCombinator extends AnyPath
+  trait AnyPathCombinator extends AnyPath
 
 
   /* Adding useful methods */

@@ -19,7 +19,7 @@ object indexes {
   /* ## Indexes */
   trait AnyIndex extends AnyGraphType {
 
-    type IndexedType <: AnyElementType
+    type IndexedType <: AnyGraphElement
     val  indexedType: IndexedType
   }
 
@@ -44,7 +44,7 @@ object indexes {
     val  properties: Properties
   }
 
-  class CompositeIndex[I <: AnyElementType, Ps <: AnyTypeSet.Of[PropertyOf[I]]]
+  class CompositeIndex[I <: AnyGraphElement, Ps <: AnyTypeSet.Of[PropertyOf[I]]]
     (val indexedType: I, val properties: Ps) extends AnyCompositeIndex {
 
     // NOTE: normally, you don't care about the index name, but it has to be unique
@@ -66,7 +66,7 @@ object indexes {
 
   }
 
-  class SimpleIndex[I <: AnyElementType, P <: PropertyOf[I]]
+  class SimpleIndex[I <: AnyGraphElement, P <: PropertyOf[I]]
     (val indexedType: I, val property: P) extends AnySimpleIndex {
 
     val label = this.toString
@@ -81,7 +81,7 @@ object indexes {
   */
   trait AnyLocalEdgeIndex extends AnyIndex {
 
-    type IndexedType <: AnyEdgeType
+    type IndexedType <: AnyEdge
 
     type Properties <: AnyTypeSet.Of[PropertyOf[IndexedType]]
     val  properties: Properties
@@ -95,7 +95,7 @@ object indexes {
   case object OnlyTargetCentric extends AnyLocalIndexType
   case object BothEndsCentric extends AnyLocalIndexType
 
-  class LocalEdgeIndex[E <: AnyEdgeType, Ps <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
+  class LocalEdgeIndex[E <: AnyEdge, Ps <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
     (val indexedType: E, val indexType: T, val properties: Ps) extends AnyLocalEdgeIndex {
 
     val label = this.toString

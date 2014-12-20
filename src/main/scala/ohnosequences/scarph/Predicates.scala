@@ -9,7 +9,7 @@ object predicates {
   /* Predicate is a restriction on properties of an element type */
   trait AnyPredicateType extends AnyGraphType {
     
-    type ElementType <: AnyElementType
+    type ElementType <: AnyGraphElement
     val  elementType: ElementType
 
     val label = s"PredicateOn(${elementType.label})"
@@ -17,17 +17,17 @@ object predicates {
 
   object AnyPredicateType {
 
-    type On[E <: AnyElementType] = AnyPredicateType { type ElementType = E }
+    type On[E <: AnyGraphElement] = AnyPredicateType { type ElementType = E }
   }
 
-  case class PredicateType[E <: AnyElementType](val elementType: E) 
+  case class PredicateType[E <: AnyGraphElement](val elementType: E) 
     extends AnyPredicateType { type ElementType = E }
 
 
 
   trait AnyPredicate {
 
-    type ElementType <: AnyElementType
+    type ElementType <: AnyGraphElement
     val  elementType: ElementType
 
     type Conditions <: AnyTypeSet //.Of[AnyCondition] //.OnElementType[ElementType]]
@@ -36,7 +36,7 @@ object predicates {
 
   object AnyPredicate {
 
-    type On[E <: AnyElementType] = AnyPredicate { type ElementType = E }
+    type On[E <: AnyGraphElement] = AnyPredicate { type ElementType = E }
   }
 
   /* Empty predicate doesn't have any restrictions */
@@ -45,7 +45,7 @@ object predicates {
     val  conditions = ∅
   }
 
-  class EmptyPredicate[E <: AnyElementType](val elementType: E) 
+  class EmptyPredicate[E <: AnyGraphElement](val elementType: E) 
     extends AnyEmptyPredicate { type ElementType = E }
 
 
