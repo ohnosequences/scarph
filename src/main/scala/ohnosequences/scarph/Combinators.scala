@@ -53,10 +53,10 @@ object combinators {
 
     // Don't do Container#Of[ExactlyOne[..]]
     type In = Container#Of[Inner#In#Inside]
-    val  in = container.of(inner.in.inside)
+    val  in = container.of(inner.in.inside): In
 
     type Out = Container#Of[Inner#Out]
-    val  out = container.of(inner.out)
+    val  out = container.of(inner.out): Out
   }
 
   case class MapOver[P <: AnyPath { type In <: AnyPlainGraphType }, C <: AnyContainer]
@@ -79,7 +79,7 @@ object combinators {
     val mul: (Inner#Out#Container × Inner#Out#Inside#Container) { type Out = OutC }
 
     type Out = OutC#Of[Inner#Out#Inside#Inside]
-    val  out = outC.of(inner.out.inside.inside)
+    val  out = outC.of(inner.out.inside.inside): Out
   }
 
   case class Flatten[P <: AnyPath, C <: AnyContainer]

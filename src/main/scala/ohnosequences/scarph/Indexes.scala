@@ -17,7 +17,7 @@ object indexes {
 
 
   /* ## Indexes */
-  trait AnyIndex extends AnyGraphType {
+  trait AnyIndex extends AnyPlainGraphType {
 
     type IndexedType <: AnyGraphElement
     val  indexedType: IndexedType

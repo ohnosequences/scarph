@@ -16,6 +16,7 @@ object graphTypes {
     val  inside: Inside
 
     type Tpe = Container#Of[Inside]
+    val  tpe = container.of(inside): Tpe
   }
 
   /* This is a non-nested graph type */
@@ -25,7 +26,7 @@ object graphTypes {
     val  container = ExactlyOne
 
     type Inside = this.type
-    val  inside = this
+    val  inside = this: Inside
   }
 
   /* A graph element is either a vertex or an edge, only they can have properties */

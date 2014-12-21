@@ -42,7 +42,7 @@ object paths {
   abstract class Step[
     I <: AnyPlainGraphType,
     O <: AnyGraphType
-  ](i: I, o: O) extends AnyEdge {
+  ](i: I, o: O) extends AnyStep {
 
     type In = I
     val  in = i

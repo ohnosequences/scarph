@@ -88,39 +88,39 @@ object containers {
 
   // TODO: HList-like with bound on vertices, another for paths etc
 
-  trait AnyParType extends AnyGraphType {
+  // trait AnyParType extends AnyGraphType {
 
-    type First <: AnyGraphType
-    val  first: First
+  //   type First <: AnyGraphType
+  //   val  first: First
 
-    type Second <: AnyGraphType
-    val  second: Second
-  }
+  //   type Second <: AnyGraphType
+  //   val  second: Second
+  // }
 
-  case class ParType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParType {
+  // case class ParType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParType {
 
-    type First = F
-    type Second = S
+  //   type First = F
+  //   type Second = S
 
-    val label = this.toString
-  }
+  //   val label = this.toString
+  // }
 
 
-  trait AnyOrType extends AnyGraphType {
+  // trait AnyOrType extends AnyGraphType {
 
-    type First <: AnyGraphType
-    val  first: First
+  //   type First <: AnyGraphType
+  //   val  first: First
 
-    type Second <: AnyGraphType
-    val  second: Second
-  }
+  //   type Second <: AnyGraphType
+  //   val  second: Second
+  // }
 
-  case class OrType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrType {
+  // case class OrType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrType {
 
-    type First = F
-    type Second = S
+  //   type First = F
+  //   type Second = S
 
-    val label = this.toString
-  }
+  //   val label = this.toString
+  // }
 
 }
