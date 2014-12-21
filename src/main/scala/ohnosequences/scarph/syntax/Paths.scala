@@ -36,8 +36,8 @@ object paths {
 
   class EdgeOps[E <: AnyEdge](e: E) {
 
-    def source: Source[E] = s.steps.Source(e)
-    def target: Target[E] = s.steps.Target(e)
+    def src: Source[E] = s.steps.Source(e)
+    def tgt: Target[E] = s.steps.Target(e)
   }
 
   implicit def pathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F):
@@ -47,12 +47,12 @@ object paths {
   class PathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
-    def source: F >=> Source[F#Out] =
-                f >=> Source(f.out)
+    def src: F >=> Source[F#Out] =
+             f >=> Source(f.out)
 
     // NOTE: in gremlin this is called .inV
-    def target: F >=> Target[F#Out] =
-                f >=> Target(f.out)
+    def tgt: F >=> Target[F#Out] =
+             f >=> Target(f.out)
   }
 
   /* Vertex types */
@@ -63,11 +63,11 @@ object paths {
   class VertexOps[V <: AnyVertex](v: V) {
 
     def inE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type OutT = V }
+        type ElementType <: AnyEdge { type TargetV = V }
       }](s: S): InE[S] = InE(s)
 
     def outE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type InT = V }
+        type ElementType <: AnyEdge { type SourceV = V }
       }](s: S): OutE[S] = OutE(s)
   }
 

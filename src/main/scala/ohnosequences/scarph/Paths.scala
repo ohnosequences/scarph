@@ -37,6 +37,7 @@ object paths {
   trait AnyStep extends AnyPath {
 
     type In <: AnyPlainGraphType
+    val  in: In
   }
 
   abstract class Step[
@@ -66,7 +67,7 @@ object paths {
 
     import combinators._
     // it's left here and not moved to syntax, because using syntax you shouldn't need it
-    def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P, S] = Composition(p, s)
+    def >=>[S <: AnyPath { type In <: P#Out }](s: S): Composition[P, S] = Composition(p, s)
 
     import evals._
     def evalOn[I, O](input: I Denotes P#In)

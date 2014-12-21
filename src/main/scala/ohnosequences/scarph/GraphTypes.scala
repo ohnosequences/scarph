@@ -15,8 +15,8 @@ object graphTypes {
     type Inside <: AnyGraphType
     val  inside: Inside
 
-    type Tpe = Container#Of[Inside]
-    val  tpe = container.of(inside): Tpe
+    // type Tpe = Container#Of[Inside]
+    // val  tpe = container.of(inside): Tpe
   }
 
   /* This is a non-nested graph type */
@@ -26,7 +26,7 @@ object graphTypes {
     val  container = ExactlyOne
 
     type Inside = this.type
-    val  inside = this: Inside
+    val  inside = this: this.type
   }
 
   /* A graph element is either a vertex or an edge, only they can have properties */
@@ -43,18 +43,24 @@ object graphTypes {
   trait AnyEdge extends AnyGraphElement {
     
     /* The source vertex for this edge */
-    type Source <: AnyVertex
+    type Source <: AnyGraphType { type Inside <: AnyVertex }
     val  source: Source
 
+    type SourceV = Source#Inside
+    val  sourceV = source.inside
+
     /* The target vertex for this edge */
-    type Target <: AnyVertex
+    type Target <: AnyGraphType { type Inside <: AnyVertex }
     val  target: Target
+
+    type TargetV = Target#Inside
+    val  targetV = target.inside
   }
 
   /* This constructor encourages to use this syntax: Edge( ExactlyOne.of(user) -> ManyOrNone.of(tweet) ) */
   abstract class Edge[
-    S <: AnyVertex,
-    T <: AnyVertex
+    S <: AnyGraphType { type Inside <: AnyVertex },
+    T <: AnyGraphType { type Inside <: AnyVertex }
   ]( st: (S, T) ) extends AnyEdge {
 
     type Source = S

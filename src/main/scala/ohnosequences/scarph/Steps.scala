@@ -10,19 +10,31 @@ object steps {
   case class Get[P <: AnyGraphProperty](val property: P) 
     extends Step[P#Owner, P](property.owner, property)
 
-  case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val pred: P) 
-    extends Step[P#ElementType#Target, P#ElementType](pred.elementType.target, pred.elementType)
+  case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
 
-  // TODO: same as for InE
-  // case class InV[E <: AnyEdge](val edge: E) 
-  //   extends Step[E#OutT, E#InC, E#InT](edge.outT, edge.inC, edge.inT)
+      type Edge = P#ElementType
+      val  edge = predicate.elementType: Edge
 
-  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val pred: P) 
-    extends Step[P#ElementType#Source, P#ElementType](pred.elementType.source, pred.elementType)
+      type In = Edge#TargetV
+      val  in = edge.targetV
 
-  // TODO: same as for OutE
-  // case class OutV[E <: AnyEdge](val edge: E) 
-  //   extends Step[E#InT, E#OutC, E#OutT](edge.inT, edge.outC, edge.outT)
+      type Out = Edge#Target#Container#Of[Edge]
+      val  out = edge.target.container.of(edge)
+  }
+
+  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
+
+      type Edge = P#ElementType
+      val  edge = predicate.elementType: Edge
+
+      type In = Edge#SourceV
+      val  in = edge.sourceV
+
+      type Out = Edge#Source#Container#Of[Edge]
+      val  out = edge.source.container.of(edge)
+  }
+
+  // TODO: inV/outV
 
   case class Source[E <: AnyEdge](val edge: E)
     extends Step[E, E#Source](edge, edge.source)

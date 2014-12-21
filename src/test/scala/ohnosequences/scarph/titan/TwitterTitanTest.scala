@@ -126,9 +126,9 @@ object titan {
       val postAuthor = Source(posted)
       val postAuthorName = postAuthor >=> userName
 
-      val edu  = ExactlyOne.of(user) := ( Query(user).evalOn(askEdu).value.head )
-      val post = ExactlyOne.of(posted) := ( Query(posted).evalOn(askPost).value.head )
-      val twt  = ExactlyOne.of(tweet) := ( Query(tweet).evalOn(askTweet).value.head )
+      val edu  = user := Query(user).evalOn(askEdu).value.head
+      val post = posted := Query(posted).evalOn(askPost).value.head
+      val twt  = tweet := Query(tweet).evalOn(askTweet).value.head
     }
 
     test("check what we got from the index queries") {
@@ -165,23 +165,23 @@ object titan {
       assert{ userName.evalOn(edu) == name("@eparejatobes") }
 
       // edge op:
-      val posterName = posted.source.get(name)
+      val posterName = posted.src.get(name)
       assert{ posterName.evalOn(post) == name("@eparejatobes") }
 
       // vertex op:
       val friendsPosts =
         user.outE( any(follows) )
-            .flatMap( follows.target )
+            .flatMap( follows.tgt )
             .flatMap( user.outE( any(posted) )
-            .flatMap( posted.target ) )
+            .flatMap( posted.tgt ) )
       assert{ friendsPosts.out == ManyOrNone.of(tweet) }
 
       import scalaz.Scalaz._
       // testing vertex query
       val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
       // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
-      assert{ vertexQuery.out == ManyOrNone.of(ExactlyOne.of(url)) }
-      assert{ vertexQuery.evalOn(edu) == (ManyOrNone.of(ExactlyOne.of(url)) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+      assert{ vertexQuery.out == ManyOrNone.of(url) }
+      assert{ vertexQuery.evalOn(edu) == (ManyOrNone.of(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
     }
 
     test("evaluating MapOver") {
@@ -211,12 +211,12 @@ object titan {
       }
 
       val userAges = Query(user).map( Get(age) )
-      assert{ userAges.out == ManyOrNone.of(ExactlyOne.of(age)) }
+      assert{ userAges.out == ManyOrNone.of(age) }
 
-      assertResult( ManyOrNone.of(ExactlyOne.of(age)) := Stream(5, 22) ){ 
+      assertResult( ManyOrNone.of(age) := Stream(5, 22) ){ 
         userAges.evalOn(user ? (age < 80))
       }
-      assertResult( ManyOrNone.of(ExactlyOne.of(age)) := Stream(22) ){ 
+      assertResult( ManyOrNone.of(age) := Stream(22) ){ 
         userAges.evalOn(user ? (age < 80) and (age > 10))
       }
 
@@ -230,7 +230,7 @@ object titan {
       assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
         Flatten(
           Query(user).map( user.outE(any(follows)) )
-        ).map( follows.target.get(name) )
+        ).map( follows.tgt.get(name) )
         .evalOn( askEdu )
       }
 
@@ -239,7 +239,7 @@ object titan {
         Query(user)
           .map( user.outE(any(follows)) )
           .flatten
-          .map( follows.target.get(name) )
+          .map( follows.tgt.get(name) )
         .evalOn( askEdu )
       }
 
@@ -247,16 +247,16 @@ object titan {
       assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
         Query(user)
           .flatMap( user.outE(any(follows)) )
-          .map( follows.target.get(name) )
+          .map( follows.tgt.get(name) )
         .evalOn( askEdu )
       }
 
       // with ExactlyOne:
       val followersNames = user
         .outE( any(follows) )
-        .map( follows.target.get(name) )
+        .map( follows.tgt.get(name) )
 
-      assert{ followersNames.out == ManyOrNone.of(ExactlyOne.of(name)) }
+      assert{ followersNames.out == ManyOrNone.of(name) }
 
       assertResult( ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim") ){ 
         followersNames.flatten.evalOn( edu )
@@ -265,10 +265,10 @@ object titan {
       // NOTE: this doesn't evaluate, because the map is unnecessary
       // therefore there are no sensible situations when you want to flatten Id[Id[]]
       val posterName = posted
-        .source
+        .src
         .map( user.get(name) )
 
-      assert{ posterName.out == ExactlyOne.of(ExactlyOne.of(name)) }
+      assert{ posterName.out == name }
 
       // assertResult( ExactlyOne(name) := Stream("@eparejatobes") ){ 
       //   posterName.evalOn( post )

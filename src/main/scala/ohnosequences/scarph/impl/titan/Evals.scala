@@ -133,10 +133,10 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   ):  EvalPathOn[TitanVertex, InE[P], O] =
   new EvalPathOn[TitanVertex, InE[P], O] {
     def apply(path: Path)(in: In): Out = {
-      path.out := containerVal(
-        transform(path.pred, 
+      outOf(path) := containerVal(
+        transform(path.predicate, 
           in.value.query
-            .labels(path.pred.elementType.label)
+            .labels(path.predicate.elementType.label)
             .direction(Direction.IN)
           ).edges
           .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]]
@@ -152,10 +152,10 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   ):  EvalPathOn[TitanVertex, OutE[P], O] =
   new EvalPathOn[TitanVertex, OutE[P], O] {
     def apply(path: Path)(in: In): Out = {
-      path.out := containerVal(
-        transform(path.pred, 
+      outOf(path) := containerVal(
+        transform(path.predicate, 
           in.value.query
-            .labels(path.pred.elementType.label)
+            .labels(path.predicate.elementType.label)
             .direction(Direction.OUT)
           ).edges
           .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]]

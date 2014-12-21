@@ -15,7 +15,7 @@ object Twitter {
   case object tweet extends Vertex
   case object text  extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends Edge(ExactlyOne.of(user) -> ManyOrNone.of(tweet))
+  case object posted extends Edge(user -> ManyOrNone.of(tweet))
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 

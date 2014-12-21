@@ -24,7 +24,7 @@ object combinators {
   /* Sequential composition of two paths */
   trait AnyComposition extends CombinatorOf2Paths {
 
-    type Second <: AnyPath { type In = First#Out }
+    type Second <: AnyPath { type In <: First#Out }
 
     type In = First#In
     val  in = first.in
@@ -33,33 +33,32 @@ object combinators {
     val  out = second.out
   }
 
-  case class Composition[F <: AnyPath, S <: AnyPath { type In = F#Out }]
+  case class Composition[F <: AnyPath, S <: AnyPath { type In <: F#Out }]
     (val first: F, val second: S) extends AnyComposition {
 
     type First = F
     type Second = S
   }
 
-  type >=>[F <: AnyPath, S <: AnyPath { type In = F#Out }] = Composition[F, S]
+  type >=>[F <: AnyPath, S <: AnyPath { type In <: F#Out }] = Composition[F, S]
 
 
   /* Mapping a Path over a container */
   trait AnyMapOver extends CombinatorOf1Path {
 
-    type Inner <: AnyPath { type In <: AnyPlainGraphType }
+    // type Inner <: AnyPath { type In <: AnyPlainGraphType }
 
     type Container <: AnyContainer
     val  container: Container
 
-    // Don't do Container#Of[ExactlyOne[..]]
-    type In = Container#Of[Inner#In#Inside]
-    val  in = container.of(inner.in.inside): In
+    type In = Container#Of[Inner#In]
+    val  in = container.of(inner.in): In
 
     type Out = Container#Of[Inner#Out]
     val  out = container.of(inner.out): Out
   }
 
-  case class MapOver[P <: AnyPath { type In <: AnyPlainGraphType }, C <: AnyContainer]
+  case class MapOver[P <: AnyPath, C <: AnyContainer]
     (val inner: P, val container: C) extends AnyMapOver {
 
     type Inner = P
