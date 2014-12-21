@@ -1,114 +1,79 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas._, types._, properties._
-import ohnosequences.scarph.steps._
+object graphTypes {
 
-trait AnyGraphType extends AnyType
-/* This is any graph type that can have properties, i.e. vertex of edge type */
-trait AnyElementType extends AnyGraphType
-
-/* 
-  Property is assigned to one element type and has a raw representation 
-  I'm tempted to make this a kind of edge
-*/
-// TODO: edge-like!
-trait AnyGraphProperty extends AnyGraphType with AnyProperty {
-
-  type Owner <: AnyElementType
-  val  owner: Owner
-}
-
-// TODO: something like edge constructor
-abstract class PropertyOf[O <: AnyElementType](val owner: O) extends AnyGraphProperty {
-  
-  type Owner = O
-
-  val label = this.toString
-}
-
-/* Vertex type is very simple */
-trait AnyVertexType extends AnyElementType {}
-
-abstract class VertexType extends AnyVertexType {
-
-  val label = this.toString
-}
-
-/* Edges connect vertices and have in/out arities */
-trait AnyEdgeType extends AnyElementType with AnyPath {
-
-  type InT <: AnyVertexType
-  type OutT <: AnyVertexType
-  
-  // /* The source vertex for this edge */
-  // type Source <: AnyVertexType
-  // val  source: Source
-  // /* This is the arity for incoming edges */
-  // type InC <: AnyContainer
-  // val  inC: InC
-
-  // /* The target vertex for this edge */
-  // type Target <: AnyVertexType
-  // val  target: Target
-  // /* This is the arity for outgoing edges */
-  // type OutC <: AnyContainer
-  // val  outC: OutC
-}
-
-class EdgeType[
-  IC <: AnyContainer,
-  IT <: AnyVertexType,
-  OC <: AnyContainer,
-  OT <: AnyVertexType
-](val inC: IC,
-  val inT: IT,
-  val outC: OC,
-  val outT: OT
-) extends AnyEdgeType {
-
-  type InC = IC
-  type InT = IT
-
-  type OutC = OC
-  type OutT = OT
-
-  val label = this.toString
-}
+  import ohnosequences.cosas._, types._, properties._
+  import steps._, paths._, containers._
 
 
-// TODO: HList-like with bound on vertices, another for paths etc
-
-trait AnyParV extends AnyGraphType {
-
-  type First <: AnyGraphType
-  val  first: First
-
-  type Second <: AnyGraphType
-  val  second: Second
-}
-
-case class ParV[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParV {
-
-  type First = F
-  type Second = S
-
-  val label = this.toString
-}
+  trait AnyGraphType extends AnyType
 
 
-trait AnyOrV extends AnyGraphType {
+  /* A graph element is either a vertex or an edge, only they can have properties */
+  sealed trait AnyGraphElement extends AnyGraphType
 
-  type First <: AnyGraphType
-  val  first: First
 
-  type Second <: AnyGraphType
-  val  second: Second
-}
+  /* Vertex type is very simple */
+  trait AnyVertex extends AnyGraphElement {}
 
-case class OrV[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrV {
+  abstract class Vertex extends AnyVertex { val label = this.toString }
 
-  type First = F
-  type Second = S
 
-  val label = this.toString
+  /* Edges connect vertices and have in/out arities */
+  // NOTE: this is the same as AnyPath but with restriction on InT/OutT
+  trait AnyEdge extends AnyGraphElement {
+    
+    /* The source vertex for this edge */
+    type InT <: AnyVertex
+    val  inT: InT
+    /* This is the arity for incoming edges */
+    type InC <: AnyContainer
+    val  inC: InC
+
+    /* The target vertex for this edge */
+    type OutT <: AnyVertex
+    val  outT: OutT
+    /* This is the arity for outgoing edges */
+    type OutC <: AnyContainer
+    val  outC: OutC
+  }
+
+  /* This constructor encourages to use this syntax: Edge( ExactlyOne.of(user) -> ManyOrNone.of(tweet) ) */
+  abstract class Edge[
+    In  <: AnyNestedGraphType { type Inside <: AnyVertex },
+    Out <: AnyNestedGraphType { type Inside <: AnyVertex }
+  ]( inout: (In, Out) ) extends AnyEdge {
+
+    private[Edge] val in  = inout._1
+    private[Edge] val out = inout._2
+
+    type InC = In#Container
+    val  inC = in.container
+    type InT = In#Inside
+    val  inT = in.inside
+
+    type OutC = Out#Container
+    val  outC = out.container
+    type OutT = Out#Inside
+    val  outT = out.inside
+
+    val label = this.toString
+  }
+
+
+  /* Property is assigned to one element type and has a raw representation */
+  trait AnyGraphProperty extends AnyGraphType with AnyProperty {
+
+    type Owner <: AnyGraphElement
+    val  owner: Owner
+  }
+
+  // TODO: something like edge constructor
+  abstract class PropertyOf[O <: AnyGraphElement](val owner: O) extends AnyGraphProperty {
+    
+    type Owner = O
+
+    val label = this.toString
+  }
+
 }

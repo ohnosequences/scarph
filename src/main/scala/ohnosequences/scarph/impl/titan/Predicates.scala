@@ -1,17 +1,22 @@
 package ohnosequences.scarph.impl.titan
 
-import shapeless._
-import ohnosequences.cosas._, fns._ 
-import ohnosequences.cosas.ops.typeSets._
-import ohnosequences.scarph._
-import com.thinkaurelius.titan.core._, schema._
-import scala.collection.JavaConversions._
-
 object predicates {
+
+  import shapeless._
+
+  import com.thinkaurelius.titan.core._, schema._
+  import scala.collection.JavaConversions._
 
   import com.tinkerpop.blueprints.Compare._
   import com.tinkerpop.blueprints.{ Query => BQuery }
   // import com.thinkaurelius.titan.core.{ TitanVertexQuery => BQuery }
+
+  import ohnosequences.cosas._, fns._ 
+  import ohnosequences.cosas.ops.typeSets._
+
+  import ohnosequences.{ scarph => s}
+  import s.conditions._, s.predicates._
+
 
   // TODO: names here are awful, rename it
   case object toBlueprintsCondition extends Poly1 {

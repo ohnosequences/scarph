@@ -1,146 +1,160 @@
 package ohnosequences.scarph
 
-import paths._
-
 object combinators {
 
-  type >=>[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }] = Composition[F, S]
-  type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
-  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
-}
-
-trait CombinatorOf1 extends AnyCombinator {
-
-  type Path <: AnyPath
-  val  path: Path
-}
-
-trait CombinatorOf2 extends AnyCombinator {
-
-  type First <: AnyPath
-  val  first: First
-
-  type Second <: AnyPath
-  val  second: Second
-}
+  import graphTypes._, paths._, containers._
 
 
-/* Sequential composition of two paths */
-trait AnyComposition extends CombinatorOf2 {
+  trait CombinatorOf1Path extends AnyPathCombinator {
 
-  type InT = First#InT
-  val  inT = first.inT
-  type InC = First#InC
-  val  inC = first.inC
+    type Inner <: AnyPath
+    val  inner: Inner
+  }
 
-  type OutT = Second#OutT
-  val  outT = second.outT 
-  type OutC = Second#OutC
-  val  outC = second.outC
-}
+  trait CombinatorOf2Paths extends AnyPathCombinator {
 
-case class Composition[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }]
-  (val first: F, val second: S) extends AnyComposition {
+    type First <: AnyPath
+    val  first: First
 
-  type First = F
-  type Second = S
-}
-
-/* Mapping a Path over a container */
-trait AnyMapOver extends CombinatorOf1 {
-
-  type Path <: AnyPath { type InC = ExactlyOne.type }
-
-  type Container <: AnyContainer
-  val  container: Container
-
-  type InT = Path#InT
-  val  inT = path.inT
-  type InC = Container
-  val  inC = container
-
-  type OutT = OutOf[Path]
-  val  outT = outOf(path)
-  type OutC = Container
-  val  outC = container
-}
-
-case class MapOver[P <: AnyPath { type InC = ExactlyOne.type }, C <: AnyContainer]
-  (val path: P, val container: C) extends AnyMapOver {
-
-  type Path = P
-  type Container = C
-}
-
-
-/* Mapping a Path over a container */
-trait AnyFlatten extends CombinatorOf1 {
-
-  type Path <: AnyPath { type OutT <: AnyContainerType }
-
-  type InT = Path#InT
-  val  inT = path.inT
-  type InC = Path#InC
-  val  inC = path.inC
-
-  type OutT = Path#OutT#Of
-  val  outT = path.outT.of
-
-  // we will get OutC through this implicit on construction:
-  val mul: Path#OutC x Path#OutT#Container
-}
-
-case class Flatten[P <: AnyPath { type OutT <: AnyContainerType }, C <: AnyContainer]
-  (val path: P)
-  (implicit val mul: (P#OutC x P#OutT#Container) { type Out = C })
-  extends AnyFlatten {
-
-    type Path = P 
-
-    type OutC = C
-    val  outC = mul(path.outC, path.outT.container)
+    type Second <: AnyPath
+    val  second: Second
   }
 
 
-/* Parallel composition of paths */
-trait AnyPar extends CombinatorOf2 {
+  /* Sequential composition of two paths */
+  trait AnyComposition extends CombinatorOf2Paths {
 
-  type InT = ParV[InOf[First], InOf[Second]]
-  val  inT = ParV(inOf(first), inOf(second))
-  type InC = ExactlyOne.type
-  val  inC = ExactlyOne 
+    type Second <: AnyPath { 
+      type InC = First#OutC
+      type InT = First#OutT 
+    }
 
-  type OutT = ParV[OutOf[First], OutOf[Second]]
-  val  outT = ParV(outOf(first), outOf(second))
-  type OutC = ExactlyOne.type
-  val  outC = ExactlyOne
-}
+    type InC = First#InC
+    val  inC = first.inC
+    type InT = First#InT
+    val  inT = first.inT
 
-case class Par[F <: AnyPath, S <: AnyPath]
-  (val first: F, val second: S) extends AnyPar {
+    type OutC = Second#OutC
+    val  outC = second.outC
+    type OutT = Second#OutT
+    val  outT = second.outT 
+  }
 
-  type First = F
-  type Second = S
-}
+  case class Composition[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }]
+    (val first: F, val second: S) extends AnyComposition {
+
+    type First = F
+    type Second = S
+  }
+
+  type >=>[F <: AnyPath, S <: AnyPath { type InC = F#OutC; type InT = F#OutT }] = Composition[F, S]
 
 
-/* Choice */
-trait AnyOr extends CombinatorOf2 {
+  /* Mapping a Path over a container */
+  trait AnyMapOver extends CombinatorOf1Path {
 
-  type InT = OrV[InOf[First], InOf[Second]]
-  val  inT = OrV(inOf(first), inOf(second))
-  type InC = ExactlyOne.type
-  val  inC = ExactlyOne 
+    type Inner <: AnyPath {
+      type InC = ExactlyOne
+    }
 
-  type OutT = OrV[OutOf[First], OutOf[Second]]
-  val  outT = OrV(outOf(first), outOf(second))
-  type OutC = ExactlyOne.type
-  val  outC = ExactlyOne
-}
+    type Container <: AnyContainer
+    val  container: Container
 
-case class Or[F <: AnyPath, S <: AnyPath]
-  (val first: F, val second: S) extends AnyOr {
+    type InC = Container
+    val  inC = container
+    type InT = Inner#InT
+    val  inT = inner.inT
 
-  type First = F
-  type Second = S
+    type OutC = Container
+    val  outC = container
+    type OutT = OutOf[Inner]
+    val  outT = outOf(inner)
+  }
+
+  case class MapOver[P <: AnyPath { type InC = ExactlyOne }, C <: AnyContainer]
+    (val inner: P, val container: C) extends AnyMapOver {
+
+    type Inner = P
+    type Container = C
+  }
+
+
+  /* Mapping a Path over a container */
+  trait AnyFlatten extends CombinatorOf1Path {
+
+    type Inner <: AnyPath {
+      type OutT <: AnyNestedGraphType
+    }
+
+    type InC = Inner#InC
+    val  inC = inner.inC
+    type InT = Inner#InT
+    val  inT = inner.inT
+
+    type OutT = Inner#OutT#Inside
+    val  outT = inner.outT.inside
+
+    // we will get OutC through this implicit on construction:
+    val mul: Inner#OutC × Inner#OutT#Container
+  }
+
+  case class Flatten[P <: AnyPath { type OutT <: AnyNestedGraphType }, C <: AnyContainer]
+    (val inner: P)
+    (implicit val mul: (P#OutC × P#OutT#Container) { type Out = C })
+    extends AnyFlatten {
+
+      type Inner = P 
+
+      type OutC = C
+      val  outC = mul(inner.outC, inner.outT.container)
+    }
+
+
+  /* Parallel composition of paths */
+  trait AnyPar extends CombinatorOf2Paths {
+
+    type InC = ExactlyOne
+    val  inC = ExactlyOne 
+    type InT = ParType[InOf[First], InOf[Second]]
+    val  inT = ParType(inOf(first), inOf(second))
+
+    type OutC = ExactlyOne
+    val  outC = ExactlyOne
+    type OutT = ParType[OutOf[First], OutOf[Second]]
+    val  outT = ParType(outOf(first), outOf(second))
+  }
+
+  case class Par[F <: AnyPath, S <: AnyPath]
+    (val first: F, val second: S) extends AnyPar {
+
+    type First = F
+    type Second = S
+  }
+
+  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+
+
+  /* Choice */
+  trait AnyOr extends CombinatorOf2Paths {
+
+    type InC = ExactlyOne
+    val  inC = ExactlyOne 
+    type InT = OrType[InOf[First], InOf[Second]]
+    val  inT = OrType(inOf(first), inOf(second))
+
+    type OutC = ExactlyOne
+    val  outC = ExactlyOne
+    type OutT = OrType[OutOf[First], OutOf[Second]]
+    val  outT = OrType(outOf(first), outOf(second))
+  }
+
+  case class Or[F <: AnyPath, S <: AnyPath]
+    (val first: F, val second: S) extends AnyOr {
+
+    type First = F
+    type Second = S
+  }
+
+  type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
+
 }

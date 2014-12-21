@@ -1,37 +1,36 @@
 package ohnosequences.scarph
 
-import AnyEvalPath._
 
 /* Basic steps: */
 object steps {
 
-  // case class IdStep[T <: AnyGraphType](t: T) 
-  //   extends Step[T, ExactlyOne.type, T](t, ExactlyOne, t)
+  import graphTypes._, paths._, containers._, predicates._
+
 
   case class Get[P <: AnyGraphProperty](val property: P) 
-    extends Step[P#Owner, ExactlyOne.type, P](property.owner, ExactlyOne, property)
+    extends Step[P#Owner, ExactlyOne, P](property.owner, ExactlyOne, property)
 
-  case class InE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
+  case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val pred: P) 
     extends Step[P#ElementType#OutT, P#ElementType#InC, P#ElementType](pred.elementType.outT, pred.elementType.inC, pred.elementType)
 
   // TODO: same as for InE
-  // case class InV[E <: AnyEdgeType](val edge: E) 
+  // case class InV[E <: AnyEdge](val edge: E) 
   //   extends Step[E#OutT, E#InC, E#InT](edge.outT, edge.inC, edge.inT)
 
-  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdgeType }](val pred: P) 
+  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val pred: P) 
     extends Step[P#ElementType#InT, P#ElementType#OutC, P#ElementType](pred.elementType.inT, pred.elementType.outC, pred.elementType)
 
   // TODO: same as for OutE
-  // case class OutV[E <: AnyEdgeType](val edge: E) 
+  // case class OutV[E <: AnyEdge](val edge: E) 
   //   extends Step[E#InT, E#OutC, E#OutT](edge.inT, edge.outC, edge.outT)
 
-  case class Source[E <: AnyEdgeType](val edge: E)
-    extends Step[E, ExactlyOne.type, E#InT](edge, ExactlyOne, edge.inT)
+  case class Source[E <: AnyEdge](val edge: E)
+    extends Step[E, ExactlyOne, E#InT](edge, ExactlyOne, edge.inT)
 
-  case class Target[E <: AnyEdgeType](val edge: E)
-    extends Step[E, ExactlyOne.type, E#OutT](edge, ExactlyOne, edge.outT)
+  case class Target[E <: AnyEdge](val edge: E)
+    extends Step[E, ExactlyOne, E#OutT](edge, ExactlyOne, edge.outT)
 
-  case class Query[E <: AnyElementType](val elem: E)
-    extends Step[PredicateType[E], ManyOrNone.type, E](PredicateType[E](elem), ManyOrNone, elem)
+  case class Query[E <: AnyGraphElement](val elem: E)
+    extends Step[PredicateType[E], ManyOrNone, E](PredicateType[E](elem), ManyOrNone, elem)
 
 }
