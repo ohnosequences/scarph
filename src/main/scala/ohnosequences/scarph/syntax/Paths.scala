@@ -20,11 +20,11 @@ object paths {
     def get[B <: AnyGraphProperty { type Owner = E }](b: B): Get[B] = Get(b)
   }
 
-  implicit def pathElementOps[F <: AnyPath { type Out = ExactlyOneOf[_ <: AnyElementType] }](f: F):
+  implicit def pathElementOps[F <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyElementType }](f: F):
         PathElementOps[F] =
     new PathElementOps[F](f)
 
-  class PathElementOps[F <: AnyPath { type Out = ExactlyOneOf[_ <: AnyElementType] }](f: F) {
+  class PathElementOps[F <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyElementType }](f: F) {
 
     def get[S <: AnyGraphProperty { type Owner = F#OutT }](s: S):
       F >=> Get[S] =
@@ -83,7 +83,7 @@ object paths {
         F >=> InE[S] =
         f >=> InE(s)
 
-    def outE[S <: AnyPredicate { type ElementType <: AnyEdgeType { type In = F#Out } }](s: S):
+    def outE[S <: AnyPredicate { type ElementType <: AnyEdgeType { type InT = F#OutT } }](s: S):
         F >=> OutE[S] =
         f >=> OutE(s)
   }
@@ -98,7 +98,7 @@ object paths {
     // F:       K[A] -> M[B]
     //       S:           B  ->   N[C]
     // F map S: K[A] -> M[B] -> M[N[C]] 
-    def map[S <: AnyPath { type In = ExactlyOne.Of[F#OutT] }](s: S): 
+    def map[S <: AnyPath { type InC = ExactlyOne.type; type InT = F#OutT }](s: S): 
       F >=> (S MapOver F#OutC) = 
       f >=> MapOver(s, f.outC)
 

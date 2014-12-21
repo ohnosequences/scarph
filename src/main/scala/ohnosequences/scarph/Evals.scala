@@ -11,8 +11,8 @@ trait AnyEvalPath {
   type InVal
   type OutVal
 
-  type In = InVal Denotes Path#In
-  type Out = OutVal Denotes Path#Out
+  type In = InVal Denotes InOf[Path]
+  type Out = OutVal Denotes OutOf[Path]
 
   def apply(path: Path)(in: In): Out
 }
@@ -29,7 +29,7 @@ object AnyEvalPath {
   implicit def evalComposition[
     I, 
     F <: AnyPath,
-    G <: AnyPath { type In = F#Out },
+    G <: AnyPath { type InC = F#OutC; type InT = F#OutT },
     X, O
   ](implicit
     evalFirst:  EvalPathOn[I, F, X],
@@ -81,28 +81,28 @@ object AnyEvalPath {
     }
   }
 
-  // // NOTE: this is the same a general thing, but then there is no secod container (i.e. it's virtual Id[])
-  // // it is an experiment, let's see how it works (we need more tests for flatten)
-  // implicit def evalFlattenWithOuterId[
-  //   P <: AnyPath { type Out <: ExactlyOneOf[_ <: AnyContainerType] }, 
-  //   I, O
-  // ](implicit
-  //   evalInner: EvalPathOn[I, P, O]
-  // ):  EvalPathOn[I, Flatten[P, P#OutT#Container], O] = 
-  // new EvalPathOn[I, Flatten[P, P#OutT#Container], O] {
-  //   def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
-  // }
+  // NOTE: this is the same a general thing, but then there is no secod container (i.e. it's virtual Id[])
+  // it is an experiment, let's see how it works (we need more tests for flatten)
+  implicit def evalFlattenWithOuterId[
+    P <: AnyPath { type OutC = ExactlyOne.type; type OutT <: AnyContainerType }, 
+    I, O
+  ](implicit
+    evalInner: EvalPathOn[I, P, O]
+  ):  EvalPathOn[I, Flatten[P, P#OutT#Container], O] = 
+  new EvalPathOn[I, Flatten[P, P#OutT#Container], O] {
+    def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
+  }
 
-  // implicit def evalFlattenWithInnerId[
-  //   P <: AnyPath { type OutT <: ExactlyOneOf[_] }, 
-  //   C <: AnyContainer,
-  //   I, O
-  // ](implicit
-  //   evalInner: EvalPathOn[I, P, O]
-  // ):  EvalPathOn[I, Flatten[P, C], O] = 
-  // new EvalPathOn[I, Flatten[P, C], O] {
-  //   def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
-  // }
+  implicit def evalFlattenWithInnerId[
+    P <: AnyPath { type OutT <: ExactlyOneOf[_] }, 
+    C <: AnyContainer,
+    I, O
+  ](implicit
+    evalInner: EvalPathOn[I, P, O]
+  ):  EvalPathOn[I, Flatten[P, C], O] = 
+  new EvalPathOn[I, Flatten[P, C], O] {
+    def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.path)(in).value
+  }
 
 
   implicit def evalPar[

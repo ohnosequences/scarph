@@ -17,22 +17,16 @@ import AnyEvalPath._
 trait AnyPath {
 
   /* Input */
-  type In <: AnyContainerType
-  val  in: In
-
-  type InC = In#Container
-  val  inC = in.container
-  type InT = In#Of
-  val  inT = in.of
+  type InC <: AnyContainer
+  val  inC: InC
+  type InT <: AnyGraphType
+  val  inT: InT
 
   /* Output */
-  type Out <: AnyContainerType
-  val  out: Out
-
-  type OutC = Out#Container
-  val  outC = out.container
-  type OutT = Out#Of
-  val  outT = out.of
+  type OutC <: AnyContainer
+  val  outC: OutC
+  type OutT <: AnyGraphType
+  val  outT: OutT
 
   // NOTE: we will need to forget about these bounds at some point
   // type Rev <: AnyPath { type In <: path.Out; type Out <: path.In }
@@ -41,36 +35,33 @@ trait AnyPath {
 /* Important aliases which combine input/output arity container with its label type */
 object paths {
 
-  // type InOf[P <: AnyPath] = P#In //C#Of[P#InT]
-  // type OutOf[P <: AnyPath] = P#Out //C#Of[P#OutT]
+  type InOf[P <: AnyPath] = P#InC#Of[P#InT]
+  type OutOf[P <: AnyPath] = P#OutC#Of[P#OutT]
 
-  def inOf[P <: AnyPath](p: P): P#In = p.in //C(p.inT)
-  def outOf[P <: AnyPath](p: P): P#Out = p.out //C(p.outT)
+  def inOf[P <: AnyPath](p: P): InOf[P] = p.inC(p.inT)
+  def outOf[P <: AnyPath](p: P): OutOf[P] = p.outC(p.outT)
 }
 
 /* A _step_ is a simple atomic _path_ which can be evaluated directly.
    Note that it always has form "ExactlyOne to something". */
 trait AnyStep extends AnyPath {
 
-  type In <: ExactlyOneOf[_]
-  // type InC <: ExactlyOne.type
-  // val  inC <: ExactlyOne
+  type InC = ExactlyOne.type
+  val  inC = ExactlyOne
 }
 
 abstract class Step[
   IT <: AnyGraphType,
   OC <: AnyContainer,
   OT <: AnyGraphType
-](iT: IT,
-  oC: OC,
-  oT: OT
+](val inT: IT,
+  val outC: OC,
+  val outT: OT
 ) extends AnyStep {
 
-  type In = ExactlyOne.Of[IT]
-  val  in = ExactlyOne(iT)
-
-  type Out = OC#Of[OT]
-  val  out = oC(oT): Out
+  type InT = IT
+  type OutC = OC
+  type OutT = OT
 }
 
 /* See available combinators in [Combinators.scala] */
@@ -86,12 +77,12 @@ object AnyPath {
 case class PathOps[P <: AnyPath](val p: P) {
   import paths._
 
-  // val in: InOf[P] = inOf(p)
-  // val out: OutOf[P] = outOf(p)
+  val in: InOf[P] = inOf(p)
+  val out: OutOf[P] = outOf(p)
 
   // it's left here and not moved to syntax, because using syntax you shouldn't need it
-  def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P, S] = Composition(p, s)
+  def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P, S] = Composition(p, s)
 
-  def evalOn[I, O](input: I Denotes P#In)
-    (implicit eval: EvalPathOn[I, P, O]): O Denotes P#Out = eval(p)(input)
+  def evalOn[I, O](input: I Denotes InOf[P])
+    (implicit eval: EvalPathOn[I, P, O]): O Denotes OutOf[P] = eval(p)(input)
 }
