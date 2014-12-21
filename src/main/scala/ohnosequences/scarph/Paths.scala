@@ -19,48 +19,36 @@ object paths {
   sealed trait AnyPath {
 
     /* Input */
-    type InC <: AnyContainer
-    val  inC: InC
-    type InT <: AnyGraphType
-    val  inT: InT
+    type In <: AnyGraphType
+    val  in: In
 
     /* Output */
-    type OutC <: AnyContainer
-    val  outC: OutC
-    type OutT <: AnyGraphType
-    val  outT: OutT
+    type Out <: AnyGraphType
+    val  out: Out
 
     // TODO: add Reverse member
   }
 
-  /* Important aliases which combine input/output arity container with its label type */
-  type InOf[P <: AnyPath] = P#InC#Of[P#InT]
-  type OutOf[P <: AnyPath] = P#OutC#Of[P#OutT]
-
-  def inOf[P <: AnyPath](p: P): InOf[P] = p.inC.of(p.inT)
-  def outOf[P <: AnyPath](p: P): OutOf[P] = p.outC.of(p.outT)
-
+  def inOf[P <: AnyPath](p: P): P#In = p.in
+  def outOf[P <: AnyPath](p: P): P#Out = p.out
 
   /* A _step_ is a simple atomic _path_ which can be evaluated directly.
      Note that it always has form "ExactlyOne to something". */
   trait AnyStep extends AnyPath {
 
-    type InC = ExactlyOne
-    val  inC = ExactlyOne
+    type In <: AnyPlainGraphType
   }
 
   abstract class Step[
-    IT <: AnyGraphType,
-    OC <: AnyContainer,
-    OT <: AnyGraphType
-  ](val inT: IT,
-    val outC: OC,
-    val outT: OT
-  ) extends AnyStep {
+    I <: AnyPlainGraphType,
+    O <: AnyGraphType
+  ](i: I, o: O) extends AnyEdge {
 
-    type InT = IT
-    type OutC = OC
-    type OutT = OT
+    type In = I
+    val  in = i
+
+    type Out = O
+    val  out = o
   }
 
 
@@ -76,16 +64,13 @@ object paths {
 
   case class PathOps[P <: AnyPath](val p: P) {
 
-    val in: InOf[P] = inOf(p)
-    val out: OutOf[P] = outOf(p)
-
     import combinators._
     // it's left here and not moved to syntax, because using syntax you shouldn't need it
-    def >=>[S <: AnyPath { type InC = P#OutC; type InT = P#OutT }](s: S): Composition[P, S] = Composition(p, s)
+    def >=>[S <: AnyPath { type In = P#Out }](s: S): Composition[P, S] = Composition(p, s)
 
     import evals._
-    def evalOn[I, O](input: I Denotes InOf[P])
-      (implicit eval: EvalPathOn[I, P, O]): O Denotes OutOf[P] = eval(p)(input)
+    def evalOn[I, O](input: I Denotes P#In)
+      (implicit eval: EvalPathOn[I, P, O]): O Denotes P#Out = eval(p)(input)
   }
 
 }

@@ -6,15 +6,33 @@ object graphTypes {
   import steps._, paths._, containers._
 
 
-  trait AnyGraphType extends AnyType
+  /* This is a graph type containing another graph type */
+  trait AnyGraphType extends AnyType {
 
+    type Container <: AnyContainer
+    val  container: Container
+
+    type Inside <: AnyGraphType
+    val  inside: Inside
+
+    type Tpe = Container#Of[Inside]
+  }
+
+  /* This is a non-nested graph type */
+  trait AnyPlainGraphType extends AnyGraphType {
+
+    type Container = ExactlyOne
+    val  container = ExactlyOne
+
+    type Inside = this.type
+    val  inside = this
+  }
 
   /* A graph element is either a vertex or an edge, only they can have properties */
-  sealed trait AnyGraphElement extends AnyGraphType
-
+  sealed trait AnyGraphElement extends AnyPlainGraphType
 
   /* Vertex type is very simple */
-  trait AnyVertex extends AnyGraphElement {}
+  trait AnyVertex extends AnyGraphElement
 
   abstract class Vertex extends AnyVertex { val label = this.toString }
 
@@ -24,45 +42,32 @@ object graphTypes {
   trait AnyEdge extends AnyGraphElement {
     
     /* The source vertex for this edge */
-    type InT <: AnyVertex
-    val  inT: InT
-    /* This is the arity for incoming edges */
-    type InC <: AnyContainer
-    val  inC: InC
+    type Source <: AnyVertex
+    val  source: Source
 
     /* The target vertex for this edge */
-    type OutT <: AnyVertex
-    val  outT: OutT
-    /* This is the arity for outgoing edges */
-    type OutC <: AnyContainer
-    val  outC: OutC
+    type Target <: AnyVertex
+    val  target: Target
   }
 
   /* This constructor encourages to use this syntax: Edge( ExactlyOne.of(user) -> ManyOrNone.of(tweet) ) */
   abstract class Edge[
-    In  <: AnyNestedGraphType { type Inside <: AnyVertex },
-    Out <: AnyNestedGraphType { type Inside <: AnyVertex }
-  ]( inout: (In, Out) ) extends AnyEdge {
+    S <: AnyVertex,
+    T <: AnyVertex
+  ]( st: (S, T) ) extends AnyEdge {
 
-    private[Edge] val in  = inout._1
-    private[Edge] val out = inout._2
+    type Source = S
+    val  source = st._1
 
-    type InC = In#Container
-    val  inC = in.container
-    type InT = In#Inside
-    val  inT = in.inside
-
-    type OutC = Out#Container
-    val  outC = out.container
-    type OutT = Out#Inside
-    val  outT = out.inside
+    type Target = T
+    val  target = st._2
 
     val label = this.toString
   }
 
 
   /* Property is assigned to one element type and has a raw representation */
-  trait AnyGraphProperty extends AnyGraphType with AnyProperty {
+  trait AnyGraphProperty extends AnyPlainGraphType with AnyProperty {
 
     type Owner <: AnyGraphElement
     val  owner: Owner

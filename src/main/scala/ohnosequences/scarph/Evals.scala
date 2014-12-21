@@ -14,8 +14,8 @@ object evals {
     type InVal
     type OutVal
 
-    type In = InVal Denotes InOf[Path]
-    type Out = OutVal Denotes OutOf[Path]
+    type In = InVal Denotes Path#In
+    type Out = OutVal Denotes Path#Out
 
     def apply(path: Path)(in: In): Out
   }
@@ -34,7 +34,7 @@ object evals {
     implicit def evalComposition[
       I, 
       F <: AnyPath,
-      G <: AnyPath { type InC = F#OutC; type InT = F#OutT },
+      G <: AnyPath { type In = F#Out },
       X, O
     ](implicit
       evalFirst:  EvalPathOn[I, F, X],
@@ -49,7 +49,7 @@ object evals {
 
 
     implicit def evalMapOver[
-      P <: AnyPath { type InC = ExactlyOne }, C <: AnyContainer,
+      P <: AnyPath { type In <: AnyPlainGraphType }, C <: AnyContainer,
       I, F[_], O
     ](implicit
       evalInner: EvalPathOn[I, P, O],
@@ -67,7 +67,7 @@ object evals {
 
 
     implicit def evalFlatten[
-      P <: AnyPath { type OutT <: AnyNestedGraphType }, 
+      P <: AnyPath, 
       C <: AnyContainer,
       I, F[_], G[_], O, FGO
     ](implicit
@@ -82,65 +82,42 @@ object evals {
       }
     }
 
-    // NOTE: this is the same a general thing, but then there is no secod container (i.e. it's virtual Id[])
-    // it is an experiment, let's see how it works (we need more tests for flatten)
-    implicit def evalFlattenWithOuterId[
-      P <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyNestedGraphType }, 
-      I, O
-    ](implicit
-      evalInner: EvalPathOn[I, P, O]
-    ):  EvalPathOn[I, Flatten[P, P#OutT#Container], O] = 
-    new EvalPathOn[I, Flatten[P, P#OutT#Container], O] {
-      def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.inner)(in).value
-    }
 
-    implicit def evalFlattenWithInnerId[
-      P <: AnyPath { type OutT <: AnyNestedGraphType { type Container = ExactlyOne } }, 
-      C <: AnyContainer,
-      I, O
-    ](implicit
-      evalInner: EvalPathOn[I, P, O]
-    ):  EvalPathOn[I, Flatten[P, C], O] = 
-    new EvalPathOn[I, Flatten[P, C], O] {
-      def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.inner)(in).value
-    }
+    // implicit def evalPar[
+    //   FI, SI,
+    //   F <: AnyPath, S <: AnyPath,
+    //   FO, SO
+    // ](implicit
+    //   evalFirst:  EvalPathOn[FI, F, FO], 
+    //   evalSecond: EvalPathOn[SI, S, SO]
+    // ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
+    // new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
+    //   def apply(path: Path)(in: In): Out = {
+    //     outOf(path) := ((
+    //       evalFirst(path.first)( inOf(path.first) := (in.value._1) ).value,
+    //       evalSecond(path.second)( inOf(path.second) := (in.value._2) ).value
+    //     ))
+    //   }
+    // }
 
 
-    implicit def evalPar[
-      FI, SI,
-      F <: AnyPath, S <: AnyPath,
-      FO, SO
-    ](implicit
-      evalFirst:  EvalPathOn[FI, F, FO], 
-      evalSecond: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
-    new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
-      def apply(path: Path)(in: In): Out = {
-        outOf(path) := ((
-          evalFirst(path.first)( inOf(path.first) := (in.value._1) ).value,
-          evalSecond(path.second)( inOf(path.second) := (in.value._2) ).value
-        ))
-      }
-    }
-
-
-    import scalaz.\/
-    implicit def evalOr[
-      FI, SI,
-      F <: AnyPath, S <: AnyPath,
-      FO, SO
-    ](implicit
-      evalFirst:  EvalPathOn[FI, F, FO], 
-      evalSecond: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
-    new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
-      def apply(path: Path)(in: In): Out = {
-        outOf(path) := ( in.value.bimap(
-          fi => evalFirst(path.first)( inOf(path.first) := (fi) ).value,
-          si => evalSecond(path.second)( inOf(path.second) := (si) ).value
-        ))
-      }
-    }
+    // import scalaz.\/
+    // implicit def evalOr[
+    //   FI, SI,
+    //   F <: AnyPath, S <: AnyPath,
+    //   FO, SO
+    // ](implicit
+    //   evalFirst:  EvalPathOn[FI, F, FO], 
+    //   evalSecond: EvalPathOn[SI, S, SO]
+    // ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
+    // new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
+    //   def apply(path: Path)(in: In): Out = {
+    //     outOf(path) := ( in.value.bimap(
+    //       fi => evalFirst(path.first)( inOf(path.first) := (fi) ).value,
+    //       si => evalSecond(path.second)( inOf(path.second) := (si) ).value
+    //     ))
+    //   }
+    // }
 
   }
 

@@ -5,19 +5,9 @@ object containers {
   import graphTypes._
 
 
-  /* This is a graph type containing another graph type */
-  sealed trait AnyNestedGraphType extends AnyGraphType {
-
-    type Container <: AnyContainer
-    val  container: Container
-
-    type Inside <: AnyGraphType
-    val  inside: Inside
-  }
-
   /* These classes are only for convenience of definitions inside this object */
   abstract sealed private class NestedGraphType[C <: AnyContainer, T <: AnyGraphType]
-    (val container: C, val inside: T) extends AnyNestedGraphType {
+    (val container: C, val inside: T) extends AnyGraphType {
 
     type Container = C
     type Inside = T
@@ -34,14 +24,14 @@ object containers {
   /* Here are 4 types of arity containers that we can use for wrapping graph types */
   sealed trait AnyContainer {
 
-    type Of[T <: AnyGraphType] <: AnyNestedGraphType
+    type Of[T <: AnyGraphType] <: AnyGraphType
     def  of[T <: AnyGraphType](t: T): Of[T]
   }
 
 
   object ExactlyOne extends AnyContainer { 
-    type Of[T <: AnyGraphType] = ExactlyOneOf[T]
-    def  of[T <: AnyGraphType](t: T): Of[T] = ExactlyOneOf[T](t)
+    type Of[T <: AnyGraphType] = T
+    def  of[T <: AnyGraphType](t: T): Of[T] = t
   }
   type ExactlyOne = ExactlyOne.type
 
