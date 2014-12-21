@@ -29,25 +29,25 @@ object containers {
   }
 
 
-  object ExactlyOne extends AnyContainer { 
+  case object ExactlyOne extends AnyContainer { 
     type Of[T <: AnyGraphType] = T
-    def  of[T <: AnyGraphType](t: T): Of[T] = t
+    def  of[T <: AnyGraphType](t: T): T = t
   }
   type ExactlyOne = ExactlyOne.type
 
-  object OneOrNone extends AnyContainer { 
+  case object OneOrNone extends AnyContainer { 
     type Of[T <: AnyGraphType] = OneOrNoneOf[T]  
     def  of[T <: AnyGraphType](t: T): Of[T] = OneOrNoneOf[T](t)
   }
   type OneOrNone = OneOrNone.type
 
-  object AtLeastOne extends AnyContainer { 
+  case object AtLeastOne extends AnyContainer { 
     type Of[T <: AnyGraphType] = AtLeastOneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = AtLeastOneOf[T](t)
   }
   type AtLeastOne = AtLeastOne.type
 
-  object ManyOrNone extends AnyContainer { 
+  case object ManyOrNone extends AnyContainer { 
     type Of[T <: AnyGraphType] = ManyOrNoneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = ManyOrNoneOf[T](t)
   }

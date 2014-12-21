@@ -93,19 +93,23 @@ object paths {
 
   class PathOps[F <: AnyPath](f: F) {
 
-    // // F:       K[A] -> M[B]
-    // //       S:           B  ->   N[C]
-    // // F map S: K[A] -> M[B] -> M[N[C]] 
-    // def map[S <: AnyPath { type In = F#Out#Inside }](s: S): 
-    //   F >=> (S MapOver F#Out#Container) = 
-    //   f >=> MapOver(s, f.out.container)
+    // F:       K[A] -> M[B]
+    //       S:           B  ->   N[C]
+    // F map S: K[A] -> M[B] -> M[N[C]] 
+    def map[S <: AnyPath](s: S)
+      (implicit cmp: F#Out ≃ MapOver[S, F#Out#Container]#In): 
+       F >=> MapOver[S, F#Out#Container] = 
+      (f >=> MapOver[S, F#Out#Container](s, f.out.container))(cmp)
 
-    // // F:           K[A] -> M[B]
-    // //           S:           B  ->   N[C]
-    // // F flatMap S: K[A] -> M[B] -> M×N[C]
-    // def flatMap[S <: AnyPath { type In = F#Out }, C <: AnyContainer](s: S)
-    //   (implicit mul: (F#Out#Container × S#Out#Container) { type Out = C }):
-    //     Flatten[(F >=> (S MapOver F#OutC)), C] = Flatten(f.map(s))(mul)
+    // F:           K[A] -> M[B]
+    //           S:           B  ->   N[C]
+    // F flatMap S: K[A] -> M[B] -> M×N[C]
+    def flatMap[S <: AnyPath, C <: AnyContainer](s: S)
+      (implicit 
+        cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
+        mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) { type Out = C }
+      ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
+         Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 
     // // TODO: bounds:
     // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)

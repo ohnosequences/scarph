@@ -20,6 +20,7 @@ object evals {
     def apply(path: Path)(in: In): Out
   }
 
+  @annotation.implicitNotFound(msg = "Can't evaluate path ${P} with\n\tinput: ${I}\n\toutput: ${O}")
   trait EvalPathOn[I, P <: AnyPath, O] extends AnyEvalPath {
 
     type InVal = I
@@ -34,16 +35,17 @@ object evals {
     implicit def evalComposition[
       I, 
       F <: AnyPath,
-      G <: AnyPath { type In = F#Out },
+      G <: AnyPath,
       X, O
     ](implicit
+      composable: F#Out ≃ G#In,
       evalFirst:  EvalPathOn[I, F, X],
       evalSecond: EvalPathOn[X, G, O]
     ):  EvalPathOn[I, Composition[F, G], O] = 
     new EvalPathOn[I, Composition[F, G], O] {
       def apply(path: Path)(in: In): Out = {
         val firstResult = evalFirst(path.first)(in)
-        evalSecond(path.second)(firstResult)
+        evalSecond(path.second)(inOf(path.second) := firstResult.value)
       }
     }
 

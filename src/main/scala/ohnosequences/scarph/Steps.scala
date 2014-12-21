@@ -37,10 +37,10 @@ object steps {
   // TODO: inV/outV
 
   case class Source[E <: AnyEdge](val edge: E)
-    extends Step[E, E#Source](edge, edge.source)
+    extends Step[E, E#SourceV](edge, edge.sourceV)
 
   case class Target[E <: AnyEdge](val edge: E)
-    extends Step[E, E#Target](edge, edge.target)
+    extends Step[E, E#TargetV](edge, edge.targetV)
 
   case class Query[E <: AnyGraphElement](val elem: E)
     extends Step[PredicateType[E], ManyOrNone#Of[E]](PredicateType[E](elem), ManyOrNone.of(elem))

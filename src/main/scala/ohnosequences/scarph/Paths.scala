@@ -67,7 +67,7 @@ object paths {
 
     import combinators._
     // it's left here and not moved to syntax, because using syntax you shouldn't need it
-    def >=>[S <: AnyPath { type In <: P#Out }](s: S): Composition[P, S] = Composition(p, s)
+    def >=>[S <: AnyPath](s: S)(implicit c: P#Out ≃ S#In): Composition[P, S] = Composition(p, s)(c)
 
     import evals._
     def evalOn[I, O](input: I Denotes P#In)

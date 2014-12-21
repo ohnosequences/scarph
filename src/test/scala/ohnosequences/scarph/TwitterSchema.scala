@@ -26,6 +26,8 @@ object Twitter {
   // case object time extends PropertyOf(posted) { type Raw = String }
   // case object url  extends PropertyOf(posted) { type Raw = String }
 
+  implicitly[ follows.TargetV ≃ name.Owner ]
+
   // case object follows extends Edge(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
   // case object liked extends Edge(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
@@ -46,10 +48,10 @@ object Twitter {
     vertices =  user :~: tweet :~: ∅,
     edges = posted :~: follows :~: liked :~: ∅,
     indexes = 
-      userByName :~: userByNameAndAge :~:
-      tweetByText :~: 
-      postedByTime :~: 
-      postedByTimeAndUrlLocal :~: 
+      // userByName :~: userByNameAndAge :~:
+      // tweetByText :~: 
+      // postedByTime :~: 
+      // postedByTimeAndUrlLocal :~: 
       ∅
   )
 
