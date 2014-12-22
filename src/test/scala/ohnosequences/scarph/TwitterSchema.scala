@@ -15,20 +15,12 @@ object Twitter {
   case object tweet extends Vertex
   case object text  extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends Edge(ExactlyOne.of(user) -> ManyOrNone.of(tweet))
+  case object posted extends Edge(user -> ManyOrNone.of(tweet))
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 
   case object follows extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(user))
   case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
-
-  // case object posted extends Edge(user, tweet) with InArity[ExactlyOne] with OutArity[ManyOrNone]
-  // case object time extends PropertyOf(posted) { type Raw = String }
-  // case object url  extends PropertyOf(posted) { type Raw = String }
-
-  // case object follows extends Edge(user, user) with InArity[ManyOrNone] with OutArity[ManyOrNone]
-
-  // case object liked extends Edge(user, tweet) with InArity[ManyOrNone] with OutArity[ManyOrNone]
 
   // simple indexes
   case object userByName extends SimpleIndex(user, name)
@@ -54,26 +46,3 @@ object Twitter {
   )
 
 }
-
-// object StupidQueries {
-//   import Twitter._
-
-//   val uh = InV(follows) map Get(name)
-//   val zz = Target(follows) >=> InE(follows)
-//   val altSyntax = Target(follows) >=> InE(follows)
-//   val ups = InE(posted)
-//   // this is clunky right now, but it works
-//   val uuuuh = InE(posted) map Target(posted)
-
-//   val asdfadf = InV(follows) map InV(follows)
-//   val asdfadf2 = InV(follows) map InV(follows)
-
-//   val ohno = Par(
-//     InV(follows) map InV(follows),
-//     Target(follows) >=> InE(follows)
-//   )
-
-//   val sfdsd = ((InV(follows) map InV(follows)) ⨂ (Target(follows) >=> InE(follows))) ⨁ (InV(follows) map OutV(posted))
-
-//   val yurj = rev( Target(follows) >=> InE(follows) )
-// }

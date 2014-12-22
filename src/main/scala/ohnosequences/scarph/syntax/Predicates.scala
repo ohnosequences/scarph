@@ -15,8 +15,8 @@ object predicates {
 
   /* Every predicate already knows it's own label type, so let's make this labeling implicit */
   implicit def labeledPredicate[E <: AnyGraphElement, P <: AnyPredicate { type ElementType = E }](p: P):
-      (P Denotes ExactlyOne.Of[PredicateType[E]]) =
-  new (P Denotes ExactlyOne.Of[PredicateType[E]])(p)
+      (P Denotes PredicateType[E]) =
+  new (P Denotes PredicateType[E])(p)
 
   // implicit def elementLabeledPredicate[E <: AnyGraphElement](e: E):
   //     (EmptyPredicate[E] Denotes ExactlyOne.Of[PredicateType[E]]) =

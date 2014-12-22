@@ -8,29 +8,53 @@ object steps {
 
 
   case class Get[P <: AnyGraphProperty](val property: P) 
-    extends Step[P#Owner, ExactlyOne, P](property.owner, ExactlyOne, property)
+    extends Step[P#Owner, P](property.owner, property)
 
-  case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val pred: P) 
-    extends Step[P#ElementType#OutT, P#ElementType#InC, P#ElementType](pred.elementType.outT, pred.elementType.inC, pred.elementType)
+  case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
 
-  // TODO: same as for InE
-  // case class InV[E <: AnyEdge](val edge: E) 
-  //   extends Step[E#OutT, E#InC, E#InT](edge.outT, edge.inC, edge.inT)
+      type     Edge = P#ElementType
+      lazy val edge = predicate.elementType: Edge
 
-  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val pred: P) 
-    extends Step[P#ElementType#InT, P#ElementType#OutC, P#ElementType](pred.elementType.inT, pred.elementType.outC, pred.elementType)
+      type     In = Edge#TargetV
+      lazy val in = edge.targetV
 
-  // TODO: same as for OutE
-  // case class OutV[E <: AnyEdge](val edge: E) 
-  //   extends Step[E#InT, E#OutC, E#OutT](edge.inT, edge.outC, edge.outT)
+      type     Out = Edge#Source#Container#Of[Edge]
+      lazy val out = edge.source.container.of(edge)
+  }
 
-  case class Source[E <: AnyEdge](val edge: E)
-    extends Step[E, ExactlyOne, E#InT](edge, ExactlyOne, edge.inT)
+  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
 
-  case class Target[E <: AnyEdge](val edge: E)
-    extends Step[E, ExactlyOne, E#OutT](edge, ExactlyOne, edge.outT)
+      type     Edge = P#ElementType
+      lazy val edge = predicate.elementType: Edge
+
+      type     In = Edge#SourceV
+      lazy val in = edge.sourceV
+
+      type     Out = Edge#Target#Container#Of[Edge]
+      lazy val out = edge.target.container.of(edge)
+  }
+
+  // TODO: inV/outV
+
+  case class Source[E <: AnyEdge](val edge: E) extends AnyStep {
+
+    type In = E
+    val  in = edge
+
+    type     Out = E#SourceV
+    lazy val out = edge.sourceV
+  }
+
+  case class Target[E <: AnyEdge](val edge: E) extends AnyStep {
+
+    type In = E
+    val  in = edge
+
+    type     Out = E#TargetV
+    lazy val out = edge.targetV
+  }
 
   case class Query[E <: AnyGraphElement](val elem: E)
-    extends Step[PredicateType[E], ManyOrNone, E](PredicateType[E](elem), ManyOrNone, elem)
+    extends Step[PredicateType[E], ManyOrNone#Of[E]](PredicateType[E](elem), ManyOrNone.of(elem))
 
 }

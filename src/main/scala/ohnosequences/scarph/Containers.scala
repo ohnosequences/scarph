@@ -5,19 +5,9 @@ object containers {
   import graphTypes._
 
 
-  /* This is a graph type containing another graph type */
-  sealed trait AnyNestedGraphType extends AnyGraphType {
-
-    type Container <: AnyContainer
-    val  container: Container
-
-    type Inside <: AnyGraphType
-    val  inside: Inside
-  }
-
   /* These classes are only for convenience of definitions inside this object */
   abstract sealed private class NestedGraphType[C <: AnyContainer, T <: AnyGraphType]
-    (val container: C, val inside: T) extends AnyNestedGraphType {
+    (val container: C, val inside: T) extends AnyGraphType {
 
     type Container = C
     type Inside = T
@@ -34,30 +24,30 @@ object containers {
   /* Here are 4 types of arity containers that we can use for wrapping graph types */
   sealed trait AnyContainer {
 
-    type Of[T <: AnyGraphType] <: AnyNestedGraphType
+    type Of[T <: AnyGraphType] <: AnyGraphType
     def  of[T <: AnyGraphType](t: T): Of[T]
   }
 
 
-  object ExactlyOne extends AnyContainer { 
-    type Of[T <: AnyGraphType] = ExactlyOneOf[T]
-    def  of[T <: AnyGraphType](t: T): Of[T] = ExactlyOneOf[T](t)
+  case object ExactlyOne extends AnyContainer { 
+    type Of[T <: AnyGraphType] = T
+    def  of[T <: AnyGraphType](t: T): T = t
   }
   type ExactlyOne = ExactlyOne.type
 
-  object OneOrNone extends AnyContainer { 
+  case object OneOrNone extends AnyContainer { 
     type Of[T <: AnyGraphType] = OneOrNoneOf[T]  
     def  of[T <: AnyGraphType](t: T): Of[T] = OneOrNoneOf[T](t)
   }
   type OneOrNone = OneOrNone.type
 
-  object AtLeastOne extends AnyContainer { 
+  case object AtLeastOne extends AnyContainer { 
     type Of[T <: AnyGraphType] = AtLeastOneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = AtLeastOneOf[T](t)
   }
   type AtLeastOne = AtLeastOne.type
 
-  object ManyOrNone extends AnyContainer { 
+  case object ManyOrNone extends AnyContainer { 
     type Of[T <: AnyGraphType] = ManyOrNoneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = ManyOrNoneOf[T](t)
   }
@@ -98,39 +88,39 @@ object containers {
 
   // TODO: HList-like with bound on vertices, another for paths etc
 
-  trait AnyParType extends AnyGraphType {
+  // trait AnyParType extends AnyGraphType {
 
-    type First <: AnyGraphType
-    val  first: First
+  //   type First <: AnyGraphType
+  //   val  first: First
 
-    type Second <: AnyGraphType
-    val  second: Second
-  }
+  //   type Second <: AnyGraphType
+  //   val  second: Second
+  // }
 
-  case class ParType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParType {
+  // case class ParType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParType {
 
-    type First = F
-    type Second = S
+  //   type First = F
+  //   type Second = S
 
-    val label = this.toString
-  }
+  //   val label = this.toString
+  // }
 
 
-  trait AnyOrType extends AnyGraphType {
+  // trait AnyOrType extends AnyGraphType {
 
-    type First <: AnyGraphType
-    val  first: First
+  //   type First <: AnyGraphType
+  //   val  first: First
 
-    type Second <: AnyGraphType
-    val  second: Second
-  }
+  //   type Second <: AnyGraphType
+  //   val  second: Second
+  // }
 
-  case class OrType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrType {
+  // case class OrType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrType {
 
-    type First = F
-    type Second = S
+  //   type First = F
+  //   type Second = S
 
-    val label = this.toString
-  }
+  //   val label = this.toString
+  // }
 
 }

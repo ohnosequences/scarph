@@ -7,7 +7,7 @@ object predicates {
 
 
   /* Predicate is a restriction on properties of an element type */
-  trait AnyPredicateType extends AnyGraphType {
+  trait AnyPredicateType extends AnySimpleGraphType {
     
     type ElementType <: AnyGraphElement
     val  elementType: ElementType

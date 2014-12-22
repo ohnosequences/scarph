@@ -15,18 +15,18 @@ object paths {
 
   class ElementOps[E <: AnyGraphElement](e: E) {
 
-    def get[B <: AnyGraphProperty { type Owner = E }](b: B): Get[B] = Get(b)
+    def get[P <: AnyGraphProperty { type Owner = E }](p: P): Get[P] = Get(p)
   }
 
-  implicit def pathElementOps[F <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyGraphElement }](f: F):
+  implicit def pathElementOps[F <: AnyPath { type Out <: AnyGraphElement }](f: F):
         PathElementOps[F] =
     new PathElementOps[F](f)
 
-  class PathElementOps[F <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyGraphElement }](f: F) {
+  class PathElementOps[F <: AnyPath { type Out <: AnyGraphElement }](f: F) {
 
-    def get[S <: AnyGraphProperty { type Owner = F#OutT }](s: S):
-      F >=> Get[S] =
-      f >=> Get(s)
+    def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
+      F >=> Get[P] =
+      f >=> Get[P](p)
   }
 
   /* Edge types */
@@ -36,23 +36,23 @@ object paths {
 
   class EdgeOps[E <: AnyEdge](e: E) {
 
-    def source: Source[E] = s.steps.Source(e)
-    def target: Target[E] = s.steps.Target(e)
+    def src: Source[E] = s.steps.Source(e)
+    def tgt: Target[E] = s.steps.Target(e)
   }
 
-  implicit def pathEdgeOps[F <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyEdge }](f: F):
+  implicit def pathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F):
         PathEdgeOps[F] =
     new PathEdgeOps[F](f)
 
-  class PathEdgeOps[F <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyEdge }](f: F) {
+  class PathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
-    def source: F >=> Source[F#OutT] =
-                f >=> Source(f.outT)
+    def src: F >=> Source[F#Out] =
+             f >=> Source(f.out)
 
     // NOTE: in gremlin this is called .inV
-    def target: F >=> Target[F#OutT] =
-                f >=> Target(f.outT)
+    def tgt: F >=> Target[F#Out] =
+             f >=> Target(f.out)
   }
 
   /* Vertex types */
@@ -63,73 +63,98 @@ object paths {
   class VertexOps[V <: AnyVertex](v: V) {
 
     def inE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type OutT = V }
+        type ElementType <: AnyEdge { type Target <: AnyGraphType { type Inside = V } }
       }](s: S): InE[S] = InE(s)
 
     def outE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type InT = V }
+        type ElementType <: AnyEdge { type Source <: AnyGraphType { type Inside = V } }
       }](s: S): OutE[S] = OutE(s)
   }
 
-  implicit def pathVertexOps[F <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyVertex }](f: F):
+  implicit def pathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F):
         PathVertexOps[F] =
     new PathVertexOps[F](f)
 
-  class PathVertexOps[F <: AnyPath { type OutC = ExactlyOne; type OutT <: AnyVertex }](f: F) {
+  class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
 
-    def inE[S <: AnyPredicate { type ElementType <: AnyEdge { type OutT = F#OutT } }](s: S):
-        F >=> InE[S] =
-        f >=> InE(s)
+    def inE[P <: AnyPredicate { 
+      type ElementType <: AnyEdge { 
+        type Target <: AnyGraphType { 
+          type Inside = F#Out
+        } 
+      } 
+    }](p: P):
+      F >=> InE[P] =
+      f >=> InE(p)
 
-    def outE[S <: AnyPredicate { type ElementType <: AnyEdge { type InT = F#OutT } }](s: S):
-        F >=> OutE[S] =
-        f >=> OutE(s)
+    def outE[P <: AnyPredicate { 
+      type ElementType <: AnyEdge { 
+        type Source <: AnyGraphType { 
+          type Inside = F#Out 
+        } 
+      } 
+    }](p: P):
+      F >=> OutE[P] =
+      f >=> OutE(p)
+  }
+
+  /* This gives user nice warnings and doesn't add unnecessary constructors */
+  implicit def pathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F): 
+        PathWarnOps[F] =
+    new PathWarnOps[F](f)
+
+  class PathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F) {
+    @deprecated("You are trying to flatten a non-nested structure, you don't need it", "")
+    def flatten: F = f
+
+    @deprecated("You are trying to map over one value, you don't need it", "")
+    def map[S <: AnyPath](s: S)
+      (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
+
+    @deprecated("You are trying to flatMap over one value, you don't need it", "")
+    def flatMap[S <: AnyPath](s: S)
+      (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
   }
 
   /* Any paths */
-  implicit def pathOps[T <: AnyPath](t: T): 
-        PathOps[T] =
-    new PathOps[T](t)
+  implicit def pathOps[F <: AnyPath](f: F): 
+        PathOps[F] =
+    new PathOps[F](f)
 
   class PathOps[F <: AnyPath](f: F) {
 
     // F:       K[A] -> M[B]
     //       S:           B  ->   N[C]
     // F map S: K[A] -> M[B] -> M[N[C]] 
-    def map[S <: AnyPath { type InC = ExactlyOne; type InT = F#OutT }](s: S): 
-      F >=> (S MapOver F#OutC) = 
-      f >=> MapOver(s, f.outC)
+    def map[S <: AnyPath](s: S)
+      (implicit cmp: F#Out ≃ MapOver[S, F#Out#Container]#In): 
+       F >=> MapOver[S, F#Out#Container] = 
+      (f >=> MapOver[S, F#Out#Container](s, f.out.container))(cmp)
 
     // F:           K[A] -> M[B]
     //           S:           B  ->   N[C]
     // F flatMap S: K[A] -> M[B] -> M×N[C]
-    def flatMap[S <: AnyPath { 
-        type InC = ExactlyOne
-        type InT = F#OutT 
-      }, C <: AnyContainer
-    ](s: S)(implicit mul: (F#OutC × OutOf[S]#Container) { type Out = C }):
-      Flatten[(F >=> (S MapOver F#OutC)), C] = Flatten(f.map(s))(mul)
-
-    // TODO: bounds:
-    def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
-    def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
-
-    // TODO: bounds:
-    def par[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
-    def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
-  }
-
-
-  implicit def nestedPathOps[T <: AnyPath { type OutT <: AnyNestedGraphType }](t: T): 
-        NestedPathOps[T] = 
-    new NestedPathOps[T](t)
-
-  class NestedPathOps[F <: AnyPath { type OutT <: AnyNestedGraphType }](f: F) {
+    def flatMap[S <: AnyPath, C <: AnyContainer](s: S)
+      (implicit 
+        cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
+        // NOTE: this is just (F#Out#Container × S#Out#Container), but compiler needs this explicit crap:
+        mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) { type Out = C }
+      ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
+         Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 
     // F:         K[A] -> L[M[B]]
     // F.flatten: K[A] -> L×M[F]
-    def flatten[C <: AnyContainer](implicit mul: (F#OutC × F#OutT#Container) { type Out = C }):
+    def flatten[C <: AnyContainer](implicit mul: (F#Out#Container × F#Out#Inside#Container) { type Out = C }):
       Flatten[F, C] =
       Flatten[F, C](f)(mul)
+
+    // // TODO: bounds:
+    // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
+    // def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
+
+    // // TODO: bounds:
+    // def par[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
+    // def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
   }
+
 }
