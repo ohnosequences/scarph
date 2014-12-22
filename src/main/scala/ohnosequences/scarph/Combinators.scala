@@ -27,10 +27,10 @@ object combinators {
     // type Second <: AnyPath { type In <: AnyGraphType.SameAs[First#Out] }
 
     type In = First#In
-    val  in = first.in
+    lazy val  in = first.in
 
     type Out = Second#Out
-    val  out = second.out
+    lazy val  out = second.out
   }
 
   case class Composition[F <: AnyPath, S <: AnyPath]
@@ -51,10 +51,10 @@ object combinators {
     val  container: Container
 
     type In = Container#Of[Inner#In]
-    val  in = container.of(inner.in): In
+    val  in: In = container.of(inner.in)
 
     type Out = Container#Of[Inner#Out]
-    val  out = container.of(inner.out): Out
+    val  out: Out = container.of(inner.out)
   }
 
   case class MapOver[P <: AnyPath, C <: AnyContainer]
@@ -69,7 +69,7 @@ object combinators {
   trait AnyFlatten extends CombinatorOf1Path {
 
     type In = Inner#In
-    val  in = inner.in
+    lazy val  in: In = inner.in
 
     type OutC <: AnyContainer
     val  outC: OutC
@@ -85,10 +85,10 @@ object combinators {
       type Inner = P 
 
       type OutC = C
-      val  outC = mul(inner.out.container, inner.out.inside.container)
+      val  outC: OutC = mul(inner.out.container, inner.out.inside.container)
 
       type Out = OutC#Of[Inner#Out#Inside#Inside]
-      val  out = outC.of(inner.out.inside.inside): Out
+      val  out: Out = outC.of(inner.out.inside.inside)
     }
 
 

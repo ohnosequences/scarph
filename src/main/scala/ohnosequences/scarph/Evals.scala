@@ -45,7 +45,7 @@ object evals {
     new EvalPathOn[I, Composition[F, G], O] {
       def apply(path: Path)(in: In): Out = {
         val firstResult = evalFirst(path.first)(in)
-        evalSecond(path.second)(inOf(path.second) := firstResult.value)
+        evalSecond(path.second)((path.second.in: G#In) := firstResult.value)
       }
     }
 
@@ -59,9 +59,9 @@ object evals {
     ):  EvalPathOn[F[I], P MapOver C, F[O]] = 
     new EvalPathOn[F[I], P MapOver C, F[O]] {
       def apply(path: Path)(in: In): Out = {
-        outOf(path) := (
+        path.out := (
           functor.map(in.value){ i => 
-            evalInner(path.inner)( inOf(path.inner) := i ).value 
+            evalInner(path.inner)( (path.inner.in: P#In) := i ).value 
           }
         )
       }
@@ -90,7 +90,7 @@ object evals {
     new EvalPathOn[I, Flatten[P, C], FGO] {
       def apply(path: Path)(in: In): Out = {
         val nested = evalInner(path.inner)(in).value
-        outOf(path) := flatten(nested)
+        path.out := flatten(nested)
       }
     }
 
@@ -106,7 +106,7 @@ object evals {
       evalInner: EvalPathOn[I, P, O]
     ):  EvalPathOn[I, Flatten[P, P#Out#Inside#Container], O] = 
     new EvalPathOn[I, Flatten[P, P#Out#Inside#Container], O] {
-      def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.inner)(in).value
+      def apply(path: Path)(in: In): Out = path.out := evalInner(path.inner)(in).value
     }
 
     implicit def evalFlattenWithInnerId[
@@ -121,7 +121,7 @@ object evals {
       evalInner: EvalPathOn[I, P, O]
     ):  EvalPathOn[I, Flatten[P, C], O] = 
     new EvalPathOn[I, Flatten[P, C], O] {
-      def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.inner)(in).value
+      def apply(path: Path)(in: In): Out = path.out := evalInner(path.inner)(in).value
     }
 
 

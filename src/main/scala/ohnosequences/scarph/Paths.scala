@@ -29,8 +29,8 @@ object paths {
     // TODO: add Reverse member
   }
 
-  def inOf[P <: AnyPath](p: P): P#In = p.in
-  def outOf[P <: AnyPath](p: P): P#Out = p.out
+  // def inOf[P <: AnyPath](p: P): P#In = p.in
+  // def outOf[P <: AnyPath](p: P): P#Out = p.out
 
   /* A _step_ is a simple atomic _path_ which can be evaluated directly.
      Note that it always has form "ExactlyOne to something". */
