@@ -47,8 +47,6 @@ object combinators {
   /* Mapping a Path over a container */
   trait AnyMapOver extends CombinatorOf1Path {
 
-    // type Inner <: AnyPath { type In <: AnyPlainGraphType }
-
     type Container <: AnyContainer
     val  container: Container
 
@@ -77,9 +75,6 @@ object combinators {
     val  outC: OutC
     // we will get OutC through this implicit on construction:
     val mul: (Inner#Out#Container × Inner#Out#Inside#Container) { type Out = OutC }
-
-    type Out = OutC#Of[Inner#Out#Inside#Inside]
-    val  out = outC.of(inner.out.inside.inside): Out
   }
 
   case class Flatten[P <: AnyPath, C <: AnyContainer]
@@ -91,6 +86,9 @@ object combinators {
 
       type OutC = C
       val  outC = mul(inner.out.container, inner.out.inside.container)
+
+      type Out = OutC#Of[Inner#Out#Inside#Inside]
+      val  out = outC.of(inner.out.inside.inside): Out
     }
 
 

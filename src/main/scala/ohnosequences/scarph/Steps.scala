@@ -15,11 +15,11 @@ object steps {
       type Edge = P#ElementType
       val  edge = predicate.elementType: Edge
 
-      type In = Edge#TargetV
-      val  in = edge.targetV
+      type In = TargetV[Edge]
+      val  in = targetV(edge)
 
-      type Out = Edge#Target#Container#Of[Edge]
-      val  out = edge.target.container.of(edge)
+      type Out = Edge#Source#Container#Of[Edge]
+      val  out = edge.source.container.of(edge)
   }
 
   case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
@@ -27,20 +27,32 @@ object steps {
       type Edge = P#ElementType
       val  edge = predicate.elementType: Edge
 
-      type In = Edge#SourceV
-      val  in = edge.sourceV
+      type In = SourceV[Edge]
+      val  in = sourceV(edge)
 
-      type Out = Edge#Source#Container#Of[Edge]
-      val  out = edge.source.container.of(edge)
+      type Out = Edge#Target#Container#Of[Edge]
+      val  out = edge.target.container.of(edge)
   }
 
   // TODO: inV/outV
 
-  case class Source[E <: AnyEdge](val edge: E)
-    extends Step[E, E#SourceV](edge, edge.sourceV)
+  case class Source[E <: AnyEdge](val edge: E) extends AnyStep {
 
-  case class Target[E <: AnyEdge](val edge: E)
-    extends Step[E, E#TargetV](edge, edge.targetV)
+    type In = E
+    val  in = edge
+
+    type Out = SourceV[E]
+    val  out = sourceV(edge)
+  }
+
+  case class Target[E <: AnyEdge](val edge: E) extends AnyStep {
+
+    type In = E
+    val  in = edge
+
+    type Out = TargetV[E]
+    val  out = targetV(edge)
+  }
 
   case class Query[E <: AnyGraphElement](val elem: E)
     extends Step[PredicateType[E], ManyOrNone#Of[E]](PredicateType[E](elem), ManyOrNone.of(elem))

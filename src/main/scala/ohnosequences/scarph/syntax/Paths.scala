@@ -63,11 +63,11 @@ object paths {
   class VertexOps[V <: AnyVertex](v: V) {
 
     def inE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type TargetV = V }
+        type ElementType <: AnyEdge { type Target <: AnyGraphType { type Inside = V } }
       }](s: S): InE[S] = InE(s)
 
     def outE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type SourceV = V }
+        type ElementType <: AnyEdge { type Source <: AnyGraphType { type Inside = V } }
       }](s: S): OutE[S] = OutE(s)
   }
 
@@ -77,13 +77,19 @@ object paths {
 
   class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
 
-    def inE[P <: AnyPredicate { type ElementType <: AnyEdge { type Target = F#Out } }](p: P):
-        F >=> InE[P] =
-        f >=> InE(p)
+    // def inE[P <: AnyPredicate { type ElementType <: AnyEdge { type Target = F#Out } }](p: P):
+    //     F >=> InE[P] =
+    //     f >=> InE(p)
 
-    def outE[P <: AnyPredicate { type ElementType <: AnyEdge { type Source = F#Out } }](p: P):
-        F >=> OutE[P] =
-        f >=> OutE(p)
+    def outE[P <: AnyPredicate { 
+      type ElementType <: AnyEdge { 
+        type Source <: AnyGraphType { 
+          type Inside = F#Out 
+        } 
+      } 
+    }](p: P):
+      F >=> OutE[P] =
+      f >=> OutE(p)
   }
 
   /* Any paths */

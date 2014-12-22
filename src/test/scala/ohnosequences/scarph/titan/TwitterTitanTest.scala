@@ -35,11 +35,6 @@ trait AnyTitanTestSuite
   }
 }
 
-// class TitanTestSuite extends org.scalatest.Suites(
-//   new TitanSchemaTestSuite,
-//   new TitanQueriesTestSuite
-// ) with org.scalatest.SequentialNestedSuiteExecution
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 class TitanTestSuite extends AnyTitanTestSuite {
@@ -147,11 +142,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
     assert{ postAuthor.evalOn(post) == edu }
 
     assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
-
-    // this query returns a list of 4 Edus, so we comare it as a set
-    // assert{ (OutE(any(posted)) >=> postAuthorName).evalOn(edu).toSet == Set(name("@eparejatobes")) }
-
-    // assert{ tweetAuthorName.evalOn(twt) == name("@eparejatobes") }
   }
 
   test("cool queries dsl") {
@@ -177,10 +167,10 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import scalaz.Scalaz._
     // testing vertex query
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
-    println(vertexQuery.out)
     // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
-    // implicitly[ vertexQuery.Out ≃ ManyOrNone#Of[url.type] ]
-    // assert{ vertexQuery.evalOn(edu) == (ManyOrNone.of(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    implicitly[ vertexQuery.Out ≃ ManyOrNone.Of[url.type] ]
+    assert{ vertexQuery.out == ManyOrNone.of(url) }
+    assert{ vertexQuery.evalOn(edu) == (ManyOrNone.of(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
   test("evaluating MapOver") {
@@ -250,28 +240,35 @@ class TitanTestSuite extends AnyTitanTestSuite {
       .evalOn( askEdu )
     }
 
-    // with ExactlyOne:
+    // Flattening with ManyOrNone × ExactlyOne:
     val followersNames = user
       .outE( any(follows) )
       .map( follows.tgt.get(name) )
 
+    implicitly[ followersNames.Out ≃ ManyOrNone.Of[ExactlyOne.Of[name.type]] ]
+    assert{ followersNames.out == ManyOrNone.of(ExactlyOne.of(name)) }
+
+    implicitly[ followersNames.Out ≃ ManyOrNone.Of[name.type] ]
     assert{ followersNames.out == ManyOrNone.of(name) }
 
-    // assertResult( ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim") ){ 
-    //   followersNames.flatten.evalOn( edu )
-    // }
+    assertResult( ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim") ){ 
+      followersNames.flatten.evalOn( edu )
+    }
 
-    // NOTE: this doesn't evaluate, because the map is unnecessary
-    // therefore there are no sensible situations when you want to flatten Id[Id[]]
+    // Flattening ExactlyOne × ExactlyOne:
     val posterName = posted
       .src
       .map( user.get(name) )
 
     assert{ posterName.out == name }
 
-    // assertResult( ExactlyOne(name) := Stream("@eparejatobes") ){ 
-    //   posterName.evalOn( post )
-    // }
+    assertResult( name := "@eparejatobes" ){ 
+      posterName.evalOn( post )
+    }
+
+    assertResult( name := "@eparejatobes" ){ 
+      posterName.flatten.evalOn( post )
+    }
 
     // TODO: test all container combinations
 

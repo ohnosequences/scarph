@@ -8,9 +8,6 @@ object predicates {
 
   /* Predicate is a restriction on properties of an element type */
   trait AnyPredicateType extends AnyPlainGraphType {
-
-    type Inside = this.type
-    val  inside = this: Inside
     
     type ElementType <: AnyGraphElement
     val  elementType: ElementType

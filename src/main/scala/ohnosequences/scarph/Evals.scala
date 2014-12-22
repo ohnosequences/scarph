@@ -51,7 +51,7 @@ object evals {
 
 
     implicit def evalMapOver[
-      P <: AnyPath { type In <: AnyPlainGraphType }, C <: AnyContainer,
+      P <: AnyPath, C <: AnyContainer,
       I, F[_], O
     ](implicit
       evalInner: EvalPathOn[I, P, O],
@@ -65,6 +65,16 @@ object evals {
           }
         )
       }
+    }
+
+    // trivial mapping over ExactlyOne:
+    implicit def evalMapOverExactlyOne[
+      P <: AnyPath, I, O
+    ](implicit
+      evalInner: EvalPathOn[I, P, O]
+    ):  EvalPathOn[I, P MapOver ExactlyOne, O] = 
+    new EvalPathOn[I, P MapOver ExactlyOne, O] {
+      def apply(path: Path)(in: In): Out = evalInner(path.inner)(in)
     }
 
 
@@ -83,6 +93,37 @@ object evals {
         outOf(path) := flatten(nested)
       }
     }
+
+    // NOTE: this is the same a general thing, but then there is no secod container (i.e. it's virtual Id[])
+    // it is an experiment, let's see how it works (we need more tests for flatten)
+    implicit def evalFlattenWithOuterId[
+      P <: AnyPath { 
+        type Out <: AnyGraphType { 
+          type Container = ExactlyOne 
+        }
+      }, I, O
+    ](implicit
+      evalInner: EvalPathOn[I, P, O]
+    ):  EvalPathOn[I, Flatten[P, P#Out#Inside#Container], O] = 
+    new EvalPathOn[I, Flatten[P, P#Out#Inside#Container], O] {
+      def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.inner)(in).value
+    }
+
+    implicit def evalFlattenWithInnerId[
+      P <: AnyPath { 
+        type Out <: AnyGraphType { 
+          type Inside <: AnyGraphType { 
+            type Container = ExactlyOne
+          }
+        }
+      }, C <: AnyContainer, I, O
+    ](implicit
+      evalInner: EvalPathOn[I, P, O]
+    ):  EvalPathOn[I, Flatten[P, C], O] = 
+    new EvalPathOn[I, Flatten[P, C], O] {
+      def apply(path: Path)(in: In): Out = outOf(path) := evalInner(path.inner)(in).value
+    }
+
 
 
     // implicit def evalPar[
