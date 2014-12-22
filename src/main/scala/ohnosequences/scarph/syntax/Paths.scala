@@ -92,10 +92,28 @@ object paths {
       f >=> OutE(p)
   }
 
+  /* This gives user nice warnings and doesn't add unnecessary constructors */
+  implicit def pathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F): 
+        PathWarnOps[F] =
+    new PathWarnOps[F](f)
+
+  class PathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F) {
+    @deprecated("You are trying to flatten a non-nested structure, you don't need it", "")
+    def flatten: F = f
+
+    @deprecated("You are trying to map over one value, you don't need it", "")
+    def map[S <: AnyPath](s: S)
+      (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
+
+    @deprecated("You are trying to flatMap over one value, you don't need it", "")
+    def flatMap[S <: AnyPath](s: S)
+      (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
+  }
+
   /* Any paths */
-  implicit def pathOps[T <: AnyPath](t: T): 
-        PathOps[T] =
-    new PathOps[T](t)
+  implicit def pathOps[F <: AnyPath](f: F): 
+        PathOps[F] =
+    new PathOps[F](f)
 
   class PathOps[F <: AnyPath](f: F) {
 
@@ -113,9 +131,16 @@ object paths {
     def flatMap[S <: AnyPath, C <: AnyContainer](s: S)
       (implicit 
         cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
+        // NOTE: this is just (F#Out#Container × S#Out#Container), but compiler needs this explicit crap:
         mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) { type Out = C }
       ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
          Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
+
+    // F:         K[A] -> L[M[B]]
+    // F.flatten: K[A] -> L×M[F]
+    def flatten[C <: AnyContainer](implicit mul: (F#Out#Container × F#Out#Inside#Container) { type Out = C }):
+      Flatten[F, C] =
+      Flatten[F, C](f)(mul)
 
     // // TODO: bounds:
     // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
@@ -124,11 +149,6 @@ object paths {
     // // TODO: bounds:
     // def par[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
     // def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
-
-    // F:         K[A] -> L[M[B]]
-    // F.flatten: K[A] -> L×M[F]
-    def flatten[C <: AnyContainer](implicit mul: (F#Out#Container × F#Out#Inside#Container) { type Out = C }):
-      Flatten[F, C] =
-      Flatten[F, C](f)(mul)
   }
+
 }
