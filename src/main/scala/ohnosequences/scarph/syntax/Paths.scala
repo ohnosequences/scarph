@@ -77,9 +77,15 @@ object paths {
 
   class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
 
-    // def inE[P <: AnyPredicate { type ElementType <: AnyEdge { type Target = F#Out } }](p: P):
-    //     F >=> InE[P] =
-    //     f >=> InE(p)
+    def inE[P <: AnyPredicate { 
+      type ElementType <: AnyEdge { 
+        type Target <: AnyGraphType { 
+          type Inside = F#Out
+        } 
+      } 
+    }](p: P):
+      F >=> InE[P] =
+      f >=> InE(p)
 
     def outE[P <: AnyPredicate { 
       type ElementType <: AnyEdge { 

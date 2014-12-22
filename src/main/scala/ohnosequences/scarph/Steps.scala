@@ -12,26 +12,26 @@ object steps {
 
   case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
 
-      type Edge = P#ElementType
-      lazy val  edge = predicate.elementType: Edge
+      type     Edge = P#ElementType
+      lazy val edge = predicate.elementType: Edge
 
-      type In = Edge#TargetV
-      lazy val  in = edge.targetV
+      type     In = Edge#TargetV
+      lazy val in = edge.targetV
 
-      type Out = Edge#Source#Container#Of[Edge]
-      lazy val  out = edge.source.container.of(edge)
+      type     Out = Edge#Source#Container#Of[Edge]
+      lazy val out = edge.source.container.of(edge)
   }
 
   case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
 
-      type Edge = P#ElementType
-      lazy val  edge = predicate.elementType: Edge
+      type     Edge = P#ElementType
+      lazy val edge = predicate.elementType: Edge
 
-      type In = Edge#SourceV
-      lazy val  in = edge.sourceV
+      type     In = Edge#SourceV
+      lazy val in = edge.sourceV
 
-      type Out = Edge#Target#Container#Of[Edge]
-      lazy val  out = edge.target.container.of(edge)
+      type     Out = Edge#Target#Container#Of[Edge]
+      lazy val out = edge.target.container.of(edge)
   }
 
   // TODO: inV/outV
@@ -41,8 +41,8 @@ object steps {
     type In = E
     val  in = edge
 
-    type Out = E#SourceV
-    lazy val  out = edge.sourceV
+    type     Out = E#SourceV
+    lazy val out = edge.sourceV
   }
 
   case class Target[E <: AnyEdge](val edge: E) extends AnyStep {
@@ -50,8 +50,8 @@ object steps {
     type In = E
     val  in = edge
 
-    type Out = E#TargetV
-    lazy val  out = edge.targetV
+    type     Out = E#TargetV
+    lazy val out = edge.targetV
   }
 
   case class Query[E <: AnyGraphElement](val elem: E)

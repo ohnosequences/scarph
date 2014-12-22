@@ -24,13 +24,14 @@ object combinators {
   /* Sequential composition of two paths */
   trait AnyComposition extends CombinatorOf2Paths {
 
-    // type Second <: AnyPath { type In <: AnyGraphType.SameAs[First#Out] }
+    // should be provided implicitly:
+    val composable: First#Out ≃ Second#In
 
-    type In = First#In
-    lazy val  in = first.in
+    type     In = First#In
+    lazy val in = first.in
 
-    type Out = Second#Out
-    lazy val  out = second.out
+    type     Out = Second#Out
+    lazy val out = second.out
   }
 
   case class Composition[F <: AnyPath, S <: AnyPath]
@@ -50,11 +51,11 @@ object combinators {
     type Container <: AnyContainer
     val  container: Container
 
-    type In = Container#Of[Inner#In]
-    val  in: In = container.of(inner.in)
+    type     In = Container#Of[Inner#In]
+    lazy val in = container.of(inner.in): In
 
-    type Out = Container#Of[Inner#Out]
-    val  out: Out = container.of(inner.out)
+    type     Out = Container#Of[Inner#Out]
+    lazy val out = container.of(inner.out): Out
   }
 
   case class MapOver[P <: AnyPath, C <: AnyContainer]
@@ -68,13 +69,19 @@ object combinators {
   /* Mapping a Path over a container */
   trait AnyFlatten extends CombinatorOf1Path {
 
-    type In = Inner#In
-    lazy val  in: In = inner.in
+    type     In = Inner#In
+    lazy val in = inner.in: In
 
+    // container that we get after flattening:
     type OutC <: AnyContainer
-    val  outC: OutC
+
     // we will get OutC through this implicit on construction:
     val mul: (Inner#Out#Container × Inner#Out#Inside#Container) { type Out = OutC }
+
+    lazy val outC = mul(inner.out.container, inner.out.inside.container): OutC
+
+    type     Out = OutC#Of[Inner#Out#Inside#Inside]
+    lazy val out = outC.of(inner.out.inside.inside): Out
   }
 
   case class Flatten[P <: AnyPath, C <: AnyContainer]
@@ -83,12 +90,7 @@ object combinators {
     extends AnyFlatten {
 
       type Inner = P 
-
       type OutC = C
-      val  outC: OutC = mul(inner.out.container, inner.out.inside.container)
-
-      type Out = OutC#Of[Inner#Out#Inside#Inside]
-      val  out: Out = outC.of(inner.out.inside.inside)
     }
 
 
