@@ -46,7 +46,7 @@ object graphTypes {
     val  container = ExactlyOne
 
     type Inside = this.type
-    val  inside = this: this.type
+    lazy val  inside: Inside = this: this.type
   }
 
   /* A graph element is either a vertex or an edge, only they can have properties */
@@ -66,16 +66,22 @@ object graphTypes {
     type Source <: AnyGraphType { type Inside <: AnyVertex }
     val  source: Source
 
+    type SourceV = Source#Inside
+    lazy val sourceV: Source#Inside = source.inside
+
     /* The target vertex for this edge */
     type Target <: AnyGraphType { type Inside <: AnyVertex }
     val  target: Target
+
+    type TargetV = Target#Inside
+    lazy val targetV: Target#Inside = target.inside
   }
 
-  type SourceV[E <: AnyEdge] = E#Source#Inside
-  def  sourceV[E <: AnyEdge](e: E): SourceV[E] = e.source.inside
+  // type SourceV[E <: AnyEdge] = E#Source#Inside
+  // def  sourceV[E <: AnyEdge](e: E): SourceV[E] = e.source.inside
 
-  type TargetV[E <: AnyEdge] = E#Target#Inside
-  def  targetV[E <: AnyEdge](e: E): TargetV[E] = e.target.inside
+  // type TargetV[E <: AnyEdge] = E#Target#Inside
+  // def  targetV[E <: AnyEdge](e: E): TargetV[E] = e.target.inside
 
   /* This constructor encourages to use this syntax: Edge( ExactlyOne.of(user) -> ManyOrNone.of(tweet) ) */
   abstract class Edge[
@@ -84,10 +90,10 @@ object graphTypes {
   ]( st: (S, T) ) extends AnyEdge {
 
     type Source = S
-    val  source = st._1
+    lazy val  source = st._1
 
     type Target = T
-    val  target = st._2
+    lazy val  target = st._2
 
     val label = this.toString
   }
