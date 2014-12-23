@@ -7,8 +7,6 @@ object Twitter {
   import ohnosequences.{ scarph => s }
   import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
 
-  case object twitterGraph extends Graph
-
   case object user extends Vertex
   case object name extends PropertyOf(user) { type Raw = String }
   case object age  extends PropertyOf(user) { type Raw = Integer }
@@ -34,7 +32,8 @@ object Twitter {
   // vertex-centric indexes
   case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
 
-  val schema = Schema(label = "twitter",
+  case object twitter extends Schema(
+    label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,
     vertices =  user :~: tweet :~: ∅,
     edges = posted :~: follows :~: liked :~: ∅,

@@ -7,8 +7,9 @@ import ohnosequences.cosas._, types._
 
 import ohnosequences.{ scarph => s }
 import s.graphTypes._, s.steps._, s.containers._, s.combinators._, s.indexes._, s.syntax
-import s.impl, impl.titan.schema._, impl.titan.predicates._
-import s.test.Twitter, Twitter._
+import s.syntax._, conditions._, predicates._, paths._
+import s.impl, impl.titan.schema._, impl.titan.predicates._, impl.titan.evals._
+import s.test.Twitter._
 
 
 trait AnyTitanTestSuite 
@@ -19,7 +20,7 @@ trait AnyTitanTestSuite
   val g: TitanGraph = TitanFactory.open("inmemory")
 
   override def beforeAll() {
-    g.createSchema(Twitter.schema)
+    g.createSchema(twitter)
 
     // loading data from a prepared GraphSON file
     import com.tinkerpop.blueprints.util.io.graphson._
@@ -98,13 +99,9 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
 
-  import syntax.conditions._
-  import syntax.predicates._
-
   object TestContext {
-    val evals = impl.titan.evals(g); import evals._
 
-    val titanTwitterGraph = twitterGraph := g
+    val titanTwitter = twitter := g
 
     // predicates for quering vertices
     val askEdu = user ? (name === "@eparejatobes")
@@ -121,13 +118,13 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val postAuthor = Source(posted)
     val postAuthorName = postAuthor >=> userName
 
-    val edu  = user := Query(twitterGraph, askEdu).evalOn( titanTwitterGraph ).value.head
-    val post = posted := Query(twitterGraph, askPost).evalOn( titanTwitterGraph ).value.head
-    val twt  = tweet := Query(twitterGraph, askTweet).evalOn( titanTwitterGraph ).value.head
+    val edu  = user := twitter.query(askEdu).evalOn( titanTwitter ).value.head
+    val post = posted := twitter.query(askPost).evalOn( titanTwitter ).value.head
+    val twt  = tweet := twitter.query(askTweet).evalOn( titanTwitter ).value.head
   }
 
   test("check what we got from the index queries") {
-    import TestContext._, evals._
+    import TestContext._
 
     /* Evaluating steps: */
     assert{ Get(name).evalOn( edu ) == name("@eparejatobes") }
@@ -137,8 +134,8 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val posterName = Source(posted) >=> Get(name)
     assert{ posterName.evalOn( post ) == (name := "@eparejatobes") }
 
-    assert{ Query(twitterGraph, user ? (name === "@eparejatobes") and (age === 5)).evalOn( titanTwitterGraph ).value == Stream() }
-    assert{ Query(twitterGraph, user ? (name === "@eparejatobes") and (age === 95)).evalOn( titanTwitterGraph ).value == Stream(edu.value) }
+    assert{ twitter.query(user ? (name === "@eparejatobes") and (age === 5)).evalOn( titanTwitter ).value == Stream() }
+    assert{ twitter.query(user ? (name === "@eparejatobes") and (age === 95)).evalOn( titanTwitter ).value == Stream(edu.value) }
 
     assert{ userName.evalOn( edu ) == name("@eparejatobes") }
     assert{ postAuthor.evalOn( post ) == edu }
@@ -147,8 +144,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   }
 
   test("cool queries dsl") {
-    import TestContext._, evals._
-    import syntax.paths._
+    import TestContext._
 
     // element op:
     val userName = user.get(name)
@@ -166,7 +162,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
           .flatMap( posted.tgt ) )
     assert{ friendsPosts.out == ManyOrNone.of(tweet) }
 
-    import scalaz.Scalaz._
     // testing vertex query
     val vertexQuery = user.outE(posted ? (time === "27.10.2013")).map( posted.get(url) )
     // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
@@ -176,8 +171,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   }
 
   test("evaluating MapOver") {
-    import TestContext._, evals._
-    import scalaz.Scalaz._
+    import TestContext._
 
     assertResult( OneOrNone.of(user) := (Option("@eparejatobes")) ){ 
       MapOver(Get(name), OneOrNone).evalOn( 
@@ -188,9 +182,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   }
 
   test("checking combination of Composition and MapOver") {
-    import TestContext._, evals._
-    import scalaz.Scalaz._
-    import syntax.paths._
+    import TestContext._
 
     assertResult( ManyOrNone.of(user) := Stream("@laughedelic", "@evdokim") ){ 
       val q = user.outE(follows)
@@ -202,42 +194,40 @@ class TitanTestSuite extends AnyTitanTestSuite {
     }
 
     assertResult( ManyOrNone.of(age) := Stream(5, 22) ){ 
-      Query(twitterGraph, user ? (age < 80)).map( Get(age) ).evalOn( titanTwitterGraph )
+      twitter.query(user ? (age < 80)).map( Get(age) ).evalOn( titanTwitter )
     }
     assertResult( ManyOrNone.of(age) := Stream(22) ){ 
-      Query(twitterGraph, user ? (age < 80) and (age > 10)).map( Get(age) ).evalOn( titanTwitterGraph)
+      twitter.query(user ? (age < 80) and (age > 10)).map( Get(age) ).evalOn( titanTwitter)
     }
 
   }
 
   test("flattening after double map") {
-    import TestContext._, evals._
-    import scalaz.Scalaz._
-    import syntax.paths._
+    import TestContext._
 
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
-        Query(twitterGraph, askEdu)
+        Query(twitter, askEdu)
           .map( user.outE(follows) )
       ).map( Target(follows) >=> Get(name) )
-      .evalOn( titanTwitterGraph )
+      .evalOn( titanTwitter )
     }
 
     // Same with .flatten syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
-      Query(twitterGraph, askEdu)
+      Query(twitter, askEdu)
         .map( user.outE(follows) )
         .flatten
         .map( follows.tgt.get(name) )
-      .evalOn( titanTwitterGraph )
+      .evalOn( titanTwitter )
     }
 
     // Same with .flatMap syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
-      Query(twitterGraph, askEdu)
+      Query(twitter, askEdu)
         .flatMap( user.outE(follows) )
         .map( follows.tgt.get(name) )
-      .evalOn( titanTwitterGraph )
+      .evalOn( titanTwitter )
     }
 
     // Flattening with ManyOrNone × ExactlyOne:

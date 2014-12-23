@@ -5,7 +5,18 @@ package ohnosequences.scarph.syntax
 object paths {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._
+  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._, s.schemas._
+
+
+  /* Graph/schema ops */
+  implicit def schemaOps[S <: AnySchema](s: S):
+        SchemaOps[S] =
+    new SchemaOps[S](s)
+
+  class SchemaOps[S <: AnySchema](s: S) {
+
+    def query[P <: AnyPredicate](p: P): Query[S, P] = Query(s, p)
+  }
 
 
   /* Element types */

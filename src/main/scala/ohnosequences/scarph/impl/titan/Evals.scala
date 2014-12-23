@@ -1,6 +1,6 @@
 package ohnosequences.scarph.impl.titan
 
-case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
+case object evals {
 
   import shapeless._
 
@@ -11,14 +11,14 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   // import cosas.ops.typeSets._
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.steps._, s.paths._, s.containers._, s.combinators._, s.evals._, s.predicates._
+  import s.graphTypes._, s.steps._, s.paths._, s.containers._, s.combinators._, s.evals._, s.predicates._, s.schemas._
   import s.impl.titan.predicates._
 
   import scalaz.{ NonEmptyList => NEList }
   import java.lang.{ Iterable => JIterable }
 
+  case class DataInconsistencyException(msg: String) extends Exception(msg)
 
-  // TODO: if it's possible to avoid Id, why not?
   implicit def containerId[X]:
         ValueContainer[ExactlyOne, JIterable[X]] with Out[X] =
     new ValueContainer[ExactlyOne, JIterable[X]] with Out[X] { def apply(in: In1): Out = in.head }
@@ -37,9 +37,19 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
     new ValueContainer[AtLeastOne, JIterable[X]] with Out[NEList[X]] { 
       def apply(in: In1): Out = {
         val l = in.toList
-        NEList.nel(l.head, l.tail) 
+        val head = l.headOption
+          .getOrElse(throw DataInconsistencyException("A non empty iterable was expected, check consistency of your data"))
+        val tail = l.drop(1)
+        NEList.nel(head, tail) 
       }
     }
+
+
+  /* The general eval for MapOver needs scalaz.Functor instances, so we re-export them */
+  implicit val optionFunctor: scalaz.Functor[Option] = scalaz.std.option.optionInstance
+  implicit val streamFunctor: scalaz.Functor[Stream] = scalaz.std.stream.streamInstance
+  // NOTE: NEList has instances in its companion object
+
 
   implicit def flattenSS[X]: 
         FlattenVals[Stream, Stream, X] with Out[Stream[X]] =
@@ -71,11 +81,11 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
 
 
   implicit def evalVertexQuery[
-    G <: AnyGraph,
+    S <: AnySchema,
     P <: AnyPredicate { type ElementType <: AnyVertex } 
   ](implicit transform: ToBlueprintsPredicate[P]): 
-      EvalPathOn[TitanGraph, Query[G, P], Stream[TitanVertex]] =
-  new EvalPathOn[TitanGraph, Query[G, P], Stream[TitanVertex]] {
+      EvalPathOn[TitanGraph, Query[S, P], Stream[TitanVertex]] =
+  new EvalPathOn[TitanGraph, Query[S, P], Stream[TitanVertex]] {
     def apply(path: Path)(in: In): Out = {
       path.out := (
         transform(path.predicate, in.value.query).vertices
@@ -85,11 +95,11 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   }
 
   implicit def evalEdgeQuery[
-    G <: AnyGraph,
+    S <: AnySchema,
     P <: AnyPredicate { type ElementType <: AnyEdge }
   ](implicit transform: ToBlueprintsPredicate[P]): 
-      EvalPathOn[TitanGraph, Query[G, P], Stream[TitanEdge]] =
-  new EvalPathOn[TitanGraph, Query[G, P], Stream[TitanEdge]] {
+      EvalPathOn[TitanGraph, Query[S, P], Stream[TitanEdge]] =
+  new EvalPathOn[TitanGraph, Query[S, P], Stream[TitanEdge]] {
     def apply(path: Path)(in: In): Out = {
       path.out := (
         transform(path.predicate, in.value.query).edges

@@ -46,9 +46,6 @@ object graphTypes {
     lazy val inside: Inside = this: this.type
   }
 
-  trait AnyGraph extends AnySimpleGraphType
-
-  abstract class Graph extends AnyGraph { val label = this.toString }
 
   /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnySimpleGraphType

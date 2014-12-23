@@ -4,7 +4,7 @@ package ohnosequences.scarph
 /* Basic steps: */
 object steps {
 
-  import graphTypes._, paths._, containers._, predicates._
+  import graphTypes._, paths._, containers._, predicates._, schemas._
 
 
   case class Get[P <: AnyGraphProperty](val property: P) 
@@ -54,7 +54,7 @@ object steps {
     lazy val out = edge.targetV
   }
 
-  case class Query[G <: AnyGraph, P <: AnyPredicate](val graph: G, val predicate: P)
-    extends Step[G, ManyOrNone#Of[P#ElementType]](graph, ManyOrNone.of(predicate.elementType))
+  case class Query[S <: AnySchema, P <: AnyPredicate](val graph: S, val predicate: P)
+    extends Step[S, ManyOrNone#Of[P#ElementType]](graph, ManyOrNone.of(predicate.elementType))
 
 }
