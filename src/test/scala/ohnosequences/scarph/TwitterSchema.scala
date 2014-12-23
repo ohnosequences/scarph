@@ -7,6 +7,7 @@ object Twitter {
   import ohnosequences.{ scarph => s }
   import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
 
+  case object twitterGraph extends Graph
 
   case object user extends Vertex
   case object name extends PropertyOf(user) { type Raw = String }

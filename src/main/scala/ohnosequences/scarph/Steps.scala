@@ -54,7 +54,7 @@ object steps {
     lazy val out = edge.targetV
   }
 
-  case class Query[E <: AnyGraphElement](val elem: E)
-    extends Step[PredicateType[E], ManyOrNone#Of[E]](PredicateType[E](elem), ManyOrNone.of(elem))
+  case class Query[G <: AnyGraph, P <: AnyPredicate](val graph: G, val predicate: P)
+    extends Step[G, ManyOrNone#Of[P#ElementType]](graph, ManyOrNone.of(predicate.elementType))
 
 }

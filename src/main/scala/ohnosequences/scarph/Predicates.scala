@@ -6,31 +6,12 @@ object predicates {
   import graphTypes._, conditions._
 
 
-  /* Predicate is a restriction on properties of an element type */
-  trait AnyPredicateType extends AnySimpleGraphType {
-    
-    type ElementType <: AnyGraphElement
-    val  elementType: ElementType
-
-    val label = s"PredicateOn(${elementType.label})"
-  }
-
-  object AnyPredicateType {
-
-    type On[E <: AnyGraphElement] = AnyPredicateType { type ElementType = E }
-  }
-
-  case class PredicateType[E <: AnyGraphElement](val elementType: E) 
-    extends AnyPredicateType { type ElementType = E }
-
-
-
   trait AnyPredicate {
 
     type ElementType <: AnyGraphElement
     val  elementType: ElementType
 
-    type Conditions <: AnyTypeSet //.Of[AnyCondition] //.OnElementType[ElementType]]
+    type Conditions <: AnyTypeSet //.Of[AnyCondition]
     val  conditions: Conditions
   }
 

@@ -104,6 +104,8 @@ class TitanTestSuite extends AnyTitanTestSuite {
   object TestContext {
     val evals = impl.titan.evals(g); import evals._
 
+    val titanTwitterGraph = twitterGraph := g
+
     // predicates for quering vertices
     val askEdu = user ? (name === "@eparejatobes")
     val askAlexey = user ? (name === "@laughedelic")
@@ -119,29 +121,29 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val postAuthor = Source(posted)
     val postAuthorName = postAuthor >=> userName
 
-    val edu  = user := Query(user).evalOn(askEdu).value.head
-    val post = posted := Query(posted).evalOn(askPost).value.head
-    val twt  = tweet := Query(tweet).evalOn(askTweet).value.head
+    val edu  = user := Query(twitterGraph, askEdu).evalOn( titanTwitterGraph ).value.head
+    val post = posted := Query(twitterGraph, askPost).evalOn( titanTwitterGraph ).value.head
+    val twt  = tweet := Query(twitterGraph, askTweet).evalOn( titanTwitterGraph ).value.head
   }
 
   test("check what we got from the index queries") {
     import TestContext._, evals._
 
     /* Evaluating steps: */
-    assert{ Get(name).evalOn(edu) == name("@eparejatobes") }
-    assert{ Source(posted).evalOn(post) == edu }
+    assert{ Get(name).evalOn( edu ) == name("@eparejatobes") }
+    assert{ Source(posted).evalOn( post ) == edu }
 
     /* Composing steps: */
     val posterName = Source(posted) >=> Get(name)
-    assert{ posterName.evalOn(post) == (name := "@eparejatobes") }
+    assert{ posterName.evalOn( post ) == (name := "@eparejatobes") }
 
-    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 5)).value == Stream() }
-    assert{ Query(user).evalOn(user ? (name === "@eparejatobes") and (age === 95)).value == Stream(edu.value) }
+    assert{ Query(twitterGraph, user ? (name === "@eparejatobes") and (age === 5)).evalOn( titanTwitterGraph ).value == Stream() }
+    assert{ Query(twitterGraph, user ? (name === "@eparejatobes") and (age === 95)).evalOn( titanTwitterGraph ).value == Stream(edu.value) }
 
-    assert{ userName.evalOn(edu) == name("@eparejatobes") }
-    assert{ postAuthor.evalOn(post) == edu }
+    assert{ userName.evalOn( edu ) == name("@eparejatobes") }
+    assert{ postAuthor.evalOn( post ) == edu }
 
-    assert{ postAuthorName.evalOn(post) == name("@eparejatobes") }
+    assert{ postAuthorName.evalOn( post ) == name("@eparejatobes") }
   }
 
   test("cool queries dsl") {
@@ -150,17 +152,17 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // element op:
     val userName = user.get(name)
-    assert{ userName.evalOn(edu) == name("@eparejatobes") }
+    assert{ userName.evalOn( edu ) == name("@eparejatobes") }
 
     // edge op:
     val posterName = posted.src.get(name)
-    assert{ posterName.evalOn(post) == name("@eparejatobes") }
+    assert{ posterName.evalOn( post ) == name("@eparejatobes") }
 
     // vertex op:
     val friendsPosts =
-      user.outE( any(follows) )
+      user.outE( follows )
           .flatMap( follows.tgt )
-          .flatMap( user.outE( any(posted) )
+          .flatMap( user.outE(posted)
           .flatMap( posted.tgt ) )
     assert{ friendsPosts.out == ManyOrNone.of(tweet) }
 
@@ -170,7 +172,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     // NOTE: scalaz equality doesn understand that these are the same types, so there are just two simple checks:
     implicitly[ vertexQuery.Out ≃ ManyOrNone.Of[url.type] ]
     assert{ vertexQuery.out == ManyOrNone.of(url) }
-    assert{ vertexQuery.evalOn(edu) == (ManyOrNone.of(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
+    assert{ vertexQuery.evalOn( edu ) == (ManyOrNone.of(url) := Stream("https://twitter.com/eparejatobes/status/394430900051927041")) }
   }
 
   test("evaluating MapOver") {
@@ -190,23 +192,20 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import scalaz.Scalaz._
     import syntax.paths._
 
-    assertResult( ManyOrNone.of(user) := (Stream("@eparejatobes")) ){ 
-      val q = Query(user)
-      (q >=> MapOver(Get(name), q.out.container)).evalOn( askEdu )
+    assertResult( ManyOrNone.of(user) := Stream("@laughedelic", "@evdokim") ){ 
+      val q = user.outE(follows)
+      (q >=> MapOver(follows.tgt.get(name), q.out.container)).evalOn( edu )
     }
 
-    assertResult( ManyOrNone.of(user) := (Stream("@eparejatobes")) ){ 
-      Query(user).map(Get(name)).evalOn( askEdu )
+    assertResult( ManyOrNone.of(user) := (Stream("@laughedelic", "@evdokim")) ){ 
+      user.outE(follows).map( follows.tgt.get(name) ).evalOn( edu )
     }
-
-    val userAges = Query(user).map( Get(age) )
-    assert{ userAges.out == ManyOrNone.of(age) }
 
     assertResult( ManyOrNone.of(age) := Stream(5, 22) ){ 
-      userAges.evalOn(user ? (age < 80))
+      Query(twitterGraph, user ? (age < 80)).map( Get(age) ).evalOn( titanTwitterGraph )
     }
     assertResult( ManyOrNone.of(age) := Stream(22) ){ 
-      userAges.evalOn(user ? (age < 80) and (age > 10))
+      Query(twitterGraph, user ? (age < 80) and (age > 10)).map( Get(age) ).evalOn( titanTwitterGraph)
     }
 
   }
@@ -218,31 +217,32 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
-        Query(user).map( user.outE(any(follows)) )
+        Query(twitterGraph, askEdu)
+          .map( user.outE(follows) )
       ).map( Target(follows) >=> Get(name) )
-      .evalOn( askEdu )
+      .evalOn( titanTwitterGraph )
     }
 
     // Same with .flatten syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
-      Query(user)
-        .map( user.outE(any(follows)) )
+      Query(twitterGraph, askEdu)
+        .map( user.outE(follows) )
         .flatten
         .map( follows.tgt.get(name) )
-      .evalOn( askEdu )
+      .evalOn( titanTwitterGraph )
     }
 
     // Same with .flatMap syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
-      Query(user)
-        .flatMap( user.outE(any(follows)) )
+      Query(twitterGraph, askEdu)
+        .flatMap( user.outE(follows) )
         .map( follows.tgt.get(name) )
-      .evalOn( askEdu )
+      .evalOn( titanTwitterGraph )
     }
 
     // Flattening with ManyOrNone × ExactlyOne:
     val followersNames = user
-      .outE( any(follows) )
+      .outE( follows )
       .map( follows.tgt.get(name) )
 
     implicitly[ followersNames.Out ≃ ManyOrNone.Of[ExactlyOne.Of[name.type]] ]

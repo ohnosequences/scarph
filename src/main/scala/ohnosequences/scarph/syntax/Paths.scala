@@ -62,13 +62,22 @@ object paths {
 
   class VertexOps[V <: AnyVertex](v: V) {
 
-    def inE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type Target <: AnyGraphType { type Inside = V } }
-      }](s: S): InE[S] = InE(s)
+    def inE[X, P <: AnyPredicate { 
+      type ElementType <: AnyEdge { 
+        type Target <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    // NOTE: this implicit conversion aalowsus to use edges for predicates on them
+    }](x: X)(implicit fromX: X => P): InE[P] = InE(fromX(x))
 
-    def outE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type Source <: AnyGraphType { type Inside = V } }
-      }](s: S): OutE[S] = OutE(s)
+    def outE[X, P <: AnyPredicate { 
+      type ElementType <: AnyEdge { 
+        type Source <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    }](x: X)(implicit fromX: X => P): OutE[P] = OutE(fromX(x))
   }
 
   implicit def pathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F):
@@ -77,25 +86,25 @@ object paths {
 
   class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
 
-    def inE[P <: AnyPredicate { 
+    def inE[X, P <: AnyPredicate { 
       type ElementType <: AnyEdge { 
         type Target <: AnyGraphType { 
           type Inside = F#Out
         } 
       } 
-    }](p: P):
+    }](x: X)(implicit fromX: X => P):
       F >=> InE[P] =
-      f >=> InE(p)
+      f >=> InE(fromX(x))
 
-    def outE[P <: AnyPredicate { 
+    def outE[X, P <: AnyPredicate { 
       type ElementType <: AnyEdge { 
         type Source <: AnyGraphType { 
           type Inside = F#Out 
         } 
       } 
-    }](p: P):
+    }](x: X)(implicit fromX: X => P):
       F >=> OutE[P] =
-      f >=> OutE(p)
+      f >=> OutE(fromX(x))
   }
 
   /* This gives user nice warnings and doesn't add unnecessary constructors */
