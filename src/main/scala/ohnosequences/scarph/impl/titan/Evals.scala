@@ -73,12 +73,12 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   implicit def evalVertexQuery[
     V <: AnyVertex,
     P <: AnyPredicate.On[V]
-  ](implicit transform: ToBlueprintsPredicate[P]): 
+  ](implicit toTitanPredicate: ToTitanPredicate[P, TitanGraphQuery[_]]): 
       EvalPathOn[P, Query[V], Stream[TitanVertex]] =
   new EvalPathOn[P, Query[V], Stream[TitanVertex]] {
     def apply(path: Path)(in: In): Out = {
       ManyOrNone.of(path.elem) := (
-        transform(in.value, graph.query).vertices
+        toTitanPredicate(in.value, graph.query).vertices
           .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanVertex]].toStream
       )
     }
@@ -87,12 +87,12 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   implicit def evalEdgeQuery[
     E <: AnyEdge,
     P <: AnyPredicate.On[E]
-  ](implicit transform: ToBlueprintsPredicate[P]): 
+  ](implicit toTitanPredicate: ToTitanPredicate[P, TitanGraphQuery[_]]): 
       EvalPathOn[P, Query[E], Stream[TitanEdge]] =
   new EvalPathOn[P, Query[E], Stream[TitanEdge]] {
     def apply(path: Path)(in: In): Out = {
       ManyOrNone.of(path.elem) := (
-        transform(in.value, graph.query).edges
+        toTitanPredicate(in.value, graph.query).edges
           .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
       )
     }
@@ -128,13 +128,13 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   implicit def evalInE[
     P <: AnyPredicate { type ElementType <: AnyEdge }, O
   ](implicit 
-    transform: ToBlueprintsPredicate[P],
+    toTitanPredicate: ToTitanPredicate[P, TitanVertexQuery[_]],
     containerVal: ValueContainer[InE[P]#Out#Container, JIterable[TitanEdge]] { type Out = O }
   ):  EvalPathOn[TitanVertex, InE[P], O] =
   new EvalPathOn[TitanVertex, InE[P], O] {
     def apply(path: Path)(in: In): Out = {
       (path.out: InE[P]#Out) := containerVal(
-        transform(path.predicate, 
+        toTitanPredicate(path.predicate, 
           in.value.query
             .labels(path.predicate.elementType.label)
             .direction(Direction.IN)
@@ -147,13 +147,13 @@ case class evals(val graph: com.thinkaurelius.titan.core.TitanGraph) {
   implicit def evalOutE[
     P <: AnyPredicate { type ElementType <: AnyEdge }, O
   ](implicit
-    transform: ToBlueprintsPredicate[P],
+    toTitanPredicate: ToTitanPredicate[P, TitanVertexQuery[_]],
     containerVal: ValueContainer[OutE[P]#Out#Container, JIterable[TitanEdge]] { type Out = O }
   ):  EvalPathOn[TitanVertex, OutE[P], O] =
   new EvalPathOn[TitanVertex, OutE[P], O] {
     def apply(path: Path)(in: In): Out = {
       (path.out: OutE[P]#Out) := containerVal(
-        transform(path.predicate, 
+        toTitanPredicate(path.predicate, 
           in.value.query
             .labels(path.predicate.elementType.label)
             .direction(Direction.OUT)
