@@ -111,7 +111,7 @@ object schema {
 
           val elemLabel = mgmt.getVertexLabel(ix.indexedType.label)
 
-          setUniqueness(ix, builder).indexOnly(elemLabel).buildCompositeIndex : TitanIndex
+          setUniqueness(ix, builder).buildCompositeIndex : TitanIndex
         }
       }
 
@@ -126,7 +126,7 @@ object schema {
 
           val elemLabel = mgmt.getEdgeLabel(ix.indexedType.label)
 
-          setUniqueness(ix, builder).indexOnly(elemLabel).buildCompositeIndex : TitanIndex
+          setUniqueness(ix, builder).buildCompositeIndex : TitanIndex
         }
       }
   }
