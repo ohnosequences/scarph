@@ -231,32 +231,32 @@ class TitanTestSuite extends AnyTitanTestSuite {
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
         twitter.query(askEdu)
-          .map( user.outE(follows) )
-      ).map( Target(follows) >=> Get(name) )
+          .map( user.outV(follows) )
+      ).map( user.get(name) )
       .evalOn( titanTwitter )
     }
 
     // Same with .flatten syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
       twitter.query(askEdu)
-        .map( user.outE(follows) )
+        .map( user.outV(follows) )
         .flatten
-        .map( follows.tgt.get(name) )
+        .map( user.get(name) )
       .evalOn( titanTwitter )
     }
 
     // Same with .flatMap syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
       twitter.query(askEdu)
-        .flatMap( user.outE(follows) )
-        .map( follows.tgt.get(name) )
+        .flatMap( user.outV(follows) )
+        .map( user.get(name) )
       .evalOn( titanTwitter )
     }
 
     // Flattening with ManyOrNone × ExactlyOne:
     val followersNames = user
-      .outE( follows )
-      .map( follows.tgt.get(name) )
+      .outV( follows )
+      .map( user.get(name) )
 
     implicitly[ followersNames.Out ≃ ManyOrNone.Of[ExactlyOne.Of[name.type]] ]
     assert{ followersNames.out == ManyOrNone.of(ExactlyOne.of(name)) }
@@ -290,7 +290,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
   test("type-safe equality for labeled values") {
 
     assertTypeError("""
-      (ManyOrNone(user) := "hola") === (ExactlyOne(user) := "hola")
+      (ManyOrNone.of(user) := "hola") === (user := "hola")
     """)
 
     assertTypeError("""
@@ -298,7 +298,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
     """)
 
     assertTypeError("""
-      (ManyOrNone(user) := "yuhuu") === (ManyOrNone(user) := 12)
+      (ManyOrNone.of(user) := "yuhuu") === (ManyOrNone.of(user) := 12)
     """)
   }
 

@@ -90,7 +90,7 @@ object paths {
           type Inside = V
         }
       }
-    // NOTE: this implicit conversion aalowsus to use edges for predicates on them
+    // NOTE: this implicit conversion allows us to use edges for predicates on them
     }](x: X)(implicit fromX: X => P): InE[P] = InE(fromX(x))
 
     def outE[X, P <: AnyPredicate { 
@@ -100,6 +100,22 @@ object paths {
         }
       }
     }](x: X)(implicit fromX: X => P): OutE[P] = OutE(fromX(x))
+
+    def inV[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
+        type Target <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    }](x: X)(implicit fromX: X => P): InV[P] = InV(fromX(x))
+
+    def outV[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
+        type Source <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    }](x: X)(implicit fromX: X => P): OutV[P] = OutV(fromX(x))
   }
 
   implicit def pathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F):

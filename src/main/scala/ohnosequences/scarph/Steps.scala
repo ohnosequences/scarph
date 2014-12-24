@@ -34,6 +34,31 @@ object steps {
       lazy val out = edge.target.container.of(edge)
   }
 
+
+  case class InV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+
+      type     Edge = P#Element
+      lazy val edge = predicate.element: Edge
+
+      type     In = Edge#TargetV
+      lazy val in = edge.targetV
+
+      type     Out = Edge#SourceV
+      lazy val out = edge.sourceV
+  }
+
+  case class OutV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+
+      type     Edge = P#Element
+      lazy val edge = predicate.element: Edge
+
+      type     In = Edge#SourceV
+      lazy val in = edge.sourceV
+
+      type     Out = Edge#Target
+      lazy val out = edge.target
+  }
+
   // TODO: inV/outV
 
   case class Source[E <: AnyEdge](val edge: E) extends AnyStep {
