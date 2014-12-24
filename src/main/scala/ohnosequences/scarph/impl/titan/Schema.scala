@@ -102,25 +102,31 @@ object schema {
 
     implicit def vertexIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyVertex }]
       (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
-      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+      at[Ix]{ (ix: Ix) => { (mgmt: TitanManagement) =>
 
           val builder = propLabels(ix.properties)
-            .foldLeft(m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])){
-              (builder, lbl) => builder.addKey(m.getPropertyKey(lbl))
+            .foldLeft(mgmt.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])){
+              (builder, lbl) => builder.addKey(mgmt.getPropertyKey(lbl))
             }
-          setUniqueness(ix, builder).buildCompositeIndex : TitanIndex
+
+          val elemLabel = mgmt.getVertexLabel(ix.indexedType.label)
+
+          setUniqueness(ix, builder).indexOnly(elemLabel).buildCompositeIndex : TitanIndex
         }
       }
 
     implicit def edgeIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyEdge }]
       (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
-      at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
+      at[Ix]{ (ix: Ix) => { (mgmt: TitanManagement) =>
 
           val builder = propLabels(ix.properties)
-            .foldLeft(m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])){
-              (builder, lbl) => builder.addKey(m.getPropertyKey(lbl))
+            .foldLeft(mgmt.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])){
+              (builder, lbl) => builder.addKey(mgmt.getPropertyKey(lbl))
             }
-          setUniqueness(ix, builder).buildCompositeIndex : TitanIndex
+
+          val elemLabel = mgmt.getEdgeLabel(ix.indexedType.label)
+
+          setUniqueness(ix, builder).indexOnly(elemLabel).buildCompositeIndex : TitanIndex
         }
       }
   }
