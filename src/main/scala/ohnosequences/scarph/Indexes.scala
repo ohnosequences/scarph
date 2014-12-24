@@ -64,27 +64,38 @@ object indexes {
       new OnlyEqualitiesPredicate[Pred, Props] {}
   }
 
+
+  sealed trait AnyUniqueness { val bool: Boolean }
+
+  case object Unique extends AnyUniqueness { val bool = true }
+  case object NonUnique extends AnyUniqueness { val bool = false }
+
+
   trait AnyCompositeIndex extends AnyIndex {
 
     type Properties <: AnyTypeSet.Of[PropertyOf[IndexedType]]
     val  properties: Properties
 
     type PredicateRestriction[Pred <: AnyPredicate] = OnlyEqualitiesPredicate[Pred, Properties]
+
+    type Uniqueness <: AnyUniqueness
+    val  uniqueness: Uniqueness
   }
 
-  class CompositeIndex[I <: AnyGraphElement, Props <: AnyTypeSet.Of[PropertyOf[I]]]
-    (val indexedType: I, val properties: Props) extends AnyCompositeIndex {
+  class CompositeIndex[I <: AnyGraphElement, Props <: AnyTypeSet.Of[PropertyOf[I]], U <: AnyUniqueness]
+    (val indexedType: I, val properties: Props, val uniqueness: U) extends AnyCompositeIndex {
 
     // NOTE: normally, you don't care about the index name, but it has to be unique
     val label = this.toString
 
     type IndexedType = I
     type Properties = Props
+    type Uniqueness = U
   }
 
 
-  /* Simple index is the same as Composite, but with only one property (Blueprints style) */
-  trait AnySimpleIndex extends AnyCompositeIndex {
+  /* Key-index is a composite index with only one property (Blueprints style) */
+  trait AnyKeyIndex extends AnyCompositeIndex {
 
     type Property <: PropertyOf[IndexedType]
     val  property: Property
@@ -93,13 +104,14 @@ object indexes {
     val  properties = property :~: ∅
   }
 
-  class SimpleIndex[I <: AnyGraphElement, P <: PropertyOf[I]]
-    (val indexedType: I, val property: P) extends AnySimpleIndex {
+  class KeyIndex[I <: AnyGraphElement, P <: PropertyOf[I], U <: AnyUniqueness]
+    (val indexedType: I, val property: P, val uniqueness: U) extends AnyKeyIndex {
 
     val label = this.toString
 
     type IndexedType = I
     type Property = P
+    type Uniqueness = U
   }
 
 

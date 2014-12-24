@@ -6,7 +6,7 @@ object conditions {
   import graphTypes._
 
 
-  /* Condition is some restriction on the property values */
+  /* A condition is a restriction on the property values */
   trait AnyCondition { 
 
     type Property <: AnyGraphProperty

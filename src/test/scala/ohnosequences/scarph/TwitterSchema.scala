@@ -22,12 +22,12 @@ object Twitter {
   case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
 
   // simple indexes
-  case object userByName extends SimpleIndex(user, name)
-  case object tweetByText extends SimpleIndex(tweet, text)
-  case object postedByTime extends SimpleIndex(posted, time)
+  case object userByName extends KeyIndex(user, name, Unique)
+  case object tweetByText extends KeyIndex(tweet, text, NonUnique)
+  case object postedByTime extends KeyIndex(posted, time, NonUnique)
 
   // composite indexes
-  case object userByNameAndAge extends CompositeIndex(user, name :~: age :~: ∅)
+  case object userByNameAndAge extends CompositeIndex(user, name :~: age :~: ∅, Unique)
 
   // vertex-centric indexes
   case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)

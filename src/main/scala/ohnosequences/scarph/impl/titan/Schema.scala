@@ -10,7 +10,7 @@ object schema {
   import com.tinkerpop.blueprints.Direction
   import scala.reflect._
 
-  import ohnosequences.cosas._, typeSets._, fns._
+  import ohnosequences.cosas._, typeSets._, fns._, types._
   import ohnosequences.cosas.ops.typeSets._
 
   import ohnosequences.{ scarph => s }
@@ -97,14 +97,18 @@ object schema {
         }
       }
 
+    private def setUniqueness[Ix <: AnyCompositeIndex](ix: Ix, builder: TitanManagement.IndexBuilder): 
+      TitanManagement.IndexBuilder = if (ix.uniqueness.bool) builder.unique else builder
+
     implicit def vertexIx[Ix <: AnyCompositeIndex { type IndexedType <: AnyVertex }]
       (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
 
-          propLabels(ix.properties)
+          val builder = propLabels(ix.properties)
             .foldLeft(m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Vertex])){
               (builder, lbl) => builder.addKey(m.getPropertyKey(lbl))
-            }.buildCompositeIndex : TitanIndex
+            }
+          setUniqueness(ix, builder).buildCompositeIndex : TitanIndex
         }
       }
 
@@ -112,37 +116,38 @@ object schema {
       (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
       at[Ix]{ (ix: Ix) => { (m: TitanManagement) =>
 
-          propLabels(ix.properties)
+          val builder = propLabels(ix.properties)
             .foldLeft(m.buildIndex(ix.label, classOf[com.tinkerpop.blueprints.Edge])){
               (builder, lbl) => builder.addKey(m.getPropertyKey(lbl))
-            }.buildCompositeIndex : TitanIndex
+            }
+          setUniqueness(ix, builder).buildCompositeIndex : TitanIndex
         }
       }
   }
 
-  implicit def titanGraphOps(g: TitanGraph): 
-    TitanGraphOps = 
-    TitanGraphOps(g)
+  implicit def titanGraphOps[S <: AnySchema](g: S := TitanGraph): 
+    TitanGraphOps[S] = 
+    TitanGraphOps[S](g)
 
-  case class TitanGraphOps(g: TitanGraph) {
+  case class TitanGraphOps[S <: AnySchema](g: S := TitanGraph) {
 
-    def createSchema[GS <: AnySchema](gs: GS)(implicit
-      propertiesMapper: MapToList[addPropertyKey.type, gs.Properties] with 
+    def createSchema(sch: S)(implicit
+      propertiesMapper: MapToList[addPropertyKey.type, S#Properties] with 
                         InContainer[TitanManagement => PropertyKey],
-      edgeTypesMapper: MapToList[addEdgeLabel.type, gs.Edges] with 
+      edgeTypesMapper: MapToList[addEdgeLabel.type, S#Edges] with 
                        InContainer[TitanManagement => EdgeLabel],
-      vertexTypesMapper: MapToList[addVertexLabel.type, gs.Vertices] with 
+      vertexTypesMapper: MapToList[addVertexLabel.type, S#Vertices] with 
                          InContainer[TitanManagement => VertexLabel],
-      indexMapper: MapToList[addIndex.type, gs.Indexes] with 
+      indexMapper: MapToList[addIndex.type, S#Indexes] with 
                    InContainer[TitanManagement => TitanIndex]
     ) = {
       /* We want this to happen all in _one_ transaction */
-      val mgmt = g.getManagementSystem
+      val mgmt = g.value.getManagementSystem
 
-      propertiesMapper(gs.properties).map{ _.apply(mgmt) }
-      edgeTypesMapper(gs.edges).map{ _.apply(mgmt) }
-      vertexTypesMapper(gs.vertices).map{ _.apply(mgmt) }
-      indexMapper(gs.indexes).map{ _.apply(mgmt) }
+      propertiesMapper(sch.properties).map{ _.apply(mgmt) }
+      edgeTypesMapper(sch.edges).map{ _.apply(mgmt) }
+      vertexTypesMapper(sch.vertices).map{ _.apply(mgmt) }
+      indexMapper(sch.indexes).map{ _.apply(mgmt) }
 
       mgmt.commit
     }
