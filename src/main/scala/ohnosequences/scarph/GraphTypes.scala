@@ -46,8 +46,10 @@ object graphTypes {
     lazy val inside: Inside = this: this.type
   }
 
+
   /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnySimpleGraphType
+
 
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement

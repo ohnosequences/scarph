@@ -4,66 +4,87 @@ object conditions {
 
   import ohnosequences.cosas._, properties._
   import graphTypes._
+  import java.lang.Comparable
 
 
-  /* Condition is some restriction on the property values */
+  /* A condition is a restriction on the property values */
   trait AnyCondition { 
 
     type Property <: AnyGraphProperty
     val  property: Property
 
-    type ElementType = Property#Owner
-    val  elementType = property.owner
+    type Element = Property#Owner
+    val  element = property.owner
   }
 
   object AnyCondition {
 
     type OnProperty[P <: AnyGraphProperty] = AnyCondition { type Property = P }
-    type OnElementType[E <: AnyGraphElement] = AnyCondition { type ElementType = E }
+    type OnElement[E <: AnyGraphElement] = AnyCondition { type Element = E }
   }
 
 
   /* Comparison conditions with **One** property value */
-  trait AnyCompareCondition extends AnyCondition { val value: Property#Raw }
-  trait CompareCondition[A <: AnyGraphProperty] extends AnyCompareCondition { type Property = A }
+  trait AnyCompareCondition extends AnyCondition { 
+    type Property <: AnyGraphProperty { type Raw <: Comparable[_] }
+
+    val value: Property#Raw 
+  }
+
+  trait CompareCondition[P <: AnyGraphProperty { type Raw <: Comparable[_] }] 
+    extends AnyCompareCondition { type Property = P }
 
 
   trait AnyEqual extends AnyCompareCondition
-  case class Equal[A <: AnyGraphProperty](
-    val property: A,
-    val value: A#Raw
-  ) extends AnyEqual with CompareCondition[A]
+  case class Equal[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val value: P#Raw
+  ) extends AnyEqual with CompareCondition[P]
 
   trait AnyNotEqual extends AnyCompareCondition
-  case class NotEqual[A <: AnyGraphProperty](
-    val property: A,
-    val value: A#Raw
-  ) extends AnyNotEqual with CompareCondition[A]
+  case class NotEqual[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val value: P#Raw
+  ) extends AnyNotEqual with CompareCondition[P]
 
 
   trait AnyLess extends AnyCompareCondition
-  case class Less[A <: AnyGraphProperty](
-    val property: A,
-    val value: A#Raw
-  ) extends AnyLess with CompareCondition[A]
+  case class Less[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val value: P#Raw
+  ) extends AnyLess with CompareCondition[P]
 
   trait AnyLessOrEqual extends AnyCompareCondition
-  case class LessOrEqual[A <: AnyGraphProperty](
-    val property: A,
-    val value: A#Raw
-  ) extends AnyLessOrEqual with CompareCondition[A]
+  case class LessOrEqual[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val value: P#Raw
+  ) extends AnyLessOrEqual with CompareCondition[P]
 
 
   trait AnyGreater extends AnyCompareCondition
-  case class Greater[A <: AnyGraphProperty](
-    val property: A,
-    val value: A#Raw
-  ) extends AnyGreater with CompareCondition[A]
+  case class Greater[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val value: P#Raw
+  ) extends AnyGreater with CompareCondition[P]
 
   trait AnyGreaterOrEqual extends AnyCompareCondition
-  case class GreaterOrEqual[A <: AnyGraphProperty](
-    val property: A,
-    val value: A#Raw
-  ) extends AnyGreaterOrEqual with CompareCondition[A]
+  case class GreaterOrEqual[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val value: P#Raw
+  ) extends AnyGreaterOrEqual with CompareCondition[P]
+
+
+  trait AnyInterval extends AnyCondition {
+    type Property <: AnyGraphProperty { type Raw <: Comparable[_] }
+
+    val start: Property#Raw
+    val end: Property#Raw
+  }
+
+  case class Interval[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
+    val property: P,
+    val start: P#Raw,
+    val end: P#Raw
+  ) extends AnyInterval { type Property = P }
 
 }

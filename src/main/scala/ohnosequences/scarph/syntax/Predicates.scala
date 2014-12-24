@@ -10,17 +10,7 @@ object predicates {
 
   /* When you don't want to restrict the query anyhow (let's imagine it makes sence),
      you can just say: `query(user).out(..).blah.evalOn(any(user))` */
-  def any[E <: AnyGraphElement](e: E): EmptyPredicate[E] = new EmptyPredicate[E](e)
-
-
-  /* Every predicate already knows it's own label type, so let's make this labeling implicit */
-  implicit def labeledPredicate[E <: AnyGraphElement, P <: AnyPredicate { type ElementType = E }](p: P):
-      (P Denotes PredicateType[E]) =
-  new (P Denotes PredicateType[E])(p)
-
-  // implicit def elementLabeledPredicate[E <: AnyGraphElement](e: E):
-  //     (EmptyPredicate[E] Denotes ExactlyOne.Of[PredicateType[E]]) =
-  // new (EmptyPredicate[E] Denotes ExactlyOne.Of[PredicateType[E]])(new EmptyPredicate[E](e))
+  implicit def any[E <: AnyGraphElement](e: E): EmptyPredicate[E] = new EmptyPredicate[E](e)
 
 
   /* A way of building a predicate from an element */
@@ -31,7 +21,7 @@ object predicates {
   case class ElementPredicateOps[E <: AnyGraphElement](elem: E) {
 
     /* For example: `user ? (name === "bob")` - this operator can be read as "such that" */
-    def ?[C <: AnyCondition.OnElementType[E]](c: C): 
+    def ?[C <: AnyCondition.OnElement[E]](c: C): 
       AndPredicate[EmptyPredicate[E], C] = AndPredicate(new EmptyPredicate(elem), c)
   }
 
@@ -45,7 +35,7 @@ object predicates {
 
     /* It's basically cons for the internal conditions type-set, 
        but with a restriction on the condtion's element type */
-    def and[C <: AnyCondition.OnElementType[P#ElementType]](c: C): 
+    def and[C <: AnyCondition.OnElement[P#Element]](c: C): 
       AndPredicate[P, C] = AndPredicate(pred, c)
   }
 }

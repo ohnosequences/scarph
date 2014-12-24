@@ -5,7 +5,29 @@ package ohnosequences.scarph.syntax
 object paths {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._
+  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._, s.schemas._, s.indexes._
+
+
+  /* Graph/schema ops */
+  implicit def schemaOps[S <: AnySchema](s: S):
+        SchemaOps[S] =
+    new SchemaOps[S](s)
+
+  class SchemaOps[S <: AnySchema](s: S) {
+
+    def query[P <: AnyPredicate](p: P): 
+      GraphQuery[S, P, ManyOrNone] = 
+      GraphQuery(s, p, ManyOrNone)
+
+    /* This method takes also an index and checks that the predicate satisfies the 
+       index'es restriction, ensuring that it can be utilized for this query */
+    def query[I <: AnyIndex, P <: AnyPredicate, C <: AnyContainer](i: I, p: P)
+      (implicit
+        ch: I#PredicateRestriction[P],
+        cn: IndexContainer[I] { type Out = C }
+      ): GraphQuery[S, P, C] =
+         GraphQuery(s, p, cn.apply)
+  }
 
 
   /* Element types */
@@ -62,13 +84,38 @@ object paths {
 
   class VertexOps[V <: AnyVertex](v: V) {
 
-    def inE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type Target <: AnyGraphType { type Inside = V } }
-      }](s: S): InE[S] = InE(s)
+    def inE[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
+        type Target <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    // NOTE: this implicit conversion allows us to use edges for predicates on them
+    }](x: X)(implicit fromX: X => P): InE[P] = InE(fromX(x))
 
-    def outE[S <: AnyPredicate { 
-        type ElementType <: AnyEdge { type Source <: AnyGraphType { type Inside = V } }
-      }](s: S): OutE[S] = OutE(s)
+    def outE[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
+        type Source <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    }](x: X)(implicit fromX: X => P): OutE[P] = OutE(fromX(x))
+
+    def inV[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
+        type Target <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    }](x: X)(implicit fromX: X => P): InV[P] = InV(fromX(x))
+
+    def outV[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
+        type Source <: AnyGraphType { 
+          type Inside = V
+        }
+      }
+    }](x: X)(implicit fromX: X => P): OutV[P] = OutV(fromX(x))
   }
 
   implicit def pathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F):
@@ -77,25 +124,25 @@ object paths {
 
   class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
 
-    def inE[P <: AnyPredicate { 
-      type ElementType <: AnyEdge { 
+    def inE[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
         type Target <: AnyGraphType { 
           type Inside = F#Out
         } 
       } 
-    }](p: P):
+    }](x: X)(implicit fromX: X => P):
       F >=> InE[P] =
-      f >=> InE(p)
+      f >=> InE(fromX(x))
 
-    def outE[P <: AnyPredicate { 
-      type ElementType <: AnyEdge { 
+    def outE[X, P <: AnyPredicate { 
+      type Element <: AnyEdge { 
         type Source <: AnyGraphType { 
           type Inside = F#Out 
         } 
       } 
-    }](p: P):
+    }](x: X)(implicit fromX: X => P):
       F >=> OutE[P] =
-      f >=> OutE(p)
+      f >=> OutE(fromX(x))
   }
 
   /* This gives user nice warnings and doesn't add unnecessary constructors */

@@ -40,13 +40,10 @@ object paths {
   abstract class Step[
     I <: AnySimpleGraphType,
     O <: AnyGraphType
-  ](i: I, o: O) extends AnyStep {
+  ](val in: I, val out: O) extends AnyStep {
 
     type In = I
-    val  in = i
-
     type Out = O
-    val  out = o
   }
 
 

@@ -5,7 +5,7 @@ object schemas {
   import ohnosequences.cosas._, typeSets._
   import graphTypes._, indexes._
 
-  trait AnySchema {
+  trait AnySchema extends AnySimpleGraphType {
 
     type Properties <: AnyTypeSet.Of[AnyGraphProperty]
     val  properties: Properties
@@ -20,7 +20,7 @@ object schemas {
     val  indexes: Indexes
   }
 
-  case class Schema[
+  abstract class Schema[
       Ps <: AnyTypeSet.Of[AnyGraphProperty],
       Vs <: AnyTypeSet.Of[AnyVertex],
       Es <: AnyTypeSet.Of[AnyEdge],

@@ -7,19 +7,21 @@ object conditions {
 
 
   /* Method aliases for predicate constructors */
-  implicit def compareConditionOps[A <: AnyGraphProperty](property: A):
-      CompareConditionOps[A] = 
-      CompareConditionOps[A](property)
+  implicit def conditionOps[P <: AnyGraphProperty { type Raw <: Comparable[_] }](property: P):
+      ConditionOps[P] = 
+      ConditionOps[P](property)
 
-  case class CompareConditionOps[A <: AnyGraphProperty](property: A) {
+  case class ConditionOps[P <: AnyGraphProperty { type Raw <: Comparable[_] }](property: P) {
 
-    final def ===(value: A#Raw): Equal[A] = Equal(property, value)
-    final def =/=(value: A#Raw): NotEqual[A] = NotEqual(property, value)
+    def ===(value: P#Raw): Equal[P] = Equal(property, value)
+    def =/=(value: P#Raw): NotEqual[P] = NotEqual(property, value)
 
-    final def <(value: A#Raw): Less[A] = Less(property, value)
-    final def ≤(value: A#Raw): LessOrEqual[A] = LessOrEqual(property, value)
+    def <(value: P#Raw): Less[P] = Less(property, value)
+    def ≤(value: P#Raw): LessOrEqual[P] = LessOrEqual(property, value)
 
-    final def >(value: A#Raw): Greater[A] = Greater(property, value)
-    final def ≥(value: A#Raw): GreaterOrEqual[A] = GreaterOrEqual(property, value)
+    def >(value: P#Raw): Greater[P] = Greater(property, value)
+    def ≥(value: P#Raw): GreaterOrEqual[P] = GreaterOrEqual(property, value)
+
+    def between(s: P#Raw, e: P#Raw): Interval[P] = Interval(property, s, e)
   }
 }
