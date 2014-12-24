@@ -50,7 +50,8 @@ object indexes {
     // NOTE: this poly returns property of a condition, but only if it's an equality condition
     import shapeless._, poly._
     case object eqConditionProperty extends Poly1 {
-      implicit def getProp[P <: AnyGraphProperty] = at[Equal[P]] { _.property }
+      implicit def getProp[P <: AnyGraphProperty { type Raw <: Comparable[_] }] =
+        at[Equal[P]] { _.property }
     }
 
     /* This check maps over the set of predicate's conditions, checking that all of them are 

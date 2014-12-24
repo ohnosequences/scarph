@@ -222,6 +222,9 @@ class TitanTestSuite extends AnyTitanTestSuite {
     assertResult( ManyOrNone.of(age) := Stream(22) ){ 
       twitter.query(user ? (age < 80) and (age > 10)).map( Get(age) ).evalOn( titanTwitter)
     }
+    assertResult( ManyOrNone.of(age) := Stream(5, 22) ){ 
+      twitter.query(user ? (age between (3, 25))).map( Get(age) ).evalOn( titanTwitter)
+    }
 
   }
 
