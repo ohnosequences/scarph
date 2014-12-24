@@ -151,11 +151,11 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val posterName = Source(posted) >=> Get(name)
     assert{ posterName.evalOn( post ) == (name := "@eparejatobes") }
 
-    assertResult( ManyOrNone.of(user) := Stream() ){ 
+    assertResult( OneOrNone.of(user) := None ){ 
       twitter.query(userByNameAndAge, user ? (name === "@eparejatobes") and (age === 5))
         .evalOn( titanTwitter )
     }
-    assertResult( ManyOrNone.of(user) := Stream(edu.value) ){ 
+    assertResult( OneOrNone.of(user) := Some(edu.value) ){ 
       twitter.query(userByNameAndAge, user ? (age === 95) and (name === "@eparejatobes"))
         .evalOn( titanTwitter )
     }

@@ -2,9 +2,9 @@ package ohnosequences.scarph
 
 object indexes {
 
-  import ohnosequences.cosas._, typeSets._
+  import ohnosequences.cosas._, typeSets._, fns._
   import ohnosequences.cosas.ops.typeSets.MapSet
-  import graphTypes._, predicates._, conditions._
+  import graphTypes._, predicates._, conditions._, containers._
 
 
   // TODO: add ordering
@@ -21,11 +21,13 @@ object indexes {
 
     /* Using this type member you can set a restriction on the predicates that 
        this index is capable handling of */
-    type PredicateRestriction[P <: AnyPredicate]
+    type PredicateRestriction[Pred <: AnyPredicate] <: AnyPredicateRestriction
   }
 
+  trait AnyPredicateRestriction
+
   /* This can be used when you don't want to restrict predicates */
-  sealed class NoRestriction
+  sealed class NoRestriction extends AnyPredicateRestriction
   object NoRestriction { implicit val ok: NoRestriction = new NoRestriction }
 
   object AnyIndex {
@@ -42,7 +44,7 @@ object indexes {
      > Also note, that composite graph indexes can only be used for equality constraints.
   */
   @annotation.implicitNotFound(msg = "Can't prove that predicate ${Pred} consists only of equality conditions on properties ${Props}")
-  trait  OnlyEqualitiesPredicate[Pred <: AnyPredicate, Props <: AnyTypeSet.Of[AnyGraphProperty]]
+  trait  OnlyEqualitiesPredicate[Pred <: AnyPredicate, Props <: AnyTypeSet.Of[AnyGraphProperty]] extends AnyPredicateRestriction
   object OnlyEqualitiesPredicate {
 
     // NOTE: this poly returns property of a condition, but only if it's an equality condition
@@ -69,6 +71,22 @@ object indexes {
 
   case object Unique extends AnyUniqueness { val bool = true }
   case object NonUnique extends AnyUniqueness { val bool = false }
+
+  trait  IndexContainer[I <: AnyIndex] extends AnyFn0 with OutBound[AnyContainer] 
+
+  object IndexContainer extends IndexContainer2 {
+
+    implicit def unique[I <: AnyCompositeIndex { type Uniqueness = Unique.type }]: 
+          IndexContainer[I] with Out[OneOrNone] =
+      new IndexContainer[I] with Out[OneOrNone] { def apply(): Out = OneOrNone }
+  }
+
+  trait IndexContainer2 {
+
+    implicit def any[I <: AnyIndex]: 
+          IndexContainer[I] with Out[ManyOrNone] =
+      new IndexContainer[I] with Out[ManyOrNone] { def apply(): Out = ManyOrNone }
+  }
 
 
   trait AnyCompositeIndex extends AnyIndex {

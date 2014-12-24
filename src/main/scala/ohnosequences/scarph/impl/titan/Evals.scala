@@ -81,29 +81,31 @@ case object evals {
 
 
   implicit def evalVertexQuery[
-    S <: AnySchema,
-    P <: AnyPredicate { type Element <: AnyVertex } 
-  ](implicit transform: ToBlueprintsPredicate[P]): 
-      EvalPathOn[TitanGraph, GraphQuery[S, P], Stream[TitanVertex]] =
-  new EvalPathOn[TitanGraph, GraphQuery[S, P], Stream[TitanVertex]] {
+    S <: AnySchema, P <: AnyPredicate { type Element <: AnyVertex }, C <: AnyContainer, O
+  ](implicit 
+    transform: ToBlueprintsPredicate[P],
+    packValue: ValueContainer[C, JIterable[TitanVertex]] { type Out = O }
+  ):  EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] =
+  new EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] {
     def apply(path: Path)(in: In): Out = {
-      path.out := (
+      path.out := packValue(
         transform(path.predicate, in.value.query).vertices
-          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanVertex]].toStream
+          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanVertex]]
       )
     }
   }
 
   implicit def evalEdgeQuery[
-    S <: AnySchema,
-    P <: AnyPredicate { type Element <: AnyEdge }
-  ](implicit transform: ToBlueprintsPredicate[P]): 
-      EvalPathOn[TitanGraph, GraphQuery[S, P], Stream[TitanEdge]] =
-  new EvalPathOn[TitanGraph, GraphQuery[S, P], Stream[TitanEdge]] {
+    S <: AnySchema, P <: AnyPredicate { type Element <: AnyEdge }, C <: AnyContainer, O
+  ](implicit 
+    transform: ToBlueprintsPredicate[P],
+    packValue: ValueContainer[C, JIterable[TitanEdge]] { type Out = O }
+  ):  EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] =
+  new EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] {
     def apply(path: Path)(in: In): Out = {
-      path.out := (
+      path.out := packValue(
         transform(path.predicate, in.value.query).edges
-          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]].toStream
+          .asInstanceOf[JIterable[com.thinkaurelius.titan.core.TitanEdge]]
       )
     }
   }
@@ -139,11 +141,11 @@ case object evals {
     P <: AnyPredicate { type Element <: AnyEdge }, O
   ](implicit 
     transform: ToBlueprintsPredicate[P],
-    containerVal: ValueContainer[InE[P]#Out#Container, JIterable[TitanEdge]] { type Out = O }
+    packValue: ValueContainer[InE[P]#Out#Container, JIterable[TitanEdge]] { type Out = O }
   ):  EvalPathOn[TitanVertex, InE[P], O] =
   new EvalPathOn[TitanVertex, InE[P], O] {
     def apply(path: Path)(in: In): Out = {
-      (path.out: Path#Out) := containerVal(
+      (path.out: Path#Out) := packValue(
         transform(path.predicate, 
           in.value.query
             .labels(path.predicate.element.label)
@@ -158,11 +160,11 @@ case object evals {
     P <: AnyPredicate { type Element <: AnyEdge }, O
   ](implicit
     transform: ToBlueprintsPredicate[P],
-    containerVal: ValueContainer[OutE[P]#Out#Container, JIterable[TitanEdge]] { type Out = O }
+    packValue: ValueContainer[OutE[P]#Out#Container, JIterable[TitanEdge]] { type Out = O }
   ):  EvalPathOn[TitanVertex, OutE[P], O] =
   new EvalPathOn[TitanVertex, OutE[P], O] {
     def apply(path: Path)(in: In): Out = {
-      (path.out: Path#Out) := containerVal(
+      (path.out: Path#Out) := packValue(
         transform(path.predicate, 
           in.value.query
             .labels(path.predicate.element.label)

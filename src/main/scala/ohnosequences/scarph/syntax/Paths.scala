@@ -16,15 +16,17 @@ object paths {
   class SchemaOps[S <: AnySchema](s: S) {
 
     def query[P <: AnyPredicate](p: P): 
-      GraphQuery[S, P] = 
-      GraphQuery(s, p)
+      GraphQuery[S, P, ManyOrNone] = 
+      GraphQuery(s, p, ManyOrNone)
 
     /* This method takes also an index and checks that the predicate satisfies the 
        index'es restriction, ensuring that it can be utilized for this query */
-    def query[I <: AnyIndex, P <: AnyPredicate]
-      (i: I, p: P)(implicit ch: I#PredicateRestriction[P]): 
-        GraphQuery[S, P] = 
-        GraphQuery(s, p)
+    def query[I <: AnyIndex, P <: AnyPredicate, C <: AnyContainer](i: I, p: P)
+      (implicit
+        ch: I#PredicateRestriction[P],
+        cn: IndexContainer[I] { type Out = C }
+      ): GraphQuery[S, P, C] =
+         GraphQuery(s, p, cn.apply)
   }
 
 
