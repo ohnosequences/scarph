@@ -134,8 +134,14 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val posterName = Source(posted) >=> Get(name)
     assert{ posterName.evalOn( post ) == (name := "@eparejatobes") }
 
-    assert{ twitter.query(user ? (name === "@eparejatobes") and (age === 5)).evalOn( titanTwitter ).value == Stream() }
-    assert{ twitter.query(user ? (name === "@eparejatobes") and (age === 95)).evalOn( titanTwitter ).value == Stream(edu.value) }
+    assertResult( ManyOrNone.of(user) := Stream() ){ 
+      twitter.query(userByNameAndAge, user ? (name === "@eparejatobes") and (age === 5))
+        .evalOn( titanTwitter )
+    }
+    assertResult( ManyOrNone.of(user) := Stream(edu.value) ){ 
+      twitter.query(userByNameAndAge, user ? (age === 95) and (name === "@eparejatobes"))
+        .evalOn( titanTwitter )
+    }
 
     assert{ userName.evalOn( edu ) == name("@eparejatobes") }
     assert{ postAuthor.evalOn( post ) == edu }
@@ -207,7 +213,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
       Flatten(
-        Query(twitter, askEdu)
+        twitter.query(askEdu)
           .map( user.outE(follows) )
       ).map( Target(follows) >=> Get(name) )
       .evalOn( titanTwitter )
@@ -215,7 +221,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // Same with .flatten syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
-      Query(twitter, askEdu)
+      twitter.query(askEdu)
         .map( user.outE(follows) )
         .flatten
         .map( follows.tgt.get(name) )
@@ -224,7 +230,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // Same with .flatMap syntax:
     assertResult( (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ){ 
-      Query(twitter, askEdu)
+      twitter.query(askEdu)
         .flatMap( user.outE(follows) )
         .map( follows.tgt.get(name) )
       .evalOn( titanTwitter )

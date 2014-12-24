@@ -5,7 +5,7 @@ package ohnosequences.scarph.syntax
 object paths {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._, s.schemas._
+  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._, s.schemas._, s.indexes._
 
 
   /* Graph/schema ops */
@@ -15,7 +15,16 @@ object paths {
 
   class SchemaOps[S <: AnySchema](s: S) {
 
-    def query[P <: AnyPredicate](p: P): Query[S, P] = Query(s, p)
+    def query[P <: AnyPredicate](p: P): 
+      GraphQuery[S, P] = 
+      GraphQuery(s, p)
+
+    /* This method takes also an index and checks that the predicate satisfies the 
+       index'es restriction, ensuring that it can be utilized for this query */
+    def query[I <: AnyIndex, P <: AnyPredicate]
+      (i: I, p: P)(implicit ch: I#PredicateRestriction[P]): 
+        GraphQuery[S, P] = 
+        GraphQuery(s, p)
   }
 
 
@@ -74,7 +83,7 @@ object paths {
   class VertexOps[V <: AnyVertex](v: V) {
 
     def inE[X, P <: AnyPredicate { 
-      type ElementType <: AnyEdge { 
+      type Element <: AnyEdge { 
         type Target <: AnyGraphType { 
           type Inside = V
         }
@@ -83,7 +92,7 @@ object paths {
     }](x: X)(implicit fromX: X => P): InE[P] = InE(fromX(x))
 
     def outE[X, P <: AnyPredicate { 
-      type ElementType <: AnyEdge { 
+      type Element <: AnyEdge { 
         type Source <: AnyGraphType { 
           type Inside = V
         }
@@ -98,7 +107,7 @@ object paths {
   class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
 
     def inE[X, P <: AnyPredicate { 
-      type ElementType <: AnyEdge { 
+      type Element <: AnyEdge { 
         type Target <: AnyGraphType { 
           type Inside = F#Out
         } 
@@ -108,7 +117,7 @@ object paths {
       f >=> InE(fromX(x))
 
     def outE[X, P <: AnyPredicate { 
-      type ElementType <: AnyEdge { 
+      type Element <: AnyEdge { 
         type Source <: AnyGraphType { 
           type Inside = F#Out 
         } 

@@ -3,14 +3,11 @@ package ohnosequences.scarph
 object indexes {
 
   import ohnosequences.cosas._, typeSets._
-  import graphTypes._
+  import ohnosequences.cosas.ops.typeSets.MapSet
+  import graphTypes._, predicates._, conditions._
 
 
-  // trait AnyDirection
-  // case object InDirection extends AnyDirection
-  // case object OutDirection extends AnyDirection
-  // case object BothDirections extends AnyDirection
-
+  // TODO: add ordering
   // trait AnyOrder
   // case object Ascending extends AnyOrder
   // case object Descending extends AnyOrder
@@ -21,7 +18,15 @@ object indexes {
 
     type IndexedType <: AnyGraphElement
     val  indexedType: IndexedType
+
+    /* Using this type member you can set a restriction on the predicates that 
+       this index is capable handling of */
+    type PredicateRestriction[P <: AnyPredicate]
   }
+
+  /* This can be used when you don't want to restrict predicates */
+  sealed class NoRestriction
+  object NoRestriction { implicit val ok: NoRestriction = new NoRestriction }
 
   object AnyIndex {
 
@@ -29,29 +34,52 @@ object indexes {
   }
 
 
-
-  /* This reflects [TitanDB Composite Index](http://s3.thinkaurelius.com/docs/titan/0.5.0/indexes.html#_composite_index)
+  /* `AnyCompositeIndex` reflects [TitanDB Composite Index](http://s3.thinkaurelius.com/docs/titan/0.5.0/indexes.html#_composite_index)
      
      > Composite indexes retrieve vertices or edges by one or a (fixed) composition of multiple keys
-     > Note, that all keys of a composite graph index must be found in the query’s equality conditions 
+     > Note, that all keys of a composite graph index must be found in the query's equality conditions 
        for this index to be used.
      > Also note, that composite graph indexes can only be used for equality constraints.
-   */
-  // TODO: so far implemented only for one property
+  */
+  @annotation.implicitNotFound(msg = "Can't prove that predicate ${Pred} consists only of equality conditions on properties ${Props}")
+  trait  OnlyEqualitiesPredicate[Pred <: AnyPredicate, Props <: AnyTypeSet.Of[AnyGraphProperty]]
+  object OnlyEqualitiesPredicate {
+
+    // NOTE: this poly returns property of a condition, but only if it's an equality condition
+    import shapeless._, poly._
+    case object eqConditionProperty extends Poly1 {
+      implicit def getProp[P <: AnyGraphProperty] = at[Equal[P]] { _.property }
+    }
+
+    /* This check maps over the set of predicate's conditions, checking that all of them are 
+       equalities and then compares result with the given set of properties (up to ordering) */
+    implicit def yes[
+      Pred <: AnyPredicate, 
+      Props <: AnyTypeSet.Of[AnyGraphProperty], 
+      PProps <: AnyTypeSet.Of[AnyGraphProperty]
+    ](implicit
+        pprops: MapSet[eqConditionProperty.type, Pred#Conditions] { type Out = PProps },
+        same: Props ~:~ PProps
+      ):  OnlyEqualitiesPredicate[Pred, Props] =
+      new OnlyEqualitiesPredicate[Pred, Props] {}
+  }
+
   trait AnyCompositeIndex extends AnyIndex {
 
     type Properties <: AnyTypeSet.Of[PropertyOf[IndexedType]]
     val  properties: Properties
+
+    type PredicateRestriction[Pred <: AnyPredicate] = OnlyEqualitiesPredicate[Pred, Properties]
   }
 
-  class CompositeIndex[I <: AnyGraphElement, Ps <: AnyTypeSet.Of[PropertyOf[I]]]
-    (val indexedType: I, val properties: Ps) extends AnyCompositeIndex {
+  class CompositeIndex[I <: AnyGraphElement, Props <: AnyTypeSet.Of[PropertyOf[I]]]
+    (val indexedType: I, val properties: Props) extends AnyCompositeIndex {
 
     // NOTE: normally, you don't care about the index name, but it has to be unique
     val label = this.toString
 
     type IndexedType = I
-    type Properties = Ps
+    type Properties = Props
   }
 
 
@@ -63,7 +91,6 @@ object indexes {
 
     type Properties = Property :~: ∅
     val  properties = property :~: ∅
-
   }
 
   class SimpleIndex[I <: AnyGraphElement, P <: PropertyOf[I]]
@@ -88,6 +115,8 @@ object indexes {
 
     type IndexType <: AnyLocalIndexType
     val  indexType: IndexType
+
+    type PredicateRestriction[P] = NoRestriction
   }
 
   sealed trait AnyLocalIndexType
@@ -95,14 +124,14 @@ object indexes {
   case object OnlyTargetCentric extends AnyLocalIndexType
   case object BothEndsCentric extends AnyLocalIndexType
 
-  class LocalEdgeIndex[E <: AnyEdge, Ps <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
-    (val indexedType: E, val indexType: T, val properties: Ps) extends AnyLocalEdgeIndex {
+  class LocalEdgeIndex[E <: AnyEdge, Props <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
+    (val indexedType: E, val indexType: T, val properties: Props) extends AnyLocalEdgeIndex {
 
     val label = this.toString
 
     type IndexedType = E
     type IndexType = T
-    type Properties = Ps
+    type Properties = Props
   }
 
 }

@@ -8,8 +8,8 @@ object predicates {
 
   trait AnyPredicate {
 
-    type ElementType <: AnyGraphElement
-    val  elementType: ElementType
+    type Element <: AnyGraphElement
+    val  element: Element
 
     type Conditions <: AnyTypeSet //.Of[AnyCondition]
     val  conditions: Conditions
@@ -17,7 +17,7 @@ object predicates {
 
   object AnyPredicate {
 
-    type On[E <: AnyGraphElement] = AnyPredicate { type ElementType = E }
+    type On[E <: AnyGraphElement] = AnyPredicate { type Element = E }
   }
 
   /* Empty predicate doesn't have any restrictions */
@@ -26,8 +26,8 @@ object predicates {
     val  conditions = ∅
   }
 
-  class EmptyPredicate[E <: AnyGraphElement](val elementType: E) 
-    extends AnyEmptyPredicate { type ElementType = E }
+  class EmptyPredicate[E <: AnyGraphElement](val element: E) 
+    extends AnyEmptyPredicate { type Element = E }
 
 
   /* This is just like cons, but controlling, that all conditions are on the same element type */
@@ -36,17 +36,17 @@ object predicates {
     type Body <: AnyPredicate
     val  body: Body
 
-    type ElementType = Body#ElementType
-    val  elementType = body.elementType
+    type     Element = Body#Element
+    lazy val element = body.element
 
-    type Condition <: AnyCondition.OnElementType[Body#ElementType]
+    type Condition <: AnyCondition.OnElement[Body#Element]
     val  condition: Condition
 
-    type Conditions = Condition :~: Body#Conditions
-    val  conditions = condition :~: (body.conditions: Body#Conditions)
+    type     Conditions = Condition :~: Body#Conditions
+    lazy val conditions = condition :~: (body.conditions: Body#Conditions)
   }
 
-  case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElementType[B#ElementType]]
+  case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElement[B#Element]]
     (val body: B, val condition: C) extends AnyAndPredicate {
 
     type Body = B

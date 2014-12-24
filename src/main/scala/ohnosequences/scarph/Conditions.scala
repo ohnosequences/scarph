@@ -12,14 +12,14 @@ object conditions {
     type Property <: AnyGraphProperty
     val  property: Property
 
-    type ElementType = Property#Owner
-    val  elementType = property.owner
+    type Element = Property#Owner
+    val  element = property.owner
   }
 
   object AnyCondition {
 
     type OnProperty[P <: AnyGraphProperty] = AnyCondition { type Property = P }
-    type OnElementType[E <: AnyGraphElement] = AnyCondition { type ElementType = E }
+    type OnElement[E <: AnyGraphElement] = AnyCondition { type Element = E }
   }
 
 

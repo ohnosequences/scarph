@@ -10,10 +10,10 @@ object steps {
   case class Get[P <: AnyGraphProperty](val property: P) 
     extends Step[P#Owner, P](property.owner, property)
 
-  case class InE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
+  case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
 
-      type     Edge = P#ElementType
-      lazy val edge = predicate.elementType: Edge
+      type     Edge = P#Element
+      lazy val edge = predicate.element: Edge
 
       type     In = Edge#TargetV
       lazy val in = edge.targetV
@@ -22,10 +22,10 @@ object steps {
       lazy val out = edge.source.container.of(edge)
   }
 
-  case class OutE[P <: AnyPredicate { type ElementType <: AnyEdge }](val predicate: P) extends AnyStep {
+  case class OutE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
 
-      type     Edge = P#ElementType
-      lazy val edge = predicate.elementType: Edge
+      type     Edge = P#Element
+      lazy val edge = predicate.element: Edge
 
       type     In = Edge#SourceV
       lazy val in = edge.sourceV
@@ -54,7 +54,7 @@ object steps {
     lazy val out = edge.targetV
   }
 
-  case class Query[S <: AnySchema, P <: AnyPredicate](val graph: S, val predicate: P)
-    extends Step[S, ManyOrNone#Of[P#ElementType]](graph, ManyOrNone.of(predicate.elementType))
+  case class GraphQuery[S <: AnySchema, P <: AnyPredicate](val graph: S, val predicate: P)
+    extends Step[S, ManyOrNone#Of[P#Element]](graph, ManyOrNone.of(predicate.element))
 
 }

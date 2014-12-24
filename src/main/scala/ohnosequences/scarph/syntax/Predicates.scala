@@ -21,7 +21,7 @@ object predicates {
   case class ElementPredicateOps[E <: AnyGraphElement](elem: E) {
 
     /* For example: `user ? (name === "bob")` - this operator can be read as "such that" */
-    def ?[C <: AnyCondition.OnElementType[E]](c: C): 
+    def ?[C <: AnyCondition.OnElement[E]](c: C): 
       AndPredicate[EmptyPredicate[E], C] = AndPredicate(new EmptyPredicate(elem), c)
   }
 
@@ -35,7 +35,7 @@ object predicates {
 
     /* It's basically cons for the internal conditions type-set, 
        but with a restriction on the condtion's element type */
-    def and[C <: AnyCondition.OnElementType[P#ElementType]](c: C): 
+    def and[C <: AnyCondition.OnElement[P#Element]](c: C): 
       AndPredicate[P, C] = AndPredicate(pred, c)
   }
 }
