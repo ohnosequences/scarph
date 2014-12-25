@@ -309,12 +309,12 @@ class TitanTestSuite extends AnyTitanTestSuite {
     import TestContext._
 
     // friends' names
-    val q1 = user
+    val friendsNames = user
       .outV(follows)
       .map( user.get(name) )
 
     // friends' ages
-    val q2 = user
+    val friendsAges = user
       .outV(follows)
       .map( user.get(age) )
 
@@ -324,7 +324,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     // using explicit Par
     assertResult(result) {
-      (q1 ⨂ q2).evalOn( edu ⨂ edu )
+      (friendsNames ⨂ friendsAges).evalOn( edu ⨂ edu )
     }
 
     // now using forkMap:
@@ -342,7 +342,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
         .fork( user.get(name) ⨂ user.get(age) )
       .evalOn( twt )
     }
-
   }
 
 }

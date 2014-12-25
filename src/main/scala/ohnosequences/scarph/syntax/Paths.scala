@@ -151,16 +151,22 @@ object paths {
     new PathWarnOps[F](f)
 
   class PathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F) {
-    @deprecated("You are trying to flatten a non-nested structure, you don't need it", "")
+    @deprecated("You are trying to 'flatten' a non-nested structure, you don't need it", "")
     def flatten: F = f
 
-    @deprecated("You are trying to map over one value, you don't need it", "")
+    @deprecated("You are trying to 'map' over one value, you don't need it", "")
     def map[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
 
-    @deprecated("You are trying to flatMap over one value, you don't need it", "")
+    @deprecated("You are trying to 'flatMap' over one value, you don't need it", "")
     def flatMap[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
+
+    @deprecated("You are trying to 'forkMap' over one value, you don't need it (use simple 'fork' method instead)", "")
+    def forkMap[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
+      Fork[F] >=> S =
+      Fork(f) >=> s
+
   }
 
   /* Any paths */
@@ -195,11 +201,7 @@ object paths {
       Flatten[F, C] =
       Flatten[F, C](f)(mul)
 
-    // // TODO: bounds:
-    // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
-    // def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
 
-    // TODO: bounds:
     def par[S <: AnyPath](s: S): Par[F, S] = Par(f, s)
     def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
 
@@ -216,12 +218,16 @@ object paths {
     // S           :        B  ⨂   B  ->   C  ⨂   D
     // F forkMap S : A -> M[B] ⨂ M[B] -> M[C] ⨂ M[D]
     def forkMap[S <: AnyPar { type In = ParType[F#Out#Inside, F#Out#Inside] }](s: S)
-      (implicit
+      (implicit // NOTE: this implicit is needed formally, but actually it's always there (because of the bound on S)
         cmp1: Fork[F]#Out ≃ Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]]#In
-        // cmp1: F#Out ≃ MapOver[S#First, F#Out#Container]#In,
-        // cmp2: F#Out ≃ MapOver[S#Second, F#Out#Container]#In
       ): Fork[F] >=> Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]] =
          Fork(f) >=> Par(MapOver(s.first, f.out.container), MapOver(s.second, f.out.container))
+
+
+    // TODO:
+    // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
+    // def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
+
   }
 
 }
