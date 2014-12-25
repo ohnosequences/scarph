@@ -94,28 +94,36 @@ object combinators {
     }
 
 
-  // /* Parallel composition of paths */
-  // trait AnyPar extends CombinatorOf2Paths {
+  /* Parallel composition of paths */
+  trait AnyPar extends CombinatorOf2Paths {
 
-  //   type InC = ExactlyOne
-  //   val  inC = ExactlyOne 
-  //   type InT = ParType[InOf[First], InOf[Second]]
-  //   val  inT = ParType(inOf(first), inOf(second))
+    type     In = ParType[First#In, Second#In]
+    lazy val in = ParType(first.in, second.in): In
 
-  //   type OutC = ExactlyOne
-  //   val  outC = ExactlyOne
-  //   type OutT = ParType[OutOf[First], OutOf[Second]]
-  //   val  outT = ParType(outOf(first), outOf(second))
-  // }
+    type     Out = ParType[First#Out, Second#Out]
+    lazy val out = ParType(first.out, second.out): Out
+  }
 
-  // case class Par[F <: AnyPath, S <: AnyPath]
-  //   (val first: F, val second: S) extends AnyPar {
+  case class Par[F <: AnyPath, S <: AnyPath]
+    (val first: F, val second: S) extends AnyPar {
 
-  //   type First = F
-  //   type Second = S
-  // }
+    type First = F
+    type Second = S
+  }
 
-  // type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+
+
+  trait AnyFork extends CombinatorOf1Path {
+
+    type     In = Inner#In
+    lazy val in = inner.in
+
+    type     Out = ParType[Inner#Out, Inner#Out]
+    lazy val out = ParType(inner.out, inner.out): Out
+  }
+
+  case class Fork[P <: AnyPath](val inner: P) extends AnyFork { type Inner = P }
 
 
   // /* Choice */
@@ -123,13 +131,13 @@ object combinators {
 
   //   type InC = ExactlyOne
   //   val  inC = ExactlyOne 
-  //   type InT = OrType[InOf[First], InOf[Second]]
-  //   val  inT = OrType(inOf(first), inOf(second))
+  //   type InT = OrType[First#In, Second#In]
+  //   val  inT = OrType(first.in, second.in)
 
   //   type OutC = ExactlyOne
   //   val  outC = ExactlyOne
-  //   type OutT = OrType[OutOf[First], OutOf[Second]]
-  //   val  outT = OrType(outOf(first), outOf(second))
+  //   type OutT = OrType[First#Out, Second#Out]
+  //   val  outT = OrType(first.out, second.out)
   // }
 
   // case class Or[F <: AnyPath, S <: AnyPath]

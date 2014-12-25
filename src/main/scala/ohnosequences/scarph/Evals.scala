@@ -125,23 +125,35 @@ object evals {
     }
 
 
+    implicit def evalFork[
+      I, P <: AnyPath, O
+    ](implicit
+      evalInner: EvalPathOn[I, P, O]
+    ):  EvalPathOn[I, Fork[P], (O, O)] = 
+    new EvalPathOn[I, Fork[P], (O, O)] {
+      def apply(path: Path)(in: In): Out = {
+        val outVal = evalInner(path.inner)(in).value
+        path.out := ( (outVal, outVal) )
+      }
+    }
 
-    // implicit def evalPar[
-    //   FI, SI,
-    //   F <: AnyPath, S <: AnyPath,
-    //   FO, SO
-    // ](implicit
-    //   evalFirst:  EvalPathOn[FI, F, FO], 
-    //   evalSecond: EvalPathOn[SI, S, SO]
-    // ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
-    // new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
-    //   def apply(path: Path)(in: In): Out = {
-    //     outOf(path) := ((
-    //       evalFirst(path.first)( inOf(path.first) := (in.value._1) ).value,
-    //       evalSecond(path.second)( inOf(path.second) := (in.value._2) ).value
-    //     ))
-    //   }
-    // }
+
+    implicit def evalPar[
+      FI, SI,
+      F <: AnyPath, S <: AnyPath,
+      FO, SO
+    ](implicit
+      eval1:  EvalPathOn[FI, F, FO], 
+      eval2: EvalPathOn[SI, S, SO]
+    ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
+    new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
+      def apply(path: Path)(in: In): Out = {
+        path.out := ((
+          eval1(path.first) ( (path.first.in: F#In)  := in.value._1 ).value,
+          eval2(path.second)( (path.second.in: S#In) := in.value._2 ).value
+        ))
+      }
+    }
 
 
     // import scalaz.\/

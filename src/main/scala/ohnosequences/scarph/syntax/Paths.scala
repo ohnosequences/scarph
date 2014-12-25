@@ -16,8 +16,8 @@ object paths {
   class SchemaOps[S <: AnySchema](s: S) {
 
     def query[P <: AnyPredicate](p: P): 
-      GraphQuery[S, P, ManyOrNone] = 
-      GraphQuery(s, p, ManyOrNone)
+      GraphQuery[S, ManyOrNone, P] = 
+      GraphQuery(s, ManyOrNone, p)
 
     /* This method takes also an index and checks that the predicate satisfies the 
        index'es restriction, ensuring that it can be utilized for this query */
@@ -25,8 +25,8 @@ object paths {
       (implicit
         ch: I#PredicateRestriction[P],
         cn: IndexContainer[I] { type Out = C }
-      ): GraphQuery[S, P, C] =
-         GraphQuery(s, p, cn.apply)
+      ): GraphQuery[S, C, P] =
+         GraphQuery(s, cn.apply, p)
   }
 
 
@@ -170,17 +170,17 @@ object paths {
 
   class PathOps[F <: AnyPath](f: F) {
 
-    // F:       K[A] -> M[B]
-    //       S:           B  ->   N[C]
-    // F map S: K[A] -> M[B] -> M[N[C]] 
+    // F       : K[A] -> M[B]
+    //       S :           B  ->   N[C]
+    // F map S : K[A] -> M[B] -> M[N[C]] 
     def map[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ MapOver[S, F#Out#Container]#In): 
        F >=> MapOver[S, F#Out#Container] = 
       (f >=> MapOver[S, F#Out#Container](s, f.out.container))(cmp)
 
-    // F:           K[A] -> M[B]
-    //           S:           B  ->   N[C]
-    // F flatMap S: K[A] -> M[B] -> M×N[C]
+    // F           : K[A] -> M[B]
+    //           S :           B  ->   N[C]
+    // F flatMap S : K[A] -> M[B] -> M×N[C]
     def flatMap[S <: AnyPath, C <: AnyContainer](s: S)
       (implicit 
         cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
@@ -189,8 +189,8 @@ object paths {
       ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
          Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 
-    // F:         K[A] -> L[M[B]]
-    // F.flatten: K[A] -> L×M[F]
+    // F         : K[A] -> L[M[B]]
+    // F.flatten : K[A] -> L×M[F]
     def flatten[C <: AnyContainer](implicit mul: (F#Out#Container × F#Out#Inside#Container) { type Out = C }):
       Flatten[F, C] =
       Flatten[F, C](f)(mul)
@@ -199,9 +199,29 @@ object paths {
     // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
     // def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
 
-    // // TODO: bounds:
-    // def par[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
-    // def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
+    // TODO: bounds:
+    def par[S <: AnyPath](s: S): Par[F, S] = Par(f, s)
+    def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
+
+
+    // F        : A -> B
+    // S        :      B ⨂ B -> C ⨂ D
+    // F fork S : A -> B ⨂ B -> C ⨂ D
+    def fork[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
+      // (implicit cmp: Fork[F]#Out ≃ S#In):
+      Fork[F] >=> S =
+      Fork(f) >=> s
+
+    // F           : A -> M[B]
+    // S           :        B  ⨂   B  ->   C  ⨂   D
+    // F forkMap S : A -> M[B] ⨂ M[B] -> M[C] ⨂ M[D]
+    def forkMap[S <: AnyPar { type In = ParType[F#Out#Inside, F#Out#Inside] }](s: S)
+      (implicit
+        cmp1: Fork[F]#Out ≃ Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]]#In
+        // cmp1: F#Out ≃ MapOver[S#First, F#Out#Container]#In,
+        // cmp2: F#Out ≃ MapOver[S#Second, F#Out#Container]#In
+      ): Fork[F] >=> Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]] =
+         Fork(f) >=> Par(MapOver(s.first, f.out.container), MapOver(s.second, f.out.container))
   }
 
 }
