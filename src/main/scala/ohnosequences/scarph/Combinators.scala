@@ -111,7 +111,8 @@ object combinators {
     type Second = S
   }
 
-  type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+  // \otimes symbol:
+  type ⊗[F <: AnyPath, S <: AnyPath] = Par[F, S]
 
 
   trait AnyFork extends CombinatorOf1Path {
@@ -126,27 +127,29 @@ object combinators {
   case class Fork[P <: AnyPath](val inner: P) extends AnyFork { type Inner = P }
 
 
-  // /* Choice */
-  // trait AnyOr extends CombinatorOf2Paths {
+  /* Choice */
+  trait AnyOr extends CombinatorOf2Paths {
+    type     Left = First
+    lazy val left = first: Left
 
-  //   type InC = ExactlyOne
-  //   val  inC = ExactlyOne 
-  //   type InT = OrType[First#In, Second#In]
-  //   val  inT = OrType(first.in, second.in)
+    type     Right = Second
+    lazy val right = second: Right
 
-  //   type OutC = ExactlyOne
-  //   val  outC = ExactlyOne
-  //   type OutT = OrType[First#Out, Second#Out]
-  //   val  outT = OrType(first.out, second.out)
-  // }
+    type     In = OrType[Left#In, Right#In]
+    lazy val in = OrType(left.in, right.in): In
 
-  // case class Or[F <: AnyPath, S <: AnyPath]
-  //   (val first: F, val second: S) extends AnyOr {
+    type     Out = OrType[Left#Out, Right#Out]
+    lazy val out = OrType(left.out, right.out): Out
+  }
 
-  //   type First = F
-  //   type Second = S
-  // }
+  case class Or[F <: AnyPath, S <: AnyPath]
+    (val first: F, val second: S) extends AnyOr {
 
-  // type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
+    type First = F
+    type Second = S
+  }
+
+  // \oplus symbol:
+  type ⊕[F <: AnyPath, S <: AnyPath] = Or[F, S]
 
 }

@@ -319,29 +319,54 @@ class TitanTestSuite extends AnyTitanTestSuite {
       .map( user.get(age) )
 
     val result =
-      (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ⨂
+      (ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim")) ⊗
       (ManyOrNone.of(age) := Stream(5, 22)) 
 
     // using explicit Par
     assertResult(result) {
-      (friendsNames ⨂ friendsAges).evalOn( edu ⨂ edu )
+      (friendsNames ⊗ friendsAges).evalOn( edu ⊗ edu )
     }
 
     // now using forkMap:
     assertResult(result) {
       user
         .outV(follows)
-        .forkMap( user.get(name) ⨂ user.get(age) )
+        .forkMap( user.get(name) ⊗ user.get(age) )
       .evalOn( edu )
     }
 
     // now testing just fork:
-    assertResult( (name := "@eparejatobes") ⨂ (age := 95) ) {
+    assertResult( (name := "@eparejatobes") ⊗ (age := 95) ) {
       tweet
         .inV(posted)  // getting exactly one author
-        .fork( user.get(name) ⨂ user.get(age) )
+        .fork( user.get(name) ⊗ user.get(age) )
       .evalOn( twt )
     }
+  }
+
+  test("choice combinator") {
+    import TestContext._
+    import scalaz._
+
+    // friends' names
+    val friendsNames = user
+      .outV(follows)
+      .map( user.get(name) )
+
+    // friends' ages
+    val friendsAges = user
+      .outV(follows)
+      .map( user.get(age) )
+
+    // just choosing left or right:
+    assertResult( ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim") ) {
+      user.left(friendsNames ⊕ friendsAges).evalOn( edu )
+    }
+
+    assertResult( ManyOrNone.of(age) := Stream(5, 22) ) {
+      user.right(friendsNames ⊕ friendsAges).evalOn( edu )
+    }
+
   }
 
 }

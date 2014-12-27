@@ -145,8 +145,8 @@ object evals {
     ](implicit
       eval1:  EvalPathOn[FI, F, FO], 
       eval2: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] = 
-    new EvalPathOn[(FI, SI), F ⨂ S, (FO, SO)] {
+    ):  EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] = 
+    new EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] {
       def apply(path: Path)(in: In): Out = {
         path.out := ((
           eval1(path.first) ( (path.first.in: F#In)  := in.value._1 ).value,
@@ -156,23 +156,23 @@ object evals {
     }
 
 
-    // import scalaz.\/
-    // implicit def evalOr[
-    //   FI, SI,
-    //   F <: AnyPath, S <: AnyPath,
-    //   FO, SO
-    // ](implicit
-    //   evalFirst:  EvalPathOn[FI, F, FO], 
-    //   evalSecond: EvalPathOn[SI, S, SO]
-    // ):  EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] = 
-    // new EvalPathOn[FI \/ SI, F ⨁ S, FO \/ SO] {
-    //   def apply(path: Path)(in: In): Out = {
-    //     outOf(path) := ( in.value.bimap(
-    //       fi => evalFirst(path.first)( inOf(path.first) := (fi) ).value,
-    //       si => evalSecond(path.second)( inOf(path.second) := (si) ).value
-    //     ))
-    //   }
-    // }
+    import scalaz.\/
+    implicit def evalOr[
+      FI, SI,
+      F <: AnyPath, S <: AnyPath,
+      FO, SO
+    ](implicit
+      evalFirst:  EvalPathOn[FI, F, FO], 
+      evalSecond: EvalPathOn[SI, S, SO]
+    ):  EvalPathOn[FI \/ SI, F ⊕ S, FO \/ SO] = 
+    new EvalPathOn[FI \/ SI, F ⊕ S, FO \/ SO] {
+      def apply(path: Path)(in: In): Out = {
+        path.out := ( in.value.bimap(
+          fi => evalFirst(path.first)( (path.first.in: F#In) := fi ).value,
+          si => evalSecond(path.second)( (path.second.in: S#In) := si ).value
+        ))
+      }
+    }
 
   }
 

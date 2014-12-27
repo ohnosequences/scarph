@@ -4,6 +4,8 @@ package ohnosequences.scarph.syntax
 /* This is an example gremlin-like syntax for paths construction */
 object graphTypes {
 
+  import scalaz.\/
+
   import ohnosequences.cosas._, types._
 
   import ohnosequences.{ scarph => s }
@@ -17,8 +19,7 @@ object graphTypes {
 
   class GraphTypeValOps[T <: AnyGraphType, VT](vt: T := VT) {
 
-    // \bigotimes symbol:
-    def ⨂[S <: AnyGraphType, VS](vs: S := VS): ParType[T, S] := (VT, VS) = 
+    def ⊗[S <: AnyGraphType, VS](vs: S := VS): ParType[T, S] := (VT, VS) = 
       new Denotes( (vt.value, vs.value) )
   }
 

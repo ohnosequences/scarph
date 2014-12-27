@@ -122,10 +122,26 @@ object graphTypes {
     type First = F
     type Second = S
 
-    val label = s"(first.label ⨉ second.label)"
+    val label = s"(first.label ⊗ second.label)"
   }
 
-  type ⨉[F <: AnyGraphType, S <: AnyGraphType] = ParType[F, S]
 
+  trait AnyOrType extends AnySimpleGraphType {
+
+    type Left <: AnyGraphType
+    val  left: Left
+
+    type Right <: AnyGraphType
+    val  right: Right
+  }
+
+  case class OrType[L <: AnyGraphType, R <: AnyGraphType]
+    (val left: L, val right: R) extends AnyOrType {
+
+    type Left = L
+    type Right = R
+
+    val label = s"(left.label ⊕ right.label)"
+  }
 
 }

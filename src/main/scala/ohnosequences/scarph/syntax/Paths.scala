@@ -38,6 +38,11 @@ object paths {
   class ElementOps[E <: AnyGraphElement](e: E) {
 
     def get[P <: AnyGraphProperty { type Owner = E }](p: P): Get[P] = Get(p)
+
+
+    def left[S <: AnyOr { type Left <: AnyPath { type In = E } }](s: S): S#Left = s.left
+
+    def right[S <: AnyOr { type Right <: AnyPath { type In = E } }](s: S): S#Right = s.right
   }
 
   implicit def pathElementOps[F <: AnyPath { type Out <: AnyGraphElement }](f: F):
@@ -203,20 +208,20 @@ object paths {
 
 
     def par[S <: AnyPath](s: S): Par[F, S] = Par(f, s)
-    def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
+    def  ⊗[S <: AnyPath](s: S): F ⊗ S = Par(f, s)
 
 
     // F        : A -> B
-    // S        :      B ⨂ B -> C ⨂ D
-    // F fork S : A -> B ⨂ B -> C ⨂ D
+    // S        :      B ⊗ B -> C ⊗ D
+    // F fork S : A -> B ⊗ B -> C ⊗ D
     def fork[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
       // (implicit cmp: Fork[F]#Out ≃ S#In):
       Fork[F] >=> S =
       Fork(f) >=> s
 
     // F           : A -> M[B]
-    // S           :        B  ⨂   B  ->   C  ⨂   D
-    // F forkMap S : A -> M[B] ⨂ M[B] -> M[C] ⨂ M[D]
+    // S           :        B  ⊗   B  ->   C  ⊗   D
+    // F forkMap S : A -> M[B] ⊗ M[B] -> M[C] ⊗ M[D]
     def forkMap[S <: AnyPar { type In = ParType[F#Out#Inside, F#Out#Inside] }](s: S)
       (implicit // NOTE: this implicit is needed formally, but actually it's always there (because of the bound on S)
         cmp1: Fork[F]#Out ≃ Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]]#In
@@ -224,9 +229,28 @@ object paths {
          Fork(f) >=> Par(MapOver(s.first, f.out.container), MapOver(s.second, f.out.container))
 
 
-    // TODO:
-    // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
-    // def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
+    def or[S <: AnyPath](s: S): F Or S = Or(f, s)
+    def ⊕[S <: AnyPath](s: S): F ⊕ S = Or(f, s)
+
+    //   F     S    |  F left S
+    // -------------+------------
+    // A -> L    B  |  A    L    B
+    //      ⊕ -> ⊕  |  ⊕ -> ⊕ -> ⊕
+    //      R    C  |  R    R    C
+    def left[S <: AnyOr](s: S)
+      (implicit cmp: F#Out ≃ S#Left#In):
+        F >=> S#Left =
+        f >=> (s: S).left
+
+    //   F     S    |   F right S
+    // -------------+------------
+    //      L    B  |  L    L    B
+    //      ⊕ -> ⊕  |  ⊕ -> ⊕ -> ⊕
+    // A -> R    C  |  A    R    C
+    def right[S <: AnyOr](s: S)
+      (implicit cmp: F#Out ≃ S#Right#In):
+        F >=> S#Right =
+        f >=> (s: S).right
 
   }
 
