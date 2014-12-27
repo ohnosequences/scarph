@@ -63,13 +63,13 @@ object containers {
   /* Containers multiplication (`\times` symbol)*/
   trait ×[A <: AnyContainer, B <: AnyContainer] extends Fn2[A, B] with OutBound[AnyContainer]
 
-  object × extends x_2 {
+  object × extends times_2 {
     implicit def idemp[A <: AnyContainer]: 
         (A × A) with Out[A] = 
     new (A × A) with Out[A] { def apply(a: In1, b: In2): Out = a }
   }
 
-  trait x_2 extends x_3 {
+  trait times_2 extends times_3 {
     implicit def unitL[B <: AnyContainer]: 
         (ExactlyOne × B) with Out[B] = 
     new (ExactlyOne × B) with Out[B] { def apply(a: In1, b: In2): Out = b }
@@ -79,12 +79,44 @@ object containers {
     new (A × ExactlyOne) with Out[A] { def apply(a: In1, b: In2): Out = a }
   }
 
-  trait x_3 {
+  trait times_3 {
     implicit def rest[A <: AnyContainer, B <: AnyContainer]: 
         (A × B) with Out[ManyOrNone] = 
     new (A × B) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
   }
 
+
+  /* Containers multiplication (`\times` symbol)*/
+  trait +[A <: AnyContainer, B <: AnyContainer] extends Fn2[A, B] with OutBound[AnyContainer]
+
+  object + extends plus_2 {
+
+    implicit def exactlyOnePlus[B <: AnyContainer]: 
+        (ExactlyOne + B) with Out[AtLeastOne] = 
+    new (ExactlyOne + B) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+
+    implicit def atLeastOnePlus[B <: AnyContainer]: 
+        (AtLeastOne + B) with Out[AtLeastOne] = 
+    new (AtLeastOne + B) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+  }
+
+  trait plus_2 extends plus_3 {
+
+    implicit def plusExactlyOne[A <: AnyContainer]: 
+        (A + ExactlyOne) with Out[AtLeastOne] = 
+    new (A + ExactlyOne) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+
+    implicit def plusAtLeastOne[A <: AnyContainer]: 
+        (A + AtLeastOne) with Out[AtLeastOne] = 
+    new (A + AtLeastOne) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+  }
+
+  trait plus_3 {
+
+    implicit def rest[A <: AnyContainer, B <: AnyContainer]: 
+        (A + B) with Out[ManyOrNone] = 
+    new (A + B) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
+  }
 
   // TODO: HList-like with bound on vertices, another for paths etc
 

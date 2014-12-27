@@ -90,6 +90,13 @@ object graphTypes {
     val label = this.toString
   }
 
+  object AnyEdge {
+    type Symmetric[V <: AnyVertex] = AnyEdge {
+      type SourceV = V
+      type TargetV = V
+    }
+  }
+
 
   /* Property is assigned to one element type and has a raw representation */
   trait AnyGraphProperty extends AnySimpleGraphType with AnyProperty {

@@ -29,4 +29,27 @@ class ContainersTest extends org.scalatest.FunSuite {
     implicitly[(ManyOrNone × ManyOrNone) with Out[ManyOrNone]]
   }
 
+  test("Check full sum table for containers") {
+
+    implicitly[(ExactlyOne + ExactlyOne) with Out[AtLeastOne]]
+    implicitly[(ExactlyOne + OneOrNone)  with Out[AtLeastOne]]
+    implicitly[(ExactlyOne + AtLeastOne) with Out[AtLeastOne]]
+    implicitly[(ExactlyOne + ManyOrNone) with Out[AtLeastOne]]
+
+    implicitly[(OneOrNone + ExactlyOne) with Out[AtLeastOne]]
+    implicitly[(OneOrNone + OneOrNone)  with Out[ManyOrNone]]
+    implicitly[(OneOrNone + AtLeastOne) with Out[AtLeastOne]]
+    implicitly[(OneOrNone + ManyOrNone) with Out[ManyOrNone]]
+
+    implicitly[(AtLeastOne + ExactlyOne) with Out[AtLeastOne]]
+    implicitly[(AtLeastOne + OneOrNone)  with Out[AtLeastOne]]
+    implicitly[(AtLeastOne + AtLeastOne) with Out[AtLeastOne]]
+    implicitly[(AtLeastOne + ManyOrNone) with Out[AtLeastOne]]
+
+    implicitly[(ManyOrNone + ExactlyOne) with Out[AtLeastOne]]
+    implicitly[(ManyOrNone + OneOrNone)  with Out[ManyOrNone]]
+    implicitly[(ManyOrNone + AtLeastOne) with Out[AtLeastOne]]
+    implicitly[(ManyOrNone + ManyOrNone) with Out[ManyOrNone]]
+  }
+
 }

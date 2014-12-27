@@ -141,4 +141,42 @@ object combinators {
 
   // type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
 
+  trait AnyMerge extends CombinatorOf2Paths {
+
+    type OutT <: AnyGraphType
+
+    type First <: AnyPath { type Out = OutT }
+    type Second <: AnyPath { type Out = OutT }
+
+    // container that we get after flattening:
+    type OutC <: AnyContainer
+
+    // we will get OutC through this implicit on construction:
+    val sum: (First#Out#Container + Second#Out#Container) { type Out = OutC }
+
+    lazy val outC = sum(first.out.container, second.out.container): OutC
+
+    type     In = ParType[First#in, Second#In]
+    lazy val in = ParType(first.in, second.in)
+
+    type     Out = OutC#Of[OutT]
+    lazy val out = outC.of(outT): Out
+  }
+
+  case class Merge[
+    C <: AnyContainer, 
+    T <: AnyGraphType, 
+    F <: AnyPath { type Out = T },
+    S <: AnyPath { type Out = T }
+  ](val first: F, val second: S)
+    (implicit val mul: (F#Out#Container + S#Out#Container) { type Out = C })
+    extends AnyFlatten {
+
+      type OutC = C
+      type OutT = T
+
+      type First = F
+      type Second = S
+    }
+
 }
