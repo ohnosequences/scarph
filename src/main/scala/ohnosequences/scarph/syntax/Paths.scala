@@ -16,8 +16,8 @@ object paths {
   class SchemaOps[S <: AnySchema](s: S) {
 
     def query[P <: AnyPredicate](p: P): 
-      GraphQuery[S, P, ManyOrNone] = 
-      GraphQuery(s, p, ManyOrNone)
+      GraphQuery[S, ManyOrNone, P] = 
+      GraphQuery(s, ManyOrNone, p)
 
     /* This method takes also an index and checks that the predicate satisfies the 
        index'es restriction, ensuring that it can be utilized for this query */
@@ -25,8 +25,8 @@ object paths {
       (implicit
         ch: I#PredicateRestriction[P],
         cn: IndexContainer[I] { type Out = C }
-      ): GraphQuery[S, P, C] =
-         GraphQuery(s, p, cn.apply)
+      ): GraphQuery[S, C, P] =
+         GraphQuery(s, cn.apply, p)
   }
 
 
@@ -38,6 +38,11 @@ object paths {
   class ElementOps[E <: AnyGraphElement](e: E) {
 
     def get[P <: AnyGraphProperty { type Owner = E }](p: P): Get[P] = Get(p)
+
+
+    def left[S <: AnyOr { type Left <: AnyPath { type In = E } }](s: S): S#Left = s.left
+
+    def right[S <: AnyOr { type Right <: AnyPath { type In = E } }](s: S): S#Right = s.right
   }
 
   implicit def pathElementOps[F <: AnyPath { type Out <: AnyGraphElement }](f: F):
@@ -151,16 +156,22 @@ object paths {
     new PathWarnOps[F](f)
 
   class PathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F) {
-    @deprecated("You are trying to flatten a non-nested structure, you don't need it", "")
+    @deprecated("You are trying to 'flatten' a non-nested structure, you don't need it", "")
     def flatten: F = f
 
-    @deprecated("You are trying to map over one value, you don't need it", "")
+    @deprecated("You are trying to 'map' over one value, you don't need it", "")
     def map[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
 
-    @deprecated("You are trying to flatMap over one value, you don't need it", "")
+    @deprecated("You are trying to 'flatMap' over one value, you don't need it", "")
     def flatMap[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
+
+    @deprecated("You are trying to 'forkMap' over one value, you don't need it (use simple 'fork' method instead)", "")
+    def forkMap[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
+      Fork[F] >=> S =
+      Fork(f) >=> s
+
   }
 
   /* Any paths */
@@ -170,17 +181,17 @@ object paths {
 
   class PathOps[F <: AnyPath](f: F) {
 
-    // F:       K[A] -> M[B]
-    //       S:           B  ->   N[C]
-    // F map S: K[A] -> M[B] -> M[N[C]] 
+    // F       : K[A] -> M[B]
+    //       S :           B  ->   N[C]
+    // F map S : K[A] -> M[B] -> M[N[C]] 
     def map[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ MapOver[S, F#Out#Container]#In): 
        F >=> MapOver[S, F#Out#Container] = 
       (f >=> MapOver[S, F#Out#Container](s, f.out.container))(cmp)
 
-    // F:           K[A] -> M[B]
-    //           S:           B  ->   N[C]
-    // F flatMap S: K[A] -> M[B] -> M×N[C]
+    // F           : K[A] -> M[B]
+    //           S :           B  ->   N[C]
+    // F flatMap S : K[A] -> M[B] -> M×N[C]
     def flatMap[S <: AnyPath, C <: AnyContainer](s: S)
       (implicit 
         cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
@@ -189,19 +200,58 @@ object paths {
       ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
          Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 
-    // F:         K[A] -> L[M[B]]
-    // F.flatten: K[A] -> L×M[F]
+    // F         : K[A] -> L[M[B]]
+    // F.flatten : K[A] -> L×M[F]
     def flatten[C <: AnyContainer](implicit mul: (F#Out#Container × F#Out#Inside#Container) { type Out = C }):
       Flatten[F, C] =
       Flatten[F, C](f)(mul)
 
-    // // TODO: bounds:
-    // def or[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
-    // def ⨁[S <: AnyPath](s: S): (F ⨁ S) = Or(f, s)
 
-    // // TODO: bounds:
-    // def par[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
-    // def  ⨂[S <: AnyPath](s: S): (F ⨂ S) = Par(f, s)
+    def par[S <: AnyPath](s: S): Par[F, S] = Par(f, s)
+    def  ⊗[S <: AnyPath](s: S): F ⊗ S = Par(f, s)
+
+
+    // F        : A -> B
+    // S        :      B ⊗ B -> C ⊗ D
+    // F fork S : A -> B ⊗ B -> C ⊗ D
+    def fork[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
+      // (implicit cmp: Fork[F]#Out ≃ S#In):
+      Fork[F] >=> S =
+      Fork(f) >=> s
+
+    // F           : A -> M[B]
+    // S           :        B  ⊗   B  ->   C  ⊗   D
+    // F forkMap S : A -> M[B] ⊗ M[B] -> M[C] ⊗ M[D]
+    def forkMap[S <: AnyPar { type In = ParType[F#Out#Inside, F#Out#Inside] }](s: S)
+      (implicit // NOTE: this implicit is needed formally, but actually it's always there (because of the bound on S)
+        cmp1: Fork[F]#Out ≃ Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]]#In
+      ): Fork[F] >=> Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]] =
+         Fork(f) >=> Par(MapOver(s.first, f.out.container), MapOver(s.second, f.out.container))
+
+
+    def or[S <: AnyPath](s: S): F Or S = Or(f, s)
+    def ⊕[S <: AnyPath](s: S): F ⊕ S = Or(f, s)
+
+    //   F     S    |  F left S
+    // -------------+------------
+    // A -> L    B  |  A    L    B
+    //      ⊕ -> ⊕  |  ⊕ -> ⊕ -> ⊕
+    //      R    C  |  R    R    C
+    def left[S <: AnyOr](s: S)
+      (implicit cmp: F#Out ≃ S#Left#In):
+        F >=> S#Left =
+        f >=> (s: S).left
+
+    //   F     S    |   F right S
+    // -------------+------------
+    //      L    B  |  L    L    B
+    //      ⊕ -> ⊕  |  ⊕ -> ⊕ -> ⊕
+    // A -> R    C  |  A    R    C
+    def right[S <: AnyOr](s: S)
+      (implicit cmp: F#Out ≃ S#Right#In):
+        F >=> S#Right =
+        f >=> (s: S).right
+
   }
 
 }

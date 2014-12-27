@@ -85,8 +85,8 @@ case object evals {
   ](implicit 
     toBlueprintsQuery: ToBlueprintsPredicate[P],
     packValue: ValueContainer[C, JIterable[TitanVertex]] { type Out = O }
-  ):  EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] =
-  new EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] {
+  ):  EvalPathOn[TitanGraph, GraphQuery[S, C, P], O] =
+  new EvalPathOn[TitanGraph, GraphQuery[S, C, P], O] {
     def apply(path: Path)(in: In): Out = {
       path.out := packValue(
         toBlueprintsQuery(path.predicate, in.value.query).vertices
@@ -100,8 +100,8 @@ case object evals {
   ](implicit 
     toBlueprintsQuery: ToBlueprintsPredicate[P],
     packValue: ValueContainer[C, JIterable[TitanEdge]] { type Out = O }
-  ):  EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] =
-  new EvalPathOn[TitanGraph, GraphQuery[S, P, C], O] {
+  ):  EvalPathOn[TitanGraph, GraphQuery[S, C, P], O] =
+  new EvalPathOn[TitanGraph, GraphQuery[S, C, P], O] {
     def apply(path: Path)(in: In): Out = {
       path.out := packValue(
         toBlueprintsQuery(path.predicate, in.value.query).edges

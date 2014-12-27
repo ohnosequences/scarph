@@ -16,7 +16,7 @@ object graphTypes {
     val  inside: Inside
   }
 
-  @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\t${A}\n\t${B}")
+  @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
   trait ≃[A <: AnyGraphType, B <: AnyGraphType]
 
   // this is `\simeq` symbol
@@ -111,6 +111,44 @@ object graphTypes {
     type Owner = O
 
     val label = this.toString
+  }
+
+
+  trait AnyParType extends AnySimpleGraphType {
+
+    type First <: AnyGraphType
+    val  first: First
+
+    type Second <: AnyGraphType
+    val  second: Second
+  }
+
+  case class ParType[F <: AnyGraphType, S <: AnyGraphType]
+    (val first: F, val second: S) extends AnyParType {
+
+    type First = F
+    type Second = S
+
+    val label = s"(first.label ⊗ second.label)"
+  }
+
+
+  trait AnyOrType extends AnySimpleGraphType {
+
+    type Left <: AnyGraphType
+    val  left: Left
+
+    type Right <: AnyGraphType
+    val  right: Right
+  }
+
+  case class OrType[L <: AnyGraphType, R <: AnyGraphType]
+    (val left: L, val right: R) extends AnyOrType {
+
+    type Left = L
+    type Right = R
+
+    val label = s"(left.label ⊕ right.label)"
   }
 
 }
