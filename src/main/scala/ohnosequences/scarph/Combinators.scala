@@ -114,7 +114,18 @@ object combinators {
   // \otimes symbol:
   type ⊗[F <: AnyPath, S <: AnyPath] = Par[F, S]
 
+  object AnyPar {
+    // type WithSameOuts = AnyPar {
+    //   type Second <: AnyPath { type Out <: AnyGraphType { type Inside = First#Out#Inside } }
+    // }
+    type WithSameOut[T <: AnyGraphType] = AnyPar {
+      type First  <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+      type Second <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+    }
+  }
 
+
+  /* Fork just duplicates output (△) */
   trait AnyFork extends CombinatorOf1Path {
 
     type     In = Inner#In
@@ -125,6 +136,60 @@ object combinators {
   }
 
   case class Fork[P <: AnyPath](val inner: P) extends AnyFork { type Inner = P }
+
+
+  // /* Merge is dual to Fork (▽) */
+  // // F[T]
+  // //  ⊗   → (F+S)[T]
+  // // S[T]
+  // trait AnyMerge extends CombinatorOf1Path {
+
+  //   type OutT <: AnyGraphType
+
+  //   type Inner <: AnyPar.WithSameOut[OutT]
+  //   val  inner: Inner
+  //     // type First  <: AnyPath { type Out <: AnyGraphType { type Inside = OutT } }
+  //     // type Second <: AnyPath { type Out <: AnyGraphType { type Inside = OutT } }
+  //   // }
+  //   // type Second <: AnyPath { type Out <: AnyGraphType { type Inside = First#Out#Inside } }
+
+  //   // type     OutT = Inner#First#Out#Inside
+  //   // lazy val outT = inner.first.out.inside: OutT
+
+  //   // type     In = ParType[Inner#First#In, Inner#Second#In]
+  //   // lazy val in = ParType(inner.first.in, inner.second.in): In
+  //   type     In = Inner#In
+  //   lazy val in = inner.in
+
+
+  //   type OutC <: AnyContainer
+  //   val sum: (Inner#First#Out#Container + Inner#Second#Out#Container) { type Out = OutC }
+
+  //   type     Out = OutC#Of[OutT]
+  // }
+
+  // case class Merge[
+  //   // F <: AnyPath,
+  //   // S <: AnyPath { type Out <: AnyGraphType { type Inside = F#Out#Inside } },
+  //   T <: AnyGraphType,
+  //   I <: AnyPar.WithSameOut[T],
+  //     // type First  <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+  //     // type Second <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+  //     // type Second <: AnyPath { type Out <: AnyGraphType { type Inside = First#Out#Inside } }
+  //   // }, 
+  //   C <: AnyContainer
+  // ](val inner: I)
+  //   (implicit val sum: (I#First#Out#Container + I#Second#Out#Container) { type Out = C })
+  //     extends AnyMerge {
+
+  //   type OutT = T
+  //   type Inner = I
+  //   // type First = F
+  //   // type Second = S
+  //   type OutC = C
+  //   lazy val outC = sum(inner.first.out.container, inner.second.out.container): OutC
+  //   lazy val out = outC.of(outT): Out
+  // }
 
 
   /* Choice */

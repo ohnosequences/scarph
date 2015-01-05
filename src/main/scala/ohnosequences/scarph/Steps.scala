@@ -84,20 +84,25 @@ object steps {
       extends Step[S, C#Of[P#Element]](graph, container.of(predicate.element))
 
 
+  // F[T]
+  //  ⊗   → (F+S)[T]
+  // S[T]
   case class Merge[
-    First <: AnyPath, // { type Out <: AnyGraphType { type Insinde = T } },
-    Second <: AnyPath { type Out <: AnyGraphType { type Insinde = First#Out#Inside } },
+    OutT <: AnyGraphType,
+    First <: AnyGraphType { type Inside = OutT },
+    Second <: AnyGraphType { type Inside = OutT },
     OutC <: AnyContainer
-  ](first: First, second: Second)
-    (implicit val sum: (First#Out#Container + Second#Out#Container) { type Out = OutC }) extends AnyStep {
+  ](outT: OutT, first: First, second: Second)
+    (implicit val sum: (First#Container + Second#Container) { type Out = OutC })
+      extends AnyStep {
 
-    lazy val outC = sum(first.out.container, second.out.container): OutC
+    lazy val outC = sum(first.container, second.container): OutC
 
-    type     In = ParType[First#In, Second#In]
-    lazy val in = ParType(first.in, second.in): In
+    type     In = ParType[First, Second]
+    lazy val in = ParType(first, second): In
 
-    type     Out = OutC#Of[First#Out#Inside]
-    lazy val out = outC.of(first.out.inside): Out
+    type     Out = OutC#Of[OutT]
+    lazy val out = outC.of(outT): Out
   }
 
 }

@@ -181,17 +181,17 @@ object paths {
 
   class PathOps[F <: AnyPath](f: F) {
 
-    // F       : K[A] -> M[B]
-    //       S :           B  ->   N[C]
-    // F map S : K[A] -> M[B] -> M[N[C]] 
+    // F       : K[A] → M[B]
+    //       S :          B  →   N[C]
+    // F map S : K[A] → M[B] → M[N[C]] 
     def map[S <: AnyPath](s: S)
       (implicit cmp: F#Out ≃ MapOver[S, F#Out#Container]#In): 
        F >=> MapOver[S, F#Out#Container] = 
       (f >=> MapOver[S, F#Out#Container](s, f.out.container))(cmp)
 
-    // F           : K[A] -> M[B]
-    //           S :           B  ->   N[C]
-    // F flatMap S : K[A] -> M[B] -> M×N[C]
+    // F           : K[A] → M[B]
+    //           S :          B  →   N[C]
+    // F flatMap S : K[A] → M[B] → M×N[C]
     def flatMap[S <: AnyPath, C <: AnyContainer](s: S)
       (implicit 
         cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
@@ -200,8 +200,8 @@ object paths {
       ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
          Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 
-    // F         : K[A] -> L[M[B]]
-    // F.flatten : K[A] -> L×M[F]
+    // F         : K[A] → L[M[B]]
+    // F.flatten : K[A] → L×M[B]
     def flatten[C <: AnyContainer](implicit mul: (F#Out#Container × F#Out#Inside#Container) { type Out = C }):
       Flatten[F, C] =
       Flatten[F, C](f)(mul)
@@ -211,17 +211,17 @@ object paths {
     def  ⊗[S <: AnyPath](s: S): F ⊗ S = Par(f, s)
 
 
-    // F        : A -> B
-    // S        :      B ⊗ B -> C ⊗ D
-    // F fork S : A -> B ⊗ B -> C ⊗ D
+    // F        : A → B
+    //        S :     B ⊗ B → C ⊗ D
+    // F fork S : A → B ⊗ B → C ⊗ D
     def fork[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
       // (implicit cmp: Fork[F]#Out ≃ S#In):
       Fork[F] >=> S =
       Fork(f) >=> s
 
-    // F           : A -> M[B]
-    // S           :        B  ⊗   B  ->   C  ⊗   D
-    // F forkMap S : A -> M[B] ⊗ M[B] -> M[C] ⊗ M[D]
+    // F           : A → M[B]
+    //           S :       B  ⊗   B  →   C  ⊗   D
+    // F forkMap S : A → M[B] ⊗ M[B] → M[C] ⊗ M[D]
     def forkMap[S <: AnyPar { type In = ParType[F#Out#Inside, F#Out#Inside] }](s: S)
       (implicit // NOTE: this implicit is needed formally, but actually it's always there (because of the bound on S)
         cmp1: Fork[F]#Out ≃ Par[MapOver[S#First, F#Out#Container], MapOver[S#Second, F#Out#Container]]#In
@@ -232,25 +232,54 @@ object paths {
     def or[S <: AnyPath](s: S): F Or S = Or(f, s)
     def ⊕[S <: AnyPath](s: S): F ⊕ S = Or(f, s)
 
-    //   F     S    |  F left S
-    // -------------+------------
-    // A -> L    B  |  A    L    B
-    //      ⊕ -> ⊕  |  ⊕ -> ⊕ -> ⊕
-    //      R    C  |  R    R    C
+    //   F   S    |   F left S
+    // -----------+------------
+    // A → L   B  |  A   L   B
+    //     ⊕ → ⊕  |  ⊕ → ⊕ → ⊕
+    //     R   C  |  R   R   C
     def left[S <: AnyOr](s: S)
       (implicit cmp: F#Out ≃ S#Left#In):
         F >=> S#Left =
         f >=> (s: S).left
 
-    //   F     S    |   F right S
-    // -------------+------------
-    //      L    B  |  L    L    B
-    //      ⊕ -> ⊕  |  ⊕ -> ⊕ -> ⊕
-    // A -> R    C  |  A    R    C
+    //   F   S    |  F right S
+    // -----------+------------
+    //     L   B  |  L   L   B
+    //     ⊕ → ⊕  |  ⊕ → ⊕ → ⊕
+    // A → R   C  |  A   R   C
     def right[S <: AnyOr](s: S)
       (implicit cmp: F#Out ≃ S#Right#In):
         F >=> S#Right =
         f >=> (s: S).right
+
+  }
+
+
+  // FIXME: it doesn't work with two type parameters, but I don't know how to do it use it only F
+  implicit def parPathOps[
+    T <: AnyGraphType,
+    F <: AnyPar {
+      type First  <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+      type Second <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+    }
+  ](f: F):
+        ParPathOps[T, F] =
+    new ParPathOps[T, F](f)
+
+  class ParPathOps[
+    T <: AnyGraphType,
+    F <: AnyPar {
+      type First  <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+      type Second <: AnyPath { type Out <: AnyGraphType { type Inside = T } }
+    }
+  ](f: F) {
+
+    def merge[C <: AnyContainer]
+      (implicit 
+        sum: (F#First#Out#Container + F#Second#Out#Container) { type Out = C },
+        cmp: F#Out ≃ Merge[T, F#First#Out, F#Second#Out, C]#In
+      ): F >=> Merge[T, F#First#Out, F#Second#Out, C] =
+         f >=> Merge[T, F#First#Out, F#Second#Out, C](f.first.out.inside, f.first.out, f.second.out)(sum)
 
   }
 

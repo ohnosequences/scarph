@@ -346,7 +346,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("choice combinator") {
     import TestContext._
-    import scalaz._
 
     // friends' names
     val friendsNames = user
@@ -367,6 +366,17 @@ class TitanTestSuite extends AnyTitanTestSuite {
       user.right(friendsNames ⊕ friendsAges).evalOn( edu )
     }
 
+  }
+
+  test("merging results") {
+    import TestContext._
+
+    // FIXME: merge method doesn't work
+    assertResult("") {
+      ( user.inV(follows) ⊗ user.outV(follows) )
+        .merge
+      .evalOn( edu ⊗ edu ).show
+    }
   }
 
 }
