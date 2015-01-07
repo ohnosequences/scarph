@@ -42,8 +42,8 @@ object graphTypes {
     type Container = ExactlyOne
     val  container = ExactlyOne
 
-    type Inside = this.type
-    lazy val inside: Inside = this: this.type
+    type Inside >: this.type <: AnyGraphType
+    lazy val inside: Inside = this
   }
 
 
@@ -54,8 +54,7 @@ object graphTypes {
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
 
-  abstract class Vertex extends AnyVertex { val label = this.toString }
-
+  class Vertex extends AnyVertex { type Inside = this.type; lazy val label = this.toString }
 
   /* Edges connect vertices and have in/out arities */
   // NOTE: this is the same as AnyPath but with restriction on InT/OutT
@@ -88,6 +87,8 @@ object graphTypes {
     lazy val target = st._2
 
     val label = this.toString
+
+    type Inside = Edge[S,T]
   }
 
 
@@ -104,8 +105,9 @@ object graphTypes {
     type Owner = O
 
     val label = this.toString
-  }
 
+    type Inside = PropertyOf[O]
+  }
 
   trait AnyParType extends AnySimpleGraphType {
 
@@ -122,7 +124,9 @@ object graphTypes {
     type First = F
     type Second = S
 
-    val label = s"(first.label ⊗ second.label)"
+    lazy val label = s"(first.label ⊗ second.label)"
+
+    type Inside = ParType[F,S]
   }
 
 

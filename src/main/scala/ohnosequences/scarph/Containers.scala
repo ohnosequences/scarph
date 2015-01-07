@@ -12,7 +12,7 @@ object containers {
     type Container = C
     type Inside = T
 
-    val label = this.toString
+    lazy val label = this.toString
   }
 
   private[containers] case class ExactlyOneOf[T <: AnyGraphType](t: T) extends NestedGraphType(ExactlyOne, t)
