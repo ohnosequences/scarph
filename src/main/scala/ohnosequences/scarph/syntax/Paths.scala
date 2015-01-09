@@ -53,7 +53,7 @@ object paths {
 
     def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
       F >=> Get[P] =
-      f >=> Get[P](p)
+      Composition(f,Get[P](p))(≃.eq[F#Out,Get[P]#In])
   }
 
   /* Edge types */
@@ -74,12 +74,12 @@ object paths {
   class PathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
-    def src: F >=> Source[F#Out] =
-             f >=> Source(f.out)
+    def src: F >=> Source[F#Out] = Composition(f, Source(f.out: F#Out))(≃.eq[F#Out, Source[F#Out]#In])
+             // f >=> Source(f.out: F#Out)
 
     // NOTE: in gremlin this is called .inV
-    def tgt: F >=> Target[F#Out] =
-             f >=> Target(f.out)
+    def tgt: F >=> Target[F#Out] = Composition(f, Target(f.out: F#Out))(≃.eq[F#Out, Target[F#Out]#In])
+             // f >=> Target(f.out: F#Out)
   }
 
   /* Vertex types */
@@ -136,8 +136,8 @@ object paths {
         } 
       } 
     }](x: X)(implicit fromX: X => P):
-      F >=> InE[P] =
-      f >=> InE(fromX(x))
+      F >=> InE[P] = Composition(f, InE(fromX(x)))(≃.eq[F#Out, InE[P]#In])
+      // f >=> InE(fromX(x))
 
     def outE[X, P <: AnyPredicate { 
       type Element <: AnyEdge { 
@@ -146,8 +146,8 @@ object paths {
         } 
       } 
     }](x: X)(implicit fromX: X => P):
-      F >=> OutE[P] =
-      f >=> OutE(fromX(x))
+      F >=> OutE[P] = Composition(f, OutE(fromX(x)))(≃.eq[F#Out, OutE[P]#In])
+      // f >=> OutE(fromX(x))
   }
 
   /* This gives user nice warnings and doesn't add unnecessary constructors */
@@ -169,8 +169,8 @@ object paths {
 
     @deprecated("You are trying to 'forkMap' over one value, you don't need it (use simple 'fork' method instead)", "")
     def forkMap[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
-      Fork[F] >=> S =
-      Fork(f) >=> s
+      Fork[F] >=> S = Composition(Fork(f), s)(≃.eq[Fork[F]#Out, S#In])
+      // Fork(f) >=> s
 
   }
 
@@ -196,7 +196,8 @@ object paths {
       (implicit 
         cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
         // NOTE: this is just (F#Out#Container × S#Out#Container), but compiler needs this explicit crap:
-        mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) { type Out = C }
+        // mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) { type Out = C }
+        mul: (S#Out#Container × S#Out#Inside#Container) { type Out = C }
       ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
          Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 
@@ -216,8 +217,8 @@ object paths {
     // F fork S : A -> B ⊗ B -> C ⊗ D
     def fork[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
       // (implicit cmp: Fork[F]#Out ≃ S#In):
-      Fork[F] >=> S =
-      Fork(f) >=> s
+      Fork[F] >=> S = Composition(Fork(f), s)(≃.eq[Fork[F]#Out, S#In])
+      // Fork(f) >=> s
 
     // F           : A -> M[B]
     // S           :        B  ⊗   B  ->   C  ⊗   D

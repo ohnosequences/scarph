@@ -21,10 +21,20 @@ object graphTypes {
 
   // this is `\simeq` symbol
   object ≃ extends simeq2 {
-    // implicit def refl[A <: AnySimpleGraphType]: A ≃ A = new (A ≃ A) {}
 
     implicit def eq[A <: AnyGraphType, B <: AnyGraphType]
       (implicit eq: A#Container#Of[A#Inside] =:= B#Container#Of[B#Inside]): A ≃ B = new (A ≃ B) {}
+
+    // implicit def eq[A <: AnyGraphType , B <: AnyGraphType](implicit
+    //   // cont: A#Container =:= B#Container,
+    //   buh: A#Container#Of[A#Inside] =:= B#Container#Of[B#Inside],
+    //   insd: A#Inside ≃ B#Inside
+    // ): A ≃ B = new (A ≃ B) {}
+
+    // implicit def refl[A <: AnySimpleGraphType]: A ≃ A = new (A ≃ A) {}
+
+
+      // (implicit eq: A#Container#Of[A#Inside] =:= B#Container#Of[B#Inside]): A ≃ B = new (A ≃ B) {}
   }
 
   trait simeq2 {
@@ -33,8 +43,14 @@ object graphTypes {
     //     cont: A#Container =:= B#Container,
     //     insd: A#Inside ≃ B#Inside
     //   ): A ≃ B = new (A ≃ B) {}
+    
+    // implicit def eqSimple[A <: AnySimpleGraphType, B <: AnySimpleGraphType]
+    //   (implicit
+    //     contr: A#Container =:= B#Container,
+    //     insd: A#Inside =:= B#Inside
+    //   ): A ≃ B = new (A ≃ B) {}
+    
   }
-
 
   /* This is a non-nested graph type */
   trait AnySimpleGraphType extends AnyGraphType {
@@ -42,14 +58,13 @@ object graphTypes {
     type Container = ExactlyOne
     val  container = ExactlyOne
 
-    type Inside >: this.type <: AnyGraphType
+    type Inside >: this.type <: AnySimpleGraphType
     lazy val inside: Inside = this
   }
 
 
   /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnySimpleGraphType
-
 
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
@@ -88,12 +103,13 @@ object graphTypes {
 
     val label = this.toString
 
-    type Inside = Edge[S,T]
+    // this is wrong too!
+    type Inside = this.type // Edge[S,T]
   }
 
 
   /* Property is assigned to one element type and has a raw representation */
-  trait AnyGraphProperty extends AnySimpleGraphType with AnyProperty {
+  trait AnyGraphProperty extends AnyProperty with AnySimpleGraphType {
 
     type Owner <: AnyGraphElement
     val  owner: Owner
@@ -104,9 +120,10 @@ object graphTypes {
     
     type Owner = O
 
-    val label = this.toString
+    lazy val label: String = this.toString
 
-    type Inside = PropertyOf[O]
+    // ???
+    type Inside = this.type
   }
 
   trait AnyParType extends AnySimpleGraphType {
@@ -147,7 +164,7 @@ object graphTypes {
 
     lazy val label = s"(left.label ⊕ right.label)"
 
-    type Inside = OrType[Left,Right]
+    type Inside = OrType[L,R]
   }
 
 }
