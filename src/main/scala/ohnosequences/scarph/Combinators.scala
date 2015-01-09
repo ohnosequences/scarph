@@ -57,7 +57,7 @@ object combinators {
     type     Out = Container#Of[Inner#Out]
     lazy val out = container.of(inner.out): Out
   }
-
+  /* P MapOver C */
   case class MapOver[P <: AnyPath, C <: AnyContainer]
     (val inner: P, val container: C) extends AnyMapOver {
 
@@ -111,7 +111,7 @@ object combinators {
     type Second = S
   }
 
-  // \otimes symbol:
+  // \otimes symbol: F ⊗ S
   type ⊗[F <: AnyPath, S <: AnyPath] = Par[F, S]
 
 

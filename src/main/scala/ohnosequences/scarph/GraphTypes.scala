@@ -145,7 +145,9 @@ object graphTypes {
     type Left = L
     type Right = R
 
-    val label = s"(left.label ⊕ right.label)"
+    lazy val label = s"(left.label ⊕ right.label)"
+
+    type Inside = OrType[Left,Right]
   }
 
 }
