@@ -25,7 +25,9 @@ object combinators {
   trait AnyComposition extends CombinatorOf2Paths with AnySimpleGraphType {
 
     // should be provided implicitly:
-    val composable: First#Out ≃ Second#In
+    def composable: First#Out ≃ Second#In
+
+    // val composableProof: (First#Out ≃? Second#In)
 
     type     In = First#In
     lazy val in = first.in
@@ -35,8 +37,7 @@ object combinators {
   }
 
   case class Composition[F <: AnyPath, S <: AnyPath]
-    (val first: F, val second: S)
-    (implicit val composable: F#Out ≃ S#In) extends AnyComposition {
+    (val first: F, val second: S)(implicit val composable: F#Out ≃ S#In) extends AnyComposition {
 
     // not so important
     lazy val label: String = s"(${second.label} >=> ${first.label})"

@@ -18,23 +18,24 @@ object graphTypes {
   }
 
   @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
-  trait ≃[A <: AnyGraphType, B <: AnyGraphType]
+  trait Equality[A <: AnyGraphType, B <: AnyGraphType] { type Out >: A with B <: A with B }
+  type EqualityContext[X <: AnyGraphType, Y <: AnyGraphType] = (X,Y)
+  type ≃[A <: AnyGraphType, B <: AnyGraphType] = EqualityContext[A,B] => (A Equality B)
+  trait Refl[A <: AnyGraphType] extends (A Equality A) { type Out = A }
+  implicit def refl[A >: B <: B, B <: AnyGraphType]: EqualityContext[A,B] => A Equality B = { 
 
-  // this is `\simeq` symbol
-  object ≃ extends simeq2 {
-
-    implicit def eq[A >: B <: B, B <: AnyGraphType]: A ≃ B = new (A ≃ B) {}
-
-    // implicit def refl[A <: AnySimpleGraphType](implicit ev: A#Inside =:= A): A ≃ A = new (A ≃ A) {} 
-    // implicit def eq[A <: AnyGraphType, B <: AnyGraphType]
-    //   (implicit eq: A#Container#Of[A#Inside] =:= B#Container#Of[B#Inside]): A ≃ B = new (A ≃ B) {}
-
-    // implicit def refl[A <: AnyGraphType]: A ≃ A = new (A ≃ A) {}
-
-
-      // (implicit eq: A#Container#Of[A#Inside] =:= B#Container#Of[B#Inside]): A ≃ B = new (A ≃ B) {}
+    (x: EqualityContext[A,B]) => new Refl[B] {} 
   }
 
+  // implicit def coerce[A <: AnyGraphType, B <: AnyGraphType](a: A)(implicit eqWitness: Equality[A,B]): Equality[A,B]#Out = a
+
+  // this is `\simeq` symbol
+  object EqualityContext {
+
+    // trait Refl[A <: AnyGraphType] extends (A Equality A) { type Out = A }
+    // implicit def refl[A >: B <: B, B <: AnyGraphType, X <: EqualityContext[A,B]]: A Equality B = new Refl[B] {}
+  }
+  
   trait simeq2 extends simeq3 {
     // implicit def eq[A <: AnyGraphType, B <: AnyGraphType]
     //   (implicit 

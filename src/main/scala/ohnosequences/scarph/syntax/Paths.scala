@@ -169,7 +169,7 @@ object paths {
 
     @deprecated("You are trying to 'forkMap' over one value, you don't need it (use simple 'fork' method instead)", "")
     def forkMap[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
-      Fork[F] >=> S = Composition(Fork(f), s)(≃.eq[Fork[F]#Out, S#In])
+      Fork[F] >=> S = Composition(Fork(f), s)
       // Fork(f) >=> s
 
   }
@@ -217,7 +217,7 @@ object paths {
     // F fork S : A -> B ⊗ B -> C ⊗ D
     def fork[S <: AnyPar { type In = ParType[F#Out, F#Out] }](s: S):
       // (implicit cmp: Fork[F]#Out ≃ S#In):
-      Fork[F] >=> S = Composition(Fork(f), s)(≃.eq[Fork[F]#Out, S#In])
+      Fork[F] >=> S = Composition(Fork(f), s)
       // Fork(f) >=> s
 
     // F           : A -> M[B]
