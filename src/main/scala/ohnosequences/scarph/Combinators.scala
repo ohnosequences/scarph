@@ -56,11 +56,11 @@ object combinators {
     type MappedOver <: AnyContainer
     val  mappedOver: MappedOver
 
-    type     In = Container#Of[Inner#In]
-    lazy val in = container.of(inner.in): In
+    type     In = MappedOver#Of[Inner#In]
+    lazy val in = mappedOver.of(inner.in): In
 
-    type     Out = Container#Of[Inner#Out]
-    lazy val out = container.of(inner.out): Out
+    type     Out = MappedOver#Of[Inner#Out]
+    lazy val out = mappedOver.of(inner.out): Out
   }
   /* P MapOver C */
   case class MapOver[P <: AnyPath, C <: AnyContainer]

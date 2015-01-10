@@ -53,7 +53,7 @@ object paths {
 
     def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
       F >=> Get[P] =
-      Composition(f,Get[P](p))(≃.eq[F#Out,Get[P]#In])
+      Composition(f,Get[P](p))//(≃.eq[F#Out,Get[P]#In])
   }
 
   /* Edge types */
@@ -74,11 +74,11 @@ object paths {
   class PathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
-    def src: F >=> Source[F#Out] = Composition(f, Source(f.out: F#Out))(≃.eq[F#Out, Source[F#Out]#In])
+    def src: F >=> Source[F#Out] = Composition(f, Source(f.out: F#Out))//(≃.eq[F#Out, Source[F#Out]#In])
              // f >=> Source(f.out: F#Out)
 
     // NOTE: in gremlin this is called .inV
-    def tgt: F >=> Target[F#Out] = Composition(f, Target(f.out: F#Out))(≃.eq[F#Out, Target[F#Out]#In])
+    def tgt: F >=> Target[F#Out] = Composition(f, Target(f.out: F#Out))//(≃.eq[F#Out, Target[F#Out]#In])
              // f >=> Target(f.out: F#Out)
   }
 
@@ -136,7 +136,7 @@ object paths {
         } 
       } 
     }](x: X)(implicit fromX: X => P):
-      F >=> InE[P] = Composition(f, InE(fromX(x)))(≃.eq[F#Out, InE[P]#In])
+      F >=> InE[P] = Composition(f, InE(fromX(x)))//(≃.eq[F#Out, InE[P]#In])
       // f >=> InE(fromX(x))
 
     def outE[X, P <: AnyPredicate { 
@@ -146,7 +146,7 @@ object paths {
         } 
       } 
     }](x: X)(implicit fromX: X => P):
-      F >=> OutE[P] = Composition(f, OutE(fromX(x)))(≃.eq[F#Out, OutE[P]#In])
+      F >=> OutE[P] = Composition(f, OutE(fromX(x)))//(≃.eq[F#Out, OutE[P]#In])
       // f >=> OutE(fromX(x))
   }
 
@@ -197,7 +197,7 @@ object paths {
         cmp: F#Out ≃ (S MapOver F#Out#Container)#In,
         // NOTE: this is just (F#Out#Container × S#Out#Container), but compiler needs this explicit crap:
         // mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) { type Out = C }
-        mul: (S#Out#Container × S#Out#Inside#Container) { type Out = C }
+        mul: (F#Out#Container#Of[S#Out]#Container × F#Out#Container#Of[S#Out]#Inside#Container) {type Out = C}
       ): Flatten[(F >=> (S MapOver F#Out#Container)), C] = 
          Flatten[(F >=> (S MapOver F#Out#Container)), C](f.map(s))(mul)
 

@@ -33,7 +33,7 @@ object predicates {
     extends AnyEmptyPredicate { 
 
       type Element = E
-      type Inside = EmptyPredicate[E]
+      type Inside = this.type
     }
 
 
