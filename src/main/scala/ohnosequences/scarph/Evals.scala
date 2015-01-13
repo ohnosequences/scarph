@@ -30,6 +30,8 @@ object evals {
 
   trait FlattenVals[F[_], G[_], X] extends Fn1[F[G[X]]]
 
+  trait MergeVals[F, S] extends Fn2[F, S]
+
   object AnyEvalPath {
 
     implicit def evalComposition[
@@ -138,6 +140,21 @@ object evals {
     }
 
 
+    implicit def evalMerge[
+      First <: AnyGraphType,
+      Second <: AnyGraphType,
+      OutC <: AnyContainer,
+      F, S, FS
+    ](implicit
+      merge: MergeVals[F, S] { type Out = FS }
+    ):  EvalPathOn[(F, S), Merge[First, Second, OutC], FS] = 
+    new EvalPathOn[(F, S), Merge[First, Second, OutC], FS] {
+      def apply(path: Path)(in: In): Out = {
+        path.out := merge(in.value._1, in.value._2)
+      }
+    }
+
+
     implicit def evalPar[
       FI, SI,
       F <: AnyPath, S <: AnyPath,
@@ -145,8 +162,8 @@ object evals {
     ](implicit
       eval1:  EvalPathOn[FI, F, FO], 
       eval2: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] = 
-    new EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] {
+    ):  EvalPathOn[(FI, SI), Par[F, S], (FO, SO)] = 
+    new EvalPathOn[(FI, SI), Par[F, S], (FO, SO)] {
       def apply(path: Path)(in: In): Out = {
         path.out := ((
           eval1(path.first) ( (path.first.in: F#In)  := in.value._1 ).value,
@@ -164,8 +181,8 @@ object evals {
     ](implicit
       evalFirst:  EvalPathOn[FI, F, FO], 
       evalSecond: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[FI \/ SI, F ⊕ S, FO \/ SO] = 
-    new EvalPathOn[FI \/ SI, F ⊕ S, FO \/ SO] {
+    ):  EvalPathOn[FI \/ SI, Or[F, S], FO \/ SO] = 
+    new EvalPathOn[FI \/ SI, Or[F, S], FO \/ SO] {
       def apply(path: Path)(in: In): Out = {
         path.out := ( in.value.bimap(
           fi => evalFirst(path.first)( (path.first.in: F#In) := fi ).value,

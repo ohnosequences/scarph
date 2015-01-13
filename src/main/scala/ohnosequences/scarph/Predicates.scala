@@ -6,13 +6,15 @@ object predicates {
   import graphTypes._, conditions._
 
 
-  trait AnyPredicate {
+  trait AnyPredicate extends AnySimpleGraphType {
 
     type Element <: AnyGraphElement
     val  element: Element
 
     type Conditions <: AnyTypeSet //.Of[AnyCondition]
     val  conditions: Conditions
+
+    lazy val label: String = s"(${element.label} ? ${conditions.toString})"
   }
 
   object AnyPredicate {
@@ -27,7 +29,11 @@ object predicates {
   }
 
   class EmptyPredicate[E <: AnyGraphElement](val element: E) 
-    extends AnyEmptyPredicate { type Element = E }
+    extends AnyEmptyPredicate { 
+
+      type Element = E
+      type Inside = this.type
+    }
 
 
   /* This is just like cons, but controlling, that all conditions are on the same element type */
@@ -51,6 +57,8 @@ object predicates {
 
     type Body = B
     type Condition = C
+
+    type Inside = AndPredicate[B,C]
   }
 
 }

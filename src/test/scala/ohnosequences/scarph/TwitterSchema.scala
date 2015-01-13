@@ -19,7 +19,7 @@ object Twitter {
   case object url  extends PropertyOf(posted) { type Raw = String }
 
   case object follows extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(user))
-  case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
+  // case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
 
   // simple indexes
   case object userByName extends KeyIndex(user, name, Unique)
@@ -36,7 +36,7 @@ object Twitter {
     label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,
     vertices =  user :~: tweet :~: ∅,
-    edges = posted :~: follows :~: liked :~: ∅,
+    edges = posted :~: follows :~: ∅,
     indexes = 
       userByName :~: userByNameAndAge :~:
       tweetByText :~: 
@@ -45,4 +45,5 @@ object Twitter {
       ∅
   )
 
+  // implicitly[ Par[Target[follows.type], Source[liked.type]] <:< Par.WithSameOuts ]
 }

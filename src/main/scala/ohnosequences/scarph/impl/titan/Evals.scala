@@ -80,6 +80,44 @@ case object evals {
     new FlattenVals[Option, NEList, X] with Out[Stream[X]] { def apply(in: In1): Out = in.map(_.stream).getOrElse(Stream[X]()) }
 
 
+  implicit def mergeSS[X]: 
+        MergeVals[Stream[X], Stream[X]] with Out[Stream[X]] =
+    new MergeVals[Stream[X], Stream[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1 ++ in2 }
+  implicit def mergeSO[X]: 
+        MergeVals[Stream[X], Option[X]] with Out[Stream[X]] =
+    new MergeVals[Stream[X], Option[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1 ++ in2 }
+  implicit def mergeOS[X]: 
+        MergeVals[Option[X], Stream[X]] with Out[Stream[X]] =
+    new MergeVals[Option[X], Stream[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1.toStream ++ in2 }
+  implicit def mergeOO[X]: 
+        MergeVals[Option[X], Option[X]] with Out[Stream[X]] =
+    new MergeVals[Option[X], Option[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1.toStream ++ in2.toStream }
+  implicit def mergeNN[X]: 
+        MergeVals[NEList[X], NEList[X]] with Out[NEList[X]] =
+    new MergeVals[NEList[X], NEList[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1 append in2 }
+  implicit def mergeNS[X]: 
+        MergeVals[NEList[X], Stream[X]] with Out[NEList[X]] =
+    new MergeVals[NEList[X], Stream[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1 :::> in2.toList }
+  implicit def mergeSN[X]: 
+        MergeVals[Stream[X], NEList[X]] with Out[NEList[X]] =
+    new MergeVals[Stream[X], NEList[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1.toList <::: in2 }
+  implicit def mergeNO[X]: 
+        MergeVals[NEList[X], Option[X]] with Out[NEList[X]] =
+    new MergeVals[NEList[X], Option[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1 :::> in2.toList }
+  implicit def mergeON[X]: 
+        MergeVals[Option[X], NEList[X]] with Out[NEList[X]] =
+    new MergeVals[Option[X], NEList[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1.toList <::: in2 }
+  // TODO: implement _inambigous_ merging for ExactyOne
+  // implicit def mergeXL[X, S[_], O]
+  //   (implicit m: MergeVals[NEList[X], S[X]] { type Out = O }): 
+  //       MergeVals[X, S[X]] with Out[O] =
+  //   new MergeVals[X, S[X]] with Out[O] { def apply(in1: In1, in2: In2): Out = m(NEList.nel(in1, List()), in2) }
+  // implicit def mergeXR[X, F[_], O]
+  //   (implicit m: MergeVals[F[X], NEList[X]] { type Out = O }): 
+  //       MergeVals[F[X], X] with Out[O] =
+  //   new MergeVals[F[X], X] with Out[O] { def apply(in1: In1, in2: In2): Out = m(in1, NEList.nel(in2, List())) }
+
+
   implicit def evalVertexQuery[
     S <: AnySchema, P <: AnyPredicate { type Element <: AnyVertex }, C <: AnyContainer, O
   ](implicit 

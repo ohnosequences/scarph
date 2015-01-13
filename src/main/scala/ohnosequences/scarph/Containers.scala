@@ -24,30 +24,40 @@ object containers {
   /* Here are 4 types of arity containers that we can use for wrapping graph types */
   sealed trait AnyContainer {
 
+    val label: String
+
     type Of[T <: AnyGraphType] <: AnyGraphType
     def  of[T <: AnyGraphType](t: T): Of[T]
   }
 
 
-  case object ExactlyOne extends AnyContainer { 
+  case object ExactlyOne extends AnyContainer {
+
+    lazy val label: String = ""
     type Of[T <: AnyGraphType] = T
     def  of[T <: AnyGraphType](t: T): T = t
   }
   type ExactlyOne = ExactlyOne.type
 
-  case object OneOrNone extends AnyContainer { 
+  case object OneOrNone extends AnyContainer {
+
+    lazy val label: String = "Opt"
     type Of[T <: AnyGraphType] = OneOrNoneOf[T]  
     def  of[T <: AnyGraphType](t: T): Of[T] = OneOrNoneOf[T](t)
   }
   type OneOrNone = OneOrNone.type
 
-  case object AtLeastOne extends AnyContainer { 
+  case object AtLeastOne extends AnyContainer {
+
+    lazy val label: String = "NEList"
     type Of[T <: AnyGraphType] = AtLeastOneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = AtLeastOneOf[T](t)
   }
   type AtLeastOne = AtLeastOne.type
 
-  case object ManyOrNone extends AnyContainer { 
+  case object ManyOrNone extends AnyContainer {
+
+    lazy val label: String = "List"
     type Of[T <: AnyGraphType] = ManyOrNoneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = ManyOrNoneOf[T](t)
   }
@@ -63,13 +73,13 @@ object containers {
   /* Containers multiplication (`\times` symbol)*/
   trait ×[A <: AnyContainer, B <: AnyContainer] extends Fn2[A, B] with OutBound[AnyContainer]
 
-  object × extends x_2 {
+  object × extends times_2 {
     implicit def idemp[A <: AnyContainer]: 
         (A × A) with Out[A] = 
     new (A × A) with Out[A] { def apply(a: In1, b: In2): Out = a }
   }
 
-  trait x_2 extends x_3 {
+  trait times_2 extends times_3 {
     implicit def unitL[B <: AnyContainer]: 
         (ExactlyOne × B) with Out[B] = 
     new (ExactlyOne × B) with Out[B] { def apply(a: In1, b: In2): Out = b }
@@ -79,10 +89,43 @@ object containers {
     new (A × ExactlyOne) with Out[A] { def apply(a: In1, b: In2): Out = a }
   }
 
-  trait x_3 {
+  trait times_3 {
     implicit def rest[A <: AnyContainer, B <: AnyContainer]: 
         (A × B) with Out[ManyOrNone] = 
     new (A × B) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
+  }
+
+
+  /* Containers multiplication (`\times` symbol)*/
+  trait +[A <: AnyContainer, B <: AnyContainer] extends Fn2[A, B] with OutBound[AnyContainer]
+
+  object + extends plus_2 {
+
+    implicit def exactlyOnePlus[B <: AnyContainer]: 
+        (ExactlyOne + B) with Out[AtLeastOne] = 
+    new (ExactlyOne + B) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+
+    implicit def atLeastOnePlus[B <: AnyContainer]: 
+        (AtLeastOne + B) with Out[AtLeastOne] = 
+    new (AtLeastOne + B) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+  }
+
+  trait plus_2 extends plus_3 {
+
+    implicit def plusExactlyOne[A <: AnyContainer]: 
+        (A + ExactlyOne) with Out[AtLeastOne] = 
+    new (A + ExactlyOne) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+
+    implicit def plusAtLeastOne[A <: AnyContainer]: 
+        (A + AtLeastOne) with Out[AtLeastOne] = 
+    new (A + AtLeastOne) with Out[AtLeastOne] { def apply(a: In1, b: In2): Out = AtLeastOne }
+  }
+
+  trait plus_3 {
+
+    implicit def rest[A <: AnyContainer, B <: AnyContainer]: 
+        (A + B) with Out[ManyOrNone] = 
+    new (A + B) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
   }
 
 }

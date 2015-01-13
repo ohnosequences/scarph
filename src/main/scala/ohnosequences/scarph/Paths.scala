@@ -17,6 +17,7 @@ object paths {
     - `T` suffix means (label) _Type_
   */
   sealed trait AnyPath {
+    val label: String
 
     /* Input */
     type In <: AnyGraphType

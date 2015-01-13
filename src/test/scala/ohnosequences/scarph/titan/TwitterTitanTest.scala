@@ -136,6 +136,8 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val postAuthorName = postAuthor >=> userName
 
     val edu  = user := twitter.query(askEdu).evalOn( titanTwitter ).value.head
+    val alexey  = user := twitter.query(askAlexey).evalOn( titanTwitter ).value.head
+    val kim  = user := twitter.query(askKim).evalOn( titanTwitter ).value.head
     val post = posted := twitter.query(askPost).evalOn( titanTwitter ).value.head
     val twt  = tweet := twitter.query(askTweet).evalOn( titanTwitter ).value.head
   }
@@ -225,6 +227,11 @@ class TitanTestSuite extends AnyTitanTestSuite {
     assertResult( ManyOrNone.of(age) := Stream(5, 22) ){ 
       twitter.query(user ? (age between (3, 25))).map( Get(age) ).evalOn( titanTwitter)
     }
+
+    // println(any(user).label)
+    // println((user ? (age < 80)).label)
+    // println((user ? (age < 80) and (age > 10)).label)
+    // println((user ? (age between (3, 25))).label)
 
   }
 
@@ -346,7 +353,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("choice combinator") {
     import TestContext._
-    import scalaz._
 
     // friends' names
     val friendsNames = user
@@ -367,6 +373,16 @@ class TitanTestSuite extends AnyTitanTestSuite {
       user.right(friendsNames ⊕ friendsAges).evalOn( edu )
     }
 
+  }
+
+  test("merging results") {
+    import TestContext._
+
+    assertResult(ManyOrNone.of(user) := Stream(alexey.value, kim.value, alexey.value, kim.value)) {
+      ( user.inV(follows) ⊗ user.outV(follows) )
+        .merge
+      .evalOn( edu ⊗ edu )
+    }
   }
 
 }
