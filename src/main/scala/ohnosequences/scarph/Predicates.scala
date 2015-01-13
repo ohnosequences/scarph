@@ -14,8 +14,7 @@ object predicates {
     type Conditions <: AnyTypeSet //.Of[AnyCondition]
     val  conditions: Conditions
 
-    // TODO: improve this:
-    lazy val label: String = s"predicate(${conditions.toString}, ${element.label})"
+    lazy val label: String = s"(${element.label} ? ${conditions.toString})"
   }
 
   object AnyPredicate {

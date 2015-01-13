@@ -60,7 +60,7 @@ object graphTypes {
     type Container = ExactlyOne
     val  container = ExactlyOne
 
-    type Inside >: this.type <: AnyGraphType//<: AnySimpleGraphType
+    type Inside >: this.type <: AnySimpleGraphType
     lazy val inside: Inside = this
   }
 
@@ -157,6 +157,9 @@ object graphTypes {
     type Inside = ParType[First,Second]
   }
 
+  // \otimes symbol: F ⊗ S
+  type ⊗[F <: AnyGraphType, S <: AnyGraphType] = ParType[F, S]
+
 
   trait AnyOrType extends AnySimpleGraphType {
 
@@ -177,5 +180,8 @@ object graphTypes {
 
     type Inside = OrType[Left,Right]
   }
+
+  // \oplus symbol: F ⊕ S
+  type ⊕[F <: AnyGraphType, S <: AnyGraphType] = OrType[F, S]
 
 }

@@ -101,15 +101,13 @@ object steps {
     type Inside = Target[E]
   }
 
-  // TODO: what's this??
   case class GraphQuery[S <: AnySchema, C <: AnyContainer, P <: AnyPredicate]
     (val graph: S, val c: C, val predicate: P)
       extends Step[S, C#Of[P#Element]](graph, c.of(predicate.element)) {
-    // (val graph: S, val container: C, val predicate: P)
-    //   extends Step[S, C#Of[P#Element]](graph, container.of(predicate.element)) {
-        lazy val label: String = toString
-        type Inside = GraphQuery[S,C,P]
-      }
+
+    lazy val label: String = toString
+    type Inside = GraphQuery[S,C,P]
+  }
 
 
   // F[T]
@@ -135,11 +133,4 @@ object steps {
     lazy val out = outC.of(first.inside): Out
   }
 
-    // (val graph: S, val c: C, val predicate: P)
-    //   extends Step[S, C#Of[P#Element]](graph, c.of(predicate.element)) {
-
-    //     // TODO: implement this
-    //     lazy val label: String = toString
-    //     type Inside = GraphQuery[S,C,P]
-    //   }
 }

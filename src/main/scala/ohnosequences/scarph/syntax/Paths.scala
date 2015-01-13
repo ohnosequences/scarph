@@ -209,7 +209,7 @@ object paths {
 
 
     def par[S <: AnyPath](s: S): Par[F, S] = Par(f, s)
-    def  ⊗[S <: AnyPath](s: S): F ⊗ S = Par(f, s)
+    def   ⊗[S <: AnyPath](s: S): Par[F, S] = Par(f, s)
 
 
     // F        : A → B
@@ -231,7 +231,7 @@ object paths {
 
 
     def or[S <: AnyPath](s: S): F Or S = Or(f, s)
-    def ⊕[S <: AnyPath](s: S): F ⊕ S = Or(f, s)
+    def  ⊕[S <: AnyPath](s: S): F Or S = Or(f, s)
 
     //   F   S    |   F left S
     // -----------+------------

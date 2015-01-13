@@ -13,8 +13,11 @@ object conditions {
     type Property <: AnyGraphProperty
     val  property: Property
 
-    type Element = Property#Owner
-    val  element = property.owner
+    type     Element = Property#Owner
+    lazy val element = property.owner
+
+    val label: String
+    override def toString = label
   }
 
   object AnyCondition {
@@ -31,7 +34,7 @@ object conditions {
     val value: Property#Raw 
   }
 
-  trait CompareCondition[P <: AnyGraphProperty { type Raw <: Comparable[_] }] 
+  trait CompareCondition[P <: AnyGraphProperty { type Raw <: Comparable[_] }]
     extends AnyCompareCondition { type Property = P }
 
 
@@ -39,39 +42,51 @@ object conditions {
   case class Equal[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
     val property: P,
     val value: P#Raw
-  ) extends AnyEqual with CompareCondition[P]
+  ) extends AnyEqual with CompareCondition[P] {
+    lazy val label = s"${property.label} = ${value.toString}"
+  }
 
   trait AnyNotEqual extends AnyCompareCondition
   case class NotEqual[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
     val property: P,
     val value: P#Raw
-  ) extends AnyNotEqual with CompareCondition[P]
+  ) extends AnyNotEqual with CompareCondition[P] {
+    lazy val label = s"${property.label} ≠ ${value.toString}"
+  }
 
 
   trait AnyLess extends AnyCompareCondition
   case class Less[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
     val property: P,
     val value: P#Raw
-  ) extends AnyLess with CompareCondition[P]
+  ) extends AnyLess with CompareCondition[P] {
+    lazy val label = s"${property.label} < ${value.toString}"
+  }
 
   trait AnyLessOrEqual extends AnyCompareCondition
   case class LessOrEqual[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
     val property: P,
     val value: P#Raw
-  ) extends AnyLessOrEqual with CompareCondition[P]
+  ) extends AnyLessOrEqual with CompareCondition[P] {
+    lazy val label = s"${property.label} ≤ ${value.toString}"
+  }
 
 
   trait AnyGreater extends AnyCompareCondition
   case class Greater[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
     val property: P,
     val value: P#Raw
-  ) extends AnyGreater with CompareCondition[P]
+  ) extends AnyGreater with CompareCondition[P] {
+    lazy val label = s"${property.label} > ${value.toString}"
+  }
 
   trait AnyGreaterOrEqual extends AnyCompareCondition
   case class GreaterOrEqual[P <: AnyGraphProperty { type Raw <: Comparable[_] }](
     val property: P,
     val value: P#Raw
-  ) extends AnyGreaterOrEqual with CompareCondition[P]
+  ) extends AnyGreaterOrEqual with CompareCondition[P] {
+    lazy val label = s"${property.label} ≥ ${value.toString}"
+  }
 
 
   trait AnyInterval extends AnyCondition {
@@ -85,6 +100,9 @@ object conditions {
     val property: P,
     val start: P#Raw,
     val end: P#Raw
-  ) extends AnyInterval { type Property = P }
+  ) extends AnyInterval { 
+    type Property = P 
+    lazy val label = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"
+  }
 
 }

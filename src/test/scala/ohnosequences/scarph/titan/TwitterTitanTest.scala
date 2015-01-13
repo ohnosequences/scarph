@@ -228,6 +228,11 @@ class TitanTestSuite extends AnyTitanTestSuite {
       twitter.query(user ? (age between (3, 25))).map( Get(age) ).evalOn( titanTwitter)
     }
 
+    // println(any(user).label)
+    // println((user ? (age < 80)).label)
+    // println((user ? (age < 80) and (age > 10)).label)
+    // println((user ? (age between (3, 25))).label)
+
   }
 
   test("flattening after double map") {
@@ -372,7 +377,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("merging results") {
     import TestContext._
-    import ohnosequences.scarph.evals._
 
     assertResult(ManyOrNone.of(user) := Stream(alexey.value, kim.value, alexey.value, kim.value)) {
       ( user.inV(follows) ⊗ user.outV(follows) )
