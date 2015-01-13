@@ -36,6 +36,8 @@ object schemas {
     type Vertices = Vs
     type Edges = Es
     type Indexes = Is
+
+    type Inside = Schema[Ps,Vs,Es,Is]
   }
 
   object AnySchemaType {

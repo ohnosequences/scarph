@@ -12,7 +12,7 @@ object containers {
     type Container = C
     type Inside = T
 
-    val label = this.toString
+    lazy val label = this.toString
   }
 
   private[containers] case class ExactlyOneOf[T <: AnyGraphType](t: T) extends NestedGraphType(ExactlyOne, t)
@@ -24,30 +24,40 @@ object containers {
   /* Here are 4 types of arity containers that we can use for wrapping graph types */
   sealed trait AnyContainer {
 
+    val label: String
+
     type Of[T <: AnyGraphType] <: AnyGraphType
     def  of[T <: AnyGraphType](t: T): Of[T]
   }
 
 
-  case object ExactlyOne extends AnyContainer { 
+  case object ExactlyOne extends AnyContainer {
+
+    lazy val label: String = ""
     type Of[T <: AnyGraphType] = T
     def  of[T <: AnyGraphType](t: T): T = t
   }
   type ExactlyOne = ExactlyOne.type
 
-  case object OneOrNone extends AnyContainer { 
+  case object OneOrNone extends AnyContainer {
+
+    lazy val label: String = "Opt"
     type Of[T <: AnyGraphType] = OneOrNoneOf[T]  
     def  of[T <: AnyGraphType](t: T): Of[T] = OneOrNoneOf[T](t)
   }
   type OneOrNone = OneOrNone.type
 
-  case object AtLeastOne extends AnyContainer { 
+  case object AtLeastOne extends AnyContainer {
+
+    lazy val label: String = "NEList"
     type Of[T <: AnyGraphType] = AtLeastOneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = AtLeastOneOf[T](t)
   }
   type AtLeastOne = AtLeastOne.type
 
-  case object ManyOrNone extends AnyContainer { 
+  case object ManyOrNone extends AnyContainer {
+
+    lazy val label: String = "List"
     type Of[T <: AnyGraphType] = ManyOrNoneOf[T] 
     def  of[T <: AnyGraphType](t: T): Of[T] = ManyOrNoneOf[T](t)
   }

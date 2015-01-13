@@ -1,3 +1,5 @@
+
+```scala
 package ohnosequences.scarph.impl.titan
 
 case object evals {
@@ -43,9 +45,11 @@ case object evals {
         NEList.nel(head, tail) 
       }
     }
+```
 
+The general eval for MapOver needs scalaz.Functor instances, so we re-export them
 
-  /* The general eval for MapOver needs scalaz.Functor instances, so we re-export them */
+```scala
   implicit val optionFunctor: scalaz.Functor[Option] = scalaz.std.option.optionInstance
   implicit val streamFunctor: scalaz.Functor[Stream] = scalaz.std.stream.streamInstance
   // NOTE: NEList has instances in its companion object
@@ -78,44 +82,6 @@ case object evals {
   implicit def flattenON[X]: 
         FlattenVals[Option, NEList, X] with Out[Stream[X]] =
     new FlattenVals[Option, NEList, X] with Out[Stream[X]] { def apply(in: In1): Out = in.map(_.stream).getOrElse(Stream[X]()) }
-
-
-  implicit def mergeSS[X]: 
-        MergeVals[Stream[X], Stream[X]] with Out[Stream[X]] =
-    new MergeVals[Stream[X], Stream[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1 ++ in2 }
-  implicit def mergeSO[X]: 
-        MergeVals[Stream[X], Option[X]] with Out[Stream[X]] =
-    new MergeVals[Stream[X], Option[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1 ++ in2 }
-  implicit def mergeOS[X]: 
-        MergeVals[Option[X], Stream[X]] with Out[Stream[X]] =
-    new MergeVals[Option[X], Stream[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1.toStream ++ in2 }
-  implicit def mergeOO[X]: 
-        MergeVals[Option[X], Option[X]] with Out[Stream[X]] =
-    new MergeVals[Option[X], Option[X]] with Out[Stream[X]] { def apply(in1: In1, in2: In2): Out = in1.toStream ++ in2.toStream }
-  implicit def mergeNN[X]: 
-        MergeVals[NEList[X], NEList[X]] with Out[NEList[X]] =
-    new MergeVals[NEList[X], NEList[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1 append in2 }
-  implicit def mergeNS[X]: 
-        MergeVals[NEList[X], Stream[X]] with Out[NEList[X]] =
-    new MergeVals[NEList[X], Stream[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1 :::> in2.toList }
-  implicit def mergeSN[X]: 
-        MergeVals[Stream[X], NEList[X]] with Out[NEList[X]] =
-    new MergeVals[Stream[X], NEList[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1.toList <::: in2 }
-  implicit def mergeNO[X]: 
-        MergeVals[NEList[X], Option[X]] with Out[NEList[X]] =
-    new MergeVals[NEList[X], Option[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1 :::> in2.toList }
-  implicit def mergeON[X]: 
-        MergeVals[Option[X], NEList[X]] with Out[NEList[X]] =
-    new MergeVals[Option[X], NEList[X]] with Out[NEList[X]] { def apply(in1: In1, in2: In2): Out = in1.toList <::: in2 }
-  // TODO: implement _inambigous_ merging for ExactyOne
-  // implicit def mergeXL[X, S[_], O]
-  //   (implicit m: MergeVals[NEList[X], S[X]] { type Out = O }): 
-  //       MergeVals[X, S[X]] with Out[O] =
-  //   new MergeVals[X, S[X]] with Out[O] { def apply(in1: In1, in2: In2): Out = m(NEList.nel(in1, List()), in2) }
-  // implicit def mergeXR[X, F[_], O]
-  //   (implicit m: MergeVals[F[X], NEList[X]] { type Out = O }): 
-  //       MergeVals[F[X], X] with Out[O] =
-  //   new MergeVals[F[X], X] with Out[O] { def apply(in1: In1, in2: In2): Out = m(in1, NEList.nel(in2, List())) }
 
 
   implicit def evalVertexQuery[
@@ -252,3 +218,68 @@ case object evals {
   }
 
 }
+
+```
+
+
+------
+
+### Index
+
++ src
+  + test
+    + scala
+      + ohnosequences
+        + scarph
+          + [ContainersTest.scala][test/scala/ohnosequences/scarph/ContainersTest.scala]
+          + [ScalazEquality.scala][test/scala/ohnosequences/scarph/ScalazEquality.scala]
+          + titan
+            + [TwitterTitanTest.scala][test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]
+          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
+    + resources
+  + main
+    + scala
+      + ohnosequences
+        + scarph
+          + [GraphTypes.scala][main/scala/ohnosequences/scarph/GraphTypes.scala]
+          + [Containers.scala][main/scala/ohnosequences/scarph/Containers.scala]
+          + impl
+            + titan
+              + [Schema.scala][main/scala/ohnosequences/scarph/impl/titan/Schema.scala]
+              + [Evals.scala][main/scala/ohnosequences/scarph/impl/titan/Evals.scala]
+              + [Predicates.scala][main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]
+          + [Paths.scala][main/scala/ohnosequences/scarph/Paths.scala]
+          + [Indexes.scala][main/scala/ohnosequences/scarph/Indexes.scala]
+          + [Evals.scala][main/scala/ohnosequences/scarph/Evals.scala]
+          + [Conditions.scala][main/scala/ohnosequences/scarph/Conditions.scala]
+          + [Steps.scala][main/scala/ohnosequences/scarph/Steps.scala]
+          + [Predicates.scala][main/scala/ohnosequences/scarph/Predicates.scala]
+          + [Schemas.scala][main/scala/ohnosequences/scarph/Schemas.scala]
+          + [Combinators.scala][main/scala/ohnosequences/scarph/Combinators.scala]
+          + syntax
+            + [GraphTypes.scala][main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]
+            + [Paths.scala][main/scala/ohnosequences/scarph/syntax/Paths.scala]
+            + [Conditions.scala][main/scala/ohnosequences/scarph/syntax/Conditions.scala]
+            + [Predicates.scala][main/scala/ohnosequences/scarph/syntax/Predicates.scala]
+
+[test/scala/ohnosequences/scarph/ContainersTest.scala]: ../../../../../../test/scala/ohnosequences/scarph/ContainersTest.scala.md
+[test/scala/ohnosequences/scarph/ScalazEquality.scala]: ../../../../../../test/scala/ohnosequences/scarph/ScalazEquality.scala.md
+[test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]: ../../../../../../test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/GraphTypes.scala]: ../../GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/Containers.scala]: ../../Containers.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Schema.scala]: Schema.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Evals.scala]: Evals.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]: Predicates.scala.md
+[main/scala/ohnosequences/scarph/Paths.scala]: ../../Paths.scala.md
+[main/scala/ohnosequences/scarph/Indexes.scala]: ../../Indexes.scala.md
+[main/scala/ohnosequences/scarph/Evals.scala]: ../../Evals.scala.md
+[main/scala/ohnosequences/scarph/Conditions.scala]: ../../Conditions.scala.md
+[main/scala/ohnosequences/scarph/Steps.scala]: ../../Steps.scala.md
+[main/scala/ohnosequences/scarph/Predicates.scala]: ../../Predicates.scala.md
+[main/scala/ohnosequences/scarph/Schemas.scala]: ../../Schemas.scala.md
+[main/scala/ohnosequences/scarph/Combinators.scala]: ../../Combinators.scala.md
+[main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]: ../../syntax/GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/syntax/Paths.scala]: ../../syntax/Paths.scala.md
+[main/scala/ohnosequences/scarph/syntax/Conditions.scala]: ../../syntax/Conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/Predicates.scala]: ../../syntax/Predicates.scala.md

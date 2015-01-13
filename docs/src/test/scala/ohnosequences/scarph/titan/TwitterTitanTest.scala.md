@@ -1,3 +1,5 @@
+
+```scala
 package ohnosequences.scarph.test.impl
 
 import com.thinkaurelius.titan.core.{ TitanFactory, TitanGraph, TitanVertex, TitanEdge }
@@ -136,20 +138,24 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val postAuthorName = postAuthor >=> userName
 
     val edu  = user := twitter.query(askEdu).evalOn( titanTwitter ).value.head
-    val alexey  = user := twitter.query(askAlexey).evalOn( titanTwitter ).value.head
-    val kim  = user := twitter.query(askKim).evalOn( titanTwitter ).value.head
     val post = posted := twitter.query(askPost).evalOn( titanTwitter ).value.head
     val twt  = tweet := twitter.query(askTweet).evalOn( titanTwitter ).value.head
   }
 
   test("check what we got from the index queries") {
     import TestContext._
+```
 
-    /* Evaluating steps: */
+Evaluating steps:
+
+```scala
     assert{ Get(name).evalOn( edu ) == name("@eparejatobes") }
     assert{ Source(posted).evalOn( post ) == edu }
+```
 
-    /* Composing steps: */
+Composing steps:
+
+```scala
     val posterName = Source(posted) >=> Get(name)
     assert{ posterName.evalOn( post ) == (name := "@eparejatobes") }
 
@@ -348,6 +354,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("choice combinator") {
     import TestContext._
+    import scalaz._
 
     // friends' names
     val friendsNames = user
@@ -370,15 +377,69 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   }
 
-  test("merging results") {
-    import TestContext._
-    import ohnosequences.scarph.evals._
-
-    assertResult(ManyOrNone.of(user) := Stream(alexey.value, kim.value, alexey.value, kim.value)) {
-      ( user.inV(follows) ⊗ user.outV(follows) )
-        .merge
-      .evalOn( edu ⊗ edu )
-    }
-  }
-
 }
+
+```
+
+
+------
+
+### Index
+
++ src
+  + test
+    + scala
+      + ohnosequences
+        + scarph
+          + [ContainersTest.scala][test/scala/ohnosequences/scarph/ContainersTest.scala]
+          + [ScalazEquality.scala][test/scala/ohnosequences/scarph/ScalazEquality.scala]
+          + titan
+            + [TwitterTitanTest.scala][test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]
+          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
+    + resources
+  + main
+    + scala
+      + ohnosequences
+        + scarph
+          + [GraphTypes.scala][main/scala/ohnosequences/scarph/GraphTypes.scala]
+          + [Containers.scala][main/scala/ohnosequences/scarph/Containers.scala]
+          + impl
+            + titan
+              + [Schema.scala][main/scala/ohnosequences/scarph/impl/titan/Schema.scala]
+              + [Evals.scala][main/scala/ohnosequences/scarph/impl/titan/Evals.scala]
+              + [Predicates.scala][main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]
+          + [Paths.scala][main/scala/ohnosequences/scarph/Paths.scala]
+          + [Indexes.scala][main/scala/ohnosequences/scarph/Indexes.scala]
+          + [Evals.scala][main/scala/ohnosequences/scarph/Evals.scala]
+          + [Conditions.scala][main/scala/ohnosequences/scarph/Conditions.scala]
+          + [Steps.scala][main/scala/ohnosequences/scarph/Steps.scala]
+          + [Predicates.scala][main/scala/ohnosequences/scarph/Predicates.scala]
+          + [Schemas.scala][main/scala/ohnosequences/scarph/Schemas.scala]
+          + [Combinators.scala][main/scala/ohnosequences/scarph/Combinators.scala]
+          + syntax
+            + [GraphTypes.scala][main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]
+            + [Paths.scala][main/scala/ohnosequences/scarph/syntax/Paths.scala]
+            + [Conditions.scala][main/scala/ohnosequences/scarph/syntax/Conditions.scala]
+            + [Predicates.scala][main/scala/ohnosequences/scarph/syntax/Predicates.scala]
+
+[test/scala/ohnosequences/scarph/ContainersTest.scala]: ../ContainersTest.scala.md
+[test/scala/ohnosequences/scarph/ScalazEquality.scala]: ../ScalazEquality.scala.md
+[test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]: TwitterTitanTest.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/GraphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/Containers.scala]: ../../../../../main/scala/ohnosequences/scarph/Containers.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Schema.scala]: ../../../../../main/scala/ohnosequences/scarph/impl/titan/Schema.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Evals.scala]: ../../../../../main/scala/ohnosequences/scarph/impl/titan/Evals.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/impl/titan/Predicates.scala.md
+[main/scala/ohnosequences/scarph/Paths.scala]: ../../../../../main/scala/ohnosequences/scarph/Paths.scala.md
+[main/scala/ohnosequences/scarph/Indexes.scala]: ../../../../../main/scala/ohnosequences/scarph/Indexes.scala.md
+[main/scala/ohnosequences/scarph/Evals.scala]: ../../../../../main/scala/ohnosequences/scarph/Evals.scala.md
+[main/scala/ohnosequences/scarph/Conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/Conditions.scala.md
+[main/scala/ohnosequences/scarph/Steps.scala]: ../../../../../main/scala/ohnosequences/scarph/Steps.scala.md
+[main/scala/ohnosequences/scarph/Predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/Predicates.scala.md
+[main/scala/ohnosequences/scarph/Schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/Schemas.scala.md
+[main/scala/ohnosequences/scarph/Combinators.scala]: ../../../../../main/scala/ohnosequences/scarph/Combinators.scala.md
+[main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/syntax/Paths.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/Paths.scala.md
+[main/scala/ohnosequences/scarph/syntax/Conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/Conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/Predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/Predicates.scala.md

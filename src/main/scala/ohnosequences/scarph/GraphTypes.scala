@@ -4,6 +4,7 @@ object graphTypes {
 
   import ohnosequences.cosas._, types._, properties._
   import steps._, paths._, containers._
+  import shapeless.<:!<
 
 
   /* This is a graph type containing another graph type */
@@ -17,24 +18,41 @@ object graphTypes {
   }
 
   @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
-  trait ≃[A <: AnyGraphType, B <: AnyGraphType]
+  trait Equality[A <: AnyGraphType, B <: AnyGraphType] { type Out >: A with B <: A with B }
+  type EqualityContext[X <: AnyGraphType, Y <: AnyGraphType] = (X,Y)
+  @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
+  type ≃[A <: AnyGraphType, B <: AnyGraphType] = EqualityContext[A,B] => (A Equality B)
+  trait Refl[A <: AnyGraphType] extends (A Equality A) { type Out = A }
+  implicit def refl[A >: B <: B, B <: AnyGraphType]: EqualityContext[A,B] => A Equality B = { 
 
-  // this is `\simeq` symbol
-  object ≃ extends simeq2 {
-    // implicit def refl[A <: AnySimpleGraphType]: A ≃ A = new (A ≃ A) {}
-
-    implicit def eq[A <: AnyGraphType, B <: AnyGraphType]
-      (implicit eq: A#Container#Of[A#Inside] =:= B#Container#Of[B#Inside]): A ≃ B = new (A ≃ B) {}
+    (x: EqualityContext[A,B]) => new Refl[B] {} 
   }
 
-  trait simeq2 {
+  // implicit def coerce[A <: AnyGraphType, B <: AnyGraphType](a: A)(implicit eqWitness: Equality[A,B]): Equality[A,B]#Out = a
+
+  // this is `\simeq` symbol
+  object EqualityContext {
+
+    // trait Refl[A <: AnyGraphType] extends (A Equality A) { type Out = A }
+    // implicit def refl[A >: B <: B, B <: AnyGraphType, X <: EqualityContext[A,B]]: A Equality B = new Refl[B] {}
+  }
+  
+  trait simeq2 extends simeq3 {
     // implicit def eq[A <: AnyGraphType, B <: AnyGraphType]
     //   (implicit 
     //     cont: A#Container =:= B#Container,
     //     insd: A#Inside ≃ B#Inside
-    //   ): A ≃ B = new (A ≃ B) {}
+    //   ): A ≃ B = new (A ≃ B) {} 
   }
 
+  trait simeq3 {
+
+    // implicit def eqSimple[A <: AnySimpleGraphType, B <: AnySimpleGraphType]
+    //   (implicit
+    //     insd: A#Inside ≃ B#Inside
+    //   ): A ≃ B = new (A ≃ B) {}  
+
+  }
 
   /* This is a non-nested graph type */
   trait AnySimpleGraphType extends AnyGraphType {
@@ -42,20 +60,18 @@ object graphTypes {
     type Container = ExactlyOne
     val  container = ExactlyOne
 
-    type Inside = this.type
-    lazy val inside: Inside = this: this.type
+    type Inside >: this.type <: AnyGraphType//<: AnySimpleGraphType
+    lazy val inside: Inside = this
   }
 
 
   /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnySimpleGraphType
 
-
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
 
-  abstract class Vertex extends AnyVertex { val label = this.toString }
-
+  class Vertex extends AnyVertex { type Inside = this.type; lazy val label = this.toString }
 
   /* Edges connect vertices and have in/out arities */
   // NOTE: this is the same as AnyPath but with restriction on InT/OutT
@@ -88,6 +104,9 @@ object graphTypes {
     lazy val target = st._2
 
     val label = this.toString
+
+    // this is wrong too!
+    type Inside = this.type // Edge[S,T]
   }
 
   object AnyEdge {
@@ -99,7 +118,7 @@ object graphTypes {
 
 
   /* Property is assigned to one element type and has a raw representation */
-  trait AnyGraphProperty extends AnySimpleGraphType with AnyProperty {
+  trait AnyGraphProperty extends AnyProperty with AnySimpleGraphType {
 
     type Owner <: AnyGraphElement
     val  owner: Owner
@@ -110,17 +129,21 @@ object graphTypes {
     
     type Owner = O
 
-    val label = this.toString
+    lazy val label: String = this.toString
+
+    // ???
+    type Inside = this.type
   }
 
-
-  trait AnyParType extends AnySimpleGraphType {
+  trait AnyParType extends AnySimpleGraphType { par =>
 
     type First <: AnyGraphType
     val  first: First
 
     type Second <: AnyGraphType
     val  second: Second
+
+    type Inside >: par.type <: AnyParType { type First = par.First; type Second = par.Second }
   }
 
   case class ParType[F <: AnyGraphType, S <: AnyGraphType]
@@ -129,7 +152,9 @@ object graphTypes {
     type First = F
     type Second = S
 
-    val label = s"(first.label ⊗ second.label)"
+    lazy val label = s"(first.label ⊗ second.label)"
+
+    type Inside = ParType[First,Second]
   }
 
 
@@ -148,7 +173,9 @@ object graphTypes {
     type Left = L
     type Right = R
 
-    val label = s"(left.label ⊕ right.label)"
+    lazy val label = s"(left.label ⊕ right.label)"
+
+    type Inside = OrType[Left,Right]
   }
 
 }

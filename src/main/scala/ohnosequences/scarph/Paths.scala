@@ -16,7 +16,7 @@ object paths {
     - `C` suffix means (arity) _Container_
     - `T` suffix means (label) _Type_
   */
-  sealed trait AnyPath {
+  sealed trait AnyPath extends AnyGraphType {
 
     /* Input */
     type In <: AnyGraphType
@@ -31,7 +31,7 @@ object paths {
 
 
   /* A _step_ is a simple atomic _path_ which can be evaluated directly */
-  trait AnyStep extends AnyPath {
+  trait AnyStep extends AnyPath with AnySimpleGraphType {
 
     type In <: AnySimpleGraphType
     val  in: In
@@ -48,7 +48,7 @@ object paths {
 
 
   /* See available combinators in [Combinators.scala] */
-  trait AnyPathCombinator extends AnyPath
+  trait AnyPathCombinator extends AnyPath with AnySimpleGraphType
 
 
   /* Adding useful methods */
