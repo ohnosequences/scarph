@@ -12,7 +12,7 @@ object containers {
     type Container = C
     type Inside = T
 
-    val label = this.toString
+    lazy val label = this.toString
   }
 
   private[containers] case class ExactlyOneOf[T <: AnyGraphType](t: T) extends NestedGraphType(ExactlyOne, t)
@@ -84,43 +84,5 @@ object containers {
         (A × B) with Out[ManyOrNone] = 
     new (A × B) with Out[ManyOrNone] { def apply(a: In1, b: In2): Out = ManyOrNone }
   }
-
-
-  // TODO: HList-like with bound on vertices, another for paths etc
-
-  // trait AnyParType extends AnyGraphType {
-
-  //   type First <: AnyGraphType
-  //   val  first: First
-
-  //   type Second <: AnyGraphType
-  //   val  second: Second
-  // }
-
-  // case class ParType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyParType {
-
-  //   type First = F
-  //   type Second = S
-
-  //   val label = this.toString
-  // }
-
-
-  // trait AnyOrType extends AnyGraphType {
-
-  //   type First <: AnyGraphType
-  //   val  first: First
-
-  //   type Second <: AnyGraphType
-  //   val  second: Second
-  // }
-
-  // case class OrType[F <: AnyGraphType, S <: AnyGraphType](val first: F, val second: S) extends AnyOrType {
-
-  //   type First = F
-  //   type Second = S
-
-  //   val label = this.toString
-  // }
 
 }

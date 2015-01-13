@@ -110,6 +110,8 @@ object indexes {
     type IndexedType = I
     type Properties = Props
     type Uniqueness = U
+
+    final type Inside = CompositeIndex[IndexedType,Properties,Uniqueness]
   }
 
 
@@ -131,6 +133,8 @@ object indexes {
     type IndexedType = I
     type Property = P
     type Uniqueness = U
+
+    final type Inside = KeyIndex[IndexedType,Property,Uniqueness]
   }
 
 
@@ -163,6 +167,8 @@ object indexes {
     type IndexedType = E
     type IndexType = T
     type Properties = Props
+
+    final type Inside = LocalEdgeIndex[IndexedType,Properties,IndexType]
   }
 
 }

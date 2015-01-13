@@ -57,7 +57,7 @@ object combinators {
     type     Out = Container#Of[Inner#Out]
     lazy val out = container.of(inner.out): Out
   }
-
+  /* P MapOver C */
   case class MapOver[P <: AnyPath, C <: AnyContainer]
     (val inner: P, val container: C) extends AnyMapOver {
 
@@ -94,51 +94,62 @@ object combinators {
     }
 
 
-  // /* Parallel composition of paths */
-  // trait AnyPar extends CombinatorOf2Paths {
+  /* Parallel composition of paths */
+  trait AnyPar extends CombinatorOf2Paths {
 
-  //   type InC = ExactlyOne
-  //   val  inC = ExactlyOne 
-  //   type InT = ParType[InOf[First], InOf[Second]]
-  //   val  inT = ParType(inOf(first), inOf(second))
+    type     In = ParType[First#In, Second#In]
+    lazy val in = ParType(first.in, second.in): In
 
-  //   type OutC = ExactlyOne
-  //   val  outC = ExactlyOne
-  //   type OutT = ParType[OutOf[First], OutOf[Second]]
-  //   val  outT = ParType(outOf(first), outOf(second))
-  // }
+    type     Out = ParType[First#Out, Second#Out]
+    lazy val out = ParType(first.out, second.out): Out
+  }
 
-  // case class Par[F <: AnyPath, S <: AnyPath]
-  //   (val first: F, val second: S) extends AnyPar {
+  case class Par[F <: AnyPath, S <: AnyPath]
+    (val first: F, val second: S) extends AnyPar {
 
-  //   type First = F
-  //   type Second = S
-  // }
+    type First = F
+    type Second = S
+  }
 
-  // type ⨂[F <: AnyPath, S <: AnyPath] = Par[F, S]
+  // \otimes symbol: F ⊗ S
+  type ⊗[F <: AnyPath, S <: AnyPath] = Par[F, S]
 
 
-  // /* Choice */
-  // trait AnyOr extends CombinatorOf2Paths {
+  trait AnyFork extends CombinatorOf1Path {
 
-  //   type InC = ExactlyOne
-  //   val  inC = ExactlyOne 
-  //   type InT = OrType[InOf[First], InOf[Second]]
-  //   val  inT = OrType(inOf(first), inOf(second))
+    type     In = Inner#In
+    lazy val in = inner.in
 
-  //   type OutC = ExactlyOne
-  //   val  outC = ExactlyOne
-  //   type OutT = OrType[OutOf[First], OutOf[Second]]
-  //   val  outT = OrType(outOf(first), outOf(second))
-  // }
+    type     Out = ParType[Inner#Out, Inner#Out]
+    lazy val out = ParType(inner.out, inner.out): Out
+  }
 
-  // case class Or[F <: AnyPath, S <: AnyPath]
-  //   (val first: F, val second: S) extends AnyOr {
+  case class Fork[P <: AnyPath](val inner: P) extends AnyFork { type Inner = P }
 
-  //   type First = F
-  //   type Second = S
-  // }
 
-  // type ⨁[F <: AnyPath, S <: AnyPath] = Or[F, S]
+  /* Choice */
+  trait AnyOr extends CombinatorOf2Paths {
+    type     Left = First
+    lazy val left = first: Left
+
+    type     Right = Second
+    lazy val right = second: Right
+
+    type     In = OrType[Left#In, Right#In]
+    lazy val in = OrType(left.in, right.in): In
+
+    type     Out = OrType[Left#Out, Right#Out]
+    lazy val out = OrType(left.out, right.out): Out
+  }
+
+  case class Or[F <: AnyPath, S <: AnyPath]
+    (val first: F, val second: S) extends AnyOr {
+
+    type First = F
+    type Second = S
+  }
+
+  // \oplus symbol:
+  type ⊕[F <: AnyPath, S <: AnyPath] = Or[F, S]
 
 }

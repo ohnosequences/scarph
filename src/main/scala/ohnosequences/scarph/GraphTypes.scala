@@ -16,7 +16,7 @@ object graphTypes {
     val  inside: Inside
   }
 
-  @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\t${A}\n\t${B}")
+  @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
   trait ≃[A <: AnyGraphType, B <: AnyGraphType]
 
   // this is `\simeq` symbol
@@ -42,8 +42,8 @@ object graphTypes {
     type Container = ExactlyOne
     val  container = ExactlyOne
 
-    type Inside = this.type
-    lazy val inside: Inside = this: this.type
+    type Inside >: this.type <: AnyGraphType
+    lazy val inside: Inside = this
   }
 
 
@@ -54,8 +54,7 @@ object graphTypes {
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
 
-  abstract class Vertex extends AnyVertex { val label = this.toString }
-
+  class Vertex extends AnyVertex { type Inside = this.type; lazy val label = this.toString }
 
   /* Edges connect vertices and have in/out arities */
   // NOTE: this is the same as AnyPath but with restriction on InT/OutT
@@ -88,6 +87,8 @@ object graphTypes {
     lazy val target = st._2
 
     val label = this.toString
+
+    type Inside = Edge[S,T]
   }
 
 
@@ -104,6 +105,49 @@ object graphTypes {
     type Owner = O
 
     val label = this.toString
+
+    type Inside = PropertyOf[O]
+  }
+
+  trait AnyParType extends AnySimpleGraphType {
+
+    type First <: AnyGraphType
+    val  first: First
+
+    type Second <: AnyGraphType
+    val  second: Second
+  }
+
+  case class ParType[F <: AnyGraphType, S <: AnyGraphType]
+    (val first: F, val second: S) extends AnyParType {
+
+    type First = F
+    type Second = S
+
+    lazy val label = s"(first.label ⊗ second.label)"
+
+    type Inside = ParType[F,S]
+  }
+
+
+  trait AnyOrType extends AnySimpleGraphType {
+
+    type Left <: AnyGraphType
+    val  left: Left
+
+    type Right <: AnyGraphType
+    val  right: Right
+  }
+
+  case class OrType[L <: AnyGraphType, R <: AnyGraphType]
+    (val left: L, val right: R) extends AnyOrType {
+
+    type Left = L
+    type Right = R
+
+    lazy val label = s"(left.label ⊕ right.label)"
+
+    type Inside = OrType[Left,Right]
   }
 
 }

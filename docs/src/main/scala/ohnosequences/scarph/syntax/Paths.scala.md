@@ -1,14 +1,20 @@
+
+```scala
 package ohnosequences.scarph.syntax
+```
 
+This is an example gremlin-like syntax for paths construction
 
-/* This is an example gremlin-like syntax for paths construction */
+```scala
 object paths {
 
   import ohnosequences.{ scarph => s }
   import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.containers._, s.predicates._, s.schemas._, s.indexes._
+```
 
+Graph/schema ops
 
-  /* Graph/schema ops */
+```scala
   implicit def schemaOps[S <: AnySchema](s: S):
         SchemaOps[S] =
     new SchemaOps[S](s)
@@ -18,9 +24,12 @@ object paths {
     def query[P <: AnyPredicate](p: P): 
       GraphQuery[S, ManyOrNone, P] = 
       GraphQuery(s, ManyOrNone, p)
+```
 
-    /* This method takes also an index and checks that the predicate satisfies the 
-       index'es restriction, ensuring that it can be utilized for this query */
+This method takes also an index and checks that the predicate satisfies the 
+index'es restriction, ensuring that it can be utilized for this query
+
+```scala
     def query[I <: AnyIndex, P <: AnyPredicate, C <: AnyContainer](i: I, p: P)
       (implicit
         ch: I#PredicateRestriction[P],
@@ -28,9 +37,11 @@ object paths {
       ): GraphQuery[S, C, P] =
          GraphQuery(s, cn.apply, p)
   }
+```
 
+Element types
 
-  /* Element types */
+```scala
   implicit def elementOps[E <: AnyGraphElement](e: E):
         ElementOps[E] =
     new ElementOps[E](e)
@@ -55,8 +66,11 @@ object paths {
       F >=> Get[P] =
       f >=> Get[P](p)
   }
+```
 
-  /* Edge types */
+Edge types
+
+```scala
   implicit def edgeOps[E <: AnyEdge](e: E):
         EdgeOps[E] =
     new EdgeOps[E](e)
@@ -81,8 +95,11 @@ object paths {
     def tgt: F >=> Target[F#Out] =
              f >=> Target(f.out)
   }
+```
 
-  /* Vertex types */
+Vertex types
+
+```scala
   implicit def vertexOps[V <: AnyVertex](v: V):
         VertexOps[V] =
     new VertexOps[V](v)
@@ -149,8 +166,11 @@ object paths {
       F >=> OutE[P] =
       f >=> OutE(fromX(x))
   }
+```
 
-  /* This gives user nice warnings and doesn't add unnecessary constructors */
+This gives user nice warnings and doesn't add unnecessary constructors
+
+```scala
   implicit def pathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F): 
         PathWarnOps[F] =
     new PathWarnOps[F](f)
@@ -173,8 +193,11 @@ object paths {
       Fork(f) >=> s
 
   }
+```
 
-  /* Any paths */
+Any paths
+
+```scala
   implicit def pathOps[F <: AnyPath](f: F): 
         PathOps[F] =
     new PathOps[F](f)
@@ -255,3 +278,68 @@ object paths {
   }
 
 }
+
+```
+
+
+------
+
+### Index
+
++ src
+  + test
+    + scala
+      + ohnosequences
+        + scarph
+          + [ContainersTest.scala][test/scala/ohnosequences/scarph/ContainersTest.scala]
+          + [ScalazEquality.scala][test/scala/ohnosequences/scarph/ScalazEquality.scala]
+          + titan
+            + [TwitterTitanTest.scala][test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]
+          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
+    + resources
+  + main
+    + scala
+      + ohnosequences
+        + scarph
+          + [GraphTypes.scala][main/scala/ohnosequences/scarph/GraphTypes.scala]
+          + [Containers.scala][main/scala/ohnosequences/scarph/Containers.scala]
+          + impl
+            + titan
+              + [Schema.scala][main/scala/ohnosequences/scarph/impl/titan/Schema.scala]
+              + [Evals.scala][main/scala/ohnosequences/scarph/impl/titan/Evals.scala]
+              + [Predicates.scala][main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]
+          + [Paths.scala][main/scala/ohnosequences/scarph/Paths.scala]
+          + [Indexes.scala][main/scala/ohnosequences/scarph/Indexes.scala]
+          + [Evals.scala][main/scala/ohnosequences/scarph/Evals.scala]
+          + [Conditions.scala][main/scala/ohnosequences/scarph/Conditions.scala]
+          + [Steps.scala][main/scala/ohnosequences/scarph/Steps.scala]
+          + [Predicates.scala][main/scala/ohnosequences/scarph/Predicates.scala]
+          + [Schemas.scala][main/scala/ohnosequences/scarph/Schemas.scala]
+          + [Combinators.scala][main/scala/ohnosequences/scarph/Combinators.scala]
+          + syntax
+            + [GraphTypes.scala][main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]
+            + [Paths.scala][main/scala/ohnosequences/scarph/syntax/Paths.scala]
+            + [Conditions.scala][main/scala/ohnosequences/scarph/syntax/Conditions.scala]
+            + [Predicates.scala][main/scala/ohnosequences/scarph/syntax/Predicates.scala]
+
+[test/scala/ohnosequences/scarph/ContainersTest.scala]: ../../../../../test/scala/ohnosequences/scarph/ContainersTest.scala.md
+[test/scala/ohnosequences/scarph/ScalazEquality.scala]: ../../../../../test/scala/ohnosequences/scarph/ScalazEquality.scala.md
+[test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]: ../../../../../test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/GraphTypes.scala]: ../GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/Containers.scala]: ../Containers.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Schema.scala]: ../impl/titan/Schema.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Evals.scala]: ../impl/titan/Evals.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]: ../impl/titan/Predicates.scala.md
+[main/scala/ohnosequences/scarph/Paths.scala]: ../Paths.scala.md
+[main/scala/ohnosequences/scarph/Indexes.scala]: ../Indexes.scala.md
+[main/scala/ohnosequences/scarph/Evals.scala]: ../Evals.scala.md
+[main/scala/ohnosequences/scarph/Conditions.scala]: ../Conditions.scala.md
+[main/scala/ohnosequences/scarph/Steps.scala]: ../Steps.scala.md
+[main/scala/ohnosequences/scarph/Predicates.scala]: ../Predicates.scala.md
+[main/scala/ohnosequences/scarph/Schemas.scala]: ../Schemas.scala.md
+[main/scala/ohnosequences/scarph/Combinators.scala]: ../Combinators.scala.md
+[main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]: GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/syntax/Paths.scala]: Paths.scala.md
+[main/scala/ohnosequences/scarph/syntax/Conditions.scala]: Conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/Predicates.scala]: Predicates.scala.md
