@@ -119,7 +119,7 @@ case object evals {
 
 
   implicit def evalVertexQuery[
-    S <: AnySchema, P <: AnyPredicate { type Element <: AnyVertex }, C <: AnyContainer, O
+    S <: AnyGraphSchema, P <: AnyPredicate { type Element <: AnyVertex }, C <: AnyContainer, O
   ](implicit 
     toBlueprintsQuery: ToBlueprintsPredicate[P],
     packValue: ValueContainer[C, JIterable[TitanVertex]] { type Out = O }
@@ -134,7 +134,7 @@ case object evals {
   }
 
   implicit def evalEdgeQuery[
-    S <: AnySchema, P <: AnyPredicate { type Element <: AnyEdge }, C <: AnyContainer, O
+    S <: AnyGraphSchema, P <: AnyPredicate { type Element <: AnyEdge }, C <: AnyContainer, O
   ](implicit 
     toBlueprintsQuery: ToBlueprintsPredicate[P],
     packValue: ValueContainer[C, JIterable[TitanEdge]] { type Out = O }

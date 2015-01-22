@@ -5,7 +5,7 @@ object schemas {
   import ohnosequences.cosas._, typeSets._
   import graphTypes._, indexes._
 
-  trait AnySchema extends AnySimpleGraphType {
+  trait AnyGraphSchema extends AnySimpleGraphType {
 
     type Properties <: AnyTypeSet.Of[AnyGraphProperty]
     val  properties: Properties
@@ -20,7 +20,7 @@ object schemas {
     val  indexes: Indexes
   }
 
-  abstract class Schema[
+  abstract class GraphSchema[
       Ps <: AnyTypeSet.Of[AnyGraphProperty],
       Vs <: AnyTypeSet.Of[AnyVertex],
       Es <: AnyTypeSet.Of[AnyEdge],
@@ -30,24 +30,24 @@ object schemas {
       val vertices: Vs,
       val edges: Es,
       val indexes: Is
-    ) extends AnySchema {
+    ) extends AnyGraphSchema {
 
     type Properties = Ps
     type Vertices = Vs
     type Edges = Es
     type Indexes = Is
 
-    type Inside = Schema[Ps,Vs,Es,Is]
+    type Inside = GraphSchema[Ps,Vs,Es,Is]
   }
 
-  object AnySchemaType {
+  object AnyGraphSchemaType {
 
-    implicit def schemaOps[GS <: AnySchema](gs: GS):
-          SchemaOps[GS] =
-      new SchemaOps[GS](gs)
+    implicit def schemaOps[GS <: AnyGraphSchema](gs: GS):
+          GraphSchemaOps[GS] =
+      new GraphSchemaOps[GS](gs)
   }
 
-  class SchemaOps[GS <: AnySchema](gs: GS) {
+  class GraphSchemaOps[GS <: AnyGraphSchema](gs: GS) {
 
     // TODO: filter schema properties by an owner
     // def propertiesOf[E <: AnyGraphElement](e: E)

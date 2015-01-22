@@ -65,6 +65,44 @@ object schema {
       }
   }
 
+  sealed trait AnyPropertyKeyError {
+    type Property <: AnyGraphProperty
+    val  property: Property
+
+    val msg: String
+  }
+  abstract class PropertyKeyError[P <: AnyGraphProperty](val msg: String) 
+    extends AnyPropertyKeyError { type Property = P }
+
+  case class PropertyKeyDoesntExist[P <: AnyGraphProperty](val property: P)
+    extends PropertyKeyError[P](s"The property key for [${property.label}] doesn't exist")
+
+  case class PropertyKeyHasWrongCardinality[P <: AnyGraphProperty](val property: P)
+    extends PropertyKeyError[P](s"The property key for [${property.label}] has wrong cardinality")
+
+  case class PropertyKeyHasWrongType[P <: AnyGraphProperty](val property: P)
+    extends PropertyKeyError[P](s"The property key for [${property.label}] has wrong datatype")
+
+  object checkPropertyKey extends Poly1 {
+    implicit def check[P <: AnyGraphProperty](implicit cc: scala.reflect.ClassTag[P#Raw]) =
+      at[P]{ (prop: P) =>
+        { (mgmt: TitanManagement) =>
+
+          if ( ! mgmt.containsRelationType(prop.label) ) Left(PropertyKeyDoesntExist(prop))
+          else {
+            val pkey: PropertyKey = mgmt.getPropertyKey(prop.label)
+
+            if ( com.thinkaurelius.titan.core.Cardinality.SINGLE != pkey.getCardinality )
+              Left(PropertyKeyHasWrongCardinality(prop))
+            else if ( cc.runtimeClass.asInstanceOf[Class[P#Raw]] != pkey.getDataType )
+              Left(PropertyKeyHasWrongType(prop))
+            else Right(pkey)
+          }: Either[AnyPropertyKeyError, PropertyKey]
+        }
+      }
+  }
+
+
   object addVertexLabel extends Poly1 {
     implicit def default[VT <: AnyVertex] = at[VT]{ (vt: VT) =>
       { (m: TitanManagement) => m.makeVertexLabel(vt.label).make }
@@ -131,14 +169,14 @@ object schema {
       }
   }
 
-  implicit def titanGraphOps[S <: AnySchema](g: S := TitanGraph): 
+  implicit def titanGraphOps[S <: AnyGraphSchema](g: S := TitanGraph)(implicit sch: S):
     TitanGraphOps[S] = 
-    TitanGraphOps[S](g)
+    TitanGraphOps[S](g)(sch)
 
-  case class TitanGraphOps[S <: AnySchema](g: S := TitanGraph) {
+  case class TitanGraphOps[S <: AnyGraphSchema](g: S := TitanGraph)(sch: S) {
 
-    def createSchema(sch: S)(implicit
-      propertiesMapper: MapToList[addPropertyKey.type, S#Properties] with 
+    def createSchema(implicit
+      propertiesMapper: MapToList[addPropertyKey.type, S#Properties] with
                         InContainer[TitanManagement => PropertyKey],
       edgeTypesMapper: MapToList[addEdgeLabel.type, S#Edges] with 
                        InContainer[TitanManagement => EdgeLabel],
@@ -156,6 +194,28 @@ object schema {
       indexMapper(sch.indexes).map{ _.apply(mgmt) }
 
       mgmt.commit
+    }
+
+    def checkSchema(implicit
+      propertiesMapper: MapToList[checkPropertyKey.type, S#Properties] with
+                        InContainer[TitanManagement => Either[AnyPropertyKeyError, PropertyKey]]
+      // edgeTypesMapper: MapToList[addEdgeLabel.type, S#Edges] with 
+      //                  InContainer[TitanManagement => EdgeLabel],
+      // vertexTypesMapper: MapToList[addVertexLabel.type, S#Vertices] with 
+      //                    InContainer[TitanManagement => VertexLabel],
+      // indexMapper: MapToList[addIndex.type, S#Indexes] with 
+      //              InContainer[TitanManagement => TitanIndex]
+    ) = {
+      /* We want this to happen all in _one_ transaction */
+      val mgmt = g.value.getManagementSystem
+
+      val r = propertiesMapper(sch.properties).map{ _.apply(mgmt) }
+      // edgeTypesMapper(sch.edges).map{ _.apply(mgmt) }
+      // vertexTypesMapper(sch.vertices).map{ _.apply(mgmt) }
+      // indexMapper(sch.indexes).map{ _.apply(mgmt) }
+
+      mgmt.commit
+      r
     }
   }
 

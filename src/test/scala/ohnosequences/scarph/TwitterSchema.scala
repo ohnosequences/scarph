@@ -32,7 +32,7 @@ object Twitter {
   // vertex-centric indexes
   case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
 
-  case object twitter extends Schema(
+  case object twitter extends GraphSchema(
     label = "twitter",
     properties = name :~: age :~: text :~: time :~: url :~: ∅,
     vertices =  user :~: tweet :~: ∅,

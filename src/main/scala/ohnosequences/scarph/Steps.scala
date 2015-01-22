@@ -101,7 +101,7 @@ object steps {
     type Inside = Target[E]
   }
 
-  case class GraphQuery[S <: AnySchema, C <: AnyContainer, P <: AnyPredicate]
+  case class GraphQuery[S <: AnyGraphSchema, C <: AnyContainer, P <: AnyPredicate]
     (val graph: S, val c: C, val predicate: P)
       extends Step[S, C#Of[P#Element]](graph, c.of(predicate.element)) {
 

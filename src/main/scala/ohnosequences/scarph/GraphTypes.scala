@@ -28,31 +28,6 @@ object graphTypes {
     (x: EqualityContext[A,B]) => new Refl[B] {} 
   }
 
-  // implicit def coerce[A <: AnyGraphType, B <: AnyGraphType](a: A)(implicit eqWitness: Equality[A,B]): Equality[A,B]#Out = a
-
-  // this is `\simeq` symbol
-  object EqualityContext {
-
-    // trait Refl[A <: AnyGraphType] extends (A Equality A) { type Out = A }
-    // implicit def refl[A >: B <: B, B <: AnyGraphType, X <: EqualityContext[A,B]]: A Equality B = new Refl[B] {}
-  }
-  
-  trait simeq2 extends simeq3 {
-    // implicit def eq[A <: AnyGraphType, B <: AnyGraphType]
-    //   (implicit 
-    //     cont: A#Container =:= B#Container,
-    //     insd: A#Inside ≃ B#Inside
-    //   ): A ≃ B = new (A ≃ B) {} 
-  }
-
-  trait simeq3 {
-
-    // implicit def eqSimple[A <: AnySimpleGraphType, B <: AnySimpleGraphType]
-    //   (implicit
-    //     insd: A#Inside ≃ B#Inside
-    //   ): A ≃ B = new (A ≃ B) {}  
-
-  }
 
   /* This is a non-nested graph type */
   trait AnySimpleGraphType extends AnyGraphType {

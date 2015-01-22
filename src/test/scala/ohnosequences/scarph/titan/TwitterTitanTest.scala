@@ -23,7 +23,7 @@ trait AnyTitanTestSuite
   val titanTwitter = twitter := g
 
   override def beforeAll() {
-    titanTwitter.createSchema(twitter)
+    titanTwitter.createSchema
 
     // loading data from a prepared GraphSON file
     import com.tinkerpop.blueprints.util.io.graphson._
@@ -54,23 +54,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
     }
   }
 
-  // checks existence and dataType
-  def checkPropertyKey[P <: AnyGraphProperty](mgmt: TitanManagement, p: P)
-    (implicit cc: scala.reflect.ClassTag[P#Raw]) = {
-
-    assert{ mgmt.containsRelationType(p.label) }
-
-    val pkey: PropertyKey = mgmt.getPropertyKey(p.label)
-
-    assertResult( com.thinkaurelius.titan.core.Cardinality.SINGLE ) { 
-      pkey.getCardinality 
-    }
-
-    assertResult( cc.runtimeClass.asInstanceOf[Class[P#Raw]] ) {
-      pkey.getDataType
-    }
-  }
-
   import ohnosequences.cosas._, fns._
   import ohnosequences.cosas.ops.typeSets.MapToList
   // checks existence, type and the indexed property
@@ -96,12 +79,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     val mgmt = g.getManagementSystem
 
-    checkPropertyKey(mgmt, name)
-    checkPropertyKey(mgmt, age)
-    checkPropertyKey(mgmt, text)
-    checkPropertyKey(mgmt, url)
-    checkPropertyKey(mgmt, time)
-
     checkEdgeLabel(mgmt, posted)
     checkEdgeLabel(mgmt, follows)
 
@@ -114,6 +91,8 @@ class TitanTestSuite extends AnyTitanTestSuite {
     checkCompositeIndex(mgmt, userByNameAndAge)
 
     mgmt.commit
+
+    assert{ titanTwitter.checkSchema.forall(_.isRight) }
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////

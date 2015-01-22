@@ -9,11 +9,11 @@ object paths {
 
 
   /* Graph/schema ops */
-  implicit def schemaOps[S <: AnySchema](s: S):
+  implicit def schemaOps[S <: AnyGraphSchema](s: S):
         SchemaOps[S] =
     new SchemaOps[S](s)
 
-  class SchemaOps[S <: AnySchema](s: S) {
+  class SchemaOps[S <: AnyGraphSchema](s: S) {
 
     def query[P <: AnyPredicate](p: P): 
       GraphQuery[S, ManyOrNone, P] = 
