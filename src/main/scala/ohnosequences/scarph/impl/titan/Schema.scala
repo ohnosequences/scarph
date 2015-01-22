@@ -65,12 +65,13 @@ object schema {
       }
   }
 
-  sealed trait AnyPropertyKeyError {
+  sealed trait AnySchemaCheckError { val msg: String }
+
+  sealed trait AnyPropertyKeyError extends AnySchemaCheckError {
     type Property <: AnyGraphProperty
     val  property: Property
-
-    val msg: String
   }
+
   abstract class PropertyKeyError[P <: AnyGraphProperty](val msg: String) 
     extends AnyPropertyKeyError { type Property = P }
 
@@ -80,8 +81,8 @@ object schema {
   case class PropertyKeyHasWrongCardinality[P <: AnyGraphProperty](val property: P)
     extends PropertyKeyError[P](s"The property key for [${property.label}] has wrong cardinality")
 
-  case class PropertyKeyHasWrongType[P <: AnyGraphProperty](val property: P)
-    extends PropertyKeyError[P](s"The property key for [${property.label}] has wrong datatype")
+  case class PropertyKeyHasWrongType[P <: AnyGraphProperty](val property: P, t1: String, t2: String)
+    extends PropertyKeyError[P](s"The property key for [${property.label}] has wrong datatype (should be ${t1}, but it is ${t2})")
 
   object checkPropertyKey extends Poly1 {
     implicit def check[P <: AnyGraphProperty](implicit cc: scala.reflect.ClassTag[P#Raw]) =
@@ -95,7 +96,7 @@ object schema {
             if ( com.thinkaurelius.titan.core.Cardinality.SINGLE != pkey.getCardinality )
               Left(PropertyKeyHasWrongCardinality(prop))
             else if ( cc.runtimeClass.asInstanceOf[Class[P#Raw]] != pkey.getDataType )
-              Left(PropertyKeyHasWrongType(prop))
+              Left(PropertyKeyHasWrongType(prop, cc.runtimeClass.asInstanceOf[Class[P#Raw]].toString, pkey.getDataType.toString))
             else Right(pkey)
           }: Either[AnyPropertyKeyError, PropertyKey]
         }
@@ -104,10 +105,33 @@ object schema {
 
 
   object addVertexLabel extends Poly1 {
-    implicit def default[VT <: AnyVertex] = at[VT]{ (vt: VT) =>
-      { (m: TitanManagement) => m.makeVertexLabel(vt.label).make }
+    implicit def default[V <: AnyVertex] = at[V]{ (v: V) =>
+      { (m: TitanManagement) => m.makeVertexLabel(v.label).make }
     }
   }
+
+  sealed trait AnyVertexLabelError extends AnySchemaCheckError {
+    type Vertex <: AnyVertex
+    val  vertex: Vertex
+  }
+
+  abstract class VertexLabelError[V <: AnyVertex](val msg: String) 
+    extends AnyVertexLabelError { type Vertex = V }
+
+  case class VertexLabelDoesntExist[V <: AnyVertex](val vertex: V)
+    extends VertexLabelError[V](s"The vertex label for [${vertex.label}] doesn't exist")
+
+  object checkVertexLabel extends Poly1 {
+    implicit def check[V <: AnyVertex] =
+      at[V]{ (v: V) =>
+        { (mgmt: TitanManagement) =>
+          if ( ! mgmt.containsVertexLabel(v.label) ) Left(VertexLabelDoesntExist(v))
+          else Right(mgmt.getVertexLabel(v.label))
+          : Either[AnyVertexLabelError, VertexLabel]
+        }
+      }
+  }
+
 
   object addEdgeLabel extends Poly1 {
     implicit def default[ET <: AnyEdge](implicit multi: EdgeTypeMultiplicity[ET]) = at[ET]{ (et: ET) =>
@@ -198,24 +222,25 @@ object schema {
 
     def checkSchema(implicit
       propertiesMapper: MapToList[checkPropertyKey.type, S#Properties] with
-                        InContainer[TitanManagement => Either[AnyPropertyKeyError, PropertyKey]]
+                        InContainer[TitanManagement => Either[AnyPropertyKeyError, PropertyKey]],
       // edgeTypesMapper: MapToList[addEdgeLabel.type, S#Edges] with 
       //                  InContainer[TitanManagement => EdgeLabel],
-      // vertexTypesMapper: MapToList[addVertexLabel.type, S#Vertices] with 
-      //                    InContainer[TitanManagement => VertexLabel],
+      vertexTypesMapper: MapToList[checkVertexLabel.type, S#Vertices] with 
+                         InContainer[TitanManagement => Either[AnyVertexLabelError, VertexLabel]]
       // indexMapper: MapToList[addIndex.type, S#Indexes] with 
       //              InContainer[TitanManagement => TitanIndex]
-    ) = {
+    ): List[AnySchemaCheckError] = {
       /* We want this to happen all in _one_ transaction */
       val mgmt = g.value.getManagementSystem
 
-      val r = propertiesMapper(sch.properties).map{ _.apply(mgmt) }
+      val pErrs = propertiesMapper(sch.properties).map{ _.apply(mgmt) }.flatMap(_.left.toOption)
       // edgeTypesMapper(sch.edges).map{ _.apply(mgmt) }
-      // vertexTypesMapper(sch.vertices).map{ _.apply(mgmt) }
+      val vErrs = vertexTypesMapper(sch.vertices).map{ _.apply(mgmt) }.flatMap(_.left.toOption)
       // indexMapper(sch.indexes).map{ _.apply(mgmt) }
 
       mgmt.commit
-      r
+      
+      pErrs ++ vErrs
     }
   }
 

@@ -82,9 +82,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
     checkEdgeLabel(mgmt, posted)
     checkEdgeLabel(mgmt, follows)
 
-    assert{ mgmt.containsVertexLabel(user.label) }
-    assert{ mgmt.containsVertexLabel(tweet.label) }
-
     checkCompositeIndex(mgmt, userByName)
     checkCompositeIndex(mgmt, tweetByText)
     checkCompositeIndex(mgmt, postedByTime)
@@ -92,7 +89,9 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     mgmt.commit
 
-    assert{ titanTwitter.checkSchema.forall(_.isRight) }
+    val errors = titanTwitter.checkSchema
+    if (errors.nonEmpty) errors.foreach{ err => info(err.msg) }
+    assert{ errors.isEmpty }
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
