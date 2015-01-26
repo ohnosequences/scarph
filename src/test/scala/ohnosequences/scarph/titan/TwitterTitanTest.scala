@@ -56,23 +56,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   import ohnosequences.cosas._, fns._
   import ohnosequences.cosas.ops.typeSets.MapToList
-  // checks existence, type and the indexed property
-  def checkCompositeIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix)
-    (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) = {
-
-    assert{ mgmt.containsGraphIndex(ix.label) }
-
-    val index = mgmt.getGraphIndex(ix.label)
-    // TODO: check for mixed indexes and any other stuff
-    assert{ index.isCompositeIndex }
-    assert{ index.isUnique == ix.uniqueness.bool }
-
-    val ixPropertyKeys: Set[PropertyKey] = 
-      propLabels(ix.properties).map{ mgmt.getPropertyKey(_) }.toSet
-
-    assert{ index.getFieldKeys.toSet == ixPropertyKeys }
-    // println(ixPropertyKeys.mkString(s"[${ix.label}] property keys: {", ", ", "}"))
-  }
 
   // TODO: make it a graph op: checkSchema
   test("check schema keys/labels") {
@@ -81,11 +64,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
     checkEdgeLabel(mgmt, posted)
     checkEdgeLabel(mgmt, follows)
-
-    checkCompositeIndex(mgmt, userByName)
-    checkCompositeIndex(mgmt, tweetByText)
-    checkCompositeIndex(mgmt, postedByTime)
-    checkCompositeIndex(mgmt, userByNameAndAge)
 
     mgmt.commit
 

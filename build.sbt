@@ -5,7 +5,7 @@ description   := "Scala graph API"
 organization  := "ohnosequences"
 bucketSuffix  := "era7.com"
 
-scalaVersion        := "2.11.4"
+scalaVersion        := "2.11.5"
 crossScalaVersions  := Seq("2.10.4")
 
 libraryDependencies ++= Seq(
@@ -16,8 +16,8 @@ libraryDependencies ++= Seq(
   },
   "ohnosequences"           %% "cosas"       % "0.6.0-SNAPSHOT",
   "org.scalaz"              %% "scalaz-core" % "7.1.0",
-  "com.thinkaurelius.titan" %  "titan-core"  % "0.5.2",
-  "org.scalatest"           %% "scalatest"   % "2.2.2" % Test,
+  "com.thinkaurelius.titan" %  "titan-core"  % "0.5.3",
+  "org.scalatest"           %% "scalatest"   % "2.2.3" % Test,
   "org.slf4j"               %  "slf4j-nop"   % "1.7.5" % Test
   // ^ getting rid of the annoying warning about logging ^
 )

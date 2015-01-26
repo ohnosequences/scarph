@@ -193,6 +193,85 @@ object schema {
       }
   }
 
+  sealed trait AnyIndexError extends AnySchemaCheckError {
+    type Index <: AnyIndex
+    val  index: Index
+  }
+
+  abstract class IndexError[V <: AnyIndex](val msg: String) 
+    extends AnyIndexError { type Index = V }
+
+  case class IndexDoesntExist[V <: AnyIndex](val index: V)
+    extends IndexError[V](s"The index [${index.label}] doesn't exist")
+
+  case class GraphIndexHasWrongProperties[V <: AnyIndex](val index: V, props1: String, props2: String)
+    extends IndexError[V](s"The index [${index.label}] is built over a wrong set of properties: ${props1} (should be ${props2})")
+
+  case class GraphIndexIsNotMono[V <: AnyCompositeIndex](val index: V)
+    extends IndexError[V](s"The index [${index.label}] uniqueness property is not set")
+
+  case class GraphIndexIsNotComposite[V <: AnyCompositeIndex](val index: V)
+    extends IndexError[V](s"The index [${index.label}] has wrong type (should be composite)")
+
+  case class LocalIndexHasWrongDirection[V <: AnyLocalEdgeIndex](val index: V, d1: Direction, d2: Direction)
+    extends IndexError[V](s"The local index [${index.label}] has wrong direction: ${d1} (expected ${d2})")
+
+  object checkIndex extends Poly1 {
+    implicit def compositeIndex[Ix <: AnyCompositeIndex]
+      (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) = 
+      at[Ix]{ (ix: Ix) => { (mgmt: TitanManagement) =>
+
+          if ( ! mgmt.containsGraphIndex(ix.label) ) Left(IndexDoesntExist(ix))
+          else {
+
+            val index = mgmt.getGraphIndex(ix.label)
+
+            if ( index.isUnique != ix.uniqueness.bool )
+              Left(GraphIndexIsNotMono(ix))
+            else if ( ! index.isCompositeIndex )
+              Left(GraphIndexIsNotComposite(ix))
+            else {
+              val ixPropertyKeys: Set[PropertyKey] = 
+                propLabels(ix.properties).map{ mgmt.getPropertyKey(_) }.toSet
+
+              if ( index.getFieldKeys.toSet != ixPropertyKeys )
+                Left(GraphIndexHasWrongProperties(ix, 
+                  index.getFieldKeys.toSet.mkString("{", ", ", "}"), 
+                  ixPropertyKeys.mkString("{", ", ", "}")
+                ))
+              else Right(index)
+            }
+          }: Either[AnyIndexError, TitanIndex]
+        }
+      }
+
+    implicit def localIndex[Ix <: AnyLocalEdgeIndex]
+      (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) =
+      at[Ix]{ (ix: Ix) => { (mgmt: TitanManagement) =>
+
+          val lbl: EdgeLabel = mgmt.getEdgeLabel(ix.indexedType.label)
+
+          if ( ! mgmt.containsRelationIndex(lbl, ix.label) ) Left(IndexDoesntExist(ix))
+          else {
+
+            val index = mgmt.getRelationIndex(lbl, ix.label)
+
+            val direction: Direction = (ix.indexType: AnyLocalIndexType) match {
+              case OnlySourceCentric => Direction.OUT
+              case OnlyTargetCentric => Direction.IN
+              case BothEndsCentric   => Direction.BOTH
+            }
+
+            if ( index.getDirection != direction )
+              Left(LocalIndexHasWrongDirection(ix, index.getDirection, direction))
+            else Right(index)
+          }: Either[AnyIndexError, TitanIndex]
+        }
+      }
+
+  }
+
+
   implicit def titanGraphOps[S <: AnyGraphSchema](g: S := TitanGraph)(implicit sch: S):
     TitanGraphOps[S] = 
     TitanGraphOps[S](g)(sch)
@@ -226,9 +305,9 @@ object schema {
       // edgeTypesMapper: MapToList[addEdgeLabel.type, S#Edges] with 
       //                  InContainer[TitanManagement => EdgeLabel],
       vertexTypesMapper: MapToList[checkVertexLabel.type, S#Vertices] with 
-                         InContainer[TitanManagement => Either[AnyVertexLabelError, VertexLabel]]
-      // indexMapper: MapToList[addIndex.type, S#Indexes] with 
-      //              InContainer[TitanManagement => TitanIndex]
+                         InContainer[TitanManagement => Either[AnyVertexLabelError, VertexLabel]],
+      indexMapper: MapToList[checkIndex.type, S#Indexes] with 
+                   InContainer[TitanManagement => Either[AnyIndexError, TitanIndex]]
     ): List[AnySchemaCheckError] = {
       /* We want this to happen all in _one_ transaction */
       val mgmt = g.value.getManagementSystem
@@ -236,11 +315,11 @@ object schema {
       val pErrs = propertiesMapper(sch.properties).map{ _.apply(mgmt) }.flatMap(_.left.toOption)
       // edgeTypesMapper(sch.edges).map{ _.apply(mgmt) }
       val vErrs = vertexTypesMapper(sch.vertices).map{ _.apply(mgmt) }.flatMap(_.left.toOption)
-      // indexMapper(sch.indexes).map{ _.apply(mgmt) }
+      val iErrs = indexMapper(sch.indexes).map{ _.apply(mgmt) }.flatMap(_.left.toOption)
 
       mgmt.commit
       
-      pErrs ++ vErrs
+      pErrs ++ vErrs ++ iErrs
     }
   }
 
