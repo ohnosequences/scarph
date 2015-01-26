@@ -1,3 +1,5 @@
+
+```scala
 package ohnosequences.scarph.test.impl
 
 import com.thinkaurelius.titan.core.{ TitanFactory, TitanGraph, TitanVertex, TitanEdge }
@@ -23,7 +25,7 @@ trait AnyTitanTestSuite
   val titanTwitter = twitter := g
 
   override def beforeAll() {
-    titanTwitter.createSchema
+    titanTwitter.createSchema(twitter)
 
     // loading data from a prepared GraphSON file
     import com.tinkerpop.blueprints.util.io.graphson._
@@ -43,11 +45,77 @@ trait AnyTitanTestSuite
 
 class TitanTestSuite extends AnyTitanTestSuite {
 
+  // checks existence and arity
+  def checkEdgeLabel[ET <: AnyEdge](mgmt: TitanManagement, et: ET)
+    (implicit multi: EdgeTypeMultiplicity[ET]) = {
+
+    assert{ mgmt.containsRelationType(et.label) }
+
+    assertResult(multi(et)) {
+      mgmt.getEdgeLabel(et.label).getMultiplicity
+    }
+  }
+
+  // checks existence and dataType
+  def checkPropertyKey[P <: AnyGraphProperty](mgmt: TitanManagement, p: P)
+    (implicit cc: scala.reflect.ClassTag[P#Raw]) = {
+
+    assert{ mgmt.containsRelationType(p.label) }
+
+    val pkey: PropertyKey = mgmt.getPropertyKey(p.label)
+
+    assertResult( com.thinkaurelius.titan.core.Cardinality.SINGLE ) { 
+      pkey.getCardinality 
+    }
+
+    assertResult( cc.runtimeClass.asInstanceOf[Class[P#Raw]] ) {
+      pkey.getDataType
+    }
+  }
+
+  import ohnosequences.cosas._, fns._
+  import ohnosequences.cosas.ops.typeSets.MapToList
+  // checks existence, type and the indexed property
+  def checkCompositeIndex[Ix <: AnyCompositeIndex](mgmt: TitanManagement, ix: Ix)
+    (implicit propLabels: MapToList[propertyLabel.type, Ix#Properties] with InContainer[String]) = {
+
+    assert{ mgmt.containsGraphIndex(ix.label) }
+
+    val index = mgmt.getGraphIndex(ix.label)
+    // TODO: check for mixed indexes and any other stuff
+    assert{ index.isCompositeIndex }
+    assert{ index.isUnique == ix.uniqueness.bool }
+
+    val ixPropertyKeys: Set[PropertyKey] = 
+      propLabels(ix.properties).map{ mgmt.getPropertyKey(_) }.toSet
+
+    assert{ index.getFieldKeys.toSet == ixPropertyKeys }
+    // println(ixPropertyKeys.mkString(s"[${ix.label}] property keys: {", ", ", "}"))
+  }
+
+  // TODO: make it a graph op: checkSchema
   test("check schema keys/labels") {
 
-    val errors = titanTwitter.checkSchema
-    if (errors.nonEmpty) errors.foreach{ err => info(err.msg) }
-    assert{ errors.isEmpty }
+    val mgmt = g.getManagementSystem
+
+    checkPropertyKey(mgmt, name)
+    checkPropertyKey(mgmt, age)
+    checkPropertyKey(mgmt, text)
+    checkPropertyKey(mgmt, url)
+    checkPropertyKey(mgmt, time)
+
+    checkEdgeLabel(mgmt, posted)
+    checkEdgeLabel(mgmt, follows)
+
+    assert{ mgmt.containsVertexLabel(user.label) }
+    assert{ mgmt.containsVertexLabel(tweet.label) }
+
+    checkCompositeIndex(mgmt, userByName)
+    checkCompositeIndex(mgmt, tweetByText)
+    checkCompositeIndex(mgmt, postedByTime)
+    checkCompositeIndex(mgmt, userByNameAndAge)
+
+    mgmt.commit
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,20 +138,24 @@ class TitanTestSuite extends AnyTitanTestSuite {
     val postAuthorName = postAuthor >=> userName
 
     val edu  = user := twitter.query(askEdu).evalOn( titanTwitter ).value.head
-    val alexey  = user := twitter.query(askAlexey).evalOn( titanTwitter ).value.head
-    val kim  = user := twitter.query(askKim).evalOn( titanTwitter ).value.head
     val post = posted := twitter.query(askPost).evalOn( titanTwitter ).value.head
     val twt  = tweet := twitter.query(askTweet).evalOn( titanTwitter ).value.head
   }
 
   test("check what we got from the index queries") {
     import TestContext._
+```
 
-    /* Evaluating steps: */
+Evaluating steps:
+
+```scala
     assert{ Get(name).evalOn( edu ) == name("@eparejatobes") }
     assert{ Source(posted).evalOn( post ) == edu }
+```
 
-    /* Composing steps: */
+Composing steps:
+
+```scala
     val posterName = Source(posted) >=> Get(name)
     assert{ posterName.evalOn( post ) == (name := "@eparejatobes") }
 
@@ -161,11 +233,6 @@ class TitanTestSuite extends AnyTitanTestSuite {
     assertResult( ManyOrNone.of(age) := Stream(5, 22) ){ 
       twitter.query(user ? (age between (3, 25))).map( Get(age) ).evalOn( titanTwitter)
     }
-
-    // println(any(user).label)
-    // println((user ? (age < 80)).label)
-    // println((user ? (age < 80) and (age > 10)).label)
-    // println((user ? (age between (3, 25))).label)
 
   }
 
@@ -287,6 +354,7 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   test("choice combinator") {
     import TestContext._
+    import scalaz._
 
     // friends' names
     val friendsNames = user
@@ -309,14 +377,69 @@ class TitanTestSuite extends AnyTitanTestSuite {
 
   }
 
-  test("merging results") {
-    import TestContext._
-
-    assertResult(ManyOrNone.of(user) := Stream(alexey.value, kim.value, alexey.value, kim.value)) {
-      ( user.inV(follows) ⊗ user.outV(follows) )
-        .merge
-      .evalOn( edu ⊗ edu )
-    }
-  }
-
 }
+
+```
+
+
+------
+
+### Index
+
++ src
+  + test
+    + scala
+      + ohnosequences
+        + scarph
+          + [ContainersTest.scala][test/scala/ohnosequences/scarph/ContainersTest.scala]
+          + [ScalazEquality.scala][test/scala/ohnosequences/scarph/ScalazEquality.scala]
+          + titan
+            + [TwitterTitanTest.scala][test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]
+          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
+    + resources
+  + main
+    + scala
+      + ohnosequences
+        + scarph
+          + [GraphTypes.scala][main/scala/ohnosequences/scarph/GraphTypes.scala]
+          + [Containers.scala][main/scala/ohnosequences/scarph/Containers.scala]
+          + impl
+            + titan
+              + [Schema.scala][main/scala/ohnosequences/scarph/impl/titan/Schema.scala]
+              + [Evals.scala][main/scala/ohnosequences/scarph/impl/titan/Evals.scala]
+              + [Predicates.scala][main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]
+          + [Paths.scala][main/scala/ohnosequences/scarph/Paths.scala]
+          + [Indexes.scala][main/scala/ohnosequences/scarph/Indexes.scala]
+          + [Evals.scala][main/scala/ohnosequences/scarph/Evals.scala]
+          + [Conditions.scala][main/scala/ohnosequences/scarph/Conditions.scala]
+          + [Steps.scala][main/scala/ohnosequences/scarph/Steps.scala]
+          + [Predicates.scala][main/scala/ohnosequences/scarph/Predicates.scala]
+          + [Schemas.scala][main/scala/ohnosequences/scarph/Schemas.scala]
+          + [Combinators.scala][main/scala/ohnosequences/scarph/Combinators.scala]
+          + syntax
+            + [GraphTypes.scala][main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]
+            + [Paths.scala][main/scala/ohnosequences/scarph/syntax/Paths.scala]
+            + [Conditions.scala][main/scala/ohnosequences/scarph/syntax/Conditions.scala]
+            + [Predicates.scala][main/scala/ohnosequences/scarph/syntax/Predicates.scala]
+
+[test/scala/ohnosequences/scarph/ContainersTest.scala]: ../ContainersTest.scala.md
+[test/scala/ohnosequences/scarph/ScalazEquality.scala]: ../ScalazEquality.scala.md
+[test/scala/ohnosequences/scarph/titan/TwitterTitanTest.scala]: TwitterTitanTest.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/GraphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/Containers.scala]: ../../../../../main/scala/ohnosequences/scarph/Containers.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Schema.scala]: ../../../../../main/scala/ohnosequences/scarph/impl/titan/Schema.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Evals.scala]: ../../../../../main/scala/ohnosequences/scarph/impl/titan/Evals.scala.md
+[main/scala/ohnosequences/scarph/impl/titan/Predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/impl/titan/Predicates.scala.md
+[main/scala/ohnosequences/scarph/Paths.scala]: ../../../../../main/scala/ohnosequences/scarph/Paths.scala.md
+[main/scala/ohnosequences/scarph/Indexes.scala]: ../../../../../main/scala/ohnosequences/scarph/Indexes.scala.md
+[main/scala/ohnosequences/scarph/Evals.scala]: ../../../../../main/scala/ohnosequences/scarph/Evals.scala.md
+[main/scala/ohnosequences/scarph/Conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/Conditions.scala.md
+[main/scala/ohnosequences/scarph/Steps.scala]: ../../../../../main/scala/ohnosequences/scarph/Steps.scala.md
+[main/scala/ohnosequences/scarph/Predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/Predicates.scala.md
+[main/scala/ohnosequences/scarph/Schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/Schemas.scala.md
+[main/scala/ohnosequences/scarph/Combinators.scala]: ../../../../../main/scala/ohnosequences/scarph/Combinators.scala.md
+[main/scala/ohnosequences/scarph/syntax/GraphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/GraphTypes.scala.md
+[main/scala/ohnosequences/scarph/syntax/Paths.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/Paths.scala.md
+[main/scala/ohnosequences/scarph/syntax/Conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/Conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/Predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/Predicates.scala.md

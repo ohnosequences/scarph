@@ -1,32 +1,49 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._
-import ohnosequences.cosas._, AnyTypeSet._
+object Twitter {
 
-object TwitterSchema {
+  import ohnosequences.cosas._, typeSets._
 
-  case object name extends Property[String]
-  case object age  extends Property[Integer]
-  case object text extends Property[String]
-  case object url  extends Property[String]
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
 
-  // case class Date(day: Integer, month: Integer, year: Integer)
-  case object time extends Property[String]
+  case object user extends Vertex
+  case object name extends PropertyOf(user) { type Raw = String }
+  case object age  extends PropertyOf(user) { type Raw = Integer }
 
-  case object User  extends VertexType("user", name :~: age :~: ∅)
-  case object Tweet extends VertexType("tweet", text :~: ∅)
+  case object tweet extends Vertex
+  case object text  extends PropertyOf(tweet) { type Raw = String }
 
-  case object Posted  extends EdgeType(User, "posted", Tweet, time :~: url :~: ∅) with OneIn with ManyOut
-  case object Follows extends EdgeType(User, "follows", User, ∅) with ManyIn with ManyOut
+  case object posted extends Edge(user -> ManyOrNone.of(tweet))
+  case object time extends PropertyOf(posted) { type Raw = String }
+  case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object UserNameIx extends CompositeIndex(User, name)
-  case object TweetTextIx extends CompositeIndex(Tweet, text)
-  case object PostedTimeIx extends CompositeIndex(Posted, time)
+  case object follows extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(user))
+  // case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
 
-  val schema = GraphSchema("twitter",
-    vertexTypes = User :~: Tweet :~: ∅,
-    edgeTypes = Posted :~: Follows :~: ∅,
-    indexes = UserNameIx :~: TweetTextIx :~: PostedTimeIx :~: ∅
+  // simple indexes
+  case object userByName extends KeyIndex(user, name, Unique)
+  case object tweetByText extends KeyIndex(tweet, text, NonUnique)
+  case object postedByTime extends KeyIndex(posted, time, NonUnique)
+
+  // composite indexes
+  case object userByNameAndAge extends CompositeIndex(user, name :~: age :~: ∅, Unique)
+
+  // vertex-centric indexes
+  case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
+
+  case object twitter extends GraphSchema(
+    label = "twitter",
+    properties = name :~: age :~: text :~: time :~: url :~: ∅,
+    vertices =  user :~: tweet :~: ∅,
+    edges = posted :~: follows :~: ∅,
+    indexes = 
+      userByName :~: userByNameAndAge :~:
+      tweetByText :~: 
+      postedByTime :~: 
+      postedByTimeAndUrlLocal :~: 
+      ∅
   )
 
+  // implicitly[ Par[Target[follows.type], Source[liked.type]] <:< Par.WithSameOuts ]
 }
