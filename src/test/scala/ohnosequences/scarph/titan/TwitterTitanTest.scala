@@ -43,29 +43,7 @@ trait AnyTitanTestSuite
 
 class TitanTestSuite extends AnyTitanTestSuite {
 
-  // checks existence and arity
-  def checkEdgeLabel[ET <: AnyEdge](mgmt: TitanManagement, et: ET)
-    (implicit multi: EdgeTypeMultiplicity[ET]) = {
-
-    assert{ mgmt.containsRelationType(et.label) }
-
-    assertResult(multi(et)) {
-      mgmt.getEdgeLabel(et.label).getMultiplicity
-    }
-  }
-
-  import ohnosequences.cosas._, fns._
-  import ohnosequences.cosas.ops.typeSets.MapToList
-
-  // TODO: make it a graph op: checkSchema
   test("check schema keys/labels") {
-
-    val mgmt = g.getManagementSystem
-
-    checkEdgeLabel(mgmt, posted)
-    checkEdgeLabel(mgmt, follows)
-
-    mgmt.commit
 
     val errors = titanTwitter.checkSchema
     if (errors.nonEmpty) errors.foreach{ err => info(err.msg) }

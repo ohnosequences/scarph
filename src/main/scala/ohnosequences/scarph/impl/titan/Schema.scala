@@ -134,14 +134,46 @@ object schema {
 
 
   object addEdgeLabel extends Poly1 {
-    implicit def default[ET <: AnyEdge](implicit multi: EdgeTypeMultiplicity[ET]) = at[ET]{ (et: ET) =>
-      { (m: TitanManagement) => m.makeEdgeLabel(et.label).multiplicity(multi(et)).make }
+    implicit def default[E <: AnyEdge](implicit multi: EdgeTypeMultiplicity[E]) = at[E]{ (e: E) =>
+      { (m: TitanManagement) => m.makeEdgeLabel(e.label).multiplicity(multi(e)).make }
     }
   }
+
+  sealed trait AnyEdgeLabelError extends AnySchemaCheckError {
+    type Edge <: AnyEdge
+    val  edge: Edge
+  }
+
+  abstract class EdgeLabelError[E <: AnyEdge](val msg: String) 
+    extends AnyEdgeLabelError { type Edge = E }
+
+  case class EdgeLabelDoesntExist[E <: AnyEdge](val edge: E)
+    extends EdgeLabelError[E](s"The edge label for [${edge.label}] doesn't exist")
+
+  case class EdgeLabelHasWrongArity[E <: AnyEdge](val edge: E, multi1: Multiplicity, multi2: Multiplicity)
+    extends EdgeLabelError[E](s"The edge label for [${edge.label}] has wrong arity: ${multi1} (extected ${multi2})")
+
+  object checkEdgeLabel extends Poly1 {
+    implicit def check[E <: AnyEdge](implicit multi: EdgeTypeMultiplicity[E]) =
+      at[E]{ (e: E) =>
+        { (mgmt: TitanManagement) =>
+          if ( ! mgmt.containsEdgeLabel(e.label) ) Left(EdgeLabelDoesntExist(e))
+          else {
+            val edge = mgmt.getEdgeLabel(e.label)
+
+            if ( edge.getMultiplicity != multi(e) )
+              Left(EdgeLabelHasWrongArity(e, edge.getMultiplicity, multi(e)))
+            else Right(mgmt.getEdgeLabel(e.label))
+          }: Either[AnyEdgeLabelError, EdgeLabel]
+        }
+      }
+  }
+
 
   object propertyLabel extends Poly1 {
     implicit def default[P <: AnyGraphProperty] = at[P]{ _.label }
   }
+
 
   object addIndex extends Poly1 {
     implicit def localIx[Ix <: AnyLocalEdgeIndex]
