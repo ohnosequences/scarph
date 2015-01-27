@@ -9,17 +9,17 @@ object graphTypes {
   import ohnosequences.cosas._, types._
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.combinators._, s.containers._
+  import s.graphTypes._, s.combinators._
 
 
-  /* Graph/schema ops */
-  implicit def graphTypeValOps[T <: AnyGraphType, VT](vt: T := VT):
-        GraphTypeValOps[T, VT] =
-    new GraphTypeValOps[T, VT](vt)
+  implicit def graphTypeValOps[F <: AnyGraphType, VF](vt: F := VF):
+        GraphTypeValOps[F, VF] =
+    new GraphTypeValOps[F, VF](vt)
 
-  class GraphTypeValOps[T <: AnyGraphType, VT](vt: T := VT) {
+  class GraphTypeValOps[F <: AnyGraphType, VF](vt: F := VF) {
 
-    def ⊗[S <: AnyGraphType, VS](vs: S := VS): ParType[T, S] := (VT, VS) = 
+    // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
+    def ⊕[S <: AnyGraphType, VS](vs: S := VS): (F ⊕ S) := (VF, VS) = 
       new Denotes( (vt.value, vs.value) )
   }
 

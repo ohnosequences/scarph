@@ -4,17 +4,13 @@ object indexes {
 
   import ohnosequences.cosas._, typeSets._, fns._
   import ohnosequences.cosas.ops.typeSets.MapSet
-  import graphTypes._, predicates._, conditions._, containers._
+  import graphTypes._, predicates._, conditions._
 
 
   // TODO: add ordering
-  // trait AnyOrder
-  // case object Ascending extends AnyOrder
-  // case object Descending extends AnyOrder
-
 
   /* ## Indexes */
-  trait AnyIndex extends AnySimpleGraphType {
+  trait AnyIndex extends AnyGraphType {
 
     type IndexedType <: AnyGraphElement
     val  indexedType: IndexedType
@@ -73,22 +69,6 @@ object indexes {
   case object Unique extends AnyUniqueness { val bool = true }
   case object NonUnique extends AnyUniqueness { val bool = false }
 
-  trait  IndexContainer[I <: AnyIndex] extends AnyFn0 with OutBound[AnyContainer] 
-
-  object IndexContainer extends IndexContainer2 {
-
-    implicit def unique[I <: AnyCompositeIndex { type Uniqueness = Unique.type }]: 
-          IndexContainer[I] with Out[OneOrNone] =
-      new IndexContainer[I] with Out[OneOrNone] { def apply(): Out = OneOrNone }
-  }
-
-  trait IndexContainer2 {
-
-    implicit def any[I <: AnyIndex]: 
-          IndexContainer[I] with Out[ManyOrNone] =
-      new IndexContainer[I] with Out[ManyOrNone] { def apply(): Out = ManyOrNone }
-  }
-
 
   trait AnyCompositeIndex extends AnyIndex {
 
@@ -104,14 +84,18 @@ object indexes {
   class CompositeIndex[I <: AnyGraphElement, Props <: AnyTypeSet.Of[PropertyOf[I]], U <: AnyUniqueness]
     (val indexedType: I, val properties: Props, val uniqueness: U) extends AnyCompositeIndex {
 
+    type     In = CompositeIndex[I, Props, U]
+    lazy val in = this: In
+
+    type     Out = CompositeIndex[I, Props, U]
+    lazy val out = this: Out
+
     // NOTE: normally, you don't care about the index name, but it has to be unique
     val label = this.toString
 
     type IndexedType = I
     type Properties = Props
     type Uniqueness = U
-
-    final type Inside = CompositeIndex[IndexedType,Properties,Uniqueness]
   }
 
 
@@ -128,13 +112,17 @@ object indexes {
   class KeyIndex[I <: AnyGraphElement, P <: PropertyOf[I], U <: AnyUniqueness]
     (val indexedType: I, val property: P, val uniqueness: U) extends AnyKeyIndex {
 
+    type     In = KeyIndex[I, P, U]
+    lazy val in = this: In
+
+    type     Out = KeyIndex[I, P, U]
+    lazy val out = this: Out
+
     val label = this.toString
 
     type IndexedType = I
     type Property = P
     type Uniqueness = U
-
-    final type Inside = KeyIndex[IndexedType,Property,Uniqueness]
   }
 
 
@@ -162,13 +150,17 @@ object indexes {
   class LocalEdgeIndex[E <: AnyEdge, Props <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
     (val indexedType: E, val indexType: T, val properties: Props) extends AnyLocalEdgeIndex {
 
-    val label = this.toString
+    type     In = LocalEdgeIndex[E, Props, T]
+    lazy val in = this: In
+
+    type     Out = LocalEdgeIndex[E, Props, T]
+    lazy val out = this: Out
+
+    lazy val label = this.toString
 
     type IndexedType = E
     type IndexType = T
     type Properties = Props
-
-    final type Inside = LocalEdgeIndex[IndexedType,Properties,IndexType]
   }
 
 }

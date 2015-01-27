@@ -5,7 +5,7 @@ object predicates {
   import ohnosequences.cosas._, types._
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.containers._, s.conditions._, s.predicates._
+  import s.graphTypes._, s.conditions._, s.predicates._
 
 
   /* When you don't want to restrict the query anyhow (let's imagine it makes sence),

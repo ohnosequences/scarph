@@ -4,133 +4,148 @@ package ohnosequences.scarph
 /* Basic steps: */
 object steps {
 
-  import graphTypes._, paths._, containers._, predicates._, schemas._, indexes._
+  import graphTypes._, paths._, predicates._, schemas._, indexes._
 
+  case class Id[T <: AnyGraphType](t: T) extends AnyStep {
+    type     In = T
+    lazy val in = t
 
-  case class Get[P <: AnyGraphProperty](val property: P) 
-    extends Step[P#Owner, P](property.owner, property) {
+    type     Out = T
+    lazy val out = t
 
-      lazy val label: String = s"get(${property.label})"
-      type Inside = Get[P]
-    }
+    lazy val label: String = s"id(${t.label})"
+  }
+
+  // △: T → T ⊕ T
+  case class Fork[T <: AnyGraphType](t: T) extends AnyStep {
+
+    type     In = T
+    lazy val in = t
+
+    type     Out = Biproduct[T, T]
+    lazy val out = Biproduct(t, t)
+
+    lazy val label = s"fork(${t.label})"
+  }
+
+  // ▽: T ⊕ T → T
+  case class Merge[T <: AnyGraphType](t: T) extends AnyStep {
+
+    type     In = Biproduct[T, T]
+    lazy val in = Biproduct(t, t)
+
+    type     Out = T
+    lazy val out = t
+
+    lazy val label = s"merge(${t.label} ⊕ ${t.label})"
+  }
 
   case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+    type Predicate = P
 
-      type     Edge = P#Element
-      lazy val edge = predicate.element: Edge
+    type     Edge = Predicate#Element
+    lazy val edge = predicate.element //: Edge
 
-      type     In = Edge#TargetV
-      lazy val in = edge.targetV
+    type     In = Edge#Target
+    lazy val in = edge.target
 
-      type     Out = Edge#Source#Container#Of[Edge]
-      lazy val out = edge.source.container.of(edge)
+    type     Out = Edge
+    lazy val out = edge
 
-      lazy val label: String = s"inE(${edge.label}, ${predicate.label})"
-      type Inside = InE[P]
+    lazy val label: String = s"inE(${edge.label}, ${predicate.label})"
   }
 
   case class OutE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+    type Predicate = P
 
-      type     Edge = P#Element
-      lazy val edge = predicate.element: Edge
+    type     Edge = Predicate#Element
+    lazy val edge = predicate.element: Edge
 
-      type     In = Edge#SourceV
-      lazy val in = edge.sourceV
+    type     In = Edge#Source
+    lazy val in = edge.source
 
-      type     Out = Edge#Target#Container#Of[Edge]
-      lazy val out = edge.target.container.of(edge)
+    type     Out = Edge
+    lazy val out = edge
 
-      lazy val label: String = s"outE(${edge.label}, ${predicate.label})"
-      type Inside = OutE[P]
+    lazy val label: String = s"outE(${edge.label}, ${predicate.label})"
   }
 
-
   case class InV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+    type Predicate = P
 
-      type     Edge = P#Element
-      lazy val edge = predicate.element: Edge
+    type     Edge = Predicate#Element
+    lazy val edge = predicate.element: Edge
 
-      type     In = Edge#TargetV
-      lazy val in = edge.targetV
+    type     In = Edge#Target
+    lazy val in = edge.target
 
-      type     Out = Edge#Source
-      lazy val out = edge.source
+    type     Out = Edge#Source
+    lazy val out = edge.source
 
-      lazy val label: String = s"inV(${predicate.label})"
-      type Inside = InV[P]
+    lazy val label: String = s"inV(${predicate.label})"
   }
 
   case class OutV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+    type Predicate = P
 
-      type     Edge = P#Element
-      lazy val edge = predicate.element: Edge
+    type     Edge = Predicate#Element
+    lazy val edge = predicate.element: Edge
 
-      type     In = Edge#SourceV
-      lazy val in = edge.sourceV
+    type     In = Edge#Source
+    lazy val in = edge.source
 
-      type     Out = Edge#Target
-      lazy val out = edge.target
+    type     Out = Edge#Target
+    lazy val out = edge.target
 
-      lazy val label: String = s"outV(${predicate.label})"
-      type Inside = OutV[P]
+    lazy val label: String = s"outV(${predicate.label})"
   }
 
-  // TODO: inV/outV
-
   case class Source[E <: AnyEdge](val edge: E) extends AnyStep {
+    type Edge = E
 
-    type In = E
-    val  in = edge
+    type     In = Edge
+    lazy val in = edge
 
-    type     Out = E#SourceV
-    lazy val out = edge.sourceV
+    type     Out = Edge#Source
+    lazy val out = edge.source
 
     lazy val label: String = s"source(${edge.label})"
-    type Inside = Source[E]
   }
 
   case class Target[E <: AnyEdge](val edge: E) extends AnyStep {
+    type Edge = E
 
-    type In = E
-    val  in = edge
+    type     In = Edge
+    lazy val in = edge
 
-    type     Out = E#TargetV
-    lazy val out = edge.targetV
+    type     Out = Edge#Target
+    lazy val out = edge.target
 
     lazy val label: String = s"target(${edge.label})"
-    type Inside = Target[E]
   }
 
-  case class GraphQuery[S <: AnyGraphSchema, C <: AnyContainer, P <: AnyPredicate]
-    (val graph: S, val c: C, val predicate: P)
-      extends Step[S, C#Of[P#Element]](graph, c.of(predicate.element)) {
+  case class Get[P <: AnyGraphProperty](val property: P) extends AnyStep {
+    type Property = P
 
-    lazy val label: String = toString
-    type Inside = GraphQuery[S,C,P]
+    type     In = Property#Owner
+    lazy val in = property.owner
+
+    type     Out = Property
+    lazy val out = property
+
+    lazy val label: String = s"get(${property.label})"
   }
 
+  case class GraphQuery[S <: AnyGraphSchema, P <: AnyPredicate](val graph: S, val predicate: P) extends AnyStep {
+    type Predicate = P
 
-  // F[T]
-  //  ⊗   → (F+S)[T]
-  // S[T]
-  case class Merge[
-    First <: AnyGraphType,
-    Second <: AnyGraphType,
-    OutC <: AnyContainer
-  ](first: First, second: Second)
-    (implicit 
-      sum: (First#Container + Second#Container) { type Out = OutC },
-      ex: First#Inside ≃ Second#Inside
-    ) extends AnyStep {
+    type     In = S
+    lazy val in = graph
 
-    lazy val label: String = toString
-    lazy val outC = sum(first.container, second.container): OutC
+    type     Out = Predicate#Element
+    lazy val out = predicate.element
 
-    type     In = ParType[First, Second]
-    lazy val in = ParType(first, second): In
-
-    type     Out = OutC#Of[First#Inside]
-    lazy val out = outC.of(first.inside): Out
+    lazy val label = s"query(${predicate.label})"
   }
 
 }
