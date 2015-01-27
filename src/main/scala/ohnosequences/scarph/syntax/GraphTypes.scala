@@ -9,7 +9,7 @@ object graphTypes {
   import ohnosequences.cosas._, types._
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.combinators._
+  import s.graphTypes._
 
 
   implicit def graphTypeValOps[F <: AnyGraphType, VF](vt: F := VF):

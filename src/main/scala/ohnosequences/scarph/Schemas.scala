@@ -5,7 +5,7 @@ object schemas {
   import ohnosequences.cosas._, typeSets._
   import graphTypes._, indexes._
 
-  trait AnyGraphSchema extends AnyGraphType {
+  trait AnyGraphSchema extends AnyGraphObject {
 
     type Properties <: AnyTypeSet.Of[AnyGraphProperty]
     val  properties: Properties
@@ -31,6 +31,9 @@ object schemas {
       val edges: Es,
       val indexes: Is
     ) extends AnyGraphSchema {
+
+    type     Self = this.type
+    lazy val self = this: Self
 
     type Properties = Ps
     type Vertices = Vs

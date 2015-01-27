@@ -6,7 +6,7 @@ object predicates {
   import graphTypes._, conditions._
 
 
-  trait AnyPredicate extends AnyGraphType {
+  trait AnyPredicate extends AnyGraphObject {
 
     type Element <: AnyGraphElement
     val  element: Element
@@ -31,11 +31,8 @@ object predicates {
   class EmptyPredicate[E <: AnyGraphElement](val element: E) 
     extends AnyEmptyPredicate { 
 
-    type     In = EmptyPredicate[E]
-    lazy val in = this: In
-
-    type     Out = EmptyPredicate[E]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     type Element = E
   }
@@ -60,11 +57,8 @@ object predicates {
   case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElement[B#Element]]
     (val body: B, val condition: C) extends AnyAndPredicate {
 
-    type     In = AndPredicate[B, C]
-    lazy val in = this: In
-
-    type     Out = AndPredicate[B, C]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     type Body = B
     type Condition = C

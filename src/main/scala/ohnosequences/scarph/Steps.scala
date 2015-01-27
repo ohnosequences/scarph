@@ -4,17 +4,17 @@ package ohnosequences.scarph
 /* Basic steps: */
 object steps {
 
-  import graphTypes._, paths._, predicates._, schemas._, indexes._
+  import graphTypes._, predicates._, schemas._, indexes._
 
-  case class Id[T <: AnyGraphType](t: T) extends AnyStep {
-    type     In = T
-    lazy val in = t
+  // case class Id[T <: AnyGraphType](t: T) extends AnyStep {
+  //   type     In = T
+  //   lazy val in = t
 
-    type     Out = T
-    lazy val out = t
+  //   type     Out = T
+  //   lazy val out = t
 
-    lazy val label: String = s"id(${t.label})"
-  }
+  //   lazy val label: String = s"id(${t.label})"
+  // }
 
   // △: T → T ⊕ T
   case class Fork[T <: AnyGraphType](t: T) extends AnyStep {

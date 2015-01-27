@@ -10,7 +10,7 @@ object indexes {
   // TODO: add ordering
 
   /* ## Indexes */
-  trait AnyIndex extends AnyGraphType {
+  trait AnyIndex extends AnyGraphObject {
 
     type IndexedType <: AnyGraphElement
     val  indexedType: IndexedType
@@ -84,11 +84,8 @@ object indexes {
   class CompositeIndex[I <: AnyGraphElement, Props <: AnyTypeSet.Of[PropertyOf[I]], U <: AnyUniqueness]
     (val indexedType: I, val properties: Props, val uniqueness: U) extends AnyCompositeIndex {
 
-    type     In = CompositeIndex[I, Props, U]
-    lazy val in = this: In
-
-    type     Out = CompositeIndex[I, Props, U]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     // NOTE: normally, you don't care about the index name, but it has to be unique
     val label = this.toString
@@ -112,11 +109,8 @@ object indexes {
   class KeyIndex[I <: AnyGraphElement, P <: PropertyOf[I], U <: AnyUniqueness]
     (val indexedType: I, val property: P, val uniqueness: U) extends AnyKeyIndex {
 
-    type     In = KeyIndex[I, P, U]
-    lazy val in = this: In
-
-    type     Out = KeyIndex[I, P, U]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     val label = this.toString
 
@@ -150,11 +144,8 @@ object indexes {
   class LocalEdgeIndex[E <: AnyEdge, Props <: AnyTypeSet.Of[PropertyOf[E]], T <: AnyLocalIndexType]
     (val indexedType: E, val indexType: T, val properties: Props) extends AnyLocalEdgeIndex {
 
-    type     In = LocalEdgeIndex[E, Props, T]
-    lazy val in = this: In
-
-    type     Out = LocalEdgeIndex[E, Props, T]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     lazy val label = this.toString
 

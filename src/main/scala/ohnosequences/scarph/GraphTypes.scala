@@ -3,11 +3,26 @@ package ohnosequences.scarph
 object graphTypes {
 
   import ohnosequences.cosas._, types._, properties._
-  import steps._, paths._
   import shapeless.<:!<
 
+  /* A graph type is kind of an n-morphism 
 
-  /* This is a graph type containing another graph type */
+     The full hierarchy looks like this:
+
+     - AnyGraphType
+         - AnyGraphObject
+             - AnyGraphElement
+                 - AnyVertex
+                 - AnyEdge
+             - AnyGraphProperty
+             - AnyPredicate
+             - AnyIndex
+             - AnyGraphSchema
+         - AnyGraphMorphism (sealed)
+             - AnyStep
+             - AnyComposition (sealed)
+         - AnyBiproduct (sealed)
+  */
   trait AnyGraphType extends AnyType {
 
     type In <: AnyGraphType
@@ -17,37 +32,36 @@ object graphTypes {
     val  out: Out
   }
 
-  // @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
-  // trait Equality[A <: AnyGraphType, B <: AnyGraphType] { type Out >: A with B <: A with B }
-  // type EqualityContext[X <: AnyGraphType, Y <: AnyGraphType] = (X,Y)
-  // @annotation.implicitNotFound(msg = "Can't prove that these graph types are equivalent:\n\tfirst:  ${A}\n\tsecond: ${B}")
-  // type ≃[A <: AnyGraphType, B <: AnyGraphType] = EqualityContext[A,B] => (A Equality B)
-  // trait Refl[A <: AnyGraphType] extends (A Equality A) { type Out = A }
-  // implicit def refl[A >: B <: B, B <: AnyGraphType]: EqualityContext[A,B] => A Equality B = { 
+  /* Graph objects are represented as their id-morphisms */
+  trait AnyGraphObject extends AnyGraphType {
 
-  //   (x: EqualityContext[A,B]) => new Refl[B] {} 
-  // }
+    // NOTE: this has to be set in a NON-abstract descendant
+    type Self >: this.type <: AnyGraphObject
+    val  self: Self // = this
+
+    type     In = Self
+    lazy val in = self: In
+
+    type     Out = Self
+    lazy val out = self: Out
+  }
 
 
   /* A graph element is either a vertex or an edge, only they can have properties */
-  sealed trait AnyGraphElement extends AnyGraphType
+  sealed trait AnyGraphElement extends AnyGraphObject
 
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
 
   class Vertex extends AnyVertex {
-
-    type     In = this.type
-    lazy val in = this: In
-
-    type     Out = this.type
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     lazy val label = this.toString
   }
 
   /* Edges connect vertices and have in/out arities */
-  // NOTE: this is the same as AnyPath but with restriction on InT/OutT
+  // NOTE: this is the same as AnyGraphMorphism but with restriction on InT/OutT
   trait AnyEdge extends AnyGraphElement {
     
     type Source <: AnyVertex
@@ -63,11 +77,8 @@ object graphTypes {
     T <: AnyVertex
   ]( st: (S, T) ) extends AnyEdge {
 
-    type     In = Edge[S, T]
-    lazy val in = this: In
-
-    type     Out = Edge[S, T]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     type Source = S
     lazy val source = st._1
@@ -85,7 +96,7 @@ object graphTypes {
   }
 
   /* Property is assigned to one element type and has a raw representation */
-  trait AnyGraphProperty extends AnyProperty with AnyGraphType {
+  trait AnyGraphProperty extends AnyProperty with AnyGraphObject {
 
     type Owner <: AnyGraphElement
     val  owner: Owner
@@ -95,17 +106,14 @@ object graphTypes {
     (val owner: O) extends AnyGraphProperty {
     type Owner = O
 
-    type     In = PropertyOf[O]
-    lazy val in = this: In
-
-    type     Out = PropertyOf[O]
-    lazy val out = this: Out
+    type     Self = this.type
+    lazy val self = this: Self
 
     lazy val label = this.toString
   }
 
 
-  trait AnyBiproduct extends AnyGraphType {
+  sealed trait AnyBiproduct extends AnyGraphType {
 
     type Left <: AnyGraphType
     val  left: Left
@@ -144,6 +152,70 @@ object graphTypes {
     def ⊕[S <: AnyGraphType](s: S):
       Biproduct[T, S] =
       Biproduct(t, s)
+  }
+
+
+  /* 
+    _Path_ describes some graph traversal. It contains of steps that are combined in various ways.
+
+    Note that `AnyGraphMorphism` hierarchy is sealed, meaning that a path is either a step or a composition of paths.
+  */
+  sealed trait AnyGraphMorphism extends AnyGraphType
+
+
+  /* A _step_ is a simple atomic _path_ which can be evaluated directly */
+  trait AnyStep extends AnyGraphMorphism 
+
+  /* Sequential composition of two paths */
+  sealed trait AnyComposition extends AnyGraphMorphism {
+
+    type First <: AnyGraphMorphism
+    type Second <: AnyGraphMorphism { type In = First#Out }
+
+    type In <: First#In
+    type Out <: Second#Out
+  }
+
+  case class Composition[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }]
+    (val first: F, val second: S) extends AnyComposition {
+
+    lazy val label: String = s"(${first.label} >=> ${second.label})"
+
+    type First = F
+    type Second = S
+
+    type     In = First#In
+    lazy val in = first.in: In
+
+    type     Out = Second#Out
+    lazy val out = second.out: Out
+  }
+
+  type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+
+  implicit def CombinatorsSyntaxOps[F <: AnyGraphMorphism](f: F):
+        CombinatorsSyntaxOps[F] =
+    new CombinatorsSyntaxOps[F](f)
+
+  class CombinatorsSyntaxOps[F <: AnyGraphMorphism](f: F) {
+
+    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): 
+      Composition[F, S] = 
+      Composition(f, s)
+  }
+
+
+  /* Adding useful methods */
+  object AnyGraphMorphism {
+
+    implicit def pathOps[T <: AnyGraphMorphism](t: T) = PathOps(t)
+  }
+
+  case class PathOps[P <: AnyGraphMorphism](val p: P) {
+
+    import evals._
+    def evalOn[I, O](input: P#In := I)
+      (implicit eval: EvalPathOn[I, P, O]): P#Out := O = eval(p)(input)
   }
 
 }

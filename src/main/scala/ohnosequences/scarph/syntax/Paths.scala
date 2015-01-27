@@ -5,7 +5,7 @@ package ohnosequences.scarph.syntax
 object paths {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.paths._, s.steps._, s.combinators._, s.predicates._, s.schemas._, s.indexes._
+  import s.graphTypes._, s.steps._, s.predicates._, s.schemas._, s.indexes._
 
 
   implicit def graphTypeOps[T <: AnyGraphType](t: T):
@@ -58,16 +58,16 @@ object paths {
     def get[P <: AnyGraphProperty { type Owner = E }](p: P): Get[P] = Get(p)
 
 
-    // def left[S <: AnyOr { type Left <: AnyPath { type In = E } }](s: S): S#Left = s.left
+    // def left[S <: AnyOr { type Left <: AnyGraphMorphism { type In = E } }](s: S): S#Left = s.left
 
-    // def right[S <: AnyOr { type Right <: AnyPath { type In = E } }](s: S): S#Right = s.right
+    // def right[S <: AnyOr { type Right <: AnyGraphMorphism { type In = E } }](s: S): S#Right = s.right
   }
 
-  implicit def pathElementOps[F <: AnyPath { type Out <: AnyGraphElement }](f: F):
+  implicit def pathElementOps[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F):
         PathElementOps[F] =
     new PathElementOps[F](f)
 
-  class PathElementOps[F <: AnyPath { type Out <: AnyGraphElement }](f: F) {
+  class PathElementOps[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) {
 
     def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
       F >=> Get[P] =
@@ -85,11 +85,11 @@ object paths {
     def tgt: Target[E] = s.steps.Target(e)
   }
 
-  implicit def pathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F):
+  implicit def pathEdgeOps[F <: AnyGraphMorphism { type Out <: AnyEdge }](f: F):
         PathEdgeOps[F] =
     new PathEdgeOps[F](f)
 
-  class PathEdgeOps[F <: AnyPath { type Out <: AnyEdge }](f: F) {
+  class PathEdgeOps[F <: AnyGraphMorphism { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
     def src: F >=> Source[F#Out] = 
@@ -122,11 +122,11 @@ object paths {
       (implicit fromX: X => P): OutV[P] = OutV(fromX(x))
   }
 
-  implicit def pathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F):
+  implicit def pathVertexOps[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F):
         PathVertexOps[F] =
     new PathVertexOps[F](f)
 
-  class PathVertexOps[F <: AnyPath { type Out <: AnyVertex }](f: F) {
+  class PathVertexOps[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F) {
 
     def inE[X, P <: AnyPredicate { type Element <: AnyEdge.To[F#Out] }](x: X)
       (implicit fromX: X => P): F >=> InE[P] = f >=> InE(fromX(x))
@@ -143,20 +143,20 @@ object paths {
   }
 
   /* This gives user nice warnings and doesn't add unnecessary constructors */
-  // implicit def pathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F): 
+  // implicit def pathWarnOps[F <: AnyGraphMorphism { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F): 
   //       PathWarnOps[F] =
   //   new PathWarnOps[F](f)
 
-  // class PathWarnOps[F <: AnyPath { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F) {
+  // class PathWarnOps[F <: AnyGraphMorphism { type Out <: AnyGraphType { type Container = ExactlyOne }}](f: F) {
   //   @deprecated("You are trying to 'flatten' a non-nested structure, you don't need it", "")
   //   def flatten: F = f
 
   //   @deprecated("You are trying to 'map' over one value, you don't need it", "")
-  //   def map[S <: AnyPath](s: S)
+  //   def map[S <: AnyGraphMorphism](s: S)
   //     (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
 
   //   @deprecated("You are trying to 'flatMap' over one value, you don't need it", "")
-  //   def flatMap[S <: AnyPath](s: S)
+  //   def flatMap[S <: AnyGraphMorphism](s: S)
   //     (implicit cmp: F#Out ≃ S#In): F >=> S = f >=> s
 
   //   @deprecated("You are trying to 'forkMap' over one value, you don't need it (use simple 'fork' method instead)", "")
@@ -167,16 +167,16 @@ object paths {
   // }
 
   /* Any paths */
-  implicit def pathOps[F <: AnyPath](f: F): 
+  implicit def pathOps[F <: AnyGraphMorphism](f: F): 
         PathOps[F] =
     new PathOps[F](f)
 
-  class PathOps[F <: AnyPath](f: F) {
+  class PathOps[F <: AnyGraphMorphism](f: F) {
 
     // F        : A → B
     //        S :     B ⊗ B → C
     // F fork S : A → B ⊗ B → C
-    def fork[S <: AnyPath { type In = F#Out ⊕ F#Out }](s: S):
+    def fork[S <: AnyGraphMorphism { type In = F#Out ⊕ F#Out }](s: S):
       F >=> Fork[F#Out] >=> S =
       f >=> Fork[F#Out](f.out) >=> s
 
@@ -185,7 +185,7 @@ object paths {
     // A → L   B  |  A   L   B
     //     ⊕ → ⊕  |  ⊕ → ⊕ → ⊕
     //     R   C  |  R   R   C
-    def left[S <: AnyBiproduct { type Left <: AnyPath { type In = F#Out } }](s: S):
+    def left[S <: AnyBiproduct { type Left <: AnyGraphMorphism { type In = F#Out } }](s: S):
       F >=> S#Left =
       f >=> s.left
 
@@ -194,7 +194,7 @@ object paths {
     //     L   B  |  L   L   B
     //     ⊕ → ⊕  |  ⊕ → ⊕ → ⊕
     // A → R   C  |  A   R   C
-    def right[S <: AnyBiproduct { type Right <: AnyPath { type In = F#Out } }](s: S):
+    def right[S <: AnyBiproduct { type Right <: AnyGraphMorphism { type In = F#Out } }](s: S):
       F >=> S#Right =
       f >=> s.right
   }
