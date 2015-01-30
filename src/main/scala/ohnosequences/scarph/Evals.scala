@@ -34,6 +34,13 @@ object evals {
 
   object AnyEvalPath {
 
+    implicit def evalId[
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[I, T, I] = 
+    new EvalPathOn[I, T, I] {
+      def apply(tpe: Tpe)(input: Input): Output = input
+    }
+
     implicit def evalComposition[
       I, 
       F <: AnyGraphMorphism,

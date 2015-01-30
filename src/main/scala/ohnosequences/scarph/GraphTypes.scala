@@ -11,7 +11,7 @@ object graphTypes {
 
      - AnyGraphType
          - AnyGraphObject
-             - AnyGraphElement
+             - AnyGraphElement (sealed)
                  - AnyVertex
                  - AnyEdge
              - AnyGraphProperty
@@ -36,7 +36,7 @@ object graphTypes {
   trait AnyGraphObject extends AnyGraphType {
 
     // NOTE: this has to be set in a NON-abstract descendant
-    type Self >: this.type <: AnyGraphObject
+    type Self >: this.type <: AnyGraphObject // = this.type
     val  self: Self // = this
 
     type     In = Self
@@ -113,6 +113,7 @@ object graphTypes {
   }
 
 
+  /* Biproduct is the same for objects and morphisms */
   sealed trait AnyBiproduct extends AnyGraphType {
 
     type Left <: AnyGraphType
@@ -121,7 +122,7 @@ object graphTypes {
     type Right <: AnyGraphType
     val  right: Right
 
-    type In <: Biproduct[Left#In, Right#In]
+    type In  <: Biproduct[Left#In, Right#In]
     type Out <: Biproduct[Left#Out, Right#Out]
   }
 
@@ -172,7 +173,7 @@ object graphTypes {
     type First <: AnyGraphMorphism
     type Second <: AnyGraphMorphism { type In = First#Out }
 
-    type In <: First#In
+    type In  <: First#In
     type Out <: Second#Out
   }
 

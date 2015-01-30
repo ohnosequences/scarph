@@ -14,7 +14,11 @@ object paths {
 
   class GraphTypeOps[T <: AnyGraphType](t: T) {
 
-    def fork: Fork[T] = Fork(t)
+    // def fork: Fork[T] = Fork(t)
+
+    def fork[S <: AnyGraphMorphism { type In = T ⊕ T }](s: S):
+      Fork[T] >=> S =
+      Fork(t) >=> s
   }
 
 

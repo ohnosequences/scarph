@@ -5,7 +5,7 @@ object Twitter {
   import ohnosequences.cosas._, typeSets._
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
+  import s.graphTypes._, s.steps._, s.indexes._, s.schemas._
 
   case object user extends Vertex
   case object name extends PropertyOf(user) { type Raw = String }
@@ -14,12 +14,15 @@ object Twitter {
   case object tweet extends Vertex
   case object text  extends PropertyOf(tweet) { type Raw = String }
 
-  case object posted extends Edge(user -> ManyOrNone.of(tweet))
+  case object posted extends Edge(user -> tweet)
   case object time extends PropertyOf(posted) { type Raw = String }
   case object url  extends PropertyOf(posted) { type Raw = String }
 
-  case object follows extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(user))
-  // case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
+  case object follows extends Edge(user -> user)
+  // case object liked   extends Edge(user -> tweet)
+
+  // case object reposted extends Edge(user -> tweet)
+  // case object time extends PropertyOf(posted) { type Raw = String }
 
   // simple indexes
   case object userByName extends KeyIndex(user, name, Unique)
@@ -44,6 +47,4 @@ object Twitter {
       postedByTimeAndUrlLocal :~: 
       ∅
   )
-
-  // implicitly[ Par[Target[follows.type], Source[liked.type]] <:< Par.WithSameOuts ]
 }
