@@ -7,30 +7,30 @@ object steps {
   import graphTypes._, predicates._, schemas._, indexes._
 
   // △: T → T ⊕ T
-  case class Fork[T <: AnyGraphType](t: T) extends AnyStep {
+  case class Fork[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
 
-    type     In = T
-    lazy val in = t
+    type     In = T#In
+    lazy val in = t.in
 
-    type     Out = T ⊕ T
-    lazy val out = t ⊕ t
+    type     Out = Biproduct[T#Out, T#Out]
+    lazy val out = Biproduct(t.out, t.out): Out
 
     lazy val label = s"fork(${t.label})"
   }
 
   // ▽: T ⊕ T → T
-  case class Merge[T <: AnyGraphType](t: T) extends AnyStep {
+  case class Merge[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
 
-    type     In = T ⊕ T
-    lazy val in = t ⊕ t
+    type     In = Biproduct[T#In, T#In]
+    lazy val in = Biproduct(t.in, t.in): In
 
-    type     Out = T
-    lazy val out = t
+    type     Out = T#Out
+    lazy val out = t.out
 
     lazy val label = s"merge(${t.label} ⊕ ${t.label})"
   }
 
-  case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+  case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
     type Predicate = P
 
     type     Edge = Predicate#Element
@@ -45,7 +45,7 @@ object steps {
     lazy val label: String = s"inE(${edge.label}, ${predicate.label})"
   }
 
-  case class OutE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+  case class OutE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
     type Predicate = P
 
     type     Edge = Predicate#Element
@@ -60,7 +60,7 @@ object steps {
     lazy val label: String = s"outE(${edge.label}, ${predicate.label})"
   }
 
-  case class InV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+  case class InV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
     type Predicate = P
 
     type     Edge = Predicate#Element
@@ -75,7 +75,7 @@ object steps {
     lazy val label: String = s"inV(${predicate.label})"
   }
 
-  case class OutV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyStep {
+  case class OutV[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
     type Predicate = P
 
     type     Edge = Predicate#Element
@@ -90,7 +90,7 @@ object steps {
     lazy val label: String = s"outV(${predicate.label})"
   }
 
-  case class Source[E <: AnyEdge](val edge: E) extends AnyStep {
+  case class Source[E <: AnyEdge](val edge: E) extends AnyGraphMorphism {
     type Edge = E
 
     type     In = Edge
@@ -102,7 +102,7 @@ object steps {
     lazy val label: String = s"source(${edge.label})"
   }
 
-  case class Target[E <: AnyEdge](val edge: E) extends AnyStep {
+  case class Target[E <: AnyEdge](val edge: E) extends AnyGraphMorphism {
     type Edge = E
 
     type     In = Edge
@@ -114,7 +114,7 @@ object steps {
     lazy val label: String = s"target(${edge.label})"
   }
 
-  case class Get[P <: AnyGraphProperty](val property: P) extends AnyStep {
+  case class Get[P <: AnyGraphProperty](val property: P) extends AnyGraphMorphism {
     type Property = P
 
     type     In = Property#Owner
@@ -126,7 +126,7 @@ object steps {
     lazy val label: String = s"get(${property.label})"
   }
 
-  case class GraphQuery[S <: AnyGraphSchema, P <: AnyPredicate](val graph: S, val predicate: P) extends AnyStep {
+  case class GraphQuery[S <: AnyGraphSchema, P <: AnyPredicate](val graph: S, val predicate: P) extends AnyGraphMorphism {
     type Predicate = P
 
     type     In = S

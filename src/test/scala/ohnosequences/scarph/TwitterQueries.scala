@@ -21,6 +21,7 @@ object Queries {
 
   val fffolowees = user.outV(follows).outV(follows).outV(follows)
 
-  val sourceAndTarget = Fork(posted) >=> ( Source(posted) ⊕ Target(posted) )
+  // val sourceAndTarget = Fork(posted) >=> ( Source(posted) ⊕ Target(posted) )
+  val sourceAndTarget = posted.fork( posted.src ⊕ posted.tgt )
 
 }

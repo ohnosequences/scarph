@@ -3,7 +3,7 @@ package ohnosequences.scarph
 object graphTypes {
 
   import ohnosequences.cosas._, types._, properties._
-  import shapeless.<:!<
+  import ohnosequences.cosas.equals._
 
   /* A graph type is kind of an n-morphism 
 
@@ -18,9 +18,8 @@ object graphTypes {
              - AnyPredicate
              - AnyIndex
              - AnyGraphSchema
-         - AnyGraphMorphism (sealed)
-             - AnyStep
-             - AnyComposition (sealed)
+         - AnyGraphMorphism (what was AnyGraphMorphism before)
+         - AnyComposition (sealed)
          - AnyBiproduct (sealed)
   */
   trait AnyGraphType extends AnyType {
@@ -81,10 +80,10 @@ object graphTypes {
     lazy val self = this: Self
 
     type Source = S
-    lazy val source = st._1
+    lazy val source = st._1: S
 
     type Target = T
-    lazy val target = st._2
+    lazy val target = st._2: T
 
     lazy val label = this.toString
   }
@@ -161,24 +160,28 @@ object graphTypes {
 
     Note that `AnyGraphMorphism` hierarchy is sealed, meaning that a path is either a step or a composition of paths.
   */
-  sealed trait AnyGraphMorphism extends AnyGraphType
+  // sealed trait AnyGraphMorphism extends AnyGraphType
 
 
   /* A _step_ is a simple atomic _path_ which can be evaluated directly */
-  trait AnyStep extends AnyGraphMorphism 
+  trait AnyGraphMorphism extends AnyGraphType 
 
   /* Sequential composition of two paths */
-  sealed trait AnyComposition extends AnyGraphMorphism {
+  sealed trait AnyComposition extends AnyGraphType {
 
-    type First <: AnyGraphMorphism
-    type Second <: AnyGraphMorphism { type In = First#Out }
+    type First <: AnyGraphType
+    type Second <: AnyGraphType { type In = First#Out }
+
+    // val composable: First#Out ≃ Second#In
 
     type In  <: First#In
     type Out <: Second#Out
   }
 
-  case class Composition[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }]
-    (val first: F, val second: S) extends AnyComposition {
+  case class Composition[F <: AnyGraphType, S <: AnyGraphType { type In = F#Out }]
+    (val first: F, val second: S)
+    // (implicit val composable: F#Out ≃ S#In) 
+    extends AnyComposition {
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
 
@@ -192,27 +195,27 @@ object graphTypes {
     lazy val out = second.out: Out
   }
 
-  type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+  type >=>[F <: AnyGraphType, S <: AnyGraphType { type In = F#Out }] = Composition[F, S]
 
-  implicit def CombinatorsSyntaxOps[F <: AnyGraphMorphism](f: F):
+  implicit def CombinatorsSyntaxOps[F <: AnyGraphType](f: F):
         CombinatorsSyntaxOps[F] =
     new CombinatorsSyntaxOps[F](f)
 
-  class CombinatorsSyntaxOps[F <: AnyGraphMorphism](f: F) {
+  class CombinatorsSyntaxOps[F <: AnyGraphType](f: F) {
 
-    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): 
+    def >=>[S <: AnyGraphType { type In = F#Out }](s: S): //(implicit cmp: F#Out ≃ S#In): 
       Composition[F, S] = 
-      Composition(f, s)
+      Composition(f, s) //(cmp)
   }
 
 
   /* Adding useful methods */
-  object AnyGraphMorphism {
+  object AnyGraphType {
 
-    implicit def pathOps[T <: AnyGraphMorphism](t: T) = PathOps(t)
+    implicit def pathOps[T <: AnyGraphType](t: T) = PathOps(t)
   }
 
-  case class PathOps[P <: AnyGraphMorphism](val p: P) {
+  case class PathOps[P <: AnyGraphType](val p: P) {
 
     import evals._
     def evalOn[I, O](input: P#In := I)

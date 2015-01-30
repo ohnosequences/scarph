@@ -43,8 +43,8 @@ object evals {
 
     implicit def evalComposition[
       I, 
-      F <: AnyGraphMorphism,
-      S <: AnyGraphMorphism { type In = F#Out },
+      F <: AnyGraphType,
+      S <: AnyGraphType { type In = F#Out },
       X, O
     ](implicit
       evalFirst:  EvalPathOn[I, F, X],
@@ -69,12 +69,12 @@ object evals {
       I, T <: AnyGraphType
     ]:  EvalPathOn[(I, I), Merge[T], I] = 
     new EvalPathOn[(I, I), Merge[T], I] {
-      def apply(tpe: Tpe)(input: Input): Output = tpe.out := input.value._1
+      def apply(tpe: Tpe)(input: Input): Output = (tpe.out: T#Out) := input.value._1
     }
 
     implicit def evalBiproduct[
       FI, SI,
-      F <: AnyGraphMorphism, S <: AnyGraphMorphism,
+      F <: AnyGraphType, S <: AnyGraphType,
       FO, SO
     ](implicit
       eval1: EvalPathOn[FI, F, FO], 
