@@ -16,6 +16,7 @@ object Queries {
   val userName   = user.get(name)
   val tweetText  = tweet.get(text)
   val postedTime = posted.get(time)
+  implicitly[ userName.type <:< (user.type --> name.type) ]
 
   val tweetPosterName = tweet.inE(posted).src.get(name)
 
@@ -24,4 +25,12 @@ object Queries {
   // val sourceAndTarget = Fork(posted) >=> ( Source(posted) ⊕ Target(posted) )
   val sourceAndTarget = posted.fork( posted.src ⊕ posted.tgt )
 
+  val friends = user.inV(follows) ⊕ user.outV(follows)
+
+  val friends1 = user.fork( friends )
+  val friends2 = user.fork( friends >=> friends )
+  val friends3 = user.fork( friends >=> friends >=> friends )
+
+  implicitly[ friends1.type <:< (user.type --> (user.type ⊕ user.type)) ]
+  implicitly[ friends2.type <:< (user.type --> (user.type ⊕ user.type)) ]
 }

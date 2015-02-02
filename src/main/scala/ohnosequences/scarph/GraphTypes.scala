@@ -10,7 +10,7 @@ object graphTypes {
      The full hierarchy looks like this:
 
      - AnyGraphType
-         - AnyGraphObject
+         - AnyGraphObject (AnyGraphType with same In/Out (itself))
              - AnyGraphElement (sealed)
                  - AnyVertex
                  - AnyEdge
@@ -18,7 +18,7 @@ object graphTypes {
              - AnyPredicate
              - AnyIndex
              - AnyGraphSchema
-         - AnyGraphMorphism (what was AnyGraphMorphism before)
+         - AnyGraphMorphism (what was AnyStep before)
          - AnyComposition (sealed)
          - AnyBiproduct (sealed)
   */
@@ -163,8 +163,10 @@ object graphTypes {
   // sealed trait AnyGraphMorphism extends AnyGraphType
 
 
-  /* A _step_ is a simple atomic _path_ which can be evaluated directly */
+  /* A _morphism_ */
   trait AnyGraphMorphism extends AnyGraphType 
+
+  type -->[A <: AnyGraphType, B <: AnyGraphType] = AnyGraphType { type In = A; type Out = B }
 
   /* Sequential composition of two paths */
   sealed trait AnyComposition extends AnyGraphType {
@@ -172,15 +174,12 @@ object graphTypes {
     type First <: AnyGraphType
     type Second <: AnyGraphType { type In = First#Out }
 
-    // val composable: First#Out ≃ Second#In
-
     type In  <: First#In
     type Out <: Second#Out
   }
 
   case class Composition[F <: AnyGraphType, S <: AnyGraphType { type In = F#Out }]
     (val first: F, val second: S)
-    // (implicit val composable: F#Out ≃ S#In) 
     extends AnyComposition {
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
@@ -203,9 +202,9 @@ object graphTypes {
 
   class CombinatorsSyntaxOps[F <: AnyGraphType](f: F) {
 
-    def >=>[S <: AnyGraphType { type In = F#Out }](s: S): //(implicit cmp: F#Out ≃ S#In): 
+    def >=>[S <: AnyGraphType { type In = F#Out }](s: S):
       Composition[F, S] = 
-      Composition(f, s) //(cmp)
+      Composition(f, s)
   }
 
 

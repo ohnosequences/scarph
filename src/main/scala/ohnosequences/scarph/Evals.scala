@@ -69,7 +69,7 @@ object evals {
       I, T <: AnyGraphType
     ]:  EvalPathOn[(I, I), Merge[T], I] = 
     new EvalPathOn[(I, I), Merge[T], I] {
-      def apply(tpe: Tpe)(input: Input): Output = (tpe.out: T#Out) := input.value._1
+      def apply(tpe: Tpe)(input: Input): Output = tpe.out := input.value._1
     }
 
     implicit def evalBiproduct[

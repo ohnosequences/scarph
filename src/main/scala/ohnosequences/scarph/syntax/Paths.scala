@@ -14,16 +14,16 @@ object paths {
 
   class GraphTypeSyntax[F <: AnyGraphType](f: F) {
 
-    def fork: Fork[F] = Fork(f)
-
-    def merge: Merge[F] = Merge(f)
+    def fork: 
+      F >=> Fork[F#Out] =
+      f >=> Fork(f.out)
 
     // F        : A → B
     //        S :     B ⊗ B → C
     // F fork S : A → B ⊗ B → C
     def fork[S <: AnyGraphType { type In = F#Out ⊕ F#Out }](s: S):
-      Fork[F] >=> S =
-      Fork(f) >=> s
+      F >=> Fork[F#Out] >=> S =
+      f >=> Fork[F#Out](f.out) >=> s
 
     //   F   S    |   F left S
     // -----------+------------
@@ -49,6 +49,10 @@ object paths {
     new BiproductSyntax[F](f)
 
   class BiproductSyntax[F <: AnyGraphType { type Out <: AnyBiproduct }](f: F) {
+
+    // def merge: 
+    //   F >=> Merge[F#Out] =
+    //   f >=> Merge(f.out)
 
     // def merge[S <: AnyGraphType { type In = Merge[F]#Out }](s: S):
     //   Merge[F] >=> S =

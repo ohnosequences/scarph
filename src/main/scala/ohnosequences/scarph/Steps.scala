@@ -9,11 +9,11 @@ object steps {
   // △: T → T ⊕ T
   case class Fork[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
 
-    type     In = T#In
-    lazy val in = t.in
+    type     In = T
+    lazy val in = t
 
-    type     Out = Biproduct[T#Out, T#Out]
-    lazy val out = Biproduct(t.out, t.out): Out
+    type     Out = Biproduct[T, T]
+    lazy val out = Biproduct(t, t): Out
 
     lazy val label = s"fork(${t.label})"
   }
@@ -21,11 +21,11 @@ object steps {
   // ▽: T ⊕ T → T
   case class Merge[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
 
-    type     In = Biproduct[T#In, T#In]
-    lazy val in = Biproduct(t.in, t.in): In
+    type     In = Biproduct[T, T]
+    lazy val in = Biproduct(t, t): In
 
-    type     Out = T#Out
-    lazy val out = t.out
+    type     Out = T
+    lazy val out = t
 
     lazy val label = s"merge(${t.label} ⊕ ${t.label})"
   }
