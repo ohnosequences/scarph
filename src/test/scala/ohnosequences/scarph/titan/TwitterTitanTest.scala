@@ -300,11 +300,11 @@
 
 //     // just choosing left or right:
 //     assertResult( ManyOrNone.of(name) := Stream("@laughedelic", "@evdokim") ) {
-//       user.left(friendsNames ⊕ friendsAges).evalOn( edu )
+//       user.left(friendsNames ⊗ friendsAges).evalOn( edu )
 //     }
 
 //     assertResult( ManyOrNone.of(age) := Stream(5, 22) ) {
-//       user.right(friendsNames ⊕ friendsAges).evalOn( edu )
+//       user.right(friendsNames ⊗ friendsAges).evalOn( edu )
 //     }
 
 //   }

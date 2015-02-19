@@ -6,28 +6,28 @@ object steps {
 
   import graphTypes._, predicates._, schemas._, indexes._
 
-  // △: T → T ⊕ T
+  // △: T → T ⊗ T
   case class Fork[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
 
     type     In = T
     lazy val in = t
 
-    type     Out = Biproduct[T, T]
-    lazy val out = Biproduct(t, t): Out
+    type     Out = Tensor[T, T]
+    lazy val out = Tensor(t, t)
 
     lazy val label = s"fork(${t.label})"
   }
 
-  // ▽: T ⊕ T → T
+  // ▽: T ⊗ T → T
   case class Merge[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
 
-    type     In = Biproduct[T, T]
-    lazy val in = Biproduct(t, t): In
+    type     In = Tensor[T, T]
+    lazy val in = Tensor(t, t)
 
     type     Out = T
     lazy val out = t
 
-    lazy val label = s"merge(${t.label} ⊕ ${t.label})"
+    lazy val label = s"merge(${t.label} ⊗ ${t.label})"
   }
 
   case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {

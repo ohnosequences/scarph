@@ -22,15 +22,17 @@ object Queries {
 
   val fffolowees = user.outV(follows).outV(follows).outV(follows)
 
-  // val sourceAndTarget = Fork(posted) >=> ( Source(posted) ⊕ Target(posted) )
-  val sourceAndTarget = posted.fork( posted.src ⊕ posted.tgt )
+  // val sourceAndTarget = Fork(posted) >=> ( Source(posted) ⊗ Target(posted) )
+  val sourceAndTarget = posted.fork( posted.src ⊗ posted.tgt )
 
-  val friends = user.inV(follows) ⊕ user.outV(follows)
+  val friends = user.inV(follows) ⊗ user.outV(follows)
 
   val friends1 = user.fork( friends )
   val friends2 = user.fork( friends >=> friends )
   val friends3 = user.fork( friends >=> friends >=> friends )
 
-  implicitly[ friends1.type <:< (user.type --> (user.type ⊕ user.type)) ]
-  implicitly[ friends2.type <:< (user.type --> (user.type ⊕ user.type)) ]
+  implicitly[ friends1.type <:< (user.type --> (user.type ⊗ user.type)) ]
+  implicitly[ friends2.type <:< (user.type --> (user.type ⊗ user.type)) ]
+
+  // val forkMerge = user.fork.merge
 }

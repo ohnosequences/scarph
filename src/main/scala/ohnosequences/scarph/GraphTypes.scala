@@ -10,7 +10,7 @@ object graphTypes {
      The full hierarchy looks like this:
 
      - AnyGraphType
-         - AnyGraphObject (AnyGraphType with same In/Out (itself))
+         - AnyGraphObject (AnyGraphType with itself as In/Out)
              - AnyGraphElement (sealed)
                  - AnyVertex
                  - AnyEdge
@@ -20,6 +20,7 @@ object graphTypes {
              - AnyGraphSchema
          - AnyGraphMorphism (what was AnyStep before)
          - AnyComposition (sealed)
+         - AnyTensor (sealed)
          - AnyBiproduct (sealed)
   */
   trait AnyGraphType extends AnyType {
@@ -45,7 +46,6 @@ object graphTypes {
     lazy val out = self: Out
   }
 
-
   /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnyGraphObject
 
@@ -60,7 +60,7 @@ object graphTypes {
   }
 
   /* Edges connect vertices and have in/out arities */
-  // NOTE: this is the same as AnyGraphMorphism but with restriction on InT/OutT
+  // NOTE: this is kind of the same as AnyGraphMorphism but with restriction on InT/OutT
   trait AnyEdge extends AnyGraphElement {
     
     type Source <: AnyVertex
@@ -68,9 +68,11 @@ object graphTypes {
 
     type Target <: AnyVertex
     val  target: Target
+
+    // TODO: add arities
   }
 
-  /* This constructor encourages to use this syntax: Edge( ExactlyOne.of(user) -> ManyOrNone.of(tweet) ) */
+  /* This constructor encourages to use this syntax: Edge(user -> tweet) */
   abstract class Edge[
     S <: AnyVertex,
     T <: AnyVertex
@@ -112,6 +114,45 @@ object graphTypes {
   }
 
 
+  /* Tensor product is the same for objects and morphisms */
+  sealed trait AnyTensor extends AnyGraphType {
+
+    type Left <: AnyGraphType
+    val  left: Left
+
+    type Right <: AnyGraphType
+    val  right: Right
+
+    type In  <: Tensor[Left#In, Right#In]
+    type Out <: Tensor[Left#Out, Right#Out]
+  }
+
+  case class Tensor[L <: AnyGraphType, R <: AnyGraphType]
+    (val left: L, val right: R) extends AnyTensor {
+
+    type Left = L
+    type Right = R
+
+    type     In = Tensor[Left#In, Right#In]
+    lazy val in = Tensor(left.in, right.in): In
+
+    type     Out = Tensor[Left#Out, Right#Out]
+    lazy val out = Tensor(left.out, right.out): Out
+
+    lazy val label = s"(${left.label} ⊗ ${right.label})"
+  }
+
+  // case object I extends AnyGraphObject {
+  //   type     Self = this.type
+  //   lazy val self = this: Self
+
+  //   lazy val label = this.toString
+  // }
+  // type I = I.type
+
+  // def leftI[T <: AnyGraphType](it: I ⊗ T): T = it.right
+
+
   /* Biproduct is the same for objects and morphisms */
   sealed trait AnyBiproduct extends AnyGraphType {
 
@@ -140,30 +181,8 @@ object graphTypes {
     lazy val label = s"(${left.label} ⊕ ${right.label})"
   }
 
-  // \oplus symbol: F ⊕ S
-  type ⊕[F <: AnyGraphType, S <: AnyGraphType] = Biproduct[F, S]
 
-  implicit def graphTypeOps[T <: AnyGraphType](t: T):
-        GraphTypeOps[T] =
-    new GraphTypeOps[T](t)
-
-  class GraphTypeOps[T <: AnyGraphType](t: T) {
-
-    def ⊕[S <: AnyGraphType](s: S):
-      Biproduct[T, S] =
-      Biproduct(t, s)
-  }
-
-
-  /* 
-    _Path_ describes some graph traversal. It contains of steps that are combined in various ways.
-
-    Note that `AnyGraphMorphism` hierarchy is sealed, meaning that a path is either a step or a composition of paths.
-  */
-  // sealed trait AnyGraphMorphism extends AnyGraphType
-
-
-  /* A _morphism_ */
+  /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType 
 
   type -->[A <: AnyGraphType, B <: AnyGraphType] = AnyGraphType { type In = A; type Out = B }
@@ -194,31 +213,38 @@ object graphTypes {
     lazy val out = second.out: Out
   }
 
+
+  /* Basic aliases */
+
+  // \otimes symbol: f ⊗ s: F ⊗ S
+  type ⊗[F <: AnyGraphType, S <: AnyGraphType] = Tensor[F, S]
+
+  // \oplus symbol: f ⊕ s: F ⊕ S
+  type ⊕[F <: AnyGraphType, S <: AnyGraphType] = Biproduct[F, S]
+
   type >=>[F <: AnyGraphType, S <: AnyGraphType { type In = F#Out }] = Composition[F, S]
 
-  implicit def CombinatorsSyntaxOps[F <: AnyGraphType](f: F):
-        CombinatorsSyntaxOps[F] =
-    new CombinatorsSyntaxOps[F](f)
+  implicit def graphTypeOps[F <: AnyGraphType](f: F):
+        GraphTypeOps[F] =
+    new GraphTypeOps[F](f)
 
-  class CombinatorsSyntaxOps[F <: AnyGraphType](f: F) {
+  class GraphTypeOps[F <: AnyGraphType](f: F) {
+
+    def ⊗[S <: AnyGraphType](s: S):
+      Tensor[F, S] =
+      Tensor(f, s)
+
+    def ⊕[S <: AnyGraphType](s: S):
+      Biproduct[F, S] =
+      Biproduct(f, s)
 
     def >=>[S <: AnyGraphType { type In = F#Out }](s: S):
       Composition[F, S] = 
       Composition(f, s)
-  }
-
-
-  /* Adding useful methods */
-  object AnyGraphType {
-
-    implicit def pathOps[T <: AnyGraphType](t: T) = PathOps(t)
-  }
-
-  case class PathOps[P <: AnyGraphType](val p: P) {
 
     import evals._
-    def evalOn[I, O](input: P#In := I)
-      (implicit eval: EvalPathOn[I, P, O]): P#Out := O = eval(p)(input)
+    def evalOn[I, O](input: F#In := I)
+      (implicit eval: EvalPathOn[I, F, O]): F#Out := O = eval(f)(input)
   }
 
 }

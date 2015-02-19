@@ -72,15 +72,15 @@ object evals {
       def apply(tpe: Tpe)(input: Input): Output = tpe.out := input.value._1
     }
 
-    implicit def evalBiproduct[
+    implicit def evalTensor[
       FI, SI,
       F <: AnyGraphType, S <: AnyGraphType,
       FO, SO
     ](implicit
       eval1: EvalPathOn[FI, F, FO], 
       eval2: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[(FI, SI), F ⊕ S, (FO, SO)] = 
-    new EvalPathOn[(FI, SI), F ⊕ S, (FO, SO)] {
+    ):  EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] = 
+    new EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] {
       def apply(tpe: Tpe)(input: Input): Output = {
         tpe.out := ((
           eval1(tpe.left) ( (tpe.left.in: F#In)  := input.value._1 ).value,

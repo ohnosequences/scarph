@@ -21,42 +21,42 @@ object paths {
     // F        : A → B
     //        S :     B ⊗ B → C
     // F fork S : A → B ⊗ B → C
-    def fork[S <: AnyGraphType { type In = F#Out ⊕ F#Out }](s: S):
+    def fork[S <: AnyGraphType { type In = F#Out ⊗ F#Out }](s: S):
       F >=> Fork[F#Out] >=> S =
       f >=> Fork[F#Out](f.out) >=> s
 
     //   F   S    |   F left S
     // -----------+------------
     // A → L   B  |  A   L   B
-    //     ⊕ → ⊕  |  ⊕ → ⊕ → ⊕
+    //     ⊗ → ⊗  |  ⊗ → ⊗ → ⊗
     //     R   C  |  R   R   C
-    def left[S <: AnyBiproduct { type Left <: AnyGraphType { type In = F#Out } }](s: S):
+    def left[S <: AnyTensor { type Left <: AnyGraphType { type In = F#Out } }](s: S):
       F >=> S#Left =
       f >=> s.left
 
     //   F   S    |  F right S
     // -----------+------------
     //     L   B  |  L   L   B
-    //     ⊕ → ⊕  |  ⊕ → ⊕ → ⊕
+    //     ⊗ → ⊗  |  ⊗ → ⊗ → ⊗
     // A → R   C  |  A   R   C
-    def right[S <: AnyBiproduct { type Right <: AnyGraphType { type In = F#Out } }](s: S):
+    def right[S <: AnyTensor { type Right <: AnyGraphType { type In = F#Out } }](s: S):
       F >=> S#Right =
       f >=> s.right
   }
 
-  implicit def biproductSyntax[F <: AnyGraphType { type Out <: AnyBiproduct }](f: F):
-        BiproductSyntax[F] =
-    new BiproductSyntax[F](f)
+  implicit def biproductSyntax[F <: AnyGraphType](ff: Tensor[F, F]):
+        TensorSyntax[F] =
+    new TensorSyntax[F](ff)
 
-  class BiproductSyntax[F <: AnyGraphType { type Out <: AnyBiproduct }](f: F) {
+  class TensorSyntax[F <: AnyGraphType](ff: Tensor[F, F]) {
 
-    // def merge: 
-    //   F >=> Merge[F#Out] =
-    //   f >=> Merge(f.out)
+    def merge: 
+      Tensor[F, F] >=> Merge[F#Out] =
+      ff >=> Merge(ff.left.out)
 
-    // def merge[S <: AnyGraphType { type In = Merge[F]#Out }](s: S):
-    //   Merge[F] >=> S =
-    //   Merge(f) >=> s
+    def merge[S <: AnyGraphType { type In = F#Out }](s: S):
+      Tensor[F, F] >=> Merge[F#Out] >=> S =
+      ff >=> Merge[F#Out](ff.left.out) >=> s
   }
 
 
