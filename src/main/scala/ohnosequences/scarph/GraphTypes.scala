@@ -142,15 +142,16 @@ object graphTypes {
     lazy val label = s"(${left.label} ⊗ ${right.label})"
   }
 
-  // case object I extends AnyGraphObject {
-  //   type     Self = this.type
-  //   lazy val self = this: Self
+  case object unit extends AnyGraphObject {
+    type     Self = this.type
+    lazy val self = this: Self
 
-  //   lazy val label = this.toString
-  // }
-  // type I = I.type
+    lazy val label = this.toString
+  }
+  type unit = unit.type
 
-  // def leftI[T <: AnyGraphType](it: I ⊗ T): T = it.right
+  implicit def leftUnit[T <: AnyGraphType](it: unit ⊗ T): T = it.right
+  implicit def rightUnit[T <: AnyGraphType](it: T ⊗ unit): T = it.left
 
 
   /* Biproduct is the same for objects and morphisms */
@@ -181,9 +182,29 @@ object graphTypes {
     lazy val label = s"(${left.label} ⊕ ${right.label})"
   }
 
+  case object zero extends AnyGraphObject {
+
+    type     Self = zero
+    lazy val self = zero
+
+    lazy val label = this.toString
+  }
+  type zero = zero.type
+
+  implicit def leftZero[T <: AnyGraphType](it: zero ⊕ T): T = it.right
+  implicit def rightZero[T <: AnyGraphType](it: T ⊕ zero): T = it.left
+
 
   /* Morphisms are spans */
-  trait AnyGraphMorphism extends AnyGraphType 
+  trait AnyGraphMorphism extends AnyGraphType { morphism =>
+
+    type Dagger <: AnyGraphMorphism {
+
+      type In = morphism.Out
+      type Out = morphism.In
+    }
+    val dagger: Dagger
+  }
 
   type -->[A <: AnyGraphType, B <: AnyGraphType] = AnyGraphType { type In = A; type Out = B }
 

@@ -24,3 +24,6 @@ libraryDependencies ++= Seq(
 
 // shows time for each test:
 testOptions in Test += Tests.Argument("-oD")
+
+// no name hashing, funny stuff happens
+incOptions := incOptions.value.withNameHashing(false)

@@ -15,6 +15,9 @@ object steps {
     type     Out = Tensor[T, T]
     lazy val out = Tensor(t, t)
 
+    type Dagger = Merge[T]
+    lazy val dagger: Dagger = Merge(t)
+
     lazy val label = s"fork(${t.label})"
   }
 
@@ -27,10 +30,44 @@ object steps {
     type     Out = T
     lazy val out = t
 
+    type Dagger = Fork[T]
+    lazy val dagger: Dagger = Fork(t)
+
     lazy val label = s"merge(${t.label} ⊗ ${t.label})"
   }
 
+  // δ: T -> T ⊕ T
+  case class either[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
+
+    type     In = T
+    lazy val in = t
+
+    type     Out = Biproduct[T, T]
+    lazy val out = Biproduct(t, t)
+
+    type Dagger = anyOf[T]
+    lazy val dagger: Dagger = anyOf(t)
+
+    lazy val label = s"either(${t.label})"
+  }
+
+  // ε: T ⊕ T -> T
+  case class anyOf[T <: AnyGraphType](t: T) extends AnyGraphMorphism {
+
+    type     In = Biproduct[T, T]
+    lazy val in = Biproduct(t, t)
+
+    type     Out = T
+    lazy val out = t
+
+    type Dagger = either[T]
+    lazy val dagger: Dagger = either(t)
+
+    lazy val label = s"anyOf(${t.label} ⊕ ${t.label})"
+  }
+
   case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
+    
     type Predicate = P
 
     type     Edge = Predicate#Element
@@ -42,10 +79,15 @@ object steps {
     type     Out = Edge
     lazy val out = edge
 
+    // TODO: what about the predicate??
+    type Dagger = Target[Edge]
+    lazy val dagger: Dagger = Target(edge)
+
     lazy val label: String = s"inE(${edge.label}, ${predicate.label})"
   }
 
   case class OutE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
+    
     type Predicate = P
 
     type     Edge = Predicate#Element
@@ -56,6 +98,10 @@ object steps {
 
     type     Out = Edge
     lazy val out = edge
+
+    // TODO: what about the predicate??
+    type Dagger = Source[Edge]
+    lazy val dagger: Dagger = Source(edge)
 
     lazy val label: String = s"outE(${edge.label}, ${predicate.label})"
   }
@@ -72,6 +118,9 @@ object steps {
     type     Out = Edge#Source
     lazy val out = edge.source
 
+    type Dagger = OutV[P]
+    lazy val dagger: Dagger = OutV(predicate)
+
     lazy val label: String = s"inV(${predicate.label})"
   }
 
@@ -86,6 +135,9 @@ object steps {
 
     type     Out = Edge#Target
     lazy val out = edge.target
+
+    type Dagger = InV[P]
+    lazy val dagger: Dagger = InV(predicate)
 
     lazy val label: String = s"outV(${predicate.label})"
   }
@@ -111,6 +163,10 @@ object steps {
     type     Out = Edge#Target
     lazy val out = edge.target
 
+    // TODO: something like this
+    type Dagger = InV[EmptyPredicate[E]]
+    lazy val dagger: Dagger = InV[EmptyPredicate[E]](new EmptyPredicate(edge))
+
     lazy val label: String = s"target(${edge.label})"
   }
 
@@ -123,9 +179,14 @@ object steps {
     type     Out = Property
     lazy val out = property
 
+    // TODO: lookup for a property value. Maybe a particular graph query?
+    type Dagger = Nothing
+    lazy val dagger: Dagger = ???
+
     lazy val label: String = s"get(${property.label})"
   }
 
+  // I don't see the point of this; maybe the lookup property thing?
   case class GraphQuery[S <: AnyGraphSchema, P <: AnyPredicate](val graph: S, val predicate: P) extends AnyGraphMorphism {
     type Predicate = P
 
@@ -134,6 +195,10 @@ object steps {
 
     type     Out = Predicate#Element
     lazy val out = predicate.element
+
+    // TODO: something like a quantified get?
+    type Dagger = Nothing
+    lazy val dagger: Dagger = ???
 
     lazy val label = s"query(${predicate.label})"
   }
