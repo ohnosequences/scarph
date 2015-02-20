@@ -143,6 +143,7 @@ object steps {
   }
 
   case class Source[E <: AnyEdge](val edge: E) extends AnyGraphMorphism {
+    
     type Edge = E
 
     type     In = Edge
@@ -150,6 +151,9 @@ object steps {
 
     type     Out = Edge#Source
     lazy val out = edge.source
+
+    type Dagger = OutE[EmptyPredicate[Edge]]
+    lazy val dagger: Dagger = OutE[EmptyPredicate[Edge]](new EmptyPredicate(edge))
 
     lazy val label: String = s"source(${edge.label})"
   }
@@ -164,8 +168,8 @@ object steps {
     lazy val out = edge.target
 
     // TODO: something like this
-    type Dagger = InV[EmptyPredicate[E]]
-    lazy val dagger: Dagger = InV[EmptyPredicate[E]](new EmptyPredicate(edge))
+    type Dagger = InE[EmptyPredicate[Edge]]
+    lazy val dagger: Dagger = InE[EmptyPredicate[Edge]](new EmptyPredicate(edge))
 
     lazy val label: String = s"target(${edge.label})"
   }
