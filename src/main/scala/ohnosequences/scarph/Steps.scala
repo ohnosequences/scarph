@@ -66,6 +66,64 @@ object steps {
     lazy val label = s"anyOf(${t.label} ⊕ ${t.label})"
   }
 
+  // projections and injections
+
+  case class asLeft[B <: AnyBiproduct](b: B) extends AnyGraphMorphism {
+
+    type     In = B#Left
+    lazy val in = b.left
+
+    type     Out = B
+    lazy val out = b
+
+    type Dagger = left[B]
+    lazy val dagger: Dagger = left(b)
+
+    lazy val label = s"${b.left.label} inL ${b.label}"
+  }
+
+  case class left[B <: AnyBiproduct](b: B) extends AnyGraphMorphism {
+
+    type In = B
+    lazy val in = b
+
+    type Out = B#Left
+    lazy val out: Out = b.left
+
+    type Dagger = asLeft[B]
+    lazy val dagger: Dagger = asLeft(b)
+
+    lazy val label = s"(${b.label}).left"
+  }
+
+  case class asRight[B <: AnyBiproduct](b: B) extends AnyGraphMorphism {
+
+    type     In = B#Right
+    lazy val in = b.right
+
+    type     Out = B
+    lazy val out = b
+
+    type Dagger = right[B]
+    lazy val dagger: Dagger = right(b)
+
+    lazy val label = s"${b.right.label} inL ${b.label}"
+  }
+
+  case class right[B <: AnyBiproduct](b: B) extends AnyGraphMorphism {
+
+    type In = B
+    lazy val in = b
+
+    type Out = B#Right
+    lazy val out: Out = b.right
+
+    type Dagger = asRight[B]
+    lazy val dagger: Dagger = asRight(b)
+
+    lazy val label = s"(${b.label}).right"
+  }
+
   case class InE[P <: AnyPredicate { type Element <: AnyEdge }](val predicate: P) extends AnyGraphMorphism {
     
     type Predicate = P

@@ -12,7 +12,7 @@ object paths {
         GraphTypeSyntax[F] =
     new GraphTypeSyntax[F](f)
 
-  class GraphTypeSyntax[F <: AnyGraphType](f: F) {
+  class GraphTypeSyntax[F <: AnyGraphMorphism](f: F) {
 
     def fork: 
       F >=> Fork[F#Out] =
@@ -21,7 +21,7 @@ object paths {
     // F        : A → B
     //        S :     B ⊗ B → C
     // F fork S : A → B ⊗ B → C
-    def fork[S <: AnyGraphType { type In = F#Out ⊗ F#Out }](s: S):
+    def fork[S <: AnyGraphMorphism { type In = F#Out ⊗ F#Out }](s: S):
       F >=> Fork[F#Out] >=> S =
       f >=> Fork[F#Out](f.out) >=> s
 
@@ -30,7 +30,7 @@ object paths {
     // A → L   B  |  A   L   B
     //     ⊗ → ⊗  |  ⊗ → ⊗ → ⊗
     //     R   C  |  R   R   C
-    def left[S <: AnyTensor { type Left <: AnyGraphType { type In = F#Out } }](s: S):
+    def left[S <: AnyTensor { type Left <: AnyGraphMorphism { type In = F#Out } }](s: S):
       F >=> S#Left =
       f >=> s.left
 
@@ -39,7 +39,7 @@ object paths {
     //     L   B  |  L   L   B
     //     ⊗ → ⊗  |  ⊗ → ⊗ → ⊗
     // A → R   C  |  A   R   C
-    def right[S <: AnyTensor { type Right <: AnyGraphType { type In = F#Out } }](s: S):
+    def right[S <: AnyTensor { type Right <: AnyGraphMorphism { type In = F#Out } }](s: S):
       F >=> S#Right =
       f >=> s.right
   }
@@ -48,13 +48,13 @@ object paths {
         TensorSyntax[F] =
     new TensorSyntax[F](ff)
 
-  class TensorSyntax[F <: AnyGraphType](ff: Tensor[F, F]) {
+  class TensorSyntax[F <: AnyGraphMorphism](ff: Tensor[F, F]) {
 
     def merge: 
       Tensor[F, F] >=> Merge[F#Out] =
       ff >=> Merge(ff.left.out)
 
-    def merge[S <: AnyGraphType { type In = F#Out }](s: S):
+    def merge[S <: AnyGraphMorphism { type In = F#Out }](s: S):
       Tensor[F, F] >=> Merge[F#Out] >=> S =
       ff >=> Merge[F#Out](ff.left.out) >=> s
   }
@@ -85,7 +85,7 @@ object paths {
         ElementSyntax[F] =
     new ElementSyntax[F](f)
 
-  class ElementSyntax[F <: AnyGraphType { type Out <: AnyGraphElement }](f: F) {
+  class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) {
 
     def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
       F >=> Get[P] =
@@ -97,7 +97,7 @@ object paths {
         EdgeSyntax[F] =
     new EdgeSyntax[F](f)
 
-  class EdgeSyntax[F <: AnyGraphType { type Out <: AnyEdge }](f: F) {
+  class EdgeSyntax[F <: AnyGraphMorphism { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
     def src: F >=> Source[F#Out] = 

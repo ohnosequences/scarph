@@ -53,6 +53,7 @@ object graphTypes {
   trait AnyVertex extends AnyGraphElement
 
   class Vertex extends AnyVertex {
+
     type     Self = this.type
     lazy val self = this: Self
 
@@ -61,7 +62,7 @@ object graphTypes {
 
   /* Edges connect vertices and have in/out arities */
   // NOTE: this is kind of the same as AnyGraphMorphism but with restriction on InT/OutT
-  trait AnyEdge extends AnyGraphElement {
+  trait AnyEdge extends AnyGraphObject {
     
     type Source <: AnyVertex
     val  source: Source
@@ -115,12 +116,12 @@ object graphTypes {
 
 
   /* Tensor product is the same for objects and morphisms */
-  sealed trait AnyTensor extends AnyGraphType {
+  sealed trait AnyTensor extends AnyGraphElement {
 
-    type Left <: AnyGraphType
+    type Left <: AnyGraphElement
     val  left: Left
 
-    type Right <: AnyGraphType
+    type Right <: AnyGraphElement
     val  right: Right
 
     type In  <: Tensor[Left#In, Right#In]
@@ -198,6 +199,9 @@ object graphTypes {
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
 
+    type In <: AnyGraphObject
+    type Out <: AnyGraphObject
+
     type Dagger <: AnyGraphMorphism {
 
       type In = morphism.Out
@@ -209,18 +213,34 @@ object graphTypes {
   type -->[A <: AnyGraphType, B <: AnyGraphType] = AnyGraphType { type In = A; type Out = B }
 
   /* Sequential composition of two paths */
-  sealed trait AnyComposition extends AnyGraphType {
+  sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
-    type First <: AnyGraphType
-    type Second <: AnyGraphType { type In = First#Out }
+    type First <: AnyGraphMorphism
+    type Second <: AnyGraphMorphism { 
+      
+      type In = First#Out
+    }
 
     type In  <: First#In
     type Out <: Second#Out
+
+    // type Dagger <: AnyComposition {
+
+    //   type First <: composition.Second#Dagger
+    //   type Second <: composition.First#Dagger
+    // }
+
+    // F#Dagger#In = Second#Dagger#Out
   }
 
-  case class Composition[F <: AnyGraphType, S <: AnyGraphType { type In = F#Out }]
-    (val first: F, val second: S)
-    extends AnyComposition {
+  case class Composition[
+    F <: AnyGraphMorphism,
+    S <: AnyGraphMorphism { 
+      
+      type In = F#Out
+    }
+  ]
+  (val first: F, val second: S) extends AnyComposition { cc =>
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
 
@@ -232,6 +252,13 @@ object graphTypes {
 
     type     Out = Second#Out
     lazy val out = second.out: Out
+
+    type Dagger = Composition[Second#Dagger, First#Dagger { type In = Second#Dagger#Out}] { type In = cc.Out; type Out = cc.In }
+    lazy val dagger: Dagger = 
+    Composition[Second#Dagger, First#Dagger { type In = Second#Dagger#Out}](
+      second.dagger,
+      first.dagger.asInstanceOf[First#Dagger { type In = Second#Dagger#Out}]
+    ).asInstanceOf[Dagger]
   }
 
 
@@ -243,7 +270,7 @@ object graphTypes {
   // \oplus symbol: f ⊕ s: F ⊕ S
   type ⊕[F <: AnyGraphType, S <: AnyGraphType] = Biproduct[F, S]
 
-  type >=>[F <: AnyGraphType, S <: AnyGraphType { type In = F#Out }] = Composition[F, S]
+  type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
 
   implicit def graphTypeOps[F <: AnyGraphType](f: F):
         GraphTypeOps[F] =
@@ -259,13 +286,29 @@ object graphTypes {
       Biproduct[F, S] =
       Biproduct(f, s)
 
-    def >=>[S <: AnyGraphType { type In = F#Out }](s: S):
-      Composition[F, S] = 
-      Composition(f, s)
+    // def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S):
+    //   Composition[F, S] = 
+    //   Composition(f, s)
 
     import evals._
     def evalOn[I, O](input: F#In := I)
       (implicit eval: EvalPathOn[I, F, O]): F#Out := O = eval(f)(input)
+  }
+
+  implicit def graphMorphismOps[F <: AnyGraphMorphism](f: F):
+        GraphMorphismOps[F] =
+    new GraphMorphismOps[F](f)
+
+
+  class GraphMorphismOps[P <: AnyGraphMorphism](val p: P) {
+
+    def >=>[
+      S <: AnyGraphMorphism {  
+        
+        type In = P#Out
+      }
+    ]
+    (s: S): Composition[P, S] = Composition[P, S](p, s)
   }
 
 }
