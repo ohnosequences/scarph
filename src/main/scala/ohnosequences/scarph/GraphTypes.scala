@@ -295,6 +295,14 @@ object graphTypes {
       (implicit eval: EvalPathOn[I, F, O]): F#Out := O = eval(f)(input)
   }
 
+  class GraphObjectOps[O <: AnyGraphObject](val obj: O) {
+
+    import monoidalStructures._
+
+    def ⊗[S <: AnyGraphObject](other: S): TensorObj[O, S] = TensorObj(obj, other)
+    def ⊕[S <: AnyGraphObject](other: S): BiproductObj[O, S] = BiproductObj(obj, other)
+  }
+
   implicit def graphMorphismOps[F <: AnyGraphMorphism](f: F):
         GraphMorphismOps[F] =
     new GraphMorphismOps[F](f)
@@ -309,6 +317,12 @@ object graphTypes {
       }
     ]
     (s: S): Composition[P, S] = Composition[P, S](p, s)
+
+    import monoidalStructures._
+
+    def ⊗[Q <: AnyGraphMorphism](q: Q): TensorMorph[P,Q] = TensorMorph(p,q)
+
+    def ⊕[Q <: AnyGraphMorphism](q: Q): BiproductMorph[P,Q] = BiproductMorph(p,q)
   }
 
 }
