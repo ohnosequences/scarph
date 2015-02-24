@@ -2,30 +2,30 @@ package ohnosequences.scarph
 
 object evals {
 
+  import monoidalStructures._
   import ohnosequences.cosas._, types._, fns._
-  import graphTypes._, steps._
+  import graphTypes._, morphisms._
 
 
-  // NOTE: maybe this should be Fn2
   trait AnyEvalPath {
 
-    type Tpe <: AnyGraphType
+    type Morph <: AnyGraphMorphism
 
     type InVal
     type OutVal
 
-    type Input = Tpe#In := InVal
-    type Output = Tpe#Out := OutVal
+    type Input = Morph#In := InVal
+    type Output = Morph#Out := OutVal
 
-    def apply(tpe: Tpe)(input: Input): Output
+    def apply(morph: Morph)(input: Input): Output
   }
 
-  @annotation.implicitNotFound(msg = "Can't evaluate tpe ${P} with\n\tinput: ${I}\n\toutput: ${O}")
-  trait EvalPathOn[I, P <: AnyGraphType, O] extends AnyEvalPath {
+  @annotation.implicitNotFound(msg = "Can't evaluate morph ${P} with\n\tinput: ${I}\n\toutput: ${O}")
+  trait EvalPathOn[I, P <: AnyGraphMorphism, O] extends AnyEvalPath {
 
     type InVal = I
     type OutVal = O
-    type Tpe = P
+    type Morph = P
   }
 
   trait FlattenVals[F[_], G[_], X] extends Fn1[F[G[X]]]
@@ -34,17 +34,10 @@ object evals {
 
   object AnyEvalPath {
 
-    implicit def evalId[
-      I, T <: AnyGraphObject
-    ]:  EvalPathOn[I, T, I] = 
-    new EvalPathOn[I, T, I] {
-      def apply(tpe: Tpe)(input: Input): Output = input
-    }
-
     implicit def evalComposition[
       I, 
-      F <: AnyGraphType,
-      S <: AnyGraphType { type In = F#Out },
+      F <: AnyGraphMorphism,
+      S <: AnyGraphMorphism { type In = F#Out },
       X, O
     ](implicit
       evalFirst:  EvalPathOn[I, F, X],
@@ -52,39 +45,56 @@ object evals {
     ):  EvalPathOn[I, F >=> S, O] = 
     new EvalPathOn[I, F >=> S, O] {
 
-      def apply(tpe: Tpe)(input: Input): Output = {
-        val firstResult = evalFirst(tpe.first)(input)
-        evalSecond(tpe.second)(tpe.second.in := firstResult.value)
+      def apply(morph: Morph)(input: Input): Output = {
+        val firstResult = evalFirst(morph.first)(input)
+        evalSecond(morph.second)(morph.second.in := firstResult.value)
       }
     }
 
     implicit def evalFork[
-      I, T <: AnyGraphType
-    ]:  EvalPathOn[I, Fork[T], (I, I)] = 
-    new EvalPathOn[I, Fork[T], (I, I)] {
-      def apply(tpe: Tpe)(input: Input): Output = tpe.out := ( (input.value, input.value) )
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[I, fork[T], (I, I)] = 
+    new EvalPathOn[I, fork[T], (I, I)] {
+      def apply(morph: Morph)(input: Input): Output = morph.out := ( (input.value, input.value) )
     }
 
     implicit def evalMerge[
-      I, T <: AnyGraphType
-    ]:  EvalPathOn[(I, I), Merge[T], I] = 
-    new EvalPathOn[(I, I), Merge[T], I] {
-      def apply(tpe: Tpe)(input: Input): Output = tpe.out := input.value._1
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[(I, I), merge[T], I] = 
+    new EvalPathOn[(I, I), merge[T], I] {
+      def apply(morph: Morph)(input: Input): Output = morph.out := input.value._1
     }
 
     implicit def evalTensor[
       FI, SI,
-      F <: AnyGraphType, S <: AnyGraphType,
+      F <: AnyGraphMorphism, S <: AnyGraphMorphism,
       FO, SO
     ](implicit
       eval1: EvalPathOn[FI, F, FO], 
       eval2: EvalPathOn[SI, S, SO]
-    ):  EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] = 
-    new EvalPathOn[(FI, SI), F ⊗ S, (FO, SO)] {
-      def apply(tpe: Tpe)(input: Input): Output = {
-        tpe.out := ((
-          eval1(tpe.left) ( (tpe.left.in: F#In)  := input.value._1 ).value,
-          eval2(tpe.right)( (tpe.right.in: S#In) := input.value._2 ).value
+    ):  EvalPathOn[(FI, SI), TensorMorph[F, S], (FO, SO)] = 
+    new EvalPathOn[(FI, SI), TensorMorph[F, S], (FO, SO)] {
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := ((
+          eval1(morph.left) ( (morph.left.in: F#In)  := input.value._1 ).value,
+          eval2(morph.right)( (morph.right.in: S#In) := input.value._2 ).value
+        ))
+      }
+    }
+
+    implicit def evalBiproduct[
+      FI, SI,
+      F <: AnyGraphMorphism, S <: AnyGraphMorphism,
+      FO, SO
+    ](implicit
+      eval1: EvalPathOn[FI, F, FO], 
+      eval2: EvalPathOn[SI, S, SO]
+    ):  EvalPathOn[(FI, SI), BiproductMorph[F, S], (FO, SO)] = 
+    new EvalPathOn[(FI, SI), BiproductMorph[F, S], (FO, SO)] {
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := ((
+          eval1(morph.left) ( (morph.left.in: F#In)  := input.value._1 ).value,
+          eval2(morph.right)( (morph.right.in: S#In) := input.value._2 ).value
         ))
       }
     }

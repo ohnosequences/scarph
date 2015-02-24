@@ -18,9 +18,9 @@ object graphTypes {
 
   class GraphTypeValOps[F <: AnyGraphType, VF](vt: F := VF) {
 
-    // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
-    def ⊗[S <: AnyGraphType, VS](vs: S := VS): (F ⊗ S) := (VF, VS) = 
-      new Denotes( (vt.value, vs.value) )
+    // // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
+    // def ⊗[S <: AnyGraphType, VS](vs: S := VS): (F ⊗ S) := (VF, VS) = 
+    //   new Denotes( (vt.value, vs.value) )
   }
 
 }
