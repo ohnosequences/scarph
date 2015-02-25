@@ -74,10 +74,10 @@ object graphTypes {
   }
 
   /* Property values have raw types that are covered as graph objects */
-  trait AnyRawType extends AnyProperty with AnyGraphObject {
+  trait AnyValueType extends AnyProperty with AnyGraphObject
 
-    lazy val label = this.toString
-  }
+  abstract class ValueType[R](val label: String) 
+    extends AnyValueType { type Raw = R }
 
   /* This is like an edge between an element and a raw type */
   trait AnyGraphProperty extends AnyGraphType {
@@ -85,11 +85,11 @@ object graphTypes {
     type Owner <: AnyGraphElement
     val  owner: Owner
 
-    type Value <: AnyRawType
+    type Value <: AnyValueType
     val  value: Value
   }
 
-  abstract class HasProperty[O <: AnyGraphElement, V <: AnyRawType]
+  abstract class Property[O <: AnyGraphElement, V <: AnyValueType]
     (val owner: O, val value: V) extends AnyGraphProperty {
 
     type Owner = O
@@ -126,7 +126,7 @@ object graphTypes {
     type Dagger <: Composition[Second#Dagger, First#Dagger]
   }
 
-  case class Composition[
+  class Composition[
     F <: AnyGraphMorphism,
     S <: AnyGraphMorphism //{ type In = F#Out }
   ] (val first: F, val second: S) extends AnyComposition { cc =>
@@ -143,8 +143,8 @@ object graphTypes {
     type     Out = Second#Out
     lazy val out = second.out: Out
 
-    type     Dagger = Composition[Second#Dagger, First#Dagger]
-    lazy val dagger = Composition(second.dagger, first.dagger): Dagger
+    type     Dagger =     Composition[Second#Dagger, First#Dagger]
+    lazy val dagger = new Composition(second.dagger, first.dagger): Dagger
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
   }
@@ -153,6 +153,10 @@ object graphTypes {
   /* Basic aliases */
   type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
 
+
+  implicit def graphObjectOps[O <: AnyGraphObject](o: O):
+        GraphObjectOps[O] =
+    new GraphObjectOps[O](o)
 
   class GraphObjectOps[O <: AnyGraphObject](val obj: O) {
 
@@ -170,7 +174,7 @@ object graphTypes {
 
     def >=>[S <: AnyGraphMorphism { type In = F#Out }]
       (s: S): Composition[F, S] = 
-              Composition[F, S](f, s)
+          new Composition[F, S](f, s)
 
     import monoidalStructures._
 

@@ -16,64 +16,131 @@ object morphisms {
     }
   }
 
-  // △: T → T ⊗ T
-  case class fork[T <: AnyGraphObject](t: T) extends AnyPrimitive {
+  // η: I → X
+  case class unitor[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
-    type     In = T
-    lazy val in = t
+    type     In = unit
+    lazy val in = unit
 
-    type     Out = TensorObj[T, T]
-    lazy val out = TensorObj(t, t)
+    type     Out = X
+    lazy val out = x
 
-    type     Dagger = merge[T]
-    lazy val dagger = merge(t)
+    type     Dagger = counitor[X]
+    lazy val dagger = counitor(x)
 
-    lazy val label = s"fork(${t.label})"
+    lazy val label = s"unitor(${x.label})"
   }
 
-  // ▽: T ⊗ T → T
-  case class merge[T <: AnyGraphObject](t: T) extends AnyPrimitive {
+  // ε: X → I
+  case class counitor[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
-    type     In = TensorObj[T, T]
-    lazy val in = TensorObj(t, t)
+    type     In = X
+    lazy val in = x
 
-    type     Out = T
-    lazy val out = t
+    type     Out = unit
+    lazy val out = unit
 
-    type     Dagger = fork[T]
-    lazy val dagger = fork(t)
+    type     Dagger = unitor[X]
+    lazy val dagger = unitor(x)
 
-    lazy val label = s"merge(${t.label} ⊗ ${t.label})"
+    lazy val label = s"counitor(${x.label})"
   }
 
-  // δ: T -> T ⊕ T
-  case class either[T <: AnyGraphObject](t: T) extends AnyPrimitive {
 
-    type     In = T
-    lazy val in = t
+  // △: X → X ⊗ X
+  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
-    type     Out = BiproductObj[T, T]
-    lazy val out = BiproductObj(t, t)
+    type     In = X
+    lazy val in = x
 
-    type     Dagger = anyOf[T]
-    lazy val dagger = anyOf(t)
+    type     Out = X ⊗ X
+    lazy val out = x ⊗ x
 
-    lazy val label = s"either(${t.label})"
+    type     Dagger = merge[X]
+    lazy val dagger = merge(x)
+
+    lazy val label = s"fork(${x.label})"
   }
 
-  // ε: T ⊕ T -> T
-  case class anyOf[T <: AnyGraphObject](t: T) extends AnyPrimitive {
+  // ▽: X ⊗ X → X
+  case class merge[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
-    type     In = BiproductObj[T, T]
-    lazy val in = BiproductObj(t, t)
+    type     In = X ⊗ X
+    lazy val in = x ⊗ x
 
-    type     Out = T
-    lazy val out = t
+    type     Out = X
+    lazy val out = x
 
-    type     Dagger = either[T]
-    lazy val dagger = either(t)
+    type     Dagger = fork[X]
+    lazy val dagger = fork(x)
 
-    lazy val label = s"anyOf(${t.label} ⊕ ${t.label})"
+    lazy val label = s"merge(${x.label} ⊗ ${x.label})"
+  }
+
+
+  // λ: I ⊗ X → X
+  case class leftUnitor[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+
+    type     In = unit ⊗ X
+    lazy val in = unit ⊗ x
+
+    type     Out = X
+    lazy val out = x
+
+    type     Dagger = leftCounitor[X]
+    lazy val dagger = leftCounitor(x)
+
+    lazy val label = s"leftUnitor(I ⊗ ${x.label})"
+  }
+
+  // λ: I ⊗ X → X
+  case class leftCounitor[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+
+    type     In = X
+    lazy val in = x
+
+    type     Out = unit ⊗ X
+    lazy val out = unit ⊗ x
+
+    type     Dagger = leftUnitor[X]
+    lazy val dagger = leftUnitor(x)
+
+    lazy val label = s"leftCounitor(${x.label})"
+  }
+
+
+  // ρ: X ⊗ I → X
+  // TODO: ...
+
+
+  // δ: X -> X ⊕ X
+  case class either[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+
+    type     In = X
+    lazy val in = x
+
+    type     Out = BiproductObj[X, X]
+    lazy val out = BiproductObj(x, x)
+
+    type     Dagger = anyOf[X]
+    lazy val dagger = anyOf(x)
+
+    lazy val label = s"either(${x.label})"
+  }
+
+  // ε: X ⊕ X -> X
+  case class anyOf[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+
+    type     In = BiproductObj[X, X]
+    lazy val in = BiproductObj(x, x)
+
+    type     Out = X
+    lazy val out = x
+
+    type     Dagger = either[X]
+    lazy val dagger = either(x)
+
+    lazy val label = s"anyOf(${x.label} ⊕ ${x.label})"
   }
 
 
@@ -261,6 +328,53 @@ object morphisms {
     lazy val dagger = get(property)
 
     lazy val label: String = s"lookup(${property.label})"
+  }
+
+
+  trait AnyIsomorphism extends AnyPrimitive
+
+  case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R) extends AnyIsomorphism {
+
+    type     In = L ⊗ R
+    lazy val in = l ⊗ r
+
+    type     Out = R ⊗ L
+    lazy val out = r ⊗ l
+
+    type     Dagger = symmetry[R, L]
+    lazy val dagger = symmetry(r, l)
+
+    lazy val label: String = s"symmetry(${l.label}, ${r.label})"
+  }
+
+  case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
+    (u: U, a: A, b: B) extends AnyIsomorphism {
+
+    type     In = U ⊗ (A ⊕ B)
+    lazy val in = u ⊗ (a ⊕ b)
+
+    type     Out = (U ⊗ A) ⊕ (U ⊗ B)
+    lazy val out = (u ⊗ a) ⊕ (u ⊗ b)
+
+    type     Dagger = undistribute[U, A, B]
+    lazy val dagger = undistribute(u, a, b)
+
+    lazy val label: String = s"distribute(${u.label} ⊗ (${a.label} ⊕ ${b.label}))"
+  }
+
+  case class undistribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
+    (u: U, a: A, b: B) extends AnyIsomorphism {
+
+    type     In = (U ⊗ A) ⊕ (U ⊗ B)
+    lazy val in = (u ⊗ a) ⊕ (u ⊗ b)
+
+    type     Out = U ⊗ (A ⊕ B)
+    lazy val out = u ⊗ (a ⊕ b)
+
+    type     Dagger = distribute[U, A, B]
+    lazy val dagger = distribute(u, a, b)
+
+    lazy val label: String = s"undistribute((${u.label} ⊗ ${a.label}) ⊕ (${u.label} ⊗ ${b.label}))"
   }
 
 }

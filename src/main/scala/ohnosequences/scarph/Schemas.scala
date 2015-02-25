@@ -13,26 +13,26 @@ object schemas {
     type Edges <: AnyTypeSet.Of[AnyEdge]
     val  edges: Edges
 
-    type RawTypes <: AnyTypeSet.Of[AnyRawType]
-    val  rawTypes: RawTypes
+    type ValueTypes <: AnyTypeSet.Of[AnyValueType]
+    val  valueTypes: ValueTypes
 
     type Properties <: AnyTypeSet.Of[AnyGraphProperty]
     val  properties: Properties
   }
 
   abstract class GraphSchema[
-      Rs <: AnyTypeSet.Of[AnyRawType],
+      Rs <: AnyTypeSet.Of[AnyValueType],
       Ps <: AnyTypeSet.Of[AnyGraphProperty],
       Vs <: AnyTypeSet.Of[AnyVertex],
       Es <: AnyTypeSet.Of[AnyEdge]
     ](val label: String,
       val vertices: Vs,
       val edges: Es,
-      val rawTypes: Rs,
+      val valueTypes: Rs,
       val properties: Ps
     ) extends AnyGraphSchema {
 
-    type RawTypes = Rs
+    type ValueTypes = Rs
     type Properties = Ps
     type Vertices = Vs
     type Edges = Es
