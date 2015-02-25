@@ -5,12 +5,14 @@ package ohnosequences.scarph
 object morphisms {
 
   import graphTypes._, predicates._, monoidalStructures._
-  // , schemas._, indexes._
 
   trait AnyPrimitive extends AnyGraphMorphism { p =>
 
     type Dagger <: AnyPrimitive {
       type Dagger >: p.type <: AnyPrimitive
+
+      type In = p.Out
+      type Out = p.In
     }
   }
 
@@ -76,134 +78,138 @@ object morphisms {
 
 
   /* Projections and injections */
-  case class asLeft[B <: AnyBiproductObj](b: B) extends AnyPrimitive {
+  case class asLeft[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+    type Biproduct = B
 
-    type     In = B#Left
-    lazy val in = b.left
+    type     In = Biproduct#Left
+    lazy val in = biproduct.left
 
-    type     Out = B
-    lazy val out = b
+    type     Out = Biproduct
+    lazy val out = biproduct
 
-    type     Dagger = left[B]
-    lazy val dagger = left(b)
+    type     Dagger = left[Biproduct]
+    lazy val dagger = left(biproduct)
 
-    lazy val label = s"(${b.left.label} asLeft ${b.label})"
+    lazy val label = s"(${biproduct.left.label} asLeft ${biproduct.label})"
   }
 
-  case class left[B <: AnyBiproductObj](b: B) extends AnyPrimitive {
+  case class left[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+    type Biproduct = B
 
-    type     In = B
-    lazy val in = b
+    type     In = Biproduct
+    lazy val in = biproduct
 
-    type     Out = B#Left
-    lazy val out = b.left
+    type     Out = Biproduct#Left
+    lazy val out = biproduct.left
 
-    type     Dagger = asLeft[B]
-    lazy val dagger = asLeft(b)
+    type     Dagger = asLeft[Biproduct]
+    lazy val dagger = asLeft(biproduct)
 
-    lazy val label = s"left(${b.label})"
-  }
-
-
-  case class asRight[B <: AnyBiproductObj](b: B) extends AnyPrimitive {
-
-    type     In = B#Right
-    lazy val in = b.right
-
-    type     Out = B
-    lazy val out = b
-
-    type     Dagger = right[B]
-    lazy val dagger = right(b)
-
-    lazy val label = s"(${b.right.label} asRight ${b.label})"
-  }
-
-  case class right[B <: AnyBiproductObj](b: B) extends AnyPrimitive {
-
-    type     In = B
-    lazy val in = b
-
-    type     Out = B#Right
-    lazy val out = b.right
-
-    type     Dagger = asRight[B]
-    lazy val dagger = asRight(b)
-
-    lazy val label = s"$right({b.label})"
+    lazy val label = s"left(${biproduct.label})"
   }
 
 
-  case class InE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class asRight[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+    type Biproduct = B
+
+    type     In = Biproduct#Right
+    lazy val in = biproduct.right
+
+    type     Out = Biproduct
+    lazy val out = biproduct
+
+    type     Dagger = right[Biproduct]
+    lazy val dagger = right(biproduct)
+
+    lazy val label = s"(${biproduct.right.label} asRight ${biproduct.label})"
+  }
+
+  case class right[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+    type Biproduct = B
+
+    type     In = Biproduct
+    lazy val in = biproduct
+
+    type     Out = Biproduct#Right
+    lazy val out = biproduct.right
+
+    type     Dagger = asRight[Biproduct]
+    lazy val dagger = asRight(biproduct)
+
+    lazy val label = s"$right({biproduct.label})"
+  }
+
+
+  case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
     type Edge = E
     
-    type     In = Edge#Target
-    lazy val in = edge.target
+    type     In = Edge#TargetVertex
+    lazy val in = edge.targetVertex
 
     type     Out = Edge
     lazy val out = edge
 
-    type     Dagger = Target[Edge]
-    lazy val dagger = Target(edge)
+    type     Dagger = target[Edge]
+    lazy val dagger = target(edge)
 
     lazy val label: String = s"inE(${edge.label})"
   }
 
-  case class Target[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class target[E <: AnyEdge](val edge: E) extends AnyPrimitive {
     type Edge = E
 
     type     In = Edge
     lazy val in = edge
 
-    type     Out = Edge#Target
-    lazy val out = edge.target
+    type     Out = Edge#TargetVertex
+    lazy val out = edge.targetVertex
 
-    type     Dagger = InE[Edge]
-    lazy val dagger = InE(edge)
+    type     Dagger = inE[Edge]
+    lazy val dagger = inE(edge)
 
     lazy val label: String = s"target(${edge.label})"
   }
 
 
-  case class OutE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
     type Edge = E
     
-    type     In = Edge#Source
-    lazy val in = edge.source
+    type     In = Edge#SourceVertex
+    lazy val in = edge.sourceVertex
 
     type     Out = Edge
     lazy val out = edge
 
-    type     Dagger = Source[Edge]
-    lazy val dagger = Source(edge)
+    type     Dagger = source[Edge]
+    lazy val dagger = source(edge)
 
     lazy val label: String = s"outE(${edge.label})"
   }
 
-  case class Source[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class source[E <: AnyEdge](val edge: E) extends AnyPrimitive {
     type Edge = E
 
     type     In = Edge
     lazy val in = edge
 
-    type     Out = Edge#Source
-    lazy val out = edge.source
+    type     Out = Edge#SourceVertex
+    lazy val out = edge.sourceVertex
 
-    type     Dagger = OutE[Edge]
-    lazy val dagger = OutE(edge)
+    type     Dagger = outE[Edge]
+    lazy val dagger = outE(edge)
 
     lazy val label: String = s"source(${edge.label})"
   }
 
 
-  case class InV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
     type Edge = E
 
-    type     In = Edge#Target
-    lazy val in = edge.target
+    type     In = Edge#TargetVertex
+    lazy val in = edge.targetVertex
 
-    type     Out = Edge#Source
-    lazy val out = edge.source
+    type     Out = Edge#SourceVertex
+    lazy val out = edge.sourceVertex
 
     type     Dagger = OutV[Edge]
     lazy val dagger = OutV(edge)
@@ -214,16 +220,47 @@ object morphisms {
   case class OutV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
     type Edge = E
 
-    type     In = Edge#Source
-    lazy val in = edge.source
+    type     In = Edge#SourceVertex
+    lazy val in = edge.sourceVertex
 
-    type     Out = Edge#Target
-    lazy val out = edge.target
+    type     Out = Edge#TargetVertex
+    lazy val out = edge.targetVertex
 
-    type     Dagger = InV[Edge]
-    lazy val dagger = InV(edge)
+    type     Dagger = inV[Edge]
+    lazy val dagger = inV(edge)
 
     lazy val label: String = s"outV(${edge.label})"
+  }
+
+
+  case class get[P <: AnyGraphProperty](val property: P) extends AnyPrimitive {
+    type Property = P
+
+    type     In = Property#Owner
+    lazy val in = property.owner
+
+    type     Out = Property#Value
+    lazy val out = property.value
+
+    type     Dagger = lookup[Property]
+    lazy val dagger = lookup(property)
+
+    lazy val label: String = s"get(${property.label})"
+  }
+
+  case class lookup[P <: AnyGraphProperty](val property: P) extends AnyPrimitive {
+    type Property = P
+
+    type     In = Property#Value
+    lazy val in = property.value
+
+    type     Out = Property#Owner
+    lazy val out = property.owner
+
+    type     Dagger = get[Property]
+    lazy val dagger = get(property)
+
+    lazy val label: String = s"lookup(${property.label})"
   }
 
 }

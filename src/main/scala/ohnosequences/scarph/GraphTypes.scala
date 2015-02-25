@@ -4,7 +4,6 @@ object graphTypes {
 
   import monoidalStructures._
   import ohnosequences.cosas._, types._, properties._
-  // import ohnosequences.cosas.equals._
 
   /* A graph type is kind of an n-morphism 
 
@@ -42,13 +41,13 @@ object graphTypes {
   }
 
   /* Edges connect vertices and have in/out arities */
-  trait AnyEdge extends AnyGraphObject {
+  trait AnyEdge extends AnyGraphElement {
     
-    type Source <: AnyVertex
-    val  source: Source
+    type SourceVertex <: AnyVertex
+    val  sourceVertex: SourceVertex
 
-    type Target <: AnyVertex
-    val  target: Target
+    type TargetVertex <: AnyVertex
+    val  targetVertex: TargetVertex
 
     // TODO: add arities
   }
@@ -59,31 +58,42 @@ object graphTypes {
     T <: AnyVertex
   ]( st: (S, T) ) extends AnyEdge {
 
-    type Source = S
-    lazy val source = st._1: S
+    type SourceVertex = S
+    lazy val sourceVertex = st._1: S
 
-    type Target = T
-    lazy val target = st._2: T
+    type TargetVertex = T
+    lazy val targetVertex = st._2: T
 
     lazy val label = this.toString
   }
 
   object AnyEdge {
 
-    type From[S <: AnyVertex] = AnyEdge { type Source = S }
-    type   To[T <: AnyVertex] = AnyEdge { type Target = T }
+    type From[S <: AnyVertex] = AnyEdge { type SourceVertex = S }
+    type   To[T <: AnyVertex] = AnyEdge { type TargetVertex = T }
   }
 
-  /* Property is assigned to one element type and has a raw representation */
-  trait AnyGraphProperty extends AnyProperty with AnyGraphObject {
+  /* Property values have raw types that are covered as graph objects */
+  trait AnyRawType extends AnyProperty with AnyGraphObject {
+
+    lazy val label = this.toString
+  }
+
+  /* This is like an edge between an element and a raw type */
+  trait AnyGraphProperty extends AnyGraphType {
 
     type Owner <: AnyGraphElement
     val  owner: Owner
+
+    type Value <: AnyRawType
+    val  value: Value
   }
 
-  abstract class PropertyOf[O <: AnyGraphElement]
-    (val owner: O) extends AnyGraphProperty {
+  abstract class HasProperty[O <: AnyGraphElement, V <: AnyRawType]
+    (val owner: O, val value: V) extends AnyGraphProperty {
+
     type Owner = O
+    type Value = V
 
     lazy val label = this.toString
   }
@@ -102,7 +112,7 @@ object graphTypes {
     val  dagger: Dagger
   }
 
-  type -->[A <: AnyGraphType, B <: AnyGraphType] = AnyGraphMorphism { type In = A; type Out = B }
+  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
 
   /* Sequential composition of two morphisms */
   sealed trait AnyComposition extends AnyGraphMorphism {

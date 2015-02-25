@@ -51,20 +51,6 @@ object evals {
       }
     }
 
-    implicit def evalFork[
-      I, T <: AnyGraphObject
-    ]:  EvalPathOn[I, fork[T], (I, I)] = 
-    new EvalPathOn[I, fork[T], (I, I)] {
-      def apply(morph: Morph)(input: Input): Output = morph.out := ( (input.value, input.value) )
-    }
-
-    implicit def evalMerge[
-      I, T <: AnyGraphObject
-    ]:  EvalPathOn[(I, I), merge[T], I] = 
-    new EvalPathOn[(I, I), merge[T], I] {
-      def apply(morph: Morph)(input: Input): Output = morph.out := input.value._1
-    }
-
     implicit def evalTensor[
       FI, SI,
       F <: AnyGraphMorphism, S <: AnyGraphMorphism,
@@ -99,6 +85,49 @@ object evals {
       }
     }
 
-  }
+    implicit def evalFork[
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[I, fork[T], (I, I)] = 
+    new EvalPathOn[I, fork[T], (I, I)] {
+      def apply(morph: Morph)(input: Input): Output = morph.out := ( (input.value, input.value) )
+    }
 
+    // TODO: it should compare values
+    implicit def evalMerge[
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[(I, I), merge[T], I] = 
+    new EvalPathOn[(I, I), merge[T], I] {
+      def apply(morph: Morph)(input: Input): Output = morph.out := input.value._1
+    }
+
+    implicit def evalEither[
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[I, either[T], (I, I)] = 
+    new EvalPathOn[I, either[T], (I, I)] {
+      def apply(morph: Morph)(input: Input): Output = morph.out := ( (input.value, input.value) )
+    }
+
+    // TODO: think better about this
+    implicit def evalAnyOf[
+      I, T <: AnyGraphObject
+    ]:  EvalPathOn[(I, I), anyOf[T], I] = 
+    new EvalPathOn[(I, I), anyOf[T], I] {
+      def apply(morph: Morph)(input: Input): Output = morph.out := input.value._1
+    }
+
+    implicit def evalLeftProj[
+      L, R, B <: AnyBiproductObj
+    ]:  EvalPathOn[(L, R), left[B], L] = 
+    new EvalPathOn[(L, R), left[B], L] {
+      def apply(morph: Morph)(input: Input): Output = (morph.out: Morph#Out) := input.value._1
+    }
+
+    implicit def evalRightProj[
+      L, R, B <: AnyBiproductObj
+    ]:  EvalPathOn[(L, R), right[B], R] = 
+    new EvalPathOn[(L, R), right[B], R] {
+      def apply(morph: Morph)(input: Input): Output = (morph.out: Morph#Out) := input.value._2
+    }
+
+  }
 }
