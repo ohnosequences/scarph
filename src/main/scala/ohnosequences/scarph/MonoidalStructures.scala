@@ -46,7 +46,7 @@ object monoidalStructures {
   }
 
   case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
-    (val left: L, val right: R) extends AnyGraphMorphism {
+    (val left: L, val right: R) extends AnyTensorMorph {
 
     type     Self = this.type
     lazy val self = this: Self

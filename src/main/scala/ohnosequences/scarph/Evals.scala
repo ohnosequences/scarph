@@ -117,15 +117,15 @@ object evals {
 
     implicit def evalLeftProj[
       L, R, B <: AnyBiproductObj
-    ]:  EvalPathOn[(L, R), left[B], L] = 
-    new EvalPathOn[(L, R), left[B], L] {
+    ]:  EvalPathOn[(L, R), leftProj[B], L] = 
+    new EvalPathOn[(L, R), leftProj[B], L] {
       def apply(morph: Morph)(input: Input): Output = (morph.out: Morph#Out) := input.value._1
     }
 
     implicit def evalRightProj[
       L, R, B <: AnyBiproductObj
-    ]:  EvalPathOn[(L, R), right[B], R] = 
-    new EvalPathOn[(L, R), right[B], R] {
+    ]:  EvalPathOn[(L, R), rightProj[B], R] = 
+    new EvalPathOn[(L, R), rightProj[B], R] {
       def apply(morph: Morph)(input: Input): Output = (morph.out: Morph#Out) := input.value._2
     }
 
