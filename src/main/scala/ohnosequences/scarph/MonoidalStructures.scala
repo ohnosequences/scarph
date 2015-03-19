@@ -76,9 +76,6 @@ object monoidalStructures {
   }
   type unit = unit.type
 
-  // implicit def leftUnit[T <: AnyGraphType](it: TensorObj[unit,T]): T = it.right
-  // implicit def rightUnit[T <: AnyGraphType](it: TensorObj[T,unit]): T = it.left
-
 
 
   /* ## Biproduct */
@@ -151,8 +148,5 @@ object monoidalStructures {
     lazy val label = this.toString
   }
   type zero = zero.type
-
-  // implicit def leftZero[T <: AnyGraphType](it: BiproductObj[zero, T]): T = it.right
-  // implicit def rightZero[T <: AnyGraphType](it: BiproductObj[T, zero]): T = it.left
 
 }
