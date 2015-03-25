@@ -8,35 +8,36 @@ object Twitter {
   import s.graphTypes._, s.schemas._
 
   /* Property value types */
-  case object name extends ValueType[String]("name")
-  case object age  extends ValueType[Integer]("age")
-  case object text extends ValueType[String]("text")
-  case object time extends ValueType[String]("time") // should have some better raw type
-  case object url  extends ValueType[String]("url")
+  case object name extends ValueOfType[String]("name")
+  case object age  extends ValueOfType[Integer]("age")
+  case object text extends ValueOfType[String]("text")
+  case object time extends ValueOfType[String]("time") // should have some better raw type
+  case object url  extends ValueOfType[String]("url")
 
   /* Vertices with their properties */
-  case object user extends Vertex
-  case object userName extends Property(user, name)
-  case object userAge  extends Property(user, age)
-  // example of shared value types:
-  case object userBio extends Property(user, text)
-  case object userWebpage extends Property(user, url)
+  case object user extends Vertex(toString)
 
-  case object tweet extends Vertex
-  case object tweetText extends Property(tweet, text)
-  case object tweetUrl  extends Property(tweet, url)
+  case object userName    extends Property(user -> name)(toString)
+  case object userAge     extends Property(user -> age)(toString)
+  // example of shared value types:
+  case object userBio     extends Property(user -> text)(toString)
+  case object userWebpage extends Property(user -> url)(toString)
+
+  case object tweet     extends Vertex(toString)
+  case object tweetText extends Property(tweet -> text)(toString)
+  case object tweetUrl  extends Property(tweet -> url)(toString)
 
   /* Edges with their properties */
-  case object posted extends Edge(user -> tweet)
-  case object postedTime extends Property(posted, time)
+  case object posted      extends Edge(user -> tweet)(toString)
+  case object postedTime  extends Property(posted -> time)(toString)
 
-  case object follows extends Edge(user -> user)
+  case object follows extends Edge(user -> user)(toString)
 
-  case object liked extends Edge(user -> tweet)
-  case object likedTime extends Property(liked, time)
+  case object liked extends Edge(user -> tweet)(toString)
+  case object likedTime extends Property(liked -> time)(toString)
 
-  case object reposted extends Edge(user -> tweet)
-  case object repostedTime extends Property(reposted, time)
+  case object reposted extends Edge(user -> tweet)(toString)
+  case object repostedTime extends Property(reposted -> time)(toString)
 
   /* Schema */
   case object twitter extends GraphSchema(

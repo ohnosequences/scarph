@@ -34,11 +34,7 @@ object graphTypes {
 
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
-  trait vertex extends AnyVertex
-  class Vertex extends AnyVertex {
-
-    lazy val label = this.toString
-  }
+  class Vertex(val label: String) extends AnyVertex
 
   /* Edges connect vertices and have in/out arities */
   trait AnyEdge extends AnyGraphElement {
@@ -52,10 +48,9 @@ object graphTypes {
     // TODO: add arities
   }
 
-  abstract class edge[
-    S <: AnyVertex,
-    T <: AnyVertex
-  ]( st: (S, T) ) extends AnyEdge {
+  class Edge[S <: AnyVertex, T <: AnyVertex]( st: (S, T))(val label: String) 
+    extends AnyEdge
+{
 
     type SourceVertex = S
     lazy val sourceVertex = st._1: S
@@ -63,20 +58,8 @@ object graphTypes {
     type TargetVertex = T
     lazy val targetVertex = st._2: T
   }
-  /* This constructor encourages to use this syntax: Edge(user -> tweet) */
-  abstract class Edge[
-    S <: AnyVertex,
-    T <: AnyVertex
-  ]( st: (S, T) ) extends AnyEdge {
-
-    type SourceVertex = S
-    lazy val sourceVertex = st._1: S
-
-    type TargetVertex = T
-    lazy val targetVertex = st._2: T
-
-    lazy val label = this.toString
-  }
+  /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
+  
 
   object AnyEdge {
 
@@ -86,10 +69,8 @@ object graphTypes {
 
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyProperty with AnyGraphObject
-
-  abstract class valueOfType[R] extends AnyValueType { type Raw = R }
   
-  abstract class ValueType[R](val label: String) 
+  abstract class ValueOfType[R](val label: String) 
     extends AnyValueType { type Raw = R }
 
   /* This is like an edge between an element and a raw type */
@@ -102,23 +83,15 @@ object graphTypes {
     val  value: Value
   }
 
-  abstract class property[O <: AnyGraphElement, V <: AnyValueType](val ow: (O,V)) extends AnyGraphProperty {
+  class Property[O <: AnyGraphElement, V <: AnyValueType](val st: (O,V))(val label: String) 
+    extends AnyGraphProperty
+  {
 
     type Owner = O
-    val owner: O = ow._1
+    val owner: O = st._1
     type Value = V
-    val value: V = ow._2
+    val value: V = st._2
   }
-
-  abstract class Property[O <: AnyGraphElement, V <: AnyValueType]
-    (val owner: O, val value: V) extends AnyGraphProperty {
-
-    type Owner = O
-    type Value = V
-
-    lazy val label = this.toString
-  }
-
 
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
