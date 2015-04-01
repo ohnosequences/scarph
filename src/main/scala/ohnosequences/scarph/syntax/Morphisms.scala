@@ -19,6 +19,7 @@ object morphisms {
       F >=> s.morphisms.split[F#Out] =
       f >=> s.morphisms.split(f.out)
 
+
     def toUnit:
       F >=> s.morphisms.toUnit[F#Out] =
       f >=> s.morphisms.toUnit(f.out)
@@ -26,17 +27,36 @@ object morphisms {
     def toZero:
       F >=> s.morphisms.toZero[F#Out] =
       f >=> s.morphisms.toZero(f.out)
+
+
+    def leftCounit:
+      F >=> s.isomorphisms.leftCounit[F#Out] =
+      f >=> s.isomorphisms.leftCounit(f.out)
+
+    def rightCounit:
+      F >=> s.isomorphisms.rightCounit[F#Out] =
+      f >=> s.isomorphisms.rightCounit(f.out)
+
+
+    def leftCozero:
+      F >=> s.isomorphisms.leftCozero[F#Out] =
+      f >=> s.isomorphisms.leftCozero(f.out)
+
+    def rightCozero:
+      F >=> s.isomorphisms.rightCozero[F#Out] =
+      f >=> s.isomorphisms.rightCozero(f.out)
   }
 
-  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F):
-        TensorSyntax[F] =
-    new TensorSyntax[F](f)
 
-  class TensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F) {
+  implicit def tensorSyntax[L <: AnyGraphObject, R <: AnyGraphObject, F <: AnyGraphMorphism { type Out = L ⊗ R }](f: F):
+        TensorSyntax[L, R, F] =
+    new TensorSyntax[L, R, F](f)
 
-    // def matchUp:
-    //   Tensor[F, F] >=> matchUp[F#Out] =
-    //   ff >=> matchUp(ff.left.out)
+  class TensorSyntax[L <: AnyGraphObject, R <: AnyGraphObject, F <: AnyGraphMorphism { type Out = L ⊗ R }](f: F) {
+
+    def twist:
+      F >=> s.isomorphisms.symmetry[L, R] =
+      f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
   }
 
 
