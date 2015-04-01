@@ -14,6 +14,18 @@ object morphisms {
     def duplicate:
       F >=> s.morphisms.duplicate[F#Out] =
       f >=> s.morphisms.duplicate(f.out)
+
+    def split:
+      F >=> s.morphisms.split[F#Out] =
+      f >=> s.morphisms.split(f.out)
+
+    def toUnit:
+      F >=> s.morphisms.toUnit[F#Out] =
+      f >=> s.morphisms.toUnit(f.out)
+
+    def toZero:
+      F >=> s.morphisms.toZero[F#Out] =
+      f >=> s.morphisms.toZero(f.out)
   }
 
   implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F):

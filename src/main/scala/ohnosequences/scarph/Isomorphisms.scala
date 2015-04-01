@@ -65,7 +65,7 @@ object isomorphisms {
 
 
   // λ: I ⊗ X → X
-  case class leftUnitor[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
+  case class leftUnit[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
 
     type     In = unit ⊗ X
     lazy val in = unit ⊗ x
@@ -73,19 +73,19 @@ object isomorphisms {
     type     Out = X
     lazy val out = x
 
-    type     Dagger = leftCounitor[X]
-    lazy val dagger = leftCounitor(x)
+    type     Dagger = leftCounit[X]
+    lazy val dagger = leftCounit(x)
 
-    lazy val label = s"leftUnitor(I ⊗ ${x.label})"
+    lazy val label = s"leftUnit(I ⊗ ${x.label})"
   }
 
   // λ^{-1}: X → I ⊗ X
-  case class leftCounitor[X <: AnyGraphObject](x: X)
-    extends DaggerOf(leftUnitor(x)) { lazy val label = s"leftCounitor(${x.label})"}
+  case class leftCounit[X <: AnyGraphObject](x: X)
+    extends DaggerOf(leftUnit(x)) { lazy val label = s"leftCounit(${x.label})"}
 
 
   // ρ: X ⊗ I → X
-  case class rightUnitor[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
+  case class rightUnit[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
 
     type     In = X ⊗ unit
     lazy val in = x ⊗ unit
@@ -93,14 +93,14 @@ object isomorphisms {
     type     Out = X
     lazy val out = x
 
-    type     Dagger = rightCounitor[X]
-    lazy val dagger = rightCounitor(x)
+    type     Dagger = rightCounit[X]
+    lazy val dagger = rightCounit(x)
 
-    lazy val label = s"rightUnitor(${x.label} ⊗ I)"
+    lazy val label = s"rightUnit(${x.label} ⊗ I)"
   }
 
   // ρ^{-1}: X → I ⊗ X
-  case class rightCounitor[X <: AnyGraphObject](x: X)
-    extends DaggerOf(rightUnitor(x)) { lazy val label = s"rightCounitor(${x.label})" }
+  case class rightCounit[X <: AnyGraphObject](x: X)
+    extends DaggerOf(rightUnit(x)) { lazy val label = s"rightCounit(${x.label})" }
 
 }
