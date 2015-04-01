@@ -39,18 +39,21 @@ object Twitter {
   case object reposted extends Edge(user -> tweet)(toString)
   case object repostedTime extends Property(reposted -> time)(toString)
 
-  /* Schema */
-  case object twitter extends GraphSchema(
+  val schema = GraphSchema(
     label = "twitter",
-    vertices =  user :~: tweet :~: ∅,
-    edges = posted :~: follows :~: liked :~: ∅,
-    valueTypes = name :~: age :~: text :~: time :~: url :~: ∅,
-    properties = 
-      userName :~: userAge :~: userBio :~: userWebpage :~:
-      tweetText :~: tweetUrl :~:
-      postedTime :~:
-      likedTime :~:
-      repostedTime :~:
-      ∅
+    vertices =  Set(user, tweet),
+    edges = Set(posted, follows, liked),
+    valueTypes = Set(name, age, text, time, url),
+    properties = Set(
+      userName,
+      userAge,
+      userBio,
+      userWebpage,
+      tweetText,
+      tweetUrl,
+      postedTime,
+      likedTime,
+      repostedTime
+    )
   )
 }
