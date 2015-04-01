@@ -10,6 +10,22 @@ object isomorphisms {
   trait AnyIsomorphism extends AnyPrimitive
 
 
+  // id: X → X
+  case class identity[X <: AnyGraphObject](x: X) extends AnyIsomorphism with AnyDaggerPrimitive {
+
+    type     In = X
+    lazy val in = x
+
+    type     Out = X
+    lazy val out = x
+
+    type     Dagger = identity[X]
+    lazy val dagger = identity(x)
+
+    lazy val label = s"identity(${x.label})"
+  }
+
+
   // σ: L ⊗ R → R ⊗ L
   case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
     extends AnyIsomorphism with AnyDaggerPrimitive {
@@ -84,7 +100,7 @@ object isomorphisms {
   }
 
   // ρ^{-1}: X → I ⊗ X
-  case class rightCounitor[X <: AnyGraphObject](x: X) 
+  case class rightCounitor[X <: AnyGraphObject](x: X)
     extends DaggerOf(rightUnitor(x)) { lazy val label = s"rightCounitor(${x.label})" }
 
 }

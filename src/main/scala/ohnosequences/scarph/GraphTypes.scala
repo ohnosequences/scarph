@@ -5,7 +5,7 @@ object graphTypes {
   import monoidalStructures._
   import ohnosequences.cosas._, types._, properties._
 
-  /* A graph type is kind of an n-morphism 
+  /* A graph type is kind of an n-morphism
 
      The full hierarchy looks like this:
 
@@ -38,7 +38,7 @@ object graphTypes {
 
   /* Edges connect vertices and have in/out arities */
   trait AnyEdge extends AnyGraphElement {
-    
+
     type SourceVertex <: AnyVertex
     val  sourceVertex: SourceVertex
 
@@ -48,7 +48,7 @@ object graphTypes {
     // TODO: add arities
   }
 
-  class Edge[S <: AnyVertex, T <: AnyVertex]( st: (S, T))(val label: String) 
+  class Edge[S <: AnyVertex, T <: AnyVertex]( st: (S, T))(val label: String)
     extends AnyEdge
 {
 
@@ -59,7 +59,7 @@ object graphTypes {
     lazy val targetVertex = st._2: T
   }
   /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
-  
+
 
   object AnyEdge {
 
@@ -69,8 +69,8 @@ object graphTypes {
 
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyProperty with AnyGraphObject
-  
-  abstract class ValueOfType[R](val label: String) 
+
+  abstract class ValueOfType[R](val label: String)
     extends AnyValueType { type Raw = R }
 
   /* This is like an edge between an element and a raw type */
@@ -83,7 +83,7 @@ object graphTypes {
     val  value: Value
   }
 
-  class Property[O <: AnyGraphElement, V <: AnyValueType](val st: (O,V))(val label: String) 
+  class Property[O <: AnyGraphElement, V <: AnyValueType](val st: (O,V))(val label: String)
     extends AnyGraphProperty
   {
 
@@ -167,7 +167,7 @@ object graphTypes {
   class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
 
     def >=>[S <: AnyGraphMorphism { type In = F#Out }]
-      (s: S): Composition[F, S] = 
+      (s: S): Composition[F, S] =
           new Composition[F, S](f, s)
 
     import monoidalStructures._

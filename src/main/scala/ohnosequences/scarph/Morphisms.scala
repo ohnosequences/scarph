@@ -33,7 +33,7 @@ object morphisms {
 
 
   // n: I → X
-  case class unitor[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fromUnit[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = unit
     lazy val in = unit
@@ -41,15 +41,15 @@ object morphisms {
     type     Out = X
     lazy val out = x
 
-    type     Dagger = counitor[X]
-    lazy val dagger = counitor(x)
+    type     Dagger = toUnit[X]
+    lazy val dagger = toUnit(x)
 
-    lazy val label = s"unitor(${x.label})"
+    lazy val label = s"fromUnit(${x.label})"
   }
 
   // e: X → I
-  case class counitor[X <: AnyGraphObject](x: X) 
-    extends DaggerOf(unitor[X](x)) { lazy val label = s"counitor(${x.label})" }
+  case class toUnit[X <: AnyGraphObject](x: X)
+    extends DaggerOf(fromUnit[X](x)) { lazy val label = s"toUnit(${x.label})" }
 
 
   // A → I → B
@@ -70,7 +70,7 @@ object morphisms {
 
 
   // △: X → X ⊗ X
-  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class duplicate[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = X
     lazy val in = x
@@ -78,19 +78,19 @@ object morphisms {
     type     Out = X ⊗ X
     lazy val out = x ⊗ x
 
-    type     Dagger = merge[X]
-    lazy val dagger = merge(x)
+    type     Dagger = matchUp[X]
+    lazy val dagger = matchUp(x)
 
-    lazy val label = s"fork(${x.label})"
+    lazy val label = s"duplicate(${x.label})"
   }
 
   // ▽: X ⊗ X → X
-  case class merge[X <: AnyGraphObject](x: X)
-    extends DaggerOf(fork[X](x)) { lazy val label = s"merge(${x.label} ⊗ ${x.label})" }
+  case class matchUp[X <: AnyGraphObject](x: X)
+    extends DaggerOf(duplicate[X](x)) { lazy val label = s"matchUp(${x.label} ⊗ ${x.label})" }
 
 
   // 0 → X
-  case class zeror[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fromZero[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = zero
     lazy val in = zero
@@ -98,15 +98,15 @@ object morphisms {
     type     Out = X
     lazy val out = x
 
-    type     Dagger = cozeror[X]
-    lazy val dagger = cozeror(x)
+    type     Dagger = toZero[X]
+    lazy val dagger = toZero(x)
 
-    lazy val label = s"zeror(${x.label})"
+    lazy val label = s"fromZero(${x.label})"
   }
 
   // X → 0
-  case class cozeror[X <: AnyGraphObject](x: X) 
-    extends DaggerOf(zeror[X](x)) { lazy val label = s"cozeror(${x.label})" }
+  case class toZero[X <: AnyGraphObject](x: X)
+    extends DaggerOf(fromZero[X](x)) { lazy val label = s"toZero(${x.label})" }
 
 
   // A → 0 → B
@@ -127,7 +127,7 @@ object morphisms {
 
 
   // δ: X -> X ⊕ X
-  case class either[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class split[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = X
     lazy val in = x
@@ -135,15 +135,15 @@ object morphisms {
     type     Out = BiproductObj[X, X]
     lazy val out = BiproductObj(x, x)
 
-    type     Dagger = anyOf[X]
-    lazy val dagger = anyOf(x)
+    type     Dagger = merge[X]
+    lazy val dagger = merge(x)
 
-    lazy val label = s"either(${x.label})"
+    lazy val label = s"split(${x.label})"
   }
 
   // ε: X ⊕ X -> X
-  case class anyOf[X <: AnyGraphObject](x: X)
-    extends DaggerOf(either[X](x)) { lazy val label = s"anyOf(${x.label} ⊕ ${x.label})" }
+  case class merge[X <: AnyGraphObject](x: X)
+    extends DaggerOf(split[X](x)) { lazy val label = s"merge(${x.label} ⊕ ${x.label})" }
 
 
   /* Projections and injections */
@@ -162,7 +162,7 @@ object morphisms {
     lazy val label = s"(${biproduct.left.label} leftInj ${biproduct.label})"
   }
 
-  case class leftProj[B <: AnyBiproductObj](b: B) 
+  case class leftProj[B <: AnyBiproductObj](b: B)
     extends DaggerOf(leftInj[B](b)) { lazy val label = s"leftProj(${b.label})" }
 
 
@@ -181,7 +181,7 @@ object morphisms {
     lazy val label = s"(${biproduct.right.label} rightInj ${biproduct.label})"
   }
 
-  case class rightProj[B <: AnyBiproductObj](b: B) 
+  case class rightProj[B <: AnyBiproductObj](b: B)
     extends DaggerOf(rightInj[B](b)) { lazy val label = s"rightProj(${b.label})" }
 
 
