@@ -3,7 +3,7 @@
 Assuming
 
 ```scala
-X, A, B <: AnyGraphObject
+X, A, B, U <: AnyGraphObject
 E <: AnyEdge
 P <: AnyProperty
 ```
@@ -23,6 +23,7 @@ P <: AnyProperty
 |        `outV[E]` | `E#Source → E#Target` | `.outV(<edge>)`    |         `inV[E]` | `E#Target → E#Source` | `.inV(<edge>)`  |
 |         `get[P]` |  `P#Owner → P#Value`  | `.get(<property>)` |      `lookup[P]` | `P#Value → P#Owner`   | --              |
 
+Here `TODO` means that it will be done in the nearest future, and `--` means that it is not needed.
 
 
 ### Isomorphisms list
@@ -33,7 +34,7 @@ P <: AnyProperty
 |              `X ≃ X`              |       `identity[X]` | --       |                    -- |                |
 |          `A ⊗ B ≃ B ⊗ A`          |     `symmetry[A,B]` | `.twist` |                    -- |                |
 | `U ⊗ (A ⊕ B) ≃ (U ⊗ A) ⊕ (U ⊗ B)` | `distribute[U,A,B]` | `TODO`   | `undistribute[U,A,B]` | `TODO`         |
-|            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `TODO`   |       `leftCounit[X]` | `.leftCounit`  |
-|            `X ⊗ I ≃ X`            |      `rightUnit[X]` | `TODO`   |      `rightCounit[X]` | `.rightCounit` |
-|            `0 ⊕ X ≃ X`            |       `leftZero[X]` | `TODO`   |       `leftCozero[X]` | `.leftCozero`  |
-|            `X ⊕ 0 ≃ X`            |      `rightZero[X]` | `TODO`   |      `rightCozero[X]` | `.rightCozero` |
+|            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `.right` |       `leftCounit[X]` | `.leftCounit`  |
+|            `X ⊗ I ≃ X`            |      `rightUnit[X]` | `.left`  |      `rightCounit[X]` | `.rightCounit` |
+|            `0 ⊕ X ≃ X`            |       `leftZero[X]` | `.right` |       `leftCozero[X]` | `.leftCozero`  |
+|            `X ⊕ 0 ≃ X`            |      `rightZero[X]` | `.left`  |      `rightCozero[X]` | `.rightCozero` |
