@@ -28,13 +28,30 @@ object evals {
     type Morph = P
   }
 
+  trait AnyImpl {
+
+    type Impl
+  }
+
   trait FlattenVals[F[_], G[_], X] extends Fn1[F[G[X]]]
 
   trait MergeVals[F, S] extends Fn2[F, S]
 
+  trait TensorImpl extends AnyImpl {
 
-/*
-  object AnyEvalPath {
+    type Left
+    val  left: Left
+
+    type Right
+    val  right: Right
+
+    def apply(l: Left, r: Right): this.type
+  }
+
+  //trait TensorImpl[T[_, _]] {
+
+
+  object generalEvals {
 
     implicit def evalComposition[
       I,
@@ -64,6 +81,24 @@ object evals {
     new EvalPathOn[(FI, SI), TensorMorph[F, S], (FO, SO)] {
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := ((
+          eval1(morph.left) ( (morph.left.in: F#In)  := input.value._1 ).value,
+          eval2(morph.right)( (morph.right.in: S#In) := input.value._2 ).value
+        ))
+      }
+    }
+
+/*
+    implicit def evalTensor[
+      I <: TensorImpl,
+      F <: AnyGraphMorphism, S <: AnyGraphMorphism,
+      O <: TensorImpl
+    ](implicit
+      eval1: EvalPathOn[I#Left, F, O#Left],
+      eval2: EvalPathOn[I#Right, S, O#Right]
+    ):  EvalPathOn[I, TensorMorph[F, S], O] =
+    new EvalPathOn[I, TensorMorph[F, S], O] {
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out :=
           eval1(morph.left) ( (morph.left.in: F#In)  := input.value._1 ).value,
           eval2(morph.right)( (morph.right.in: S#In) := input.value._2 ).value
         ))
@@ -130,7 +165,7 @@ object evals {
     new EvalPathOn[(L, R), rightProj[B], R] {
       def apply(morph: Morph)(input: Input): Output = (morph.out: Morph#Out) := input.value._2
     }
+*/
 
   }
-*/
 }
