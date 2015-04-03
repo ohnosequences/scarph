@@ -32,7 +32,23 @@ object morphisms {
   }
 
 
-  // n: I → X
+  // id: X → X
+  case class id[X <: AnyGraphObject](x: X) extends AnyPrimitive with AnyDaggerPrimitive {
+
+    type     In = X
+    lazy val in = x
+
+    type     Out = X
+    lazy val out = x
+
+    type     Dagger = id[X]
+    lazy val dagger = id(x)
+
+    lazy val label = s"id(${x.label})"
+  }
+
+
+  // I → X
   case class fromUnit[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = unit
@@ -47,7 +63,7 @@ object morphisms {
     lazy val label = s"fromUnit(${x.label})"
   }
 
-  // e: X → I
+  // X → I
   case class toUnit[X <: AnyGraphObject](x: X)
     extends DaggerOf(fromUnit[X](x)) { lazy val label = s"toUnit(${x.label})" }
 
@@ -126,7 +142,7 @@ object morphisms {
   }
 
 
-  // δ: X -> X ⊕ X
+  // X -> X ⊕ X
   case class split[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = X
@@ -141,7 +157,7 @@ object morphisms {
     lazy val label = s"split(${x.label})"
   }
 
-  // ε: X ⊕ X -> X
+  // X ⊕ X -> X
   case class merge[X <: AnyGraphObject](x: X)
     extends DaggerOf(split[X](x)) { lazy val label = s"merge(${x.label} ⊕ ${x.label})" }
 

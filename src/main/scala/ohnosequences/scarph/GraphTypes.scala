@@ -36,27 +36,50 @@ object graphTypes {
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
 
+
+  trait AnyArity {
+    type Vertex <: AnyVertex
+    val  vertex: Vertex
+  }
+  abstract class Arity[V <:AnyVertex](val vertex: V)
+    extends AnyArity { type Vertex = V }
+
+  case class OneOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+  case class AtLeastOne[V <: AnyVertex](v: V) extends Arity[V](v)
+  case class ExactlyOne[V <: AnyVertex](v: V) extends Arity[V](v)
+  case class ManyOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+
+
   /* Edges connect vertices and have in/out arities */
   trait AnyEdge extends AnyGraphElement {
 
-    type SourceVertex <: AnyVertex
+    type SourceArity <: AnyArity
+    val  sourceArity: SourceArity
+
+    type SourceVertex <: SourceArity#Vertex
     val  sourceVertex: SourceVertex
 
-    type TargetVertex <: AnyVertex
-    val  targetVertex: TargetVertex
 
-    // TODO: add arities
+    type TargetArity <: AnyArity
+    val  targetArity: TargetArity
+
+    type TargetVertex <: TargetArity#Vertex
+    val  targetVertex: TargetVertex
   }
 
-  class Edge[S <: AnyVertex, T <: AnyVertex]( st: (S, T))(val label: String)
+  class Edge[S <: AnyArity, T <: AnyArity]( st: (S, T))(val label: String)
     extends AnyEdge
 {
 
-    type SourceVertex = S
-    lazy val sourceVertex = st._1: S
+    type SourceArity = S
+    lazy val sourceArity = st._1
+    type SourceVertex = SourceArity#Vertex
+    lazy val sourceVertex = sourceArity.vertex
 
-    type TargetVertex = T
-    lazy val targetVertex = st._2: T
+    type TargetArity = T
+    lazy val targetArity = st._2
+    type TargetVertex = TargetArity#Vertex
+    lazy val targetVertex = targetArity.vertex
   }
   /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
 

@@ -32,6 +32,7 @@ object evals {
 
   trait MergeVals[F, S] extends Fn2[F, S]
 
+
 /*
   object AnyEvalPath {
 
