@@ -11,6 +11,11 @@ object morphisms {
 
   class GraphMorphismSyntax[F <: AnyGraphMorphism](f: F) {
 
+    // just an alias for >=> composition:
+    def andThen[T <: AnyGraphMorphism { type In = F#Out }](t: T):
+      F >=> T =
+      f >=> t
+
     def duplicate:
       F >=> s.morphisms.duplicate[F#Out] =
       f >=> s.morphisms.duplicate(f.out)
@@ -96,12 +101,12 @@ object morphisms {
   class EdgeSyntax[F <: AnyGraphMorphism { type Out <: AnyEdge }](f: F) {
 
     // NOTE: in gremlin this is called .outV
-    def src: F >=> source[F#Out] =
-             f >=> source(f.out)
+    def source: F >=> s.morphisms.source[F#Out] =
+                f >=> s.morphisms.source(f.out)
 
     // NOTE: in gremlin this is called .inV
-    def tgt: F >=> target[F#Out] =
-             f >=> target(f.out)
+    def target: F >=> s.morphisms.target[F#Out] =
+                f >=> s.morphisms.target(f.out)
   }
 
   /* Vertex types */

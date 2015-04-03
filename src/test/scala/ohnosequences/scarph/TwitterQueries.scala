@@ -1,38 +1,36 @@
-// package ohnosequences.scarph.test
+package ohnosequences.scarph.test
 
-// object Queries {
+object Queries {
 
-//   import ohnosequences.{ scarph => s }
-//   import s.graphTypes._, s.morphisms._
-//   import s.syntax._, conditions._, predicates._ //paths._, graphTypes._
-//   import s.test.Twitter._
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.conditions._, s.predicates._
+  import s.syntax._, morphisms._, conditions._, predicates._
+  import s.test.twitter._
 
-//   val edus    = twitter.query(user ? (name === "@eparejatobes"))
-//   val alexeys = twitter.query(user ? (name === "@laughedelic"))
-//   val kims    = twitter.query(user ? (name === "@evdokim"))
-//   val tweets  = twitter.query(tweet ? (text === "back to twitter :)"))
-//   val posts   = twitter.query(posted ? (time === "13.11.2012"))
+   val edus    = user ? (user.name === "@eparejatobes")
+  // val alexeys = twitter.query(user ? (name === "@laughedelic"))
+  // val kims    = twitter.query(user ? (name === "@evdokim"))
+  // val tweets  = twitter.query(tweet ? (text === "back to twitter :)"))
+  // val posts   = twitter.query(posted ? (time === "13.11.2012"))
 
-//   val userName   = user.get(name)
-//   val tweetText  = tweet.get(text)
-//   val postedTime = posted.get(time)
-//   implicitly[ userName.type <:< (user.type --> name.type) ]
+  val userName   = id(user).get(user.name)
+  val tweetText  = id(tweet).get(tweet.text)
+  val postedTime = id(posted).get(posted.time)
+  implicitly[ userName.type <:< (user.type --> name.type) ]
 
-//   val tweetPosterName = tweet.inE(posted).src.get(name)
+  val tweetPosterName = inE(posted).source.get(user.name)
 
-//   val fffolowees = user.outV(follows).outV(follows).outV(follows)
+  val fffolowees = outV(follows).outV(follows).outV(follows)
 
-//   // val sourceAndTarget = Fork(posted) >=> ( Source(posted) ⊗ Target(posted) )
-//   val sourceAndTarget = posted.fork( posted.src ⊗ posted.tgt )
+  val sourceAndTarget = duplicate(posted).andThen( source(posted) ⊗ target(posted) )
 
-//   val friends = user.inV(follows) ⊗ user.outV(follows)
+  val friends = inV(follows) ⊗ outV(follows)
 
-//   val friends1 = user.fork( friends )
-//   val friends2 = user.fork( friends >=> friends )
-//   val friends3 = user.fork( friends >=> friends >=> friends )
+  val friends1 = duplicate(user) >=> ( friends )
+  val friends2 = duplicate(user) >=> ( friends >=> friends )
+  val friends3 = duplicate(user) >=> ( friends >=> friends >=> friends )
 
-//   implicitly[ friends1.type <:< (user.type --> (user.type ⊗ user.type)) ]
-//   implicitly[ friends2.type <:< (user.type --> (user.type ⊗ user.type)) ]
+  implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
+  implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
 
-//   // val forkMerge = user.fork.merge
-// }
+}
