@@ -15,28 +15,26 @@ object predicates {
 
   /* A way of building a predicate from an element */
   implicit def elementPredicateOps[E <: AnyGraphElement](elem: E):
-      ElementPredicateOps[E] = 
+      ElementPredicateOps[E] =
       ElementPredicateOps[E](elem)
 
   case class ElementPredicateOps[E <: AnyGraphElement](elem: E) {
 
     /* For example: `user ? (name === "bob")` - this operator can be read as "such that" */
-    def ?[C <: AnyCondition.OnElement[E]](c: C): 
+    def ?[C <: AnyCondition.OnElement[E]](c: C):
       AndPredicate[EmptyPredicate[E], C] = AndPredicate(new EmptyPredicate(elem), c)
   }
 
-
   /* Adding more conditions to a predicate */
   implicit def predicateOps[P <: AnyPredicate](p: P):
-      PredicateOps[P] = 
+      PredicateOps[P] =
       PredicateOps[P](p)
 
   case class PredicateOps[P <: AnyPredicate](pred: P) {
 
-    /* It's basically cons for the internal conditions type-set, 
+    /* It's basically cons for the internal conditions type-set,
        but with a restriction on the condtion's element type */
-    def and[C <: AnyCondition.OnElement[P#Element]](c: C): 
+    def and[C <: AnyCondition.OnElement[P#Element]](c: C):
       AndPredicate[P, C] = AndPredicate(pred, c)
   }
 }
-

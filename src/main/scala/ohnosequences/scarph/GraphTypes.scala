@@ -5,7 +5,7 @@ object graphTypes {
   import monoidalStructures._
   import ohnosequences.cosas._, types._, properties._
 
-  /* A graph type is kind of an n-morphism 
+  /* A graph type is kind of an n-morphism
 
      The full hierarchy looks like this:
 
@@ -36,30 +36,53 @@ object graphTypes {
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
 
+
+  trait AnyArity {
+    type Vertex <: AnyVertex
+    val  vertex: Vertex
+  }
+  abstract class Arity[V <:AnyVertex](val vertex: V)
+    extends AnyArity { type Vertex = V }
+
+  case class OneOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+  case class AtLeastOne[V <: AnyVertex](v: V) extends Arity[V](v)
+  case class ExactlyOne[V <: AnyVertex](v: V) extends Arity[V](v)
+  case class ManyOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+
+
   /* Edges connect vertices and have in/out arities */
   trait AnyEdge extends AnyGraphElement {
-    
-    type SourceVertex <: AnyVertex
+
+    type SourceArity <: AnyArity
+    val  sourceArity: SourceArity
+
+    type SourceVertex <: SourceArity#Vertex
     val  sourceVertex: SourceVertex
 
-    type TargetVertex <: AnyVertex
-    val  targetVertex: TargetVertex
 
-    // TODO: add arities
+    type TargetArity <: AnyArity
+    val  targetArity: TargetArity
+
+    type TargetVertex <: TargetArity#Vertex
+    val  targetVertex: TargetVertex
   }
 
-  class Edge[S <: AnyVertex, T <: AnyVertex]( st: (S, T))(val label: String) 
+  class Edge[S <: AnyArity, T <: AnyArity]( st: (S, T))(val label: String)
     extends AnyEdge
 {
 
-    type SourceVertex = S
-    lazy val sourceVertex = st._1: S
+    type SourceArity = S
+    lazy val sourceArity = st._1
+    type SourceVertex = SourceArity#Vertex
+    lazy val sourceVertex = sourceArity.vertex
 
-    type TargetVertex = T
-    lazy val targetVertex = st._2: T
+    type TargetArity = T
+    lazy val targetArity = st._2
+    type TargetVertex = TargetArity#Vertex
+    lazy val targetVertex = targetArity.vertex
   }
   /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
-  
+
 
   object AnyEdge {
 
@@ -69,8 +92,8 @@ object graphTypes {
 
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyProperty with AnyGraphObject
-  
-  abstract class ValueOfType[R](val label: String) 
+
+  abstract class ValueOfType[R](val label: String)
     extends AnyValueType { type Raw = R }
 
   /* This is like an edge between an element and a raw type */
@@ -83,7 +106,7 @@ object graphTypes {
     val  value: Value
   }
 
-  class Property[O <: AnyGraphElement, V <: AnyValueType](val st: (O,V))(val label: String) 
+  class Property[O <: AnyGraphElement, V <: AnyValueType](val st: (O,V))(val label: String)
     extends AnyGraphProperty
   {
 
@@ -167,7 +190,7 @@ object graphTypes {
   class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
 
     def >=>[S <: AnyGraphMorphism { type In = F#Out }]
-      (s: S): Composition[F, S] = 
+      (s: S): Composition[F, S] =
           new Composition[F, S](f, s)
 
     import monoidalStructures._
