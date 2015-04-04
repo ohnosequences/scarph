@@ -37,18 +37,23 @@ object evals {
 
   trait MergeVals[F, S] extends Fn2[F, S]
 
-  trait TensorImpl extends AnyImpl {
+
+  trait AnyTensorImpl extends AnyImpl {
 
     type Left
-    val  left: Left
+    def left(i: Impl): Left
 
     type Right
-    val  right: Right
+    def right(i: Impl): Right
 
-    def apply(l: Left, r: Right): this.type
+    def apply(l: Left, r: Right): Impl
   }
 
-  //trait TensorImpl[T[_, _]] {
+  abstract class TensorImpl[L, R] extends AnyTensorImpl {
+
+    type Left = L
+    type Right = R
+  }
 
 
   object generalEvals {
@@ -71,6 +76,26 @@ object evals {
     }
 
     implicit def evalTensor[
+      IL, IR, I,
+      L <: AnyGraphMorphism, R <: AnyGraphMorphism,
+      OL, OR, O
+    ](implicit
+      inImpl: TensorImpl[IL, IR] { type Impl = I },
+      outImpl: TensorImpl[OL, OR] { type Impl = O },
+      eval1: EvalPathOn[IL, L, OL],
+      eval2: EvalPathOn[IR, R, OR]
+    ):  EvalPathOn[I, TensorMorph[L, R], O] =
+    new EvalPathOn[I, TensorMorph[L, R], O] {
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := outImpl.apply(
+          eval1(morph.left) ( (morph.left.in: L#In)  := inImpl.left(input.value) ).value,
+          eval2(morph.right)( (morph.right.in: R#In) := inImpl.right(input.value) ).value
+        )
+      }
+    }
+
+/*
+    implicit def evalTensor[
       FI, SI,
       F <: AnyGraphMorphism, S <: AnyGraphMorphism,
       FO, SO
@@ -81,24 +106,6 @@ object evals {
     new EvalPathOn[(FI, SI), TensorMorph[F, S], (FO, SO)] {
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := ((
-          eval1(morph.left) ( (morph.left.in: F#In)  := input.value._1 ).value,
-          eval2(morph.right)( (morph.right.in: S#In) := input.value._2 ).value
-        ))
-      }
-    }
-
-/*
-    implicit def evalTensor[
-      I <: TensorImpl,
-      F <: AnyGraphMorphism, S <: AnyGraphMorphism,
-      O <: TensorImpl
-    ](implicit
-      eval1: EvalPathOn[I#Left, F, O#Left],
-      eval2: EvalPathOn[I#Right, S, O#Right]
-    ):  EvalPathOn[I, TensorMorph[F, S], O] =
-    new EvalPathOn[I, TensorMorph[F, S], O] {
-      def apply(morph: Morph)(input: Input): Output = {
-        morph.out :=
           eval1(morph.left) ( (morph.left.in: F#In)  := input.value._1 ).value,
           eval2(morph.right)( (morph.right.in: S#In) := input.value._2 ).value
         ))
