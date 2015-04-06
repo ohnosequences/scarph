@@ -148,9 +148,6 @@ object graphTypes {
     S <: AnyGraphMorphism //{ type In = F#Out }
   ] (val first: F, val second: S) extends AnyComposition { cc =>
 
-    type     Self = this.type
-    lazy val self = this: Self
-
     type First = F
     type Second = S
 
