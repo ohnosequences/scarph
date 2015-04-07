@@ -143,7 +143,7 @@ object graphTypes {
     type Dagger <: Composition[Second#Dagger, First#Dagger]
   }
 
-  class Composition[
+  case class Composition[
     F <: AnyGraphMorphism,
     S <: AnyGraphMorphism //{ type In = F#Out }
   ] (val first: F, val second: S) extends AnyComposition { cc =>
@@ -157,8 +157,8 @@ object graphTypes {
     type     Out = Second#Out
     lazy val out = second.out: Out
 
-    type     Dagger =     Composition[Second#Dagger, First#Dagger]
-    lazy val dagger = new Composition(second.dagger, first.dagger): Dagger
+    type     Dagger = Composition[Second#Dagger, First#Dagger]
+    lazy val dagger = Composition(second.dagger, first.dagger): Dagger
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
   }
@@ -186,9 +186,9 @@ object graphTypes {
 
   class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
 
-    def >=>[S <: AnyGraphMorphism { type In = F#Out }]
-      (s: S): Composition[F, S] =
-          new Composition[F, S](f, s)
+    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S):
+      Composition[F, S] =
+      Composition[F, S](f, s)
 
     import monoidalStructures._
 
