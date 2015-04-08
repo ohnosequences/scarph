@@ -29,7 +29,7 @@ object evals {
   }
 
 
-  object structural {
+  trait DefaultEvals {
 
     // X = X (does nothing)
     implicit def eval_id[
@@ -64,8 +64,8 @@ object evals {
       L <: AnyGraphMorphism, R <: AnyGraphMorphism,
       OL, OR, O
     ](implicit
-      inTens:  TensorImpl[IL, IR] { type Impl = I },
-      outTens: TensorImpl[OL, OR] { type Impl = O },
+      inTens:  TensorImpl[I] { type Left = IL; type Right = IR },
+      outTens: TensorImpl[O] { type Left = OL; type Right = OR },
       evalLeft:  EvalPathOn[IL, L, OL],
       evalRight: EvalPathOn[IR, R, OR]
     ):  EvalPathOn[I, TensorMorph[L, R], O] =
@@ -84,8 +84,8 @@ object evals {
       F <: AnyGraphMorphism, S <: AnyGraphMorphism,
       OL, OR, O
     ](implicit
-      inBip:  TensorImpl[IL, IR] { type Impl = I },
-      outBip: TensorImpl[OL, OR] { type Impl = O },
+      inBip:  TensorImpl[I] { type Left = IL; type Right = IR },
+      outBip: TensorImpl[O] { type Left = OL; type Right = OR },
       evalLeft:  EvalPathOn[IL, F, OL],
       evalRight: EvalPathOn[IR, S, OR]
     ):  EvalPathOn[I, BiproductMorph[F, S], O] =
@@ -102,7 +102,7 @@ object evals {
     implicit def eval_duplicate[
       I, T <: AnyGraphObject, O
     ](implicit
-      outTens: TensorImpl[I, I] { type Impl = O }
+      outTens: TensorImpl[O] { type Left = I; type Right = I }
     ):  EvalPathOn[I, duplicate[T], O] =
     new EvalPathOn[I, duplicate[T], O] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -114,7 +114,7 @@ object evals {
     implicit def eval_split[
       I, T <: AnyGraphObject, O
     ](implicit
-      outBip: BiproductImpl[I, I] { type Impl = O }
+      outBip: BiproductImpl[O] { type Left = I; type Right = I }
     ):  EvalPathOn[I, split[T], O] =
     new EvalPathOn[I, split[T], O] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -127,7 +127,7 @@ object evals {
       L <: AnyGraphObject, R <: AnyGraphObject,
       OL, OR, O
     ](implicit
-      outBip: BiproductImpl[OL, OR] { type Impl = O }
+      outBip: BiproductImpl[O] { type Left = OL; type Right = OR }
     ):  EvalPathOn[OL, leftInj[L ⊕ R], O] =
     new EvalPathOn[OL, leftInj[L ⊕ R], O] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -140,7 +140,7 @@ object evals {
       L <: AnyGraphObject, R <: AnyGraphObject,
       OL, OR, O
     ](implicit
-      outBip: BiproductImpl[OL, OR] { type Impl = O }
+      outBip: BiproductImpl[O] { type Left = OL; type Right = OR }
     ):  EvalPathOn[OR, rightInj[L ⊕ R], O] =
     new EvalPathOn[OR, rightInj[L ⊕ R], O] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -153,7 +153,7 @@ object evals {
       IL, IR, I,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
-      outBip: BiproductImpl[IL, IR] { type Impl = I }
+      outBip: BiproductImpl[I] { type Left = IL; type Right = IR }
     ):  EvalPathOn[I, leftProj[L ⊕ R], IL] =
     new EvalPathOn[I, leftProj[L ⊕ R], IL] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -166,7 +166,7 @@ object evals {
       IL, IR, I,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
-      outBip: BiproductImpl[IL, IR] { type Impl = I }
+      outBip: BiproductImpl[I] { type Left = IL; type Right = IR }
     ):  EvalPathOn[I, rightProj[L ⊕ R], IR] =
     new EvalPathOn[I, rightProj[L ⊕ R], IR] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -178,7 +178,7 @@ object evals {
     implicit def eval_fromZero[
       I, X <: AnyGraphObject, O
     ](implicit
-      outZero: AnyZeroImpl { type Impl = O }
+      outZero: ZeroImpl[O]
     ):  EvalPathOn[I, fromZero[X], O] =
     new EvalPathOn[I, fromZero[X], O] {
       def apply(morph: Morph)(input: Input): Output = {
@@ -190,8 +190,8 @@ object evals {
     implicit def eval_toZero[
       I, T, X <: AnyGraphObject, O
     ](implicit
-      inZero:  ZeroImpl[T] { type Impl = I },
-      outZero: ZeroImpl[T] { type Impl = O }
+      inZero:  ZeroImpl[I] { type Inside = T },
+      outZero: ZeroImpl[O] { type Inside = T }
     ):  EvalPathOn[I, toZero[X], O] =
     new EvalPathOn[I, toZero[X], O] {
       def apply(morph: Morph)(input: Input): Output = {
