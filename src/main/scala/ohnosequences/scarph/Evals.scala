@@ -31,6 +31,15 @@ object evals {
 
   object structural {
 
+    // X = X (does nothing)
+    implicit def eval_id[
+      I, X <: AnyGraphObject
+    ]:  EvalPathOn[I, id[X], I] =
+    new EvalPathOn[I, id[X], I] {
+      def apply(morph: Morph)(input: Input): Output = input
+    }
+
+
     // F >=> S
     implicit def eval_composition[
       I,
@@ -63,7 +72,7 @@ object evals {
     new EvalPathOn[I, TensorMorph[L, R], O] {
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outTens(
-          evalLeft(morph.left) ( (morph.left.in: L#In)  := inTens.leftProj(input.value) ).value,
+          evalLeft(morph.left)  ( (morph.left.in:  L#In) := inTens.leftProj(input.value) ).value,
           evalRight(morph.right)( (morph.right.in: R#In) := inTens.rightProj(input.value) ).value
         )
       }
@@ -83,7 +92,7 @@ object evals {
     new EvalPathOn[I, BiproductMorph[F, S], O] {
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip(
-          evalLeft(morph.left) ( (morph.left.in: F#In)  := inBip.leftProj(input.value) ).value,
+          evalLeft(morph.left)  ( (morph.left.in:  F#In) := inBip.leftProj(input.value) ).value,
           evalRight(morph.right)( (morph.right.in: S#In) := inBip.rightProj(input.value) ).value
         )
       }
@@ -189,6 +198,9 @@ object evals {
         morph.out := outZero()
       }
     }
+
+    // TODO: matchUp & merge
+    // TODO: fromUnit & toUnit
 
   }
 }
