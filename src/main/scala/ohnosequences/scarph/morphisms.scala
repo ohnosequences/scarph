@@ -68,21 +68,21 @@ object morphisms {
     extends DaggerOf(fromUnit[X](x)) { lazy val label = s"toUnit(${x.label})" }
 
 
-  // A → I → B
-  case class unitMorph[A <: AnyGraphObject, B <: AnyGraphObject](a: A, b: B)
-    extends AnyPrimitive with AnyDaggerPrimitive {
-
-    type     In = A
-    lazy val in = a
-
-    type     Out = B
-    lazy val out = b
-
-    type     Dagger = unitMorph[B, A]
-    lazy val dagger = unitMorph(b, a)
-
-    lazy val label = s"unitMorph(${a.label}, ${b.label})"
-  }
+//  // A → I → B
+//  case class unitMorph[A <: AnyGraphObject, B <: AnyGraphObject](a: A, b: B)
+//    extends AnyPrimitive with AnyDaggerPrimitive {
+//
+//    type     In = A
+//    lazy val in = a
+//
+//    type     Out = B
+//    lazy val out = b
+//
+//    type     Dagger = unitMorph[B, A]
+//    lazy val dagger = unitMorph(b, a)
+//
+//    lazy val label = s"unitMorph(${a.label}, ${b.label})"
+//  }
 
 
   // △: X → X ⊗ X
@@ -125,21 +125,21 @@ object morphisms {
     extends DaggerOf(fromZero[X](x)) { lazy val label = s"toZero(${x.label})" }
 
 
-  // A → 0 → B
-  case class zeroMorph[A <: AnyGraphObject, B <: AnyGraphObject](a: A, b: B)
-    extends AnyPrimitive with AnyDaggerPrimitive {
-
-    type     In = A
-    lazy val in = a
-
-    type     Out = B
-    lazy val out = b
-
-    type     Dagger = zeroMorph[B, A]
-    lazy val dagger = zeroMorph(b, a)
-
-    lazy val label = s"zeroMorph(${a.label}, ${b.label})"
-  }
+//  // A → 0 → B
+//  case class zeroMorph[A <: AnyGraphObject, B <: AnyGraphObject](a: A, b: B)
+//    extends AnyPrimitive with AnyDaggerPrimitive {
+//
+//    type     In = A
+//    lazy val in = a
+//
+//    type     Out = B
+//    lazy val out = b
+//
+//    type     Dagger = zeroMorph[B, A]
+//    lazy val dagger = zeroMorph(b, a)
+//
+//    lazy val label = s"zeroMorph(${a.label}, ${b.label})"
+//  }
 
 
   // X -> X ⊕ X
@@ -162,7 +162,7 @@ object morphisms {
     extends DaggerOf(split[X](x)) { lazy val label = s"merge(${x.label} ⊕ ${x.label})" }
 
 
-  /* Projections and injections */
+  // L → L ⊕ R
   case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
     type Biproduct = B
 
@@ -178,10 +178,12 @@ object morphisms {
     lazy val label = s"(${biproduct.left.label} leftInj ${biproduct.label})"
   }
 
+  // L ⊕ R → L
   case class leftProj[B <: AnyBiproductObj](b: B)
     extends DaggerOf(leftInj[B](b)) { lazy val label = s"leftProj(${b.label})" }
 
 
+  // R → L ⊕ R
   case class rightInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
     type Biproduct = B
 
@@ -197,6 +199,7 @@ object morphisms {
     lazy val label = s"(${biproduct.right.label} rightInj ${biproduct.label})"
   }
 
+  // L ⊕ R → R
   case class rightProj[B <: AnyBiproductObj](b: B)
     extends DaggerOf(rightInj[B](b)) { lazy val label = s"rightProj(${b.label})" }
 
