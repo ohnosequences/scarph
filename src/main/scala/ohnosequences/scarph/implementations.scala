@@ -90,4 +90,6 @@ object implementations {
     type Inside = T
   }
 
+
+  // TODO: unit, edge, vertex, element, property (value)
 }
