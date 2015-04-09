@@ -33,4 +33,10 @@ object Queries {
   implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
   implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
 
+
+  // funny check / coerce
+  val edusAgain = check ( those ( user ? (user.name === "@eparejatobes") ))
+
+  val edusTweets = edusAgain andThen edusAgain.dagger.outV(posted)
+
 }

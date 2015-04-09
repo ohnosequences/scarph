@@ -10,9 +10,17 @@ object predicates {
 
   trait AnyQuantifiedObject extends AnyGraphObject {
 
-    type Predicate <: AnyPredicate { type Element = OnObject }
-    type OnObject <: AnyGraphElement
-    val onObject: OnObject
+    type Predicate <: AnyPredicate
+    val predicate: Predicate
+    type OnObject = Predicate#Element
+    lazy val onObject: OnObject = predicate.element
+  }
+
+  case class those[P <: AnyPredicate](val predicate: P) extends AnyQuantifiedObject {
+
+    type Predicate = P
+
+    lazy val label: String = predicate.label
   }
 
   trait AnyCheck extends AnyGraphMorphism {
