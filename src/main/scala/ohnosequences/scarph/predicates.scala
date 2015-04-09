@@ -1,4 +1,4 @@
-package ohnosequences.scarph
+  package ohnosequences.scarph
 
 object predicates {
 
@@ -7,6 +7,57 @@ object predicates {
 
   val  GraphBoolean = unit ⊕ unit
   type GraphBoolean = GraphBoolean.type
+
+  trait AnyQuantifiedObject extends AnyGraphObject {
+
+    type Predicate <: AnyPredicate { type Element = OnObject }
+    type OnObject <: AnyGraphElement
+    val onObject: OnObject
+  }
+
+  trait AnyCheck extends AnyGraphMorphism {
+
+    type QObject <: AnyQuantifiedObject
+    val qObject: QObject
+
+    type In = QObject#OnObject
+    lazy val in: In = qObject.onObject
+
+    type Out = QObject
+    lazy val out: Out = qObject
+
+    type Dagger = coerce[QObject]
+    lazy val dagger: Dagger = coerce(qObject)
+
+    lazy val label: String = s"check ${out.label}"
+  }
+
+  case class check[QO <: AnyQuantifiedObject](val qObject: QO) extends AnyCheck {
+
+    type QObject = QO
+  }
+
+  trait AnyCoerce extends AnyGraphMorphism {
+
+    type QObject <: AnyQuantifiedObject
+    val qObject: QObject
+
+    type In = QObject
+    lazy val in: In = qObject
+
+    type Out = QObject#OnObject
+    lazy val out: Out = qObject.onObject
+
+    type Dagger = check[QObject]
+    lazy val dagger: Dagger = check(qObject)
+
+    lazy val label: String = s"${in.label} as {out.label}"
+  }
+
+  case class coerce[QO <: AnyQuantifiedObject](val qObject: QO) extends AnyCoerce {
+
+    type QObject = QO
+  }
 
   trait AnyPredicate extends AnyGraphMorphism {
 
@@ -53,8 +104,8 @@ object predicates {
     val  conditions = ∅
   }
 
-  class EmptyPredicate[E <: AnyGraphElement](val element: E) 
-    extends AnyEmptyPredicate { 
+  class EmptyPredicate[E <: AnyGraphElement](val element: E)
+    extends AnyEmptyPredicate {
 
     type Element = E
   }
