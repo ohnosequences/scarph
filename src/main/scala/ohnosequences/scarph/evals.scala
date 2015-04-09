@@ -31,32 +31,32 @@ object evals {
 
   trait DefaultEvals {
 
-    // X = X (does nothing)
-    implicit def eval_id[
-      I, X <: AnyGraphObject
-    ]:  EvalPathOn[I, id[X], I] =
-    new EvalPathOn[I, id[X], I] {
-      def apply(morph: Morph)(input: Input): Output = input
-    }
+//    // X = X (does nothing)
+//    implicit def eval_id[
+//      I, X <: AnyGraphObject
+//    ]:  EvalPathOn[I, id[X], I] =
+//    new EvalPathOn[I, id[X], I] {
+//      def apply(morph: Morph)(input: Input): Output = input
+//    }
 
 
-    // F >=> S
-    implicit def eval_composition[
-      I,
-      F <: AnyGraphMorphism,
-      S <: AnyGraphMorphism { type In = F#Out },
-      X, O
-    ](implicit
-      evalFirst:  EvalPathOn[I, F, X],
-      evalSecond: EvalPathOn[X, S, O]
-    ):  EvalPathOn[I, F >=> S, O] =
-    new EvalPathOn[I, F >=> S, O] {
-
-      def apply(morph: Morph)(input: Input): Output = {
-        val firstResult = evalFirst(morph.first)(input)
-        evalSecond(morph.second)(morph.second.in := firstResult.value)
-      }
-    }
+//    // F >=> S
+//    def eval_composition[
+//      I,
+//      F <: AnyGraphMorphism,
+//      S <: AnyGraphMorphism { type In = F#Out },
+//      X, O
+//    ](implicit
+//      evalFirst:  EvalPathOn[I, F, X],
+//      evalSecond: EvalPathOn[X, S, O]
+//    ):  EvalPathOn[I, F >=> S, O] =
+//    new EvalPathOn[I, F >=> S, O] {
+//
+//      def apply(morph: Morph)(input: Input): Output = {
+//        val firstResult = evalFirst(morph.first)(input)
+//        evalSecond(morph.second)(morph.second.in := firstResult.value)
+//      }
+//    }
 
     // IL ⊗ IR → OL ⊗ OR
     implicit def eval_tensor[
@@ -84,8 +84,8 @@ object evals {
       F <: AnyGraphMorphism, S <: AnyGraphMorphism,
       OL, OR, O
     ](implicit
-      inBip:  TensorImpl[I] { type Left = IL; type Right = IR },
-      outBip: TensorImpl[O] { type Left = OL; type Right = OR },
+      inBip:  BiproductImpl[I] { type Left = IL; type Right = IR },
+      outBip: BiproductImpl[O] { type Left = OL; type Right = OR },
       evalLeft:  EvalPathOn[IL, F, OL],
       evalRight: EvalPathOn[IR, S, OR]
     ):  EvalPathOn[I, BiproductMorph[F, S], O] =

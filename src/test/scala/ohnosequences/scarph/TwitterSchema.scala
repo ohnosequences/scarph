@@ -46,7 +46,7 @@ object twitter extends AnyGraphSchema {
     case object webpage extends Property(user -> twitter.url)("webpage")
   }
 
-  case object tweet extends Vertex(toString) {
+  case object tweet extends Vertex("tweet") {
     case object text extends Property(tweet -> twitter.text)("text")
     case object url  extends Property(tweet -> twitter.url)("url")
   }

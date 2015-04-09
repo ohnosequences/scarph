@@ -45,11 +45,31 @@ object dummy {
 
 import ohnosequences.scarph._, graphTypes._, morphisms._, evals._
 
-object dummyEvals extends DefaultEvals {}
+object dummyEvals extends dummyEvals2 {
 
-object dummyEvals_2 {
+  // F >=> S
+  implicit def eval_composition[
+    X,
+    F <: AnyGraphMorphism,
+    S <: AnyGraphMorphism { type In = F#Out }
+  ](implicit
+    evalFirst:  EvalPathOn[String, F, X],
+    evalSecond: EvalPathOn[X, S, String]
+  ):  EvalPathOn[String, F >=> S, String] =
+  new EvalPathOn[String, F >=> S, String] {
 
-  implicit def eval_outV[
+    def apply(morph: Morph)(input: Input): Output = {
+      val f = evalFirst(morph.first)((morph.first.in: F#In) := "").value
+      val s = evalSecond(morph.second)(morph.second.in := f).value
+      morph.out := (f +" >=> "+ s)
+    }
+  }
+
+}
+
+trait dummyEvals2 extends DefaultEvals {
+
+  implicit def eval_Primitives[
     M <: AnyPrimitive
   ]:  EvalPathOn[String, M, String] =
   new EvalPathOn[String, M, String] {
