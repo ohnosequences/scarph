@@ -197,7 +197,9 @@ object graphTypes {
 
     import evals._
     def evalOn[I, O](input: F#In := I)
-      (implicit eval: EvalPathOn[I, F, O]): F#Out := O = eval(f)(input)
+      (implicit eval: EvalPathOn[F] { type InVal = I; type OutVal = O }): F#Out := O = eval(f)(input)
+
+    def present(implicit eval: EvalPathOn[F]): String = eval.present(f)
   }
 
 }
