@@ -186,9 +186,7 @@ object graphTypes {
 
   class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
 
-    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S):
-      Composition[F, S] =
-      Composition[F, S](f, s)
+    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
 
     import monoidalStructures._
 
@@ -197,9 +195,12 @@ object graphTypes {
 
     import evals._
     def evalOn[I, O](input: F#In := I)
-      (implicit eval: EvalPathOn[F] { type InVal = I; type OutVal = O }): F#Out := O = eval(f)(input)
+      (implicit eval: Eval[F] { type InVal = I; type OutVal = O }): F#Out := O = eval(f)(input)
 
-    def present(implicit eval: EvalPathOn[F]): String = eval.present(f)
+    //def evalOn[I, O](input: F#In := I)
+    //  (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
+
+    def present(implicit eval: Eval[F]): String = eval.present(f)
   }
 
 }

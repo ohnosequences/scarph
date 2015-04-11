@@ -4,46 +4,49 @@ object dummy {
 
   import ohnosequences.scarph._, implementations._
 
-  implicit def tensorImpl:
-        TensorImpl[Any] =
-    new TensorImpl[Any] {
-      type Left = Any
-      type Right = Any
+  case object Dummy
+  type Dummy = Dummy.type
 
-      def leftProj(i: Impl): Left = i
-      def rightProj(i: Impl): Right = i
-      def apply(l: Left, r: Right): Impl = s"($l, $r)"
+  implicit def tensorImpl:
+        TensorImpl[Dummy] =
+    new TensorImpl[Dummy] {
+      type Left = Dummy
+      type Right = Dummy
+
+      def leftProj(i: Impl): Left = Dummy
+      def rightProj(i: Impl): Right = Dummy
+      def apply(l: Left, r: Right): Impl = Dummy
     }
 
   implicit def zeroImpl:
-        ZeroImpl[Any] =
-    new ZeroImpl[Any] {
-      type Inside = Any
+        ZeroImpl[Dummy] =
+    new ZeroImpl[Dummy] {
+      type Inside = Dummy
 
-      def apply(): Impl = ""
+      def apply(): Impl = Dummy
   }
 
   implicit def biproductImpl:
-        BiproductImpl[Any] =
-    new BiproductImpl[Any] {
-      type Left = Any
-      type Right = Any
+        BiproductImpl[Dummy] =
+    new BiproductImpl[Dummy] {
+      type Left = Dummy
+      type Right = Dummy
 
-      def leftProj(i: Impl): Left = i
-      def rightProj(i: Impl): Right = i
+      def leftProj(i: Impl): Left = Dummy
+      def rightProj(i: Impl): Right = Dummy
 
-      def leftInj(l: Left): Impl = l //(l, zeroR())
-      def rightInj(r: Right): Impl = r //(zeroL(), r)
+      def leftInj(l: Left): Impl = l
+      def rightInj(r: Right): Impl = r
 
-      def apply(l: Left, r: Right): Impl = s"($l, $r)"
+      def apply(l: Left, r: Right): Impl = Dummy
     }
 
 }
 
 import ohnosequences.scarph._, graphTypes._, morphisms._, evals._
 
-object dummyEvals extends dummyEvals2 {
 /*
+object dummyEvals extends dummyEvals2 {
   // F >=> S
   implicit def eval_composition[
     X,
@@ -60,20 +63,19 @@ object dummyEvals extends dummyEvals2 {
       val s = evalSecond(morph.second)(morph.second.in := f).value
       morph.out := (f +" >=> "+ s)
     }
-  }*/
 
 }
+  }*/
 
-trait dummyEvals2 extends DefaultEvals {
+object dummyEvals {
+  import dummy._
 
   implicit def eval_primitive[
     M <: AnyPrimitive
-  ]:  EvalPathOn[M] =
-  new EvalPathOn[M] {
-    type InVal = String
-    type OutVal = String
+  ]:  EvalOn[Dummy, M, Dummy] =
+  new EvalOn[Dummy, M, Dummy] {
 
-    def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := (morph.out.label: OutVal)
+    def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := Dummy
 
     def present(morph: Morph): String = morph.label
   }
