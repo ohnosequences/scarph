@@ -194,11 +194,11 @@ object graphTypes {
     def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
 
     import evals._
-    def evalOn[I, O](input: F#In := I)
-      (implicit eval: Eval[F] { type InVal = I; type OutVal = O }): F#Out := O = eval(f)(input)
-
     //def evalOn[I, O](input: F#In := I)
-    //  (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
+    //  (implicit eval: Eval[F] { type InVal = I; type OutVal = O }): F#Out := O = eval(f)(input)
+
+    def evalOn[I, O](input: F#In := I)
+      (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
 
     def present(implicit eval: Eval[F]): String = eval.present(f)
   }

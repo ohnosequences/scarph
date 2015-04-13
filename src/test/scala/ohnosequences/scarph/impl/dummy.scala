@@ -56,6 +56,6 @@ object dummyEvals {
 
   implicit def eval_primitive[
     M <: AnyPrimitive
-  ]:  DummyEvalOn[M] = new DummyEvalOn[M]
+  ]:  EvalOn[Dummy,M,Dummy] = new DummyEvalOn[M]
 
 }

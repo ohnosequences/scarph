@@ -15,10 +15,10 @@ class DummyTests extends org.scalatest.FunSuite {
     val query6 = duplicate(user) >=> outV(posted) ⊗ outV(posted) >=> matchUp(tweet)
     //val query7 = id(posted) ⊕ id(posted)*/
     //println(query2.present)*/
-    //println(query3.present)*/
-    println(query4.present(eval_composition))
-    query4.evalOn[Dummy, Dummy](query4.in := Dummy)(eval_composition)
-    //println(query5.present)*/
+    println(query3.present)
+    println(query4.present)
+    val uh = query4.evalOn(query4.in := Dummy)
+    println(query5.present)
     //println(query6.present)
   }
 

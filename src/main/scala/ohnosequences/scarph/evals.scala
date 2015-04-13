@@ -24,40 +24,40 @@ object evals {
 
   trait Eval[M <: AnyGraphMorphism] extends AnyEval { type Morph = M }
 
-  trait InVal[I] extends AnyEval { type InVal = I }
-  trait OutVal[O] extends AnyEval { type OutVal = O }
-
   //@annotation.implicitNotFound(msg = "Can't evaluate morphism ${M}")*/
-  trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] with InVal[I] with OutVal[O]
+  trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] {
+
+    type InVal = I
+    type OutVal = O
+  }
 
 
   object DefaultEvals {
 
 //    // X = X (does nothing)
-//    implicit def eval_id[
-//      I, X <: AnyGraphObject
-//    ]:  EvalPathOn[id[X]] =
-//    new EvalPathOn[id[X]] {
-//      type InVal = I
-//      type OutVal = I
-//
-//      def apply(morph: Morph)(input: Input): Output = input
-//
-//      def present(morph: Morph): String = morph.label
-//    }
+    /*implicit def eval_id[
+      I, X <: AnyGraphObject
+    ]:  EvalOn[I,id[X],I] =
+    new EvalOn[I,id[X],I] {
+
+      def apply(morph: Morph)(input: Input): Output = input
+
+      def present(morph: Morph): String = morph.label
+    }
+    */
 
 
     // F >=> S
-    def eval_composition[
+    implicit def eval_composition[
       I,
       F <: AnyGraphMorphism,
       S <: AnyGraphMorphism { type In = F#Out },
       X, O
     ](implicit
-      evalFirst:  Eval[F] { type InVal = I; type OutVal = X},
-      evalSecond: Eval[S] { type InVal = X; type OutVal = O}
-    ):  Eval[F >=> S] with InVal[I] with OutVal[O] =
-    new Eval[F >=> S] with InVal[I] with OutVal[O] {
+      evalFirst:  EvalOn[I, F, X],
+      evalSecond: EvalOn[X, S, O]
+    ):  EvalOn[I, F >=> S, O] =
+    new EvalOn[I, F >=> S, O] {
 
       def apply(morph: Morph)(input: Input): Output = {
         val firstResult = evalFirst(morph.first)(input)
