@@ -7,19 +7,25 @@ class DummyTests extends org.scalatest.FunSuite {
 
   test("record property bound works") {
 
-    val query1 = id(user) >=> outV(posted).duplicate
-    val query2 = inV(posted) >=> outV(posted).duplicate
-    val query3 = inV(posted)
-    val query4 = id(user) >=> id(user)
+    val query2 = duplicate(user)
+    val query3 = inE(posted)
+    val query4 = inE(posted) >=> source(posted)
     val query5 = fromZero(user) >=> toZero(user) >=> fromZero(tweet)
-    val query6 = duplicate(user) >=> outV(posted) ⊗ outV(posted) >=> matchUp(tweet)
-    //val query7 = id(posted) ⊕ id(posted)*/
-    //println(query2.present)*/
+    val query6 = duplicate(user) >=> outE(posted) ⊗ outE(posted) //>=> matchUp(tweet)
+    val query7 = id(user) ⊕ id(user)
+
+    println("------------")
+    println(query2.present)
+    println("------------")
     println(query3.present)
+    println("------------")
     println(query4.present)
-    val uh = query4.evalOn(query4.in := Dummy)
+    println("------------")
     println(query5.present)
-    //println(query6.present)
+    println("------------")
+    println(query6.present)
+    println("------------")
+    println(query7.present)
   }
 
 }

@@ -221,8 +221,11 @@ object morphisms {
     lazy val label: String = s"target(${edge.label})"
   }
 
-  case class inE[E <: AnyEdge](e: E)
-    extends DaggerOf(target[E](e)) { lazy val label = s"inE(${e.label})" }
+  case class inE[E <: AnyEdge](val edge: E) extends DaggerOf(target[E](edge)) { 
+    type Edge = E
+
+    lazy val label = s"inE(${edge.label})"
+  }
 
 
   case class source[E <: AnyEdge](val edge: E) extends AnyStraightPrimitive {
@@ -240,8 +243,11 @@ object morphisms {
     lazy val label: String = s"source(${edge.label})"
   }
 
-  case class outE[E <: AnyEdge](e: E)
-    extends DaggerOf(source[E](e)) { lazy val label = s"outE(${e.label})" }
+  case class outE[E <: AnyEdge](val edge: E) extends DaggerOf(source[E](edge)) {
+    type Edge = E
+
+    lazy val label = s"outE(${edge.label})"
+  }
 
 
   case class outV[E <: AnyEdge](val edge: E) extends AnyStraightPrimitive {
@@ -259,8 +265,11 @@ object morphisms {
     lazy val label: String = s"outV(${edge.label})"
   }
 
-  case class inV[E <: AnyEdge](e: E)
-    extends DaggerOf(outV[E](e)) { lazy val label = s"inV(${e.label})" }
+  case class inV[E <: AnyEdge](val edge: E) extends DaggerOf(outV[E](edge)) {
+    type Edge = E
+
+    lazy val label = s"inV(${edge.label})"
+  }
 
 
   case class get[P <: AnyGraphProperty](val property: P) extends AnyStraightPrimitive {
