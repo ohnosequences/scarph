@@ -24,12 +24,11 @@ object evals {
 
   trait Eval[M <: AnyGraphMorphism] extends AnyEval { type Morph = M }
 
-  //@annotation.implicitNotFound(msg = "Can't evaluate morphism ${M}")*/
-  trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] {
+  trait InVal[I] extends AnyEval { type InVal = I }
+  trait OutVal[O] extends AnyEval { type OutVal = O }
 
-    type InVal = I
-    type OutVal = O
-  }
+  //@annotation.implicitNotFound(msg = "Can't evaluate morphism ${M}")*/
+  trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] with InVal[I] with OutVal[O]
 
 
   object DefaultEvals {
@@ -55,10 +54,10 @@ object evals {
       S <: AnyGraphMorphism { type In = F#Out },
       X, O
     ](implicit
-      evalFirst:  EvalOn[I, F, X],
-      evalSecond: EvalOn[X, S, O]
-    ):  EvalOn[I, F >=> S, O] =
-    new EvalOn[I, F >=> S, O] {
+      evalFirst:  Eval[F] { type InVal = I; type OutVal = X},
+      evalSecond: Eval[S] { type InVal = X; type OutVal = O}
+    ):  Eval[F >=> S] with InVal[I] with OutVal[O] =
+    new Eval[F >=> S] with InVal[I] with OutVal[O] {
 
       def apply(morph: Morph)(input: Input): Output = {
         val firstResult = evalFirst(morph.first)(input)

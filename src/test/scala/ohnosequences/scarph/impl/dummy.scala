@@ -45,47 +45,17 @@ object dummy {
 
 import ohnosequences.scarph._, graphTypes._, morphisms._, evals._
 
-/*
-object dummyEvals extends dummyEvals2 {
-  // F >=> S
-  implicit def eval_composition[
-    X,
-    F <: AnyGraphMorphism,
-    S <: AnyGraphMorphism { type In = F#Out }
-  ](implicit
-    evalFirst:  EvalPathOn[String, F, X],
-    evalSecond: EvalPathOn[X, S, String]
-  ):  EvalPathOn[String, F >=> S, String] =
-  new EvalPathOn[String, F >=> S, String] {
+object dummyEvals {
+  import dummy._
 
-    def apply(morph: Morph)(input: Input): Output = {
-      val f = evalFirst(morph.first)((morph.first.in: F#In) := "").value
-      val s = evalSecond(morph.second)(morph.second.in := f).value
-      morph.out := (f +" >=> "+ s)
-    }
+  class DummyEvalOn[M <: AnyGraphMorphism] extends EvalOn[Dummy, M, Dummy] {
+
+    def present(morph: Morph): String = morph.label
+    def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := Dummy
+  }
+
+  implicit def eval_primitive[
+    M <: AnyPrimitive
+  ]:  DummyEvalOn[M] = new DummyEvalOn[M]
 
 }
-  }*/
-
-  object dummyEvals {
-    import dummy._
-
-    class DummyEvalOn[M <: AnyGraphMorphism] extends EvalOn[Dummy, M, Dummy] {
-
-      def present(morph: Morph): String = morph.label
-      def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := Dummy
-    }
-
-    implicit def eval_primitive[
-      M <: AnyPrimitive
-    ]:  DummyEvalOn[M] = new DummyEvalOn[M]
-
-    implicit def dummyEval_composition[
-      F <: AnyGraphMorphism,
-      S <: AnyGraphMorphism { type In = F#Out }
-    ](implicit
-      evalFirst:  DummyEvalOn[F],
-      evalSecond: DummyEvalOn[S]
-    ):  DummyEvalOn[F >=> S] = new DummyEvalOn[F >=> S]
-
-  }
