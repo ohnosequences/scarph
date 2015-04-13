@@ -67,16 +67,25 @@ object dummyEvals extends dummyEvals2 {
 }
   }*/
 
-object dummyEvals {
-  import dummy._
+  object dummyEvals {
+    import dummy._
 
-  implicit def eval_primitive[
-    M <: AnyPrimitive
-  ]:  EvalOn[Dummy, M, Dummy] =
-  new EvalOn[Dummy, M, Dummy] {
+    class DummyEvalOn[M <: AnyGraphMorphism] extends EvalOn[Dummy, M, Dummy] {
 
-    def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := Dummy
+      def present(morph: Morph): String = morph.label
+      def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := Dummy
+    }
 
-    def present(morph: Morph): String = morph.label
+    implicit def eval_primitive[
+      M <: AnyPrimitive
+    ]:  DummyEvalOn[M] = new DummyEvalOn[M]
+
+    implicit def dummyEval_composition[
+      F <: AnyGraphMorphism,
+      S <: AnyGraphMorphism { type In = F#Out }
+    ](implicit
+      evalFirst:  DummyEvalOn[F],
+      evalSecond: DummyEvalOn[S]
+    ):  DummyEvalOn[F >=> S] = new DummyEvalOn[F >=> S]
+
   }
-}
