@@ -115,6 +115,20 @@ object implementations {
   }
 
 
+//  trait AnyProperyImpl extends AnyImpl {
+//
+//    type Elements
+//
+//    def lookup(i: Impl): Elements
+//    def get(e: Elements): Impl
+//  }
+//
+//  trait ProperyImpl[I, E] extends AnyProperyImpl {
+//
+//    type Impl = I
+//    type Elements = E
+//  }
+
   // TODO: unit, element, property (value)
 
 
