@@ -257,4 +257,36 @@ object morphisms {
     extends DaggerOf(get[P](p)) { lazy val label = s"lookup(${p.label})" }
 
 
+  case class quantify[P <: AnyPredicate](val predicate: P) extends AnyGraphMorphism {
+    type Predicate = P
+
+    type In = Predicate#Element
+    lazy val in: In = predicate.element
+
+    type Out = Predicate
+    lazy val out: Out = predicate
+
+    type Dagger = coerce[Predicate]
+    lazy val dagger: Dagger = coerce(predicate)
+
+    lazy val label: String = s"quantify ${out.label}"
+  }
+
+
+  case class coerce[P <: AnyPredicate](val predicate: P) extends AnyGraphMorphism {
+    type Predicate = P
+
+    type In = Predicate
+    lazy val in: In = predicate
+
+    type Out = Predicate#Element
+    lazy val out: Out = predicate.element
+
+    type Dagger = quantify[Predicate]
+    lazy val dagger: Dagger = quantify(predicate)
+
+    lazy val label: String = s"${in.label} as {out.label}"
+  }
+
+
 }
