@@ -7,7 +7,7 @@ object evals {
   import graphTypes._, morphisms._, implementations._
 
 
-  trait AnyEvalPath {
+  trait AnyEval {
 
     type Morph <: AnyGraphMorphism
 
@@ -18,25 +18,31 @@ object evals {
     type Output = Morph#Out := OutVal
 
     def apply(morph: Morph)(input: Input): Output
+
+    def present(morph: Morph): String
   }
 
-  @annotation.implicitNotFound(msg = "Can't evaluate morph ${P} with\n\tinput: ${I}\n\toutput: ${O}")
-  trait EvalPathOn[I, P <: AnyGraphMorphism, O] extends AnyEvalPath {
+  trait Eval[M <: AnyGraphMorphism] extends AnyEval { type Morph = M }
+
+  //@annotation.implicitNotFound(msg = "Can't evaluate morphism ${M}")*/
+  trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] {
 
     type InVal = I
     type OutVal = O
-    type Morph = P
   }
 
 
-  object structural {
+  object DefaultEvals {
 
     // X = X (does nothing)
     implicit def eval_id[
       I, X <: AnyGraphObject
-    ]:  EvalPathOn[I, id[X], I] =
-    new EvalPathOn[I, id[X], I] {
+    ]:  EvalOn[I, id[X], I] =
+    new EvalOn[I, id[X], I] {
+
       def apply(morph: Morph)(input: Input): Output = input
+
+      def present(morph: Morph): String = morph.label
     }
 
 
@@ -47,15 +53,17 @@ object evals {
       S <: AnyGraphMorphism { type In = F#Out },
       X, O
     ](implicit
-      evalFirst:  EvalPathOn[I, F, X],
-      evalSecond: EvalPathOn[X, S, O]
-    ):  EvalPathOn[I, F >=> S, O] =
-    new EvalPathOn[I, F >=> S, O] {
+      evalFirst:  EvalOn[I, F, X],
+      evalSecond: EvalOn[X, S, O]
+    ):  EvalOn[I, F >=> S, O] =
+    new EvalOn[I, F >=> S, O] {
 
       def apply(morph: Morph)(input: Input): Output = {
         val firstResult = evalFirst(morph.first)(input)
         evalSecond(morph.second)(morph.second.in := firstResult.value)
       }
+
+      def present(morph: Morph): String = s"${evalFirst.present(morph.first)} >=>\n${evalSecond.present(morph.second)}"
     }
 
     // IL ⊗ IR → OL ⊗ OR
@@ -64,75 +72,90 @@ object evals {
       L <: AnyGraphMorphism, R <: AnyGraphMorphism,
       OL, OR, O
     ](implicit
-      inTens:  TensorImpl[IL, IR] { type Impl = I },
-      outTens: TensorImpl[OL, OR] { type Impl = O },
-      evalLeft:  EvalPathOn[IL, L, OL],
-      evalRight: EvalPathOn[IR, R, OR]
-    ):  EvalPathOn[I, TensorMorph[L, R], O] =
-    new EvalPathOn[I, TensorMorph[L, R], O] {
+      inTens:  TensorImpl[I, IL, IR],
+      outTens: TensorImpl[O, OL, OR],
+      evalLeft:  EvalOn[IL, L, OL],
+      evalRight: EvalOn[IR, R, OR]
+    ):  EvalOn[I, TensorMorph[L, R], O] =
+    new EvalOn[I, TensorMorph[L, R], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outTens(
           evalLeft(morph.left)  ( (morph.left.in:  L#In) := inTens.leftProj(input.value) ).value,
           evalRight(morph.right)( (morph.right.in: R#In) := inTens.rightProj(input.value) ).value
         )
       }
+
+      def present(morph: Morph): String = s"${evalLeft.present(morph.left)} ⊗ ${evalRight.present(morph.right)}"
     }
 
     // IL ⊕ IR → OL ⊕ OR
     implicit def eval_biproduct[
       IL, IR, I,
-      F <: AnyGraphMorphism, S <: AnyGraphMorphism,
+      L <: AnyGraphMorphism, R <: AnyGraphMorphism,
       OL, OR, O
     ](implicit
-      inBip:  TensorImpl[IL, IR] { type Impl = I },
-      outBip: TensorImpl[OL, OR] { type Impl = O },
-      evalLeft:  EvalPathOn[IL, F, OL],
-      evalRight: EvalPathOn[IR, S, OR]
-    ):  EvalPathOn[I, BiproductMorph[F, S], O] =
-    new EvalPathOn[I, BiproductMorph[F, S], O] {
+      inBip:  BiproductImpl[I, IL, IR],
+      outBip: BiproductImpl[O, OL, OR],
+      evalLeft:  EvalOn[IL, L, OL],
+      evalRight: EvalOn[IR, R, OR]
+    ):  EvalOn[I, BiproductMorph[L, R], O] =
+    new EvalOn[I, BiproductMorph[L, R], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip(
-          evalLeft(morph.left)  ( (morph.left.in:  F#In) := inBip.leftProj(input.value) ).value,
-          evalRight(morph.right)( (morph.right.in: S#In) := inBip.rightProj(input.value) ).value
+          evalLeft(morph.left)  ( (morph.left.in:  L#In) := inBip.leftProj(input.value) ).value,
+          evalRight(morph.right)( (morph.right.in: R#In) := inBip.rightProj(input.value) ).value
         )
       }
+
+      def present(morph: Morph): String = s"${evalLeft.present(morph.left)} ⊕ ${evalRight.present(morph.right)}"
     }
 
     // △: X → X ⊗ X
     implicit def eval_duplicate[
       I, T <: AnyGraphObject, O
     ](implicit
-      outTens: TensorImpl[I, I] { type Impl = O }
-    ):  EvalPathOn[I, duplicate[T], O] =
-    new EvalPathOn[I, duplicate[T], O] {
+      outTens: TensorImpl[O, I, I]
+    ):  EvalOn[I, duplicate[T], O] =
+    new EvalOn[I, duplicate[T], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outTens(input.value, input.value)
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // X → X ⊕ X
     implicit def eval_split[
       I, T <: AnyGraphObject, O
     ](implicit
-      outBip: BiproductImpl[I, I] { type Impl = O }
-    ):  EvalPathOn[I, split[T], O] =
-    new EvalPathOn[I, split[T], O] {
+      outBip: BiproductImpl[O, I, I]
+    ):  EvalOn[I, split[T], O] =
+    new EvalOn[I, split[T], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip(input.value, input.value)
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // L → L ⊕ R
     implicit def eval_leftInj[
       L <: AnyGraphObject, R <: AnyGraphObject,
-      OL, OR, O
+      I, OR, O
     ](implicit
-      outBip: BiproductImpl[OL, OR] { type Impl = O }
-    ):  EvalPathOn[OL, leftInj[L ⊕ R], O] =
-    new EvalPathOn[OL, leftInj[L ⊕ R], O] {
+      outBip: BiproductImpl[O, I, OR]
+    ):  EvalOn[I, leftInj[L ⊕ R], O] =
+    new EvalOn[I, leftInj[L ⊕ R], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip.leftInj(input.value)
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // R → L ⊕ R
@@ -140,12 +163,15 @@ object evals {
       L <: AnyGraphObject, R <: AnyGraphObject,
       OL, OR, O
     ](implicit
-      outBip: BiproductImpl[OL, OR] { type Impl = O }
-    ):  EvalPathOn[OR, rightInj[L ⊕ R], O] =
-    new EvalPathOn[OR, rightInj[L ⊕ R], O] {
+      outBip: BiproductImpl[O, OL, OR]
+    ):  EvalOn[OR, rightInj[L ⊕ R], O] =
+    new EvalOn[OR, rightInj[L ⊕ R], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip.rightInj(input.value)
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // L ⊕ R → L
@@ -153,12 +179,15 @@ object evals {
       IL, IR, I,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
-      outBip: BiproductImpl[IL, IR] { type Impl = I }
-    ):  EvalPathOn[I, leftProj[L ⊕ R], IL] =
-    new EvalPathOn[I, leftProj[L ⊕ R], IL] {
+      outBip: BiproductImpl[I, IL, IR]
+    ):  EvalOn[I, leftProj[L ⊕ R], IL] =
+    new EvalOn[I, leftProj[L ⊕ R], IL] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip.leftProj(input.value)
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // L ⊕ R → R
@@ -166,37 +195,131 @@ object evals {
       IL, IR, I,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
-      outBip: BiproductImpl[IL, IR] { type Impl = I }
-    ):  EvalPathOn[I, rightProj[L ⊕ R], IR] =
-    new EvalPathOn[I, rightProj[L ⊕ R], IR] {
+      outBip: BiproductImpl[I, IL, IR]
+    ):  EvalOn[I, rightProj[L ⊕ R], IR] =
+    new EvalOn[I, rightProj[L ⊕ R], IR] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip.rightProj(input.value)
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // 0 → X
     implicit def eval_fromZero[
       I, X <: AnyGraphObject, O
     ](implicit
-      outZero: AnyZeroImpl { type Impl = O }
-    ):  EvalPathOn[I, fromZero[X], O] =
-    new EvalPathOn[I, fromZero[X], O] {
+      inZero:  ZeroImpl[I],
+      outZero: ZeroImpl[O]
+    ):  EvalOn[I, fromZero[X], O] =
+    new EvalOn[I, fromZero[X], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outZero()
       }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // X → 0
     implicit def eval_toZero[
       I, T, X <: AnyGraphObject, O
     ](implicit
-      inZero:  ZeroImpl[T] { type Impl = I },
-      outZero: ZeroImpl[T] { type Impl = O }
-    ):  EvalPathOn[I, toZero[X], O] =
-    new EvalPathOn[I, toZero[X], O] {
+      inZero:  ZeroImpl[I],
+      outZero: ZeroImpl[O]
+    ):  EvalOn[I, toZero[X], O] =
+    new EvalOn[I, toZero[X], O] {
+
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outZero()
       }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_inE[
+      I, E <: AnyEdge, IE, IV
+    ](implicit
+      vImpl:  VertexInImpl[I, IE, IV]
+    ):  EvalOn[I, inE[E], IE] =
+    new EvalOn[I, inE[E], IE] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := vImpl.inE(input.value, morph.edge)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_outE[
+      I, E <: AnyEdge, OE, OV
+    ](implicit
+      vImpl:  VertexOutImpl[I, OE, OV]
+    ):  EvalOn[I, outE[E], OE] =
+    new EvalOn[I, outE[E], OE] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := vImpl.outE(input.value, morph.edge)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_inV[
+      I, E <: AnyEdge, IE, IV
+    ](implicit
+      vImpl:  VertexInImpl[I, IE, IV]
+    ):  EvalOn[I, inV[E], IV] =
+    new EvalOn[I, inV[E], IV] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := vImpl.inV(input.value, morph.edge)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_outV[
+      I, E <: AnyEdge, OE, OV
+    ](implicit
+      vImpl:  VertexOutImpl[I, OE, OV]
+    ):  EvalOn[I, outV[E], OV] =
+    new EvalOn[I, outV[E], OV] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := vImpl.outV(input.value, morph.edge)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_source[
+      E <: AnyEdge, I, S, T
+    ](implicit
+      eImpl: EdgeImpl[I, S, T]
+    ):  EvalOn[I, source[E], S] =
+    new EvalOn[I, source[E], S] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := eImpl.source(input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_target[
+      E <: AnyEdge, I, S, T
+    ](implicit
+      eImpl: EdgeImpl[I, S, T]
+    ):  EvalOn[I, target[E], T] =
+    new EvalOn[I, target[E], T] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := eImpl.target(input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
     }
 
     // TODO: matchUp & merge

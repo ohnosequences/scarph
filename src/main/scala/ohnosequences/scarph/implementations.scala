@@ -2,41 +2,13 @@ package ohnosequences.scarph
 
 object implementations {
 
-  import monoidalStructures._
-  import ohnosequences.cosas._, types._, fns._
-  import graphTypes._, morphisms._
-
-
-  trait AnyEvalPath {
-
-    type Morph <: AnyGraphMorphism
-
-    type InVal
-    type OutVal
-
-    type Input = Morph#In := InVal
-    type Output = Morph#Out := OutVal
-
-    def apply(morph: Morph)(input: Input): Output
-  }
-
-  @annotation.implicitNotFound(msg = "Can't evaluate morph ${P} with\n\tinput: ${I}\n\toutput: ${O}")
-  trait EvalPathOn[I, P <: AnyGraphMorphism, O] extends AnyEvalPath {
-
-    type InVal = I
-    type OutVal = O
-    type Morph = P
-  }
+  import graphTypes._
 
 
   trait AnyImpl {
 
     type Impl
   }
-
-  //trait FlattenVals[F[_], G[_], X] extends Fn1[F[G[X]]]*/
-
-  //trait MergeVals[F, S] extends Fn2[F, S]*/
 
 
   trait AnyTensorImpl extends AnyImpl {
@@ -50,8 +22,9 @@ object implementations {
     def apply(l: Left, r: Right): Impl
   }
 
-  abstract class TensorImpl[L, R] extends AnyTensorImpl {
+  trait TensorImpl[I, L, R] extends AnyTensorImpl {
 
+    type Impl = I
     type Left = L
     type Right = R
   }
@@ -71,8 +44,9 @@ object implementations {
     def rightInj(r: Right): Impl
   }
 
-  abstract class BiproductImpl[L, R] extends AnyBiproductImpl {
+  trait BiproductImpl[I, L, R] extends AnyBiproductImpl {
 
+    type Impl = I
     type Left = L
     type Right = R
   }
@@ -80,16 +54,82 @@ object implementations {
 
   trait AnyZeroImpl extends AnyImpl {
 
-    type Inside
+    //type Inside*/
 
     def apply(): Impl
   }
 
-  abstract class ZeroImpl[T] extends AnyZeroImpl {
+  trait ZeroImpl[I] extends AnyZeroImpl { type Impl = I }
 
-    type Inside = T
+
+  trait AnyEdgeImpl extends AnyImpl {
+
+    type Source
+    type Target
+
+    def source(i: Impl): Source
+    def target(i: Impl): Target
+  }
+
+  trait EdgeImpl[I, S, T] extends AnyEdgeImpl {
+
+    type Impl = I
+    type Source = S
+    type Target = T
   }
 
 
-  // TODO: unit, edge, vertex, element, property (value)
+  // TODO: probably it makes sense to separate it
+  trait AnyVertexInImpl extends AnyImpl {
+
+    type InEdges
+    def inE(i: Impl, e: AnyEdge): InEdges
+
+    type InVertices
+    def inV(i: Impl, e: AnyEdge): InVertices
+  }
+
+  trait VertexInImpl[I, IE, IV] extends AnyVertexInImpl {
+
+    type Impl = I
+    type InEdges = IE
+    type InVertices = IV
+  }
+
+
+  // TODO: probably it makes sense to separate it
+  trait AnyVertexOutImpl extends AnyImpl {
+
+    type OutEdges
+    def outE(i: Impl, e: AnyEdge): OutEdges
+
+    type OutVertices
+    def outV(i: Impl, e: AnyEdge): OutVertices
+  }
+
+  trait VertexOutImpl[I, OE, OV] extends AnyVertexOutImpl {
+
+    type Impl = I
+    type OutEdges = OE
+    type OutVertices = OV
+  }
+
+
+//  trait AnyProperyImpl extends AnyImpl {
+//
+//    type Elements
+//
+//    def lookup(i: Impl): Elements
+//    def get(e: Elements): Impl
+//  }
+//
+//  trait ProperyImpl[I, E] extends AnyProperyImpl {
+//
+//    type Impl = I
+//    type Elements = E
+//  }
+
+  // TODO: unit, element, property (value)
+
+
 }
