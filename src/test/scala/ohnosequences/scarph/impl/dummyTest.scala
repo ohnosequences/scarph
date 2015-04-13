@@ -11,7 +11,7 @@ class DummyTests extends org.scalatest.FunSuite {
     val query3 = inE(posted)
     val query4 = inE(posted) >=> source(posted)
     val query5 = fromZero(user) >=> toZero(user) >=> fromZero(tweet)
-    val query6 = duplicate(user) >=> outE(posted) ⊗ outE(posted) //>=> matchUp(tweet)
+    val query6 = duplicate(user) >=> outE(posted) ⊗ outV(posted) //>=> matchUp(tweet)
     val query7 = id(user) ⊕ id(user)
 
     println("------------")

@@ -79,23 +79,39 @@ object implementations {
   }
 
 
-  trait AnyVertexImpl extends AnyImpl {
+  // TODO: probably it makes sense to separate it
+  trait AnyVertexInImpl extends AnyImpl {
 
     type InEdges
-    type OutEdges
-
     def inE(i: Impl, e: AnyEdge): InEdges
-    def outE(i: Impl, e: AnyEdge): OutEdges
 
-    //def inV(i: Impl, e: AnyEdge): InEdges#Source
-    //def outV(i: Impl, e: AnyEdge): OutEdges#Target
+    type InVertices
+    def inV(i: Impl, e: AnyEdge): InVertices
   }
 
-  trait VertexImpl[I, IE, OE] extends AnyVertexImpl {
+  trait VertexInImpl[I, IE, IV] extends AnyVertexInImpl {
 
     type Impl = I
     type InEdges = IE
+    type InVertices = IV
+  }
+
+
+  // TODO: probably it makes sense to separate it
+  trait AnyVertexOutImpl extends AnyImpl {
+
+    type OutEdges
+    def outE(i: Impl, e: AnyEdge): OutEdges
+
+    type OutVertices
+    def outV(i: Impl, e: AnyEdge): OutVertices
+  }
+
+  trait VertexOutImpl[I, OE, OV] extends AnyVertexOutImpl {
+
+    type Impl = I
     type OutEdges = OE
+    type OutVertices = OV
   }
 
 

@@ -45,12 +45,20 @@ object dummy {
     def target(i: Impl): Target = Dummy
   }
 
-  implicit def vertexImpl:
-      VertexImpl[Dummy, Dummy, Dummy] =
-  new VertexImpl[Dummy, Dummy, Dummy] {
+  implicit def vertexInImpl:
+      VertexInImpl[Dummy, Dummy, Dummy] =
+  new VertexInImpl[Dummy, Dummy, Dummy] {
 
     def inE(i: Impl, e: AnyEdge): InEdges = Dummy
+    def inV(i: Impl, e: AnyEdge): InVertices = Dummy
+  }
+
+  implicit def vertexOutImpl:
+      VertexOutImpl[Dummy, Dummy, Dummy] =
+  new VertexOutImpl[Dummy, Dummy, Dummy] {
+
     def outE(i: Impl, e: AnyEdge): OutEdges = Dummy
+    def outV(i: Impl, e: AnyEdge): OutVertices = Dummy
   }
 
 }
