@@ -7,7 +7,7 @@ object isomorphisms {
   import graphTypes._, predicates._, monoidalStructures._, morphisms._
 
 
-  trait AnyIsomorphism extends AnyPrimitive
+  trait AnyIsomorphism extends AnyStraightPrimitive
 
 
   // σ: L ⊗ R → R ⊗ L

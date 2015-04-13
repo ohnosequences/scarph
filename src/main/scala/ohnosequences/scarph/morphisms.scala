@@ -6,20 +6,22 @@ object morphisms {
 
   import graphTypes._, predicates._, monoidalStructures._
 
-  trait AnyPrimitive extends AnyGraphMorphism { morph =>
+  trait AnyPrimitive extends AnyGraphMorphism
+
+  trait AnyStraightPrimitive extends AnyPrimitive { morph =>
 
     type Dagger <: AnyDaggerPrimitive {
-      type Dagger >: morph.type <: AnyPrimitive
+      type Dagger >: morph.type <: AnyStraightPrimitive
     }
   }
 
-  trait AnyDaggerPrimitive extends AnyGraphMorphism {
+  trait AnyDaggerPrimitive extends AnyPrimitive {
 
-    type Dagger <: AnyPrimitive
+    type Dagger <: AnyStraightPrimitive
     val  dagger: Dagger
   }
 
-  abstract class DaggerOf[M <: AnyPrimitive](val m: M) extends AnyDaggerPrimitive {
+  abstract class DaggerOf[M <: AnyStraightPrimitive](val m: M) extends AnyDaggerPrimitive {
 
     type     Dagger = M
     lazy val dagger = m
@@ -33,7 +35,7 @@ object morphisms {
 
 
   // id: X → X
-  case class id[X <: AnyGraphObject](x: X) extends AnyPrimitive with AnyDaggerPrimitive {
+  case class id[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive with AnyDaggerPrimitive {
 
     type     In = X
     lazy val in = x
@@ -49,7 +51,7 @@ object morphisms {
 
 
   // I → X
-  case class fromUnit[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fromUnit[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
 
     type     In = unit
     lazy val in = unit
@@ -68,25 +70,8 @@ object morphisms {
     extends DaggerOf(fromUnit[X](x)) { lazy val label = s"toUnit(${x.label})" }
 
 
-//  // A → I → B
-//  case class unitMorph[A <: AnyGraphObject, B <: AnyGraphObject](a: A, b: B)
-//    extends AnyPrimitive with AnyDaggerPrimitive {
-//
-//    type     In = A
-//    lazy val in = a
-//
-//    type     Out = B
-//    lazy val out = b
-//
-//    type     Dagger = unitMorph[B, A]
-//    lazy val dagger = unitMorph(b, a)
-//
-//    lazy val label = s"unitMorph(${a.label}, ${b.label})"
-//  }
-
-
   // △: X → X ⊗ X
-  case class duplicate[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class duplicate[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
 
     type     In = X
     lazy val in = x
@@ -106,7 +91,7 @@ object morphisms {
 
 
   // 0 → X
-  case class fromZero[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fromZero[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
 
     type     In = zero
     lazy val in = zero
@@ -125,25 +110,8 @@ object morphisms {
     extends DaggerOf(fromZero[X](x)) { lazy val label = s"toZero(${x.label})" }
 
 
-//  // A → 0 → B
-//  case class zeroMorph[A <: AnyGraphObject, B <: AnyGraphObject](a: A, b: B)
-//    extends AnyPrimitive with AnyDaggerPrimitive {
-//
-//    type     In = A
-//    lazy val in = a
-//
-//    type     Out = B
-//    lazy val out = b
-//
-//    type     Dagger = zeroMorph[B, A]
-//    lazy val dagger = zeroMorph(b, a)
-//
-//    lazy val label = s"zeroMorph(${a.label}, ${b.label})"
-//  }
-
-
   // X -> X ⊕ X
-  case class split[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class split[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
 
     type     In = X
     lazy val in = x
@@ -163,7 +131,7 @@ object morphisms {
 
 
   // L → L ⊕ R
-  case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+  case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyStraightPrimitive {
     type Biproduct = B
 
     type     In = Biproduct#Left
@@ -184,7 +152,7 @@ object morphisms {
 
 
   // R → L ⊕ R
-  case class rightInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+  case class rightInj[B <: AnyBiproductObj](val biproduct: B) extends AnyStraightPrimitive {
     type Biproduct = B
 
     type     In = Biproduct#Right
@@ -204,7 +172,7 @@ object morphisms {
     extends DaggerOf(rightInj[B](b)) { lazy val label = s"rightProj(${b.label})" }
 
 
-  case class target[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class target[E <: AnyEdge](val edge: E) extends AnyStraightPrimitive {
     type Edge = E
 
     type     In = Edge
@@ -219,11 +187,14 @@ object morphisms {
     lazy val label: String = s"target(${edge.label})"
   }
 
-  case class inE[E <: AnyEdge](e: E)
-    extends DaggerOf(target[E](e)) { lazy val label = s"inE(${e.label})" }
+  case class inE[E <: AnyEdge](val edge: E) extends DaggerOf(target[E](edge)) {
+    type Edge = E
+
+    lazy val label = s"inE(${edge.label})"
+  }
 
 
-  case class source[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class source[E <: AnyEdge](val edge: E) extends AnyStraightPrimitive {
     type Edge = E
 
     type     In = Edge
@@ -238,11 +209,14 @@ object morphisms {
     lazy val label: String = s"source(${edge.label})"
   }
 
-  case class outE[E <: AnyEdge](e: E)
-    extends DaggerOf(source[E](e)) { lazy val label = s"outE(${e.label})" }
+  case class outE[E <: AnyEdge](val edge: E) extends DaggerOf(source[E](edge)) {
+    type Edge = E
+
+    lazy val label = s"outE(${edge.label})"
+  }
 
 
-  case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class outV[E <: AnyEdge](val edge: E) extends AnyStraightPrimitive {
     type Edge = E
 
     type     In = Edge#SourceVertex
@@ -257,11 +231,14 @@ object morphisms {
     lazy val label: String = s"outV(${edge.label})"
   }
 
-  case class inV[E <: AnyEdge](e: E)
-    extends DaggerOf(outV[E](e)) { lazy val label = s"inV(${e.label})" }
+  case class inV[E <: AnyEdge](val edge: E) extends DaggerOf(outV[E](edge)) {
+    type Edge = E
+
+    lazy val label = s"inV(${edge.label})"
+  }
 
 
-  case class get[P <: AnyGraphProperty](val property: P) extends AnyPrimitive {
+  case class get[P <: AnyGraphProperty](val property: P) extends AnyStraightPrimitive {
     type Property = P
 
     type     In = Property#Owner
