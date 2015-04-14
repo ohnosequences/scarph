@@ -18,9 +18,6 @@ object monoidalStructures {
   case class TensorObj[L <: AnyGraphObject, R <: AnyGraphObject]
     (val left: L, val right: R) extends AnyTensorObj {
 
-    type     Self = this.type
-    lazy val self = this: Self
-
     type Left = L
     type Right = R
 
@@ -39,17 +36,14 @@ object monoidalStructures {
     type Right <: AnyGraphMorphism
     val  right: Right
 
-    type In  <: TensorObj[Left#In, Right#In]
-    type Out <: TensorObj[Left#Out, Right#Out]
+    type In  <: AnyTensorObj { type Left = tensor.Left#In; type Right = tensor.Right#In }
+    type Out <: AnyTensorObj { type Left = tensor.Left#Out; type Right = tensor.Right#Out }
 
     type Dagger <: TensorMorph[Left#Dagger, Right#Dagger]
   }
 
   case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
     (val left: L, val right: R) extends AnyTensorMorph {
-
-    type     Self = this.type
-    lazy val self = this: Self
 
     type Left = L
     type Right = R

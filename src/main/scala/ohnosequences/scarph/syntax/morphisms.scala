@@ -52,16 +52,16 @@ object morphisms {
       f >=> s.isomorphisms.rightCozero(f.out)
   }
 
+  implicit def isTensorReally[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): AnyGraphMorphism.isTensorOut[F] = f
+  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }, F0 <% AnyGraphMorphism.isTensorOut[F]](f: F0):
+        TensorSyntax[F] =
+    new TensorSyntax[F](f)
 
-  implicit def tensorSyntax[L <: AnyGraphObject, R <: AnyGraphObject, F <: AnyGraphMorphism { type Out = L ⊗ R }](f: F):
-        TensorSyntax[L, R, F] =
-    new TensorSyntax[L, R, F](f)
-
-  class TensorSyntax[L <: AnyGraphObject, R <: AnyGraphObject, F <: AnyGraphMorphism { type Out = L ⊗ R }](f: F) {
+  class TensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](val f: AnyGraphMorphism.isTensorOut[F]) {
 
     def twist:
-      F >=> s.isomorphisms.symmetry[L, R] =
-      f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
+    AnyGraphMorphism.isTensorOut[F] >=> s.isomorphisms.symmetry[F#Out#Left, F#Out#Right] =
+        f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
   }
 
 

@@ -33,6 +33,8 @@ object Queries {
   implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
   implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
 
+  val friendsTwist = friends.duplicate.twist
+
 
   // funny check / coerce
   val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
