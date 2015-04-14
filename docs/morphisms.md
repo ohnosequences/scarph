@@ -3,18 +3,18 @@
 
 - From/to unit
 
-| `X <: AnyGraphObject` |    type    | syntax    |
-|----------------------:|:----------:|:----------|
-|         `fromUnit[X]` | `unit → X` | --        |
-|           `toUnit[X]` | `X → unit` | `.toUnit` |
+| `X <: AnyGraphObject` |    type    | syntax           |
+|----------------------:|:----------:|:-----------------|
+|         `fromUnit[X]` | `unit → X` | `.fromUnit(<x>)` |
+|           `toUnit[X]` | `X → unit` | `.toUnit`        |
 
 
 - From/to zero
 
-| `X <: AnyGraphObject` |    type    | syntax    |
-|----------------------:|:----------:|:----------|
-|         `fromZero[X]` | `zero → X` | --        |
-|           `toZero[X]` | `X → zero` | `.toZero` |
+| `X <: AnyGraphObject` |    type    | syntax           |
+|----------------------:|:----------:|:-----------------|
+|         `fromZero[X]` | `zero → X` | `.fromZero(<x>)` |
+|           `toZero[X]` | `X → zero` | `.toZero`        |
 
 
 - Tensor diagonal & condiagonal (`△` & `▽`)
@@ -22,7 +22,7 @@
 | `X <: AnyGraphObject` |    type     | syntax       |
 |----------------------:|:-----------:|:-------------|
 |        `duplicate[X]` | `X → X ⊗ X` | `.duplicate` |
-|          `matchUp[X]` | `X ⊗ X → X` | `TODO`       |
+|          `matchUp[X]` | `X ⊗ X → X` | `.matchUp`   |
 
 
 - Biproduct diagonal & condiagonal
@@ -30,7 +30,7 @@
 | `X <: AnyGraphObject` |    type     | syntax   |
 |----------------------:|:-----------:|:---------|
 |            `split[X]` | `X → X ⊕ X` | `.split` |
-|            `merge[X]` | `X ⊕ X → X` | `TODO`   |
+|            `merge[X]` | `X ⊕ X → X` | `.merge` |
 
 
 - Biproduct left injection/projection
@@ -78,7 +78,7 @@
 | `P <: AnyProperty` |        type         | syntax             |
 |-------------------:|:-------------------:|:-------------------|
 |           `get[P]` | `P#Owner → P#Value` | `.get(<property>)` |
-|        `lookup[P]` | `P#Value → P#Owner` | --                 |
+|        `lookup[P]` | `P#Value → P#Owner` |                    |
 
 
 - Predicate quantification/coercion
@@ -88,7 +88,7 @@
 |       `quantify[P]` | `P#Element → P` | `.quantify(<predicate>)` |
 |         `coerce[P]` | `P → P#Element` | `.coerce`                |
 
-  Additional syntax: `.filter(predicate) = .quantify(predicate).coerce(predicate)`
+  Additional syntax: `.filter(predicate) = .quantify(predicate).coerce`
 
 
 

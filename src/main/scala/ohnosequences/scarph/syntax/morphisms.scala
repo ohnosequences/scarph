@@ -65,6 +65,18 @@ object morphisms {
   }
 
 
+  implicit def matchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: F):
+        MatchUpSyntax[T, F] =
+    new MatchUpSyntax[T, F](f)
+
+  class MatchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: F) {
+
+    def matchUp:
+      F >=> s.morphisms.matchUp[T] =
+      f >=> s.morphisms.matchUp(f.out.left)
+  }
+
+
   implicit def BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
         BiproductSyntax[F] =
     new BiproductSyntax[F](f)
@@ -78,6 +90,18 @@ object morphisms {
     def right:
       F >=> rightProj[F#Out] =
       f >=> rightProj(f.out)
+  }
+
+
+  implicit def mergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: F):
+        MergeSyntax[T, F] =
+    new MergeSyntax[T, F](f)
+
+  class MergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: F) {
+
+    def merge:
+      F >=> s.morphisms.merge[T] =
+      f >=> s.morphisms.merge(f.out.left)
   }
 
 
@@ -101,7 +125,6 @@ object morphisms {
       f >=> s.morphisms.quantify(p) >=> s.morphisms.coerce(p)
   }
 
-  /* Element types */
   implicit def predicateSyntax[F <: AnyGraphMorphism { type Out <: AnyPredicate }](f: F):
         PredicateSyntax[F] =
     new PredicateSyntax[F](f)
@@ -111,6 +134,28 @@ object morphisms {
     def coerce:
       F >=> s.morphisms.coerce[F#Out] =
       f >=> s.morphisms.coerce(f.out)
+  }
+
+  implicit def zeroSyntax[F <: AnyGraphMorphism { type Out = zero }](f: F):
+        ZeroSyntax[F] =
+    new ZeroSyntax[F](f)
+
+  class ZeroSyntax[F <: AnyGraphMorphism { type Out = zero }](f: F) {
+
+    def fromZero[X <: AnyGraphObject](x: X):
+      F >=> s.morphisms.fromZero[X] =
+      f >=> s.morphisms.fromZero(x)
+  }
+
+  implicit def unitSyntax[F <: AnyGraphMorphism { type Out = unit }](f: F):
+        UnitSyntax[F] =
+    new UnitSyntax[F](f)
+
+  class UnitSyntax[F <: AnyGraphMorphism { type Out = unit }](f: F) {
+
+    def fromUnit[X <: AnyGraphObject](x: X):
+      F >=> s.morphisms.fromUnit[X] =
+      f >=> s.morphisms.fromUnit(x)
   }
 
   /* Edge types */
