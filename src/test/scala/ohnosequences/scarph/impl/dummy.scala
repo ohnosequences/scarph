@@ -11,70 +11,73 @@ object dummy extends DefaultEvals {
       TensorImpl[Dummy, Dummy, Dummy] =
   new TensorImpl[Dummy, Dummy, Dummy] {
 
-    def leftProj(i: Impl): Left = Dummy
-    def rightProj(i: Impl): Right = Dummy
-    def apply(l: Left, r: Right): Impl = Dummy
+    def leftProj(t: Tensor): Left = Dummy
+    def rightProj(t: Tensor): Right = Dummy
+    def apply(l: Left, r: Right): Tensor = Dummy
   }
+
 
   implicit def zeroImpl:
       ZeroImpl[Dummy] =
-  new ZeroImpl[Dummy] {
-    //type Inside = Dummy*/
+  new ZeroImpl[Dummy] { def apply(): Impl = Dummy }
 
-    def apply(): Impl = Dummy
-  }
 
   implicit def biproductImpl:
       BiproductImpl[Dummy, Dummy, Dummy] =
   new BiproductImpl[Dummy, Dummy, Dummy] {
 
-    def leftProj(i: Impl): Left = Dummy
-    def rightProj(i: Impl): Right = Dummy
+    def leftProj(b: Biproduct): Left = Dummy
+    def rightProj(b: Biproduct): Right = Dummy
 
-    def leftInj(l: Left): Impl = l
-    def rightInj(r: Right): Impl = r
+    def leftInj(l: Left): Biproduct = l
+    def rightInj(r: Right): Biproduct = r
 
-    def apply(l: Left, r: Right): Impl = Dummy
+    def apply(l: Left, r: Right): Biproduct = Dummy
   }
+
 
   implicit def edgeImpl:
       EdgeImpl[Dummy, Dummy, Dummy] =
   new EdgeImpl[Dummy, Dummy, Dummy] {
 
-    def source(i: Impl): Source = Dummy
-    def target(i: Impl): Target = Dummy
+    def source(e: Edge): Source = Dummy
+    def target(e: Edge): Target = Dummy
   }
+
 
   implicit def vertexInImpl:
       VertexInImpl[Dummy, Dummy, Dummy] =
   new VertexInImpl[Dummy, Dummy, Dummy] {
 
-    def inE(i: Impl, e: AnyEdge): InEdges = Dummy
-    def inV(i: Impl, e: AnyEdge): InVertices = Dummy
+    def inE(v: Vertex, e: AnyEdge): InEdges = Dummy
+    def inV(v: Vertex, e: AnyEdge): InVertices = Dummy
   }
+
 
   implicit def vertexOutImpl:
       VertexOutImpl[Dummy, Dummy, Dummy] =
   new VertexOutImpl[Dummy, Dummy, Dummy] {
 
-    def outE(i: Impl, e: AnyEdge): OutEdges = Dummy
-    def outV(i: Impl, e: AnyEdge): OutVertices = Dummy
+    def outE(v: Vertex, e: AnyEdge): OutEdges = Dummy
+    def outV(v: Vertex, e: AnyEdge): OutVertices = Dummy
   }
+
 
   implicit def dummyPropertyImpl:
       PropertyImpl[Dummy, Dummy] =
   new PropertyImpl[Dummy, Dummy] {
 
-    def lookup(i: Impl): Element = Dummy
-    def get(e: Element, p: AnyGraphProperty): Impl = Dummy
+    def lookup(p: Property): Element = Dummy
+    def get(e: Element, p: AnyGraphProperty): Property = Dummy
   }
+
 
   implicit def unitImpl:
       UnitImpl[Dummy, Dummy] =
   new UnitImpl[Dummy, Dummy] {
 
-    def fromUnit(u: Impl): Smth = Dummy
-    def toUnit(s: Smth): Impl = Dummy
+    def fromUnit(u: UnitImpl): Obj = Dummy
+    def toUnit(s: Obj): UnitImpl = Dummy
   }
 
 }

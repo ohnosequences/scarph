@@ -13,18 +13,20 @@ object implementations {
 
   trait AnyTensorImpl extends AnyImpl {
 
+    type Tensor
+    type Impl = Tensor
+    def apply(l: Left, r: Right): Tensor
+
     type Left
-    def leftProj(i: Impl): Left
+    def leftProj(t: Tensor): Left
 
     type Right
-    def rightProj(i: Impl): Right
-
-    def apply(l: Left, r: Right): Impl
+    def rightProj(t: Tensor): Right
   }
 
-  trait TensorImpl[I, L, R] extends AnyTensorImpl {
+  trait TensorImpl[T, L, R] extends AnyTensorImpl {
 
-    type Impl = I
+    type Tensor = T
     type Left = L
     type Right = R
   }
@@ -32,21 +34,22 @@ object implementations {
 
   trait AnyBiproductImpl extends AnyImpl {
 
+    type Biproduct
+    type Impl = Biproduct
+    def apply(l: Left, r: Right): Biproduct
+
     type Left
-    def leftProj(i: Impl): Left
+    def leftProj(b: Biproduct): Left
+    def leftInj(l: Left): Biproduct
 
     type Right
-    def rightProj(i: Impl): Right
-
-    def apply(l: Left, r: Right): Impl
-
-    def leftInj(l: Left): Impl
-    def rightInj(r: Right): Impl
+    def rightProj(b: Biproduct): Right
+    def rightInj(r: Right): Biproduct
   }
 
-  trait BiproductImpl[I, L, R] extends AnyBiproductImpl {
+  trait BiproductImpl[B, L, R] extends AnyBiproductImpl {
 
-    type Impl = I
+    type Biproduct = B
     type Left = L
     type Right = R
   }
@@ -54,26 +57,27 @@ object implementations {
 
   trait AnyZeroImpl extends AnyImpl {
 
-    //type Inside*/
-
     def apply(): Impl
   }
 
-  trait ZeroImpl[I] extends AnyZeroImpl { type Impl = I }
+  trait ZeroImpl[Z] extends AnyZeroImpl { type Impl = Z }
 
 
   trait AnyEdgeImpl extends AnyImpl {
 
-    type Source
-    type Target
+    type Edge
+    type Impl = Edge
 
-    def source(i: Impl): Source
-    def target(i: Impl): Target
+    type Source
+    def source(e: Edge): Source
+
+    type Target
+    def target(e: Edge): Target
   }
 
-  trait EdgeImpl[I, S, T] extends AnyEdgeImpl {
+  trait EdgeImpl[E, S, T] extends AnyEdgeImpl {
 
-    type Impl = I
+    type Edge = E
     type Source = S
     type Target = T
   }
@@ -82,69 +86,76 @@ object implementations {
   // TODO: probably it makes sense to separate it
   trait AnyVertexInImpl extends AnyImpl {
 
+    type Vertex
+    type Impl = Vertex
+
     type InEdges
-    def inE(i: Impl, e: AnyEdge): InEdges
+    def inE(v: Vertex, e: AnyEdge): InEdges
 
     type InVertices
-    def inV(i: Impl, e: AnyEdge): InVertices
+    def inV(v: Vertex, e: AnyEdge): InVertices
   }
 
-  trait VertexInImpl[I, IE, IV] extends AnyVertexInImpl {
+  trait VertexInImpl[V, InE, InV] extends AnyVertexInImpl {
 
-    type Impl = I
-    type InEdges = IE
-    type InVertices = IV
+    type Vertex = V
+    type InEdges = InE
+    type InVertices = InV
   }
 
 
   // TODO: probably it makes sense to separate it
   trait AnyVertexOutImpl extends AnyImpl {
 
+    type Vertex
+    type Impl = Vertex
+
     type OutEdges
-    def outE(i: Impl, e: AnyEdge): OutEdges
+    def outE(v: Vertex, e: AnyEdge): OutEdges
 
     type OutVertices
-    def outV(i: Impl, e: AnyEdge): OutVertices
+    def outV(v: Vertex, e: AnyEdge): OutVertices
   }
 
-  trait VertexOutImpl[I, OE, OV] extends AnyVertexOutImpl {
+  trait VertexOutImpl[V, OutE, OutV] extends AnyVertexOutImpl {
 
-    type Impl = I
-    type OutEdges = OE
-    type OutVertices = OV
+    type Vertex = V
+    type OutEdges = OutE
+    type OutVertices = OutV
   }
 
 
   trait AnyPropertyImpl extends AnyImpl {
 
-    type Element
+    type Property
+    type Impl = Property
+    def get(e: Element, p: AnyGraphProperty): Property
 
-    def lookup(i: Impl): Element
-    def get(e: Element, p: AnyGraphProperty): Impl
+    type Element
+    def lookup(p: Property): Element
   }
 
   trait PropertyImpl[P, E] extends AnyPropertyImpl {
 
-    type Impl = P
+    type Property = P
     type Element = E
   }
 
 
   trait AnyUnitImpl extends AnyImpl {
 
-    type Smth
+    type UnitImpl
+    type Impl = UnitImpl
+    def toUnit(s: Obj): UnitImpl
 
-    def fromUnit(u: Impl): Smth
-    def toUnit(s: Smth): Impl
+    type Obj
+    def fromUnit(u: UnitImpl): Obj
   }
 
-  trait UnitImpl[I, S] extends AnyUnitImpl {
+  trait UnitImpl[U, S] extends AnyUnitImpl {
 
-    type Impl = I
-    type Smth = S
+    type UnitImpl = U
+    type Obj = S
   }
-
-
-  // TODO: unit, element, property (value)
 
 }
