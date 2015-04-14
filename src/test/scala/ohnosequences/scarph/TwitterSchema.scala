@@ -1,49 +1,70 @@
 package ohnosequences.scarph.test
 
-object Twitter {
+import ohnosequences.cosas._, typeSets._
 
-  import ohnosequences.cosas._, typeSets._
+import ohnosequences.{ scarph => s }
+import s.graphTypes._, s.schemas._
 
-  import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.steps._, s.combinators._, s.containers._, s.indexes._, s.schemas._
 
-  case object user extends Vertex
-  case object name extends PropertyOf(user) { type Raw = String }
-  case object age  extends PropertyOf(user) { type Raw = Integer }
+object twitter extends AnyGraphSchema {
 
-  case object tweet extends Vertex
-  case object text  extends PropertyOf(tweet) { type Raw = String }
+  lazy val label = this.toString
 
-  case object posted extends Edge(user -> ManyOrNone.of(tweet))
-  case object time extends PropertyOf(posted) { type Raw = String }
-  case object url  extends PropertyOf(posted) { type Raw = String }
+  lazy val vertices: Set[AnyVertex] = Set(user, tweet)
 
-  case object follows extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(user))
-  // case object liked   extends Edge(ManyOrNone.of(user) -> ManyOrNone.of(tweet))
+  lazy val edges: Set[AnyEdge] = Set(posted, follows, liked)
 
-  // simple indexes
-  case object userByName extends KeyIndex(user, name, Unique)
-  case object tweetByText extends KeyIndex(tweet, text, NonUnique)
-  case object postedByTime extends KeyIndex(posted, time, NonUnique)
+  lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
 
-  // composite indexes
-  case object userByNameAndAge extends CompositeIndex(user, name :~: age :~: ∅, Unique)
-
-  // vertex-centric indexes
-  case object postedByTimeAndUrlLocal extends LocalEdgeIndex(posted, OnlySourceCentric, time :~: url :~: ∅)
-
-  case object twitter extends GraphSchema(
-    label = "twitter",
-    properties = name :~: age :~: text :~: time :~: url :~: ∅,
-    vertices =  user :~: tweet :~: ∅,
-    edges = posted :~: follows :~: ∅,
-    indexes = 
-      userByName :~: userByNameAndAge :~:
-      tweetByText :~: 
-      postedByTime :~: 
-      postedByTimeAndUrlLocal :~: 
-      ∅
+  lazy val properties: Set[AnyGraphProperty] = Set(
+    user.name,
+    user.age,
+    user.bio,
+    user.webpage,
+    tweet.text,
+    tweet.url,
+    posted.time,
+    liked.time,
+    reposted.time
   )
 
-  // implicitly[ Par[Target[follows.type], Source[liked.type]] <:< Par.WithSameOuts ]
+
+  /* Property value types */
+  case object name extends ValueOfType[String]("name")
+  case object age  extends ValueOfType[Integer]("age")
+  case object text extends ValueOfType[String]("text")
+  case object time extends ValueOfType[String]("time") // should have some better raw type
+  case object url  extends ValueOfType[String]("url")
+
+
+  /* Vertices with their properties */
+  case object user extends Vertex("user") {
+    case object name    extends Property(user -> twitter.name)("name")
+    case object age     extends Property(user -> twitter.age)("age")
+    // example of shared value types:
+    case object bio     extends Property(user -> twitter.text)("bio")
+    case object webpage extends Property(user -> twitter.url)("webpage")
+  }
+
+  case object tweet extends Vertex("tweet") {
+    case object text extends Property(tweet -> twitter.text)("text")
+    case object url  extends Property(tweet -> twitter.url)("url")
+  }
+
+
+  /* Edges with their properties */
+  case object posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted") {
+    case object time  extends Property(posted -> twitter.time)("time")
+  }
+
+  case object follows extends Edge(ManyOrNone(user) -> ManyOrNone(user))("follows")
+
+  case object liked extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("liked") {
+    case object time extends Property(liked -> twitter.time)("time")
+  }
+
+  case object reposted extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("reposted") {
+    case object time extends Property(reposted -> twitter.time)("time")
+  }
+
 }

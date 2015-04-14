@@ -1,12 +1,12 @@
-package ohnosequences.scarph
+  package ohnosequences.scarph
 
 object predicates {
 
   import ohnosequences.cosas._, typeSets._
-  import graphTypes._, conditions._
+  import graphTypes._, conditions._, monoidalStructures._
 
 
-  trait AnyPredicate extends AnySimpleGraphType {
+  trait AnyPredicate extends AnyGraphObject {
 
     type Element <: AnyGraphElement
     val  element: Element
@@ -28,12 +28,11 @@ object predicates {
     val  conditions = ∅
   }
 
-  class EmptyPredicate[E <: AnyGraphElement](val element: E) 
-    extends AnyEmptyPredicate { 
+  case class EmptyPredicate[E <: AnyGraphElement](val element: E)
+    extends AnyEmptyPredicate {
 
-      type Element = E
-      type Inside = this.type
-    }
+    type Element = E
+  }
 
 
   /* This is just like cons, but controlling, that all conditions are on the same element type */
@@ -57,8 +56,6 @@ object predicates {
 
     type Body = B
     type Condition = C
-
-    type Inside = AndPredicate[B,C]
   }
 
 }
