@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, implementations._, graphTypes._, evals._
+import ohnosequences.scarph._, implementations._, graphTypes._, evals._, predicates._
 
 object dummy extends DefaultEvals {
 
@@ -74,8 +74,8 @@ object dummy extends DefaultEvals {
       VertexInImpl[Dummy, Dummy, Dummy] =
   new VertexInImpl[Dummy, Dummy, Dummy] {
 
-    def inE(v: Vertex, e: AnyEdge): InEdges = Dummy
-    def inV(v: Vertex, e: AnyEdge): InVertices = Dummy
+    def inE[E <: AnyEdge](v: Vertex, e: E): InEdges = Dummy
+    def inV[E <: AnyEdge](v: Vertex, e: E): InVertices = Dummy
   }
 
 
@@ -83,8 +83,8 @@ object dummy extends DefaultEvals {
       VertexOutImpl[Dummy, Dummy, Dummy] =
   new VertexOutImpl[Dummy, Dummy, Dummy] {
 
-    def outE(v: Vertex, e: AnyEdge): OutEdges = Dummy
-    def outV(v: Vertex, e: AnyEdge): OutVertices = Dummy
+    def outE[E <: AnyEdge](v: Vertex, e: E): OutEdges = Dummy
+    def outV[E <: AnyEdge](v: Vertex, e: E): OutVertices = Dummy
   }
 
 
@@ -93,8 +93,16 @@ object dummy extends DefaultEvals {
   new PropertyImpl[Dummy, Dummy] {
 
     def lookup(p: Property): Element = Dummy
-    def get(e: Element, p: AnyGraphProperty): Property = Dummy
+    def get[P <: AnyGraphProperty](e: Element, p: P): Property = Dummy
   }
 
+
+  implicit def dummyPredicateImpl:
+      PredicateImpl[Dummy, Dummy] =
+  new PredicateImpl[Dummy, Dummy] {
+
+    def quantify[P <: AnyPredicate](e: Element, p: P): Predicate = Dummy
+    def coerce(p: Predicate): Element = Dummy
+  }
 
 }

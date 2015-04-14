@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 object implementations {
 
-  import graphTypes._
+  import graphTypes._, predicates._
 
 
   trait AnyImpl {
@@ -106,10 +106,10 @@ object implementations {
     type Impl = Vertex
 
     type InEdges
-    def inE(v: Vertex, e: AnyEdge): InEdges
+    def inE[E <: AnyEdge](v: Vertex, e: E): InEdges
 
     type InVertices
-    def inV(v: Vertex, e: AnyEdge): InVertices
+    def inV[E <: AnyEdge](v: Vertex, e: E): InVertices
   }
 
   trait VertexInImpl[V, InE, InV] extends AnyVertexInImpl {
@@ -127,10 +127,10 @@ object implementations {
     type Impl = Vertex
 
     type OutEdges
-    def outE(v: Vertex, e: AnyEdge): OutEdges
+    def outE[E <: AnyEdge](v: Vertex, e: E): OutEdges
 
     type OutVertices
-    def outV(v: Vertex, e: AnyEdge): OutVertices
+    def outV[E <: AnyEdge](v: Vertex, e: E): OutVertices
   }
 
   trait VertexOutImpl[V, OutE, OutV] extends AnyVertexOutImpl {
@@ -145,7 +145,7 @@ object implementations {
 
     type Property
     type Impl = Property
-    def get(e: Element, p: AnyGraphProperty): Property
+    def get[P <: AnyGraphProperty](e: Element, p: P): Property
 
     type Element
     def lookup(p: Property): Element
@@ -172,6 +172,23 @@ object implementations {
 
     type UnitImpl = U
     type Obj = S
+  }
+
+
+  trait AnyPredicateImpl extends AnyImpl {
+
+    type Predicate
+    type Impl = Predicate
+    def quantify[P <: AnyPredicate](e: Element, p: P): Predicate
+
+    type Element
+    def coerce(p: Predicate): Element
+  }
+
+  trait PredicateImpl[P, E] extends AnyPredicateImpl {
+
+    type Predicate = P
+    type Element = E
   }
 
 }

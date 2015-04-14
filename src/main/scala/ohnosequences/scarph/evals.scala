@@ -4,7 +4,7 @@ object evals {
 
   import monoidalStructures._
   import ohnosequences.cosas._, types._, fns._
-  import graphTypes._, morphisms._, implementations._
+  import graphTypes._, morphisms._, implementations._, predicates._
 
 
   trait AnyEval {
@@ -414,8 +414,36 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    // TODO: matchUp & merge
 
+    implicit def eval_quantify[
+      P <: AnyPredicate, ElemImpl, PredImpl
+    ](implicit
+      predImpl: PredicateImpl[PredImpl, ElemImpl]
+    ):  EvalOn[ElemImpl, quantify[P], PredImpl] =
+    new EvalOn[ElemImpl, quantify[P], PredImpl] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := predImpl.quantify(input.value, morph.predicate)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+
+    implicit def eval_coerce[
+      P <: AnyPredicate, ElemImpl, PredImpl
+    ](implicit
+      predImpl: PredicateImpl[PredImpl, ElemImpl]
+    ):  EvalOn[PredImpl, coerce[P], ElemImpl] =
+    new EvalOn[PredImpl, coerce[P], ElemImpl] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := predImpl.coerce(input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
 
   }
+
 }
