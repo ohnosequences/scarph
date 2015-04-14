@@ -11,11 +11,13 @@ class DummyTests extends org.scalatest.FunSuite {
     val query3 = inE(posted)
     val query4 = inE(posted) >=> source(posted)
     val query5 = fromZero(user) >=> toZero(user) >=> fromZero(tweet)
-    val query6 = duplicate(user) >=> outE(posted) ⊗ outV(posted) //>=> matchUp(tweet)
-    val query7 = id(user) ⊕ id(user)
+    val query6 = duplicate(user) >=> outV(posted) ⊗ outV(posted) //>=> matchUp(tweet)
+    val query7 = inV(follows) ⊕ outV(follows)
     val query8 = get(user.name)
     val query9 = lookup(user.name) >=> get(user.name)
     val query10 = fromUnit(user) >=> toUnit(user)
+    val query11 = query6 >=> matchUp(tweet)
+    val query12 = query7 >=> merge(user)
 
     println("------------")
     println(query2.label)
@@ -40,6 +42,10 @@ class DummyTests extends org.scalatest.FunSuite {
     println(query9.present)
     println("------------")
     println(query10.present)
+    println("------------")
+    println(query11.present)
+    println("------------")
+    println(query12.present)
   }
 
 }

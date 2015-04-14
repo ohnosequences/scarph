@@ -127,6 +127,22 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
+    // ▽: X ⊗ X → X
+    implicit def eval_matchUp[
+      I, T <: AnyGraphObject, O
+    ](implicit
+      tensImpl: TensorImpl[I, O, O],
+      matchImpl: MatchUpImpl[O]
+    ):  EvalOn[I, matchUp[T], O] =
+    new EvalOn[I, matchUp[T], O] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := matchImpl.matchUp(tensImpl.leftProj(input.value), tensImpl.rightProj(input.value))
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
     // X → X ⊕ X
     implicit def eval_split[
       I, T <: AnyGraphObject, O
@@ -137,6 +153,22 @@ object evals {
 
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip(input.value, input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    // X ⊕ X → X
+    implicit def eval_merge[
+      I, T <: AnyGraphObject, O
+    ](implicit
+      bipImpl: BiproductImpl[I, O, O],
+      mergeImpl: MergeImpl[O]
+    ):  EvalOn[I, merge[T], O] =
+    new EvalOn[I, merge[T], O] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := mergeImpl.merge(bipImpl.leftProj(input.value), bipImpl.rightProj(input.value))
       }
 
       def present(morph: Morph): String = morph.label

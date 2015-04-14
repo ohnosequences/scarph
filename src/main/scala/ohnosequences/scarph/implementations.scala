@@ -32,6 +32,14 @@ object implementations {
   }
 
 
+  trait AnyMatchUpImpl extends AnyImpl {
+
+    def matchUp(l: Impl, r: Impl): Impl
+  }
+
+  trait MatchUpImpl[I] extends AnyMatchUpImpl { type Impl = I }
+
+
   trait AnyBiproductImpl extends AnyImpl {
 
     type Biproduct
@@ -53,6 +61,14 @@ object implementations {
     type Left = L
     type Right = R
   }
+
+
+  trait AnyMergeImpl extends AnyImpl {
+
+    def merge(l: Impl, r: Impl): Impl
+  }
+
+  trait MergeImpl[I] extends AnyMergeImpl { type Impl = I }
 
 
   trait AnyZeroImpl extends AnyImpl {

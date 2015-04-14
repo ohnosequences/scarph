@@ -17,9 +17,21 @@ object dummy extends DefaultEvals {
   }
 
 
-  implicit def zeroImpl:
-      ZeroImpl[Dummy] =
-  new ZeroImpl[Dummy] { def apply(): Impl = Dummy }
+  implicit def matchUpImpl:
+      MatchUpImpl[Dummy] =
+  new MatchUpImpl[Dummy] {
+
+    def matchUp(l: Impl, r: Impl): Impl = Dummy
+  }
+
+
+  implicit def unitImpl:
+      UnitImpl[Dummy, Dummy] =
+  new UnitImpl[Dummy, Dummy] {
+
+    def fromUnit(u: UnitImpl): Obj = Dummy
+    def toUnit(s: Obj): UnitImpl = Dummy
+  }
 
 
   implicit def biproductImpl:
@@ -34,6 +46,19 @@ object dummy extends DefaultEvals {
 
     def apply(l: Left, r: Right): Biproduct = Dummy
   }
+
+
+  implicit def mergeImpl:
+      MergeImpl[Dummy] =
+  new MergeImpl[Dummy] {
+
+    def merge(l: Impl, r: Impl): Impl = Dummy
+  }
+
+
+  implicit def zeroImpl:
+      ZeroImpl[Dummy] =
+  new ZeroImpl[Dummy] { def apply(): Impl = Dummy }
 
 
   implicit def edgeImpl:
@@ -71,13 +96,5 @@ object dummy extends DefaultEvals {
     def get(e: Element, p: AnyGraphProperty): Property = Dummy
   }
 
-
-  implicit def unitImpl:
-      UnitImpl[Dummy, Dummy] =
-  new UnitImpl[Dummy, Dummy] {
-
-    def fromUnit(u: UnitImpl): Obj = Dummy
-    def toUnit(s: Obj): UnitImpl = Dummy
-  }
 
 }
