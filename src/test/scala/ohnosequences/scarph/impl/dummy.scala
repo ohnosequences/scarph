@@ -1,8 +1,8 @@
 package ohnosequences.scarph.test
 
-object dummy {
+import ohnosequences.scarph._, implementations._, graphTypes._, evals._
 
-  import ohnosequences.scarph._, implementations._, graphTypes._
+object dummy extends DefaultEvals {
 
   case object Dummy
   type Dummy = Dummy.type
@@ -61,20 +61,20 @@ object dummy {
     def outV(i: Impl, e: AnyEdge): OutVertices = Dummy
   }
 
-}
+  implicit def dummyPropertyImpl:
+      PropertyImpl[Dummy, Dummy] =
+  new PropertyImpl[Dummy, Dummy] {
 
-import ohnosequences.scarph._, graphTypes._, morphisms._, evals._
-
-object dummyEvals {
-  import dummy._
-/*
-  implicit def eval_primitive[
-    M <: AnyPrimitive
-  ]:  EvalOn[Dummy, M, Dummy] =
-  new EvalOn[Dummy, M, Dummy] {
-
-    def present(morph: Morph): String = morph.label
-    def apply(morph: Morph)(input: Input): Output = (morph.out: M#Out) := Dummy
+    def lookup(i: Impl): Element = Dummy
+    def get(e: Element, p: AnyGraphProperty): Impl = Dummy
   }
-*/
+
+  implicit def unitImpl:
+      UnitImpl[Dummy, Dummy] =
+  new UnitImpl[Dummy, Dummy] {
+
+    def fromUnit(u: Impl): Smth = Dummy
+    def toUnit(s: Smth): Impl = Dummy
+  }
+
 }

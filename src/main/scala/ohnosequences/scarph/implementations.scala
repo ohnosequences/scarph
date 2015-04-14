@@ -115,21 +115,36 @@ object implementations {
   }
 
 
-//  trait AnyProperyImpl extends AnyImpl {
-//
-//    type Elements
-//
-//    def lookup(i: Impl): Elements
-//    def get(e: Elements): Impl
-//  }
-//
-//  trait ProperyImpl[I, E] extends AnyProperyImpl {
-//
-//    type Impl = I
-//    type Elements = E
-//  }
+  trait AnyPropertyImpl extends AnyImpl {
+
+    type Element
+
+    def lookup(i: Impl): Element
+    def get(e: Element, p: AnyGraphProperty): Impl
+  }
+
+  trait PropertyImpl[P, E] extends AnyPropertyImpl {
+
+    type Impl = P
+    type Element = E
+  }
+
+
+  trait AnyUnitImpl extends AnyImpl {
+
+    type Smth
+
+    def fromUnit(u: Impl): Smth
+    def toUnit(s: Smth): Impl
+  }
+
+  trait UnitImpl[I, S] extends AnyUnitImpl {
+
+    type Impl = I
+    type Smth = S
+  }
+
 
   // TODO: unit, element, property (value)
-
 
 }

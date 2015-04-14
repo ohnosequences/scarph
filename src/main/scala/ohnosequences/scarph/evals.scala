@@ -32,7 +32,7 @@ object evals {
   }
 
 
-  object DefaultEvals {
+  trait DefaultEvals {
 
     // X = X (does nothing)
     implicit def eval_id[
@@ -63,7 +63,7 @@ object evals {
         evalSecond(morph.second)(morph.second.in := firstResult.value)
       }
 
-      def present(morph: Morph): String = s"${evalFirst.present(morph.first)} >=>\n${evalSecond.present(morph.second)}"
+      def present(morph: Morph): String = s"(${evalFirst.present(morph.first)} >=> ${evalSecond.present(morph.second)})"
     }
 
     // IL ⊗ IR → OL ⊗ OR
@@ -86,7 +86,7 @@ object evals {
         )
       }
 
-      def present(morph: Morph): String = s"${evalLeft.present(morph.left)} ⊗ ${evalRight.present(morph.right)}"
+      def present(morph: Morph): String = s"(${evalLeft.present(morph.left)} ⊗ ${evalRight.present(morph.right)})"
     }
 
     // IL ⊕ IR → OL ⊕ OR
@@ -109,7 +109,7 @@ object evals {
         )
       }
 
-      def present(morph: Morph): String = s"${evalLeft.present(morph.left)} ⊕ ${evalRight.present(morph.right)}"
+      def present(morph: Morph): String = s"(${evalLeft.present(morph.left)} ⊕ ${evalRight.present(morph.right)})"
     }
 
     // △: X → X ⊗ X
@@ -322,8 +322,68 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
+
+    // I → X
+    implicit def eval_fromUnit[
+      I, X <: AnyGraphObject, O
+    ](implicit
+      unitImpl:  UnitImpl[I, O]
+    ):  EvalOn[I, fromUnit[X], O] =
+    new EvalOn[I, fromUnit[X], O] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := unitImpl.fromUnit(input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    // X → I
+    implicit def eval_toUnit[
+      I, X <: AnyGraphObject, O
+    ](implicit
+      unitImpl:  UnitImpl[O, I]
+    ):  EvalOn[I, toUnit[X], O] =
+    new EvalOn[I, toUnit[X], O] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        morph.out := unitImpl.toUnit(input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+
+    implicit def eval_get[
+      P <: AnyGraphProperty, ElemImpl, PropImpl
+    ](implicit
+      propImpl: PropertyImpl[PropImpl, ElemImpl]
+    ):  EvalOn[ElemImpl, get[P], PropImpl] =
+    new EvalOn[ElemImpl, get[P], PropImpl] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := propImpl.get(input.value, morph.property)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
+    implicit def eval_lookup[
+      P <: AnyGraphProperty, ElemImpl, PropImpl
+    ](implicit
+      propImpl: PropertyImpl[PropImpl, ElemImpl]
+    ):  EvalOn[PropImpl, lookup[P], ElemImpl] =
+    new EvalOn[PropImpl, lookup[P], ElemImpl] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := propImpl.lookup(input.value)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
     // TODO: matchUp & merge
-    // TODO: fromUnit & toUnit
+
 
   }
 }
