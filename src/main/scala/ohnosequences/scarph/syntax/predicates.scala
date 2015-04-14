@@ -14,21 +14,17 @@ object predicates {
 
 
   /* A way of building a predicate from an element */
-  implicit def elementPredicateOps[E <: AnyGraphElement](elem: E):
+  implicit def elementPredicateOps[E <: AnyGraphElement](e: E):
       ElementPredicateOps[E] =
-      ElementPredicateOps[E](elem)
+      ElementPredicateOps[E](e)
 
-  case class ElementPredicateOps[E <: AnyGraphElement](elem: E) {
+  case class ElementPredicateOps[E <: AnyGraphElement](e: E) {
 
-    /* For example: `user suchThat (name === "bob")` */
-    def suchThat[P <: AnyPredicate.On[E]](p: P):
-      quantify[P] =
-      quantify(p)
+    /* For example: `user ? (user.name === "bob")` */
+    def ?[C <: AnyCondition.OnElement[E]](c: C):
+      AndPredicate[EmptyPredicate[E], C] =
+      AndPredicate(EmptyPredicate(e), c)
   }
-
-//  implicit def conditionToPredicate[C <: AnyCondition](c: C):
-//    AndPredicate[EmptyPredicate[C#Element], C] =
-//    AndPredicate(EmptyPredicate(c.element), c)
 
   /* Adding more conditions to a predicate */
   implicit def predicateOps[P <: AnyPredicate](p: P):
@@ -43,15 +39,4 @@ object predicates {
       AndPredicate[P, C] = AndPredicate(pred, c)
   }
 
-  /* Adding more conditions to a predicate */
-  implicit def PredicateInitOps[C1 <: AnyCondition](c1: C1):
-      PredicateInitOps[C1] =
-      PredicateInitOps[C1](c1)
-
-  case class PredicateInitOps[C1 <: AnyCondition](c1: C1) {
-
-//    def and[C2 <: AnyCondition.OnElement[C1#Element]](c2: C2):
-//      AndPredicate[AndPredicate[EmptyPredicate[C1#Element], C1], C2] =
-//      AndPredicate(AndPredicate(EmptyPredicate(c1.element), c1), c2)
-  }
 }

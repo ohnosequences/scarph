@@ -7,7 +7,7 @@ object Queries {
   import s.syntax._, morphisms._, conditions._, predicates._
   import s.test.twitter._
 
-   val edus    = user.suchThat(user.name === "@eparejatobes")
+   val edus    = user ? (user.name === "@eparejatobes")
   // val alexeys = twitter.query(user ? (name === "@laughedelic"))
   // val kims    = twitter.query(user ? (name === "@evdokim"))
   // val tweets  = twitter.query(tweet ? (text === "back to twitter :)"))
@@ -35,7 +35,7 @@ object Queries {
 
 
   // funny check / coerce
-  val edusAgain = user.suchThat(user.name === "@eparejatobes")
+  val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
 
   val edusTweets = edusAgain andThen edusAgain.dagger.outV(posted)
 

@@ -3,7 +3,7 @@ package ohnosequences.scarph.syntax
 object morphisms {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.monoidalStructures._, s.morphisms._
+  import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.predicates._
 
   implicit def graphMorphismSyntax[F <: AnyGraphMorphism](f: F):
         GraphMorphismSyntax[F] =
@@ -91,6 +91,26 @@ object morphisms {
     def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
       F >=> s.morphisms.get[P] =
       f >=> s.morphisms.get(p)
+
+    def quantify[P <: AnyPredicate.On[F#Out]](p: P):
+      F >=> s.morphisms.quantify[P] =
+      f >=> s.morphisms.quantify(p)
+
+    def filter[P <: AnyPredicate.On[F#Out]](p: P):
+      F >=> s.morphisms.quantify[P] >=> s.morphisms.coerce[P] =
+      f >=> s.morphisms.quantify(p) >=> s.morphisms.coerce(p)
+  }
+
+  /* Element types */
+  implicit def predicateSyntax[F <: AnyGraphMorphism { type Out <: AnyPredicate }](f: F):
+        PredicateSyntax[F] =
+    new PredicateSyntax[F](f)
+
+  class PredicateSyntax[F <: AnyGraphMorphism { type Out <: AnyPredicate }](f: F) {
+
+    def coerce:
+      F >=> s.morphisms.coerce[F#Out] =
+      f >=> s.morphisms.coerce(f.out)
   }
 
   /* Edge types */
