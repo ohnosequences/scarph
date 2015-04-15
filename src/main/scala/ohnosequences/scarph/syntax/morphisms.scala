@@ -50,6 +50,16 @@ object morphisms {
     def rightCozero:
       F >=> s.isomorphisms.rightCozero[F#Out] =
       f >=> s.isomorphisms.rightCozero(f.out)
+
+
+    // biproduct injections
+    def leftInj[B <: AnyBiproductObj { type Left = F#Out }](b: B):
+      F >=> s.morphisms.leftInj[B] =
+      f >=> s.morphisms.leftInj(b)
+
+    def rightInj[B <: AnyBiproductObj { type Right = F#Out }](b: B):
+      F >=> s.morphisms.rightInj[B] =
+      f >=> s.morphisms.rightInj(b)
   }
 
 
@@ -94,30 +104,37 @@ object morphisms {
   }
 
 
-  implicit def BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
+  implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
         BiproductSyntax[F] =
     new BiproductSyntax[F](f)
 
   class BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F) {
 
-    def left:
-      F >=> leftProj[F#Out] =
-      f >=> leftProj(f.out)
+    def leftProj:
+      F >=> s.morphisms.leftProj[F#Out] =
+      f >=> s.morphisms.leftProj(f.out)
 
-    def right:
-      F >=> rightProj[F#Out] =
-      f >=> rightProj(f.out)
+    def rightProj:
+      F >=> s.morphisms.rightProj[F#Out] =
+      f >=> s.morphisms.rightProj(f.out)
   }
 
 
-  implicit def mergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: F):
-        MergeSyntax[T, F] =
-    new MergeSyntax[T, F](f)
+  type SameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }] =
+    F with AnyGraphMorphism { type Out = F#Out#Left ⊕ F#Out#Left }
+
+  implicit def sameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
+    (implicit check: F#Out#Left =:= F#Out#Right): SameBiproductOut[F] = f
+
+  implicit def mergeSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
+    (implicit refine: F => SameBiproductOut[F]):
+        MergeSyntax[F#Out#Left, SameBiproductOut[F]] =
+    new MergeSyntax[F#Out#Left, SameBiproductOut[F]](refine(f))
 
   class MergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: F) {
 
     def merge:
-      F >=> s.morphisms.merge[T] =
+      F >=> s.morphisms.merge[F#Out#Left] =
       f >=> s.morphisms.merge(f.out.left)
   }
 

@@ -35,18 +35,18 @@
 
 - Biproduct left injection/projection
 
-| `A, B <: AnyGraphObject` |    type     | syntax  |
-|-------------------------:|:-----------:|:--------|
-|          `leftInj[A, B]` | `A → A ⊕ B` | `TODO`  |
-|         `leftProj[A, B]` | `A ⊕ B → A` | `.left` |
+| `A, B <: AnyGraphObject` |    type     | syntax              |
+|-------------------------:|:-----------:|:--------------------|
+|          `leftInj[A, B]` | `A → A ⊕ B` | `.leftInj(<a ⊕ b>)` |
+|         `leftProj[A, B]` | `A ⊕ B → A` | `.leftProj`         |
 
 
 - Biproduct right injection/projection
 
-| `A, B <: AnyGraphObject` |    type     | syntax   |
-|-------------------------:|:-----------:|:---------|
-|         `rightInj[A, B]` | `B → A ⊕ B` | `TODO`   |
-|        `rightProj[A, B]` | `A ⊕ B → B` | `.right` |
+| `A, B <: AnyGraphObject` |    type     | syntax               |
+|-------------------------:|:-----------:|:---------------------|
+|         `rightInj[A, B]` | `B → A ⊕ B` | `.rightInj(<a ⊕ b>)` |
+|        `rightProj[A, B]` | `A ⊕ B → B` | `.rightProj`         |
 
 
 - Edge target & vertex incoming edges

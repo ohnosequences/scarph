@@ -44,6 +44,13 @@ object Queries {
   val match4 = duplicate(tweet).matchUp
   //val match5 = (id(user) ⊗ id(tweet)).matchUp
 
+  val bip = inV(follows) ⊕ outV(follows)
+  val inFriends  = bip.leftProj
+  val outFriends = bip.rightProj
+  val allFriends = bip.merge
+
+  val injectL = outV(liked).leftInj(tweet ⊕ user)
+  val injectR = inV(posted).rightInj(tweet ⊕ user)
 
   // funny check / coerce
   val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
