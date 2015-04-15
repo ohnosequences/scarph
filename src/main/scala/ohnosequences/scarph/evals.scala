@@ -387,11 +387,11 @@ object evals {
 
 
     implicit def eval_get[
-      P <: AnyGraphProperty, ElemImpl, PropImpl
+      P <: AnyGraphProperty, ElemImpl
     ](implicit
-      propImpl: PropertyImpl[PropImpl, ElemImpl]
-    ):  EvalOn[ElemImpl, get[P], PropImpl] =
-    new EvalOn[ElemImpl, get[P], PropImpl] {
+      propImpl: PropertyImpl[P, ElemImpl]
+    ):  EvalOn[ElemImpl, get[P], P#Raw] =
+    new EvalOn[ElemImpl, get[P], P#Raw] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := propImpl.get(input.value, morph.property)
@@ -401,11 +401,11 @@ object evals {
     }
 
     implicit def eval_lookup[
-      P <: AnyGraphProperty, ElemImpl, PropImpl
+      P <: AnyGraphProperty, ElemImpl
     ](implicit
-      propImpl: PropertyImpl[PropImpl, ElemImpl]
-    ):  EvalOn[PropImpl, lookup[P], ElemImpl] =
-    new EvalOn[PropImpl, lookup[P], ElemImpl] {
+      propImpl: PropertyImpl[P, ElemImpl]
+    ):  EvalOn[P#Raw, lookup[P], ElemImpl] =
+    new EvalOn[P#Raw, lookup[P], ElemImpl] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := propImpl.lookup(input.value)
