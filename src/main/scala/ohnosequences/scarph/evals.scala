@@ -387,11 +387,11 @@ object evals {
 
 
     implicit def eval_get[
-      P <: AnyGraphProperty, ElemImpl
+      P <: AnyGraphProperty, ElemImpl, RawImpl
     ](implicit
-      propImpl: PropertyImpl[P, ElemImpl]
-    ):  EvalOn[ElemImpl, get[P], P#Raw] =
-    new EvalOn[ElemImpl, get[P], P#Raw] {
+      propImpl: PropertyImpl[P, RawImpl, ElemImpl]
+    ):  EvalOn[ElemImpl, get[P], RawImpl] =
+    new EvalOn[ElemImpl, get[P], RawImpl] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := propImpl.get(input.value, morph.property)
@@ -401,14 +401,14 @@ object evals {
     }
 
     implicit def eval_lookup[
-      P <: AnyGraphProperty, ElemImpl
+      P <: AnyGraphProperty, ElemImpl, RawImpl
     ](implicit
-      propImpl: PropertyImpl[P, ElemImpl]
-    ):  EvalOn[P#Raw, lookup[P], ElemImpl] =
-    new EvalOn[P#Raw, lookup[P], ElemImpl] {
+      propImpl: PropertyImpl[P, RawImpl, ElemImpl]
+    ):  EvalOn[RawImpl, lookup[P], ElemImpl] =
+    new EvalOn[RawImpl, lookup[P], ElemImpl] {
 
       def apply(morph: Morph)(input: Input): Output = {
-        (morph.out: Morph#Out) := propImpl.lookup(input.value)
+        (morph.out: Morph#Out) := propImpl.lookup(input.value, morph.property)
       }
 
       def present(morph: Morph): String = morph.label
