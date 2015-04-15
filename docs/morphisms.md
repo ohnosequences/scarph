@@ -3,18 +3,18 @@
 
 - From/to unit
 
-| `X <: AnyGraphObject` |    type    | syntax    |
-|----------------------:|:----------:|:----------|
-|         `fromUnit[X]` | `unit → X` | --        |
-|           `toUnit[X]` | `X → unit` | `.toUnit` |
+| `X <: AnyGraphObject` |    type    | syntax           |
+|----------------------:|:----------:|:-----------------|
+|         `fromUnit[X]` | `unit → X` | `.fromUnit(<x>)` |
+|           `toUnit[X]` | `X → unit` | `.toUnit`        |
 
 
 - From/to zero
 
-| `X <: AnyGraphObject` |    type    | syntax    |
-|----------------------:|:----------:|:----------|
-|         `fromZero[X]` | `zero → X` | --        |
-|           `toZero[X]` | `X → zero` | `.toZero` |
+| `X <: AnyGraphObject` |    type    | syntax           |
+|----------------------:|:----------:|:-----------------|
+|         `fromZero[X]` | `zero → X` | `.fromZero(<x>)` |
+|           `toZero[X]` | `X → zero` | `.toZero`        |
 
 
 - Tensor diagonal & condiagonal (`△` & `▽`)
@@ -22,7 +22,7 @@
 | `X <: AnyGraphObject` |    type     | syntax       |
 |----------------------:|:-----------:|:-------------|
 |        `duplicate[X]` | `X → X ⊗ X` | `.duplicate` |
-|          `matchUp[X]` | `X ⊗ X → X` | `TODO`       |
+|          `matchUp[X]` | `X ⊗ X → X` | `.matchUp`   |
 
 
 - Biproduct diagonal & condiagonal
@@ -30,23 +30,23 @@
 | `X <: AnyGraphObject` |    type     | syntax   |
 |----------------------:|:-----------:|:---------|
 |            `split[X]` | `X → X ⊕ X` | `.split` |
-|            `merge[X]` | `X ⊕ X → X` | `TODO`   |
+|            `merge[X]` | `X ⊕ X → X` | `.merge` |
 
 
 - Biproduct left injection/projection
 
-| `A, B <: AnyGraphObject` |    type     | syntax  |
-|-------------------------:|:-----------:|:--------|
-|          `leftInj[A, B]` | `A → A ⊕ B` | `TODO`  |
-|         `leftProj[A, B]` | `A ⊕ B → A` | `.left` |
+| `A, B <: AnyGraphObject` |    type     | syntax              |
+|-------------------------:|:-----------:|:--------------------|
+|          `leftInj[A, B]` | `A → A ⊕ B` | `.leftInj(<a ⊕ b>)` |
+|         `leftProj[A, B]` | `A ⊕ B → A` | `.leftProj`         |
 
 
 - Biproduct right injection/projection
 
-| `A, B <: AnyGraphObject` |    type     | syntax   |
-|-------------------------:|:-----------:|:---------|
-|         `rightInj[A, B]` | `B → A ⊕ B` | `TODO`   |
-|        `rightProj[A, B]` | `A ⊕ B → B` | `.right` |
+| `A, B <: AnyGraphObject` |    type     | syntax               |
+|-------------------------:|:-----------:|:---------------------|
+|         `rightInj[A, B]` | `B → A ⊕ B` | `.rightInj(<a ⊕ b>)` |
+|        `rightProj[A, B]` | `A ⊕ B → B` | `.rightProj`         |
 
 
 - Edge target & vertex incoming edges
@@ -78,7 +78,7 @@
 | `P <: AnyProperty` |        type         | syntax             |
 |-------------------:|:-------------------:|:-------------------|
 |           `get[P]` | `P#Owner → P#Value` | `.get(<property>)` |
-|        `lookup[P]` | `P#Value → P#Owner` | --                 |
+|        `lookup[P]` | `P#Value → P#Owner` |                    |
 
 
 - Predicate quantification/coercion
@@ -88,19 +88,23 @@
 |       `quantify[P]` | `P#Element → P` | `.quantify(<predicate>)` |
 |         `coerce[P]` | `P → P#Element` | `.coerce`                |
 
-  Additional syntax: `.filter(predicate) = .quantify(predicate).coerce(predicate)`
+
+#### Additional syntax 
+
+- `a.andThen(b) = a >=> b`
+- `.filter(predicate) = .quantify(predicate).coerce`
 
 
 
 ### Isomorphisms list
 
 
-|            isomorphism            |                   → | syntax   |                     ← | syntax |
-|:---------------------------------:|--------------------:|:---------|----------------------:|:-------|
-|              `X ≃ X`              |       `identity[X]` | --       |                    -- |        |
-|          `A ⊗ B ≃ B ⊗ A`          |     `symmetry[A,B]` | `.twist` |                    -- |        |
-| `U ⊗ (A ⊕ B) ≃ (U ⊗ A) ⊕ (U ⊗ B)` | `distribute[U,A,B]` | `TODO`   | `undistribute[U,A,B]` | `TODO` |
-|            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `.right` |                    -- | `TODO` |
-|            `X ⊗ I ≃ X`            |      `rightUnit[X]` | `.left`  |                    -- | `TODO` |
-|            `0 ⊕ X ≃ X`            |       `leftZero[X]` | `.right` |                    -- | `TODO` |
-|            `X ⊕ 0 ≃ X`            |      `rightZero[X]` | `.left`  |                    -- | `TODO` |
+|            isomorphism            |                   → | syntax   |                     ← | syntax         |
+|:---------------------------------:|--------------------:|:---------|----------------------:|:---------------|
+|              `X ≃ X`              |       `identity[X]` | --       |                    -- |                |
+|          `A ⊗ B ≃ B ⊗ A`          |     `symmetry[A,B]` | `.twist` |                    -- |                |
+| `U ⊗ (A ⊕ B) ≃ (U ⊗ A) ⊕ (U ⊗ B)` | `distribute[U,A,B]` | `TODO`   | `undistribute[U,A,B]` | `TODO`         |
+|            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `.right` |                    -- | `.leftCounit`  |
+|            `X ⊗ I ≃ X`            |      `rightUnit[X]` | `.left`  |                    -- | `.rightCounit` |
+|            `0 ⊕ X ≃ X`            |       `leftZero[X]` | `.right` |                    -- | `.leftCozero`  |
+|            `X ⊕ 0 ≃ X`            |      `rightZero[X]` | `.left`  |                    -- | `.rightCozero` |

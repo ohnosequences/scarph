@@ -50,34 +50,141 @@ object morphisms {
     def rightCozero:
       F >=> s.isomorphisms.rightCozero[F#Out] =
       f >=> s.isomorphisms.rightCozero(f.out)
+
+
+    // biproduct injections
+    def leftInj[B <: AnyBiproductObj { type Left = F#Out }](b: B):
+      F >=> s.morphisms.leftInj[B] =
+      f >=> s.morphisms.leftInj(b)
+
+    def rightInj[B <: AnyBiproductObj { type Right = F#Out }](b: B):
+      F >=> s.morphisms.rightInj[B] =
+      f >=> s.morphisms.rightInj(b)
   }
 
 
-  implicit def tensorSyntax[L <: AnyGraphObject, R <: AnyGraphObject, F <: AnyGraphMorphism { type Out = L ⊗ R }](f: F):
-        TensorSyntax[L, R, F] =
-    new TensorSyntax[L, R, F](f)
+  type RefineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+    F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Right }
 
-  class TensorSyntax[L <: AnyGraphObject, R <: AnyGraphObject, F <: AnyGraphMorphism { type Out = L ⊗ R }](f: F) {
+  implicit def refineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): RefineTensorOut[F] = f
+
+  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => RefineTensorOut[F]):
+        TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]] =
+    new TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]](refine(f))
+
+  class TensorSyntax[
+    L <: AnyGraphObject,
+    R <: AnyGraphObject,
+    F <: AnyGraphMorphism { type Out = L ⊗ R }
+  ](val f: F) {
 
     def twist:
-      F >=> s.isomorphisms.symmetry[L, R] =
+      F >=> s.isomorphisms.symmetry[F#Out#Left, F#Out#Right] =
       f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
   }
 
 
-  implicit def BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
+  type SameTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+    F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Left }
+
+  implicit def sameTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit check: F#Out#Left =:= F#Out#Right): SameTensorOut[F] = f
+
+  implicit def matchUpSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => SameTensorOut[F]):
+        MatchUpSyntax[F#Out#Left, SameTensorOut[F]] =
+    new MatchUpSyntax[F#Out#Left, SameTensorOut[F]](refine(f))
+
+  class MatchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: F) {
+
+    def matchUp:
+      F >=> s.morphisms.matchUp[F#Out#Left] =
+      f >=> s.morphisms.matchUp(f.out.left)
+  }
+
+  type DistributableOut[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = F#Out#Left ⊗ (F#Out#Right#Left ⊕ F#Out#Right#Right) }
+
+  implicit def distributableOut[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F): DistributableOut[F] = f
+
+
+  implicit def distributableSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F)
+    (implicit refine: F => DistributableOut[F]):
+        DistributableSyntax[
+          F#Out#Left,
+          F#Out#Right#Left,
+          F#Out#Right#Right,
+          DistributableOut[F]
+        ] =
+          new DistributableSyntax[
+            F#Out#Left,
+            F#Out#Right#Left,
+            F#Out#Right#Right,
+            DistributableOut[F]
+          ](refine(f))
+
+  class DistributableSyntax[
+    X <: AnyGraphObject,
+    A <: AnyGraphObject,
+    B <: AnyGraphObject,
+    F <: AnyGraphMorphism { type Out = X ⊗ (A ⊕ B) }
+  ](val f: F) {
+
+    def distribute:
+      F >=> s.isomorphisms.distribute[X,A,B] =
+      f >=> s.isomorphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
+  }
+
+  implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
         BiproductSyntax[F] =
     new BiproductSyntax[F](f)
 
   class BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F) {
 
-    def left:
-      F >=> leftProj[F#Out] =
-      f >=> leftProj(f.out)
+    def leftProj:
+      F >=> s.morphisms.leftProj[F#Out] =
+      f >=> s.morphisms.leftProj(f.out)
 
-    def right:
-      F >=> rightProj[F#Out] =
-      f >=> rightProj(f.out)
+    def rightProj:
+      F >=> s.morphisms.rightProj[F#Out] =
+      f >=> s.morphisms.rightProj(f.out)
+  }
+
+
+  type SameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }] =
+    F with AnyGraphMorphism { type Out = F#Out#Left ⊕ F#Out#Left }
+
+  implicit def sameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
+    (implicit check: F#Out#Left =:= F#Out#Right): SameBiproductOut[F] = f
+
+  implicit def mergeSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
+    (implicit refine: F => SameBiproductOut[F]):
+        MergeSyntax[F#Out#Left, SameBiproductOut[F]] =
+    new MergeSyntax[F#Out#Left, SameBiproductOut[F]](refine(f))
+
+  class MergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: F) {
+
+    def merge:
+      F >=> s.morphisms.merge[F#Out#Left] =
+      f >=> s.morphisms.merge(f.out.left)
   }
 
 
@@ -101,7 +208,6 @@ object morphisms {
       f >=> s.morphisms.quantify(p) >=> s.morphisms.coerce(p)
   }
 
-  /* Element types */
   implicit def predicateSyntax[F <: AnyGraphMorphism { type Out <: AnyPredicate }](f: F):
         PredicateSyntax[F] =
     new PredicateSyntax[F](f)
@@ -111,6 +217,28 @@ object morphisms {
     def coerce:
       F >=> s.morphisms.coerce[F#Out] =
       f >=> s.morphisms.coerce(f.out)
+  }
+
+  implicit def zeroSyntax[F <: AnyGraphMorphism { type Out = zero }](f: F):
+        ZeroSyntax[F] =
+    new ZeroSyntax[F](f)
+
+  class ZeroSyntax[F <: AnyGraphMorphism { type Out = zero }](f: F) {
+
+    def fromZero[X <: AnyGraphObject](x: X):
+      F >=> s.morphisms.fromZero[X] =
+      f >=> s.morphisms.fromZero(x)
+  }
+
+  implicit def unitSyntax[F <: AnyGraphMorphism { type Out = unit }](f: F):
+        UnitSyntax[F] =
+    new UnitSyntax[F](f)
+
+  class UnitSyntax[F <: AnyGraphMorphism { type Out = unit }](f: F) {
+
+    def fromUnit[X <: AnyGraphObject](x: X):
+      F >=> s.morphisms.fromUnit[X] =
+      f >=> s.morphisms.fromUnit(x)
   }
 
   /* Edge types */

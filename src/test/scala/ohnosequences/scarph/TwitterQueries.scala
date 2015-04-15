@@ -33,6 +33,24 @@ object Queries {
   implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
   implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
 
+  val twist1 = friends.twist
+  val twist2 = friends.duplicate.twist
+  val twist3 = duplicate(user).twist
+  val twist4 = duplicate(user).twist.twist
+
+  val match1 = friends.matchUp
+  val match2 = friends.twist.matchUp
+  val match3 = friends.duplicate.matchUp
+  val match4 = duplicate(tweet).matchUp
+  //val match5 = (id(user) ⊗ id(tweet)).matchUp
+
+  val bip = inV(follows) ⊕ outV(follows)
+  val inFriends  = bip.leftProj
+  val outFriends = bip.rightProj
+  val allFriends = bip.merge
+
+  val injectL = outV(liked).leftInj(tweet ⊕ user)
+  val injectR = inV(posted).rightInj(tweet ⊕ user)
 
   // funny check / coerce
   val edusAgain = quantify(user ? (user.name === "@eparejatobes"))

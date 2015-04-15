@@ -143,17 +143,19 @@ object implementations {
 
   trait AnyPropertyImpl extends AnyImpl {
 
-    type Property
-    type Impl = Property
-    def get[P <: AnyGraphProperty](e: Element, p: P): Property
-
+    type Property <: AnyGraphProperty
     type Element
-    def lookup(p: Property): Element
+    type Raw
+
+    def get(e: Element, p: Property): Raw
+
+    def lookup(r: Raw, p: Property): Element
   }
 
-  trait PropertyImpl[P, E] extends AnyPropertyImpl {
+  trait PropertyImpl[P <: AnyGraphProperty, R, E] extends AnyPropertyImpl {
 
     type Property = P
+    type Raw = R
     type Element = E
   }
 
