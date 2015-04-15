@@ -103,6 +103,55 @@ object morphisms {
       f >=> s.morphisms.matchUp(f.out.left)
   }
 
+  type DistributableOut[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = F#Out#Left ⊗ (F#Out#Right#Left ⊕ F#Out#Right#Right) }
+
+  implicit def distributableOut[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F): DistributableOut[F] = f
+
+
+  implicit def distributableSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F)
+    (implicit refine: F => DistributableOut[F]):
+        DistributableSyntax[
+          F#Out#Left,
+          F#Out#Right#Left,
+          F#Out#Right#Right,
+          DistributableOut[F]
+        ] =
+          new DistributableSyntax[
+            F#Out#Left,
+            F#Out#Right#Left,
+            F#Out#Right#Right,
+            DistributableOut[F]
+          ](refine(f))
+
+  class DistributableSyntax[
+    X <: AnyGraphObject,
+    A <: AnyGraphObject,
+    B <: AnyGraphObject,
+    F <: AnyGraphMorphism { type Out = X ⊗ (A ⊕ B) }
+  ](val f: F) {
+
+    def distribute:
+      F >=> s.isomorphisms.distribute[X,A,B] =
+      f >=> s.isomorphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
+  }
 
   implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
         BiproductSyntax[F] =

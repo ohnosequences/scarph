@@ -21,6 +21,7 @@ class DummyTests extends org.scalatest.FunSuite {
     val query12 = query7 >=> merge(user)
     val query13 = quantify(tweet ? (tweet.text === "foo") and (tweet.url === "www"))
     val query14 = coerce(query13.predicate)
+    val query15 = (query6 ⊗ query7) distribute
 
     println("------------")
     println(query2.present)
@@ -48,6 +49,9 @@ class DummyTests extends org.scalatest.FunSuite {
     println(query13.present)
     println("------------")
     println(query14.present)
+    println("------------")
+    println(query15.present)
+
 
   }
 
