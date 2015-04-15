@@ -33,7 +33,16 @@ object Queries {
   implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
   implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
 
-  val friendsTwist = friends.duplicate.twist
+  val twist1 = friends.twist
+  val twist2 = friends.duplicate.twist
+  val twist3 = duplicate(user).twist
+  val twist4 = duplicate(user).twist.twist
+
+  val match1 = friends.matchUp
+  val match2 = friends.twist.matchUp
+  val match3 = friends.duplicate.matchUp
+  val match4 = duplicate(tweet).matchUp
+  //val match5 = (id(user) ⊗ id(tweet)).matchUp
 
 
   // funny check / coerce

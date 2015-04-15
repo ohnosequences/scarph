@@ -52,27 +52,44 @@ object morphisms {
       f >=> s.isomorphisms.rightCozero(f.out)
   }
 
-  implicit def isTensorReally[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): AnyGraphMorphism.isTensorOut[F] = f
-  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }, F0 <% AnyGraphMorphism.isTensorOut[F]](f: F0):
-        TensorSyntax[F] =
-    new TensorSyntax[F](f)
 
-  class TensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](val f: AnyGraphMorphism.isTensorOut[F]) {
+  type RefineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+    F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Right }
+
+  implicit def refineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): RefineTensorOut[F] = f
+
+  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => RefineTensorOut[F]):
+        TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]] =
+    new TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]](refine(f))
+
+  class TensorSyntax[
+    L <: AnyGraphObject,
+    R <: AnyGraphObject,
+    F <: AnyGraphMorphism { type Out = L ⊗ R }
+  ](val f: F) {
 
     def twist:
-    AnyGraphMorphism.isTensorOut[F] >=> s.isomorphisms.symmetry[F#Out#Left, F#Out#Right] =
-        f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
+      F >=> s.isomorphisms.symmetry[F#Out#Left, F#Out#Right] =
+      f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
   }
 
 
-  implicit def matchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: F):
-        MatchUpSyntax[T, F] =
-    new MatchUpSyntax[T, F](f)
+  type SameTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+    F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Left }
+
+  implicit def sameTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit check: F#Out#Left =:= F#Out#Right): SameTensorOut[F] = f
+
+  implicit def matchUpSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => SameTensorOut[F]):
+        MatchUpSyntax[F#Out#Left, SameTensorOut[F]] =
+    new MatchUpSyntax[F#Out#Left, SameTensorOut[F]](refine(f))
 
   class MatchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: F) {
 
     def matchUp:
-      F >=> s.morphisms.matchUp[T] =
+      F >=> s.morphisms.matchUp[F#Out#Left] =
       f >=> s.morphisms.matchUp(f.out.left)
   }
 

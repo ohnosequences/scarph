@@ -116,24 +116,6 @@ object graphTypes {
     val value: V = st._2
   }
 
-  object AnyGraphMorphism {
-
-    type is[F <: AnyGraphMorphism] = F with AnyGraphMorphism {
-
-      type In = F#In
-      type Out = F#Out
-
-      type Dagger = F#Dagger
-    }
-
-    type isTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj}] = F with AnyGraphMorphism {
-
-      type Out = F#Out#Left ⊗ F#Out#Right
-
-      //type In = F#In
-      //type Dagger = F#Dagger
-    }
-  }
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
 
