@@ -51,23 +51,27 @@ object morphisms {
 
 
   // I → X
-  case class fromUnit[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
+  case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyStraightPrimitive {
+    type Obj = X
 
     type     In = unit
     lazy val in = unit
 
-    type     Out = X
-    lazy val out = x
+    type     Out = Obj
+    lazy val out = obj
 
-    type     Dagger = toUnit[X]
-    lazy val dagger = toUnit(x)
+    type     Dagger = toUnit[Obj]
+    lazy val dagger = toUnit(obj)
 
-    lazy val label = s"fromUnit(${x.label})"
+    lazy val label = s"fromUnit(${obj.label})"
   }
 
   // X → I
-  case class toUnit[X <: AnyGraphObject](x: X)
-    extends DaggerOf(fromUnit[X](x)) { lazy val label = s"toUnit(${x.label})" }
+  case class toUnit[X <: AnyGraphObject](val obj: X) extends DaggerOf(fromUnit[X](obj)) {
+    type Obj = X
+
+    lazy val label = s"toUnit(${obj.label})"
+  }
 
 
   // △: X → X ⊗ X
