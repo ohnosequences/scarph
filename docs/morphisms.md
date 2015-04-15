@@ -88,19 +88,23 @@
 |       `quantify[P]` | `P#Element → P` | `.quantify(<predicate>)` |
 |         `coerce[P]` | `P → P#Element` | `.coerce`                |
 
-  Additional syntax: `.filter(predicate) = .quantify(predicate).coerce`
+
+#### Additional syntax 
+
+- `a.andThen(b) = a >=> b`
+- `.filter(predicate) = .quantify(predicate).coerce`
 
 
 
 ### Isomorphisms list
 
 
-|            isomorphism            |                   → | syntax   |                     ← | syntax |
-|:---------------------------------:|--------------------:|:---------|----------------------:|:-------|
-|              `X ≃ X`              |       `identity[X]` | --       |                    -- |        |
-|          `A ⊗ B ≃ B ⊗ A`          |     `symmetry[A,B]` | `.twist` |                    -- |        |
-| `U ⊗ (A ⊕ B) ≃ (U ⊗ A) ⊕ (U ⊗ B)` | `distribute[U,A,B]` | `TODO`   | `undistribute[U,A,B]` | `TODO` |
-|            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `.right` |                    -- | `TODO` |
-|            `X ⊗ I ≃ X`            |      `rightUnit[X]` | `.left`  |                    -- | `TODO` |
-|            `0 ⊕ X ≃ X`            |       `leftZero[X]` | `.right` |                    -- | `TODO` |
-|            `X ⊕ 0 ≃ X`            |      `rightZero[X]` | `.left`  |                    -- | `TODO` |
+|            isomorphism            |                   → | syntax   |                     ← | syntax         |
+|:---------------------------------:|--------------------:|:---------|----------------------:|:---------------|
+|              `X ≃ X`              |       `identity[X]` | --       |                    -- |                |
+|          `A ⊗ B ≃ B ⊗ A`          |     `symmetry[A,B]` | `.twist` |                    -- |                |
+| `U ⊗ (A ⊕ B) ≃ (U ⊗ A) ⊕ (U ⊗ B)` | `distribute[U,A,B]` | `TODO`   | `undistribute[U,A,B]` | `TODO`         |
+|            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `.right` |                    -- | `.leftCounit`  |
+|            `X ⊗ I ≃ X`            |      `rightUnit[X]` | `.left`  |                    -- | `.rightCounit` |
+|            `0 ⊕ X ≃ X`            |       `leftZero[X]` | `.right` |                    -- | `.leftCozero`  |
+|            `X ⊕ 0 ≃ X`            |      `rightZero[X]` | `.left`  |                    -- | `.rightCozero` |
