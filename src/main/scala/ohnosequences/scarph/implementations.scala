@@ -99,17 +99,19 @@ object implementations {
   // TODO: probably it makes sense to separate it
   trait AnyVertexInImpl {
 
+    type Edge <: AnyEdge
     type RawVertex
 
     type RawInEdge
-    def inE[E <: AnyEdge](v: RawVertex, e: E): RawInEdge
+    def inE(v: RawVertex, e: Edge): RawInEdge
 
     type RawInVertex
-    def inV[E <: AnyEdge](v: RawVertex, e: E): RawInVertex
+    def inV(v: RawVertex, e: Edge): RawInVertex
   }
 
-  trait VertexInImpl[V, InE, InV] extends AnyVertexInImpl {
+  trait VertexInImpl[E <: AnyEdge, V, InE, InV] extends AnyVertexInImpl {
 
+    type Edge = E
     type RawVertex = V
     type RawInEdge = InE
     type RawInVertex = InV
@@ -119,17 +121,19 @@ object implementations {
   // TODO: probably it makes sense to separate it
   trait AnyVertexOutImpl {
 
+    type Edge <: AnyEdge
     type RawVertex
 
     type RawOutEdge
-    def outE[E <: AnyEdge](v: RawVertex, e: E): RawOutEdge
+    def outE(v: RawVertex, e: Edge): RawOutEdge
 
     type RawOutVertex
-    def outV[E <: AnyEdge](v: RawVertex, e: E): RawOutVertex
+    def outV(v: RawVertex, e: Edge): RawOutVertex
   }
 
-  trait VertexOutImpl[V, OutE, OutV] extends AnyVertexOutImpl {
+  trait VertexOutImpl[E <: AnyEdge, V, OutE, OutV] extends AnyVertexOutImpl {
 
+    type Edge = E
     type RawVertex = V
     type RawOutEdge = OutE
     type RawOutVertex = OutV

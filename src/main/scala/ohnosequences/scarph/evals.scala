@@ -273,7 +273,7 @@ object evals {
     implicit def eval_inE[
       I, E <: AnyEdge, IE, IV
     ](implicit
-      vImpl:  VertexInImpl[I, IE, IV]
+      vImpl:  VertexInImpl[E, I, IE, IV]
     ):  EvalOn[I, inE[E], IE] =
     new EvalOn[I, inE[E], IE] {
 
@@ -287,7 +287,7 @@ object evals {
     implicit def eval_outE[
       I, E <: AnyEdge, OE, OV
     ](implicit
-      vImpl:  VertexOutImpl[I, OE, OV]
+      vImpl:  VertexOutImpl[E, I, OE, OV]
     ):  EvalOn[I, outE[E], OE] =
     new EvalOn[I, outE[E], OE] {
 
@@ -301,7 +301,7 @@ object evals {
     implicit def eval_inV[
       I, E <: AnyEdge, IE, IV
     ](implicit
-      vImpl:  VertexInImpl[I, IE, IV]
+      vImpl:  VertexInImpl[E, I, IE, IV]
     ):  EvalOn[I, inV[E], IV] =
     new EvalOn[I, inV[E], IV] {
 
@@ -315,7 +315,7 @@ object evals {
     implicit def eval_outV[
       I, E <: AnyEdge, OE, OV
     ](implicit
-      vImpl:  VertexOutImpl[I, OE, OV]
+      vImpl:  VertexOutImpl[E, I, OE, OV]
     ):  EvalOn[I, outV[E], OV] =
     new EvalOn[I, outV[E], OV] {
 
