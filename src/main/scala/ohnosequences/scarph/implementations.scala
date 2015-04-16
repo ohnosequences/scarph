@@ -5,7 +5,7 @@ object implementations {
   import graphTypes._, predicates._
 
 
-  trait AnyTensorImpl {
+  trait AnyTensorImpl extends Any {
 
     type RawTensor
     def apply(l: RawLeft, r: RawRight): RawTensor
@@ -17,7 +17,7 @@ object implementations {
     def rightProj(t: RawTensor): RawRight
   }
 
-  trait TensorImpl[T, L, R] extends AnyTensorImpl {
+  trait TensorImpl[T, L, R] extends Any with AnyTensorImpl {
 
     type RawTensor = T
     type RawLeft = L
@@ -25,17 +25,17 @@ object implementations {
   }
 
 
-  trait AnyMatchUpImpl {
+  trait AnyMatchUpImpl extends Any {
 
     type Raw
 
     def matchUp(l: Raw, r: Raw): Raw
   }
 
-  trait MatchUpImpl[I] extends AnyMatchUpImpl { type Raw = I }
+  trait MatchUpImpl[I] extends Any with AnyMatchUpImpl { type Raw = I }
 
 
-  trait AnyBiproductImpl {
+  trait AnyBiproductImpl extends Any {
 
     type RawBiproduct
     def apply(l: RawLeft, r: RawRight): RawBiproduct
@@ -49,7 +49,7 @@ object implementations {
     def rightInj(r: RawRight): RawBiproduct
   }
 
-  trait BiproductImpl[B, L, R] extends AnyBiproductImpl {
+  trait BiproductImpl[B, L, R] extends Any with AnyBiproductImpl {
 
     type RawBiproduct = B
     type RawLeft = L
@@ -57,27 +57,27 @@ object implementations {
   }
 
 
-  trait AnyMergeImpl {
+  trait AnyMergeImpl extends Any {
 
     type Raw
 
     def merge(l: Raw, r: Raw): Raw
   }
 
-  trait MergeImpl[R] extends AnyMergeImpl { type Raw = R }
+  trait MergeImpl[R] extends Any with AnyMergeImpl { type Raw = R }
 
 
-  trait AnyZeroImpl {
+  trait AnyZeroImpl extends Any {
 
     type Raw
 
     def apply(): Raw
   }
 
-  trait ZeroImpl[R] extends AnyZeroImpl { type Raw = R }
+  trait ZeroImpl[R] extends Any with AnyZeroImpl { type Raw = R }
 
 
-  trait AnyEdgeImpl {
+  trait AnyEdgeImpl extends Any {
 
     type RawEdge
 
@@ -88,7 +88,7 @@ object implementations {
     def target(e: RawEdge): RawTarget
   }
 
-  trait EdgeImpl[E, S, T] extends AnyEdgeImpl {
+  trait EdgeImpl[E, S, T] extends Any with AnyEdgeImpl {
 
     type RawEdge = E
     type RawSource = S
@@ -97,7 +97,7 @@ object implementations {
 
 
   // TODO: probably it makes sense to separate it
-  trait AnyVertexInImpl {
+  trait AnyVertexInImpl extends Any {
 
     type Edge <: AnyEdge
     type RawVertex
@@ -109,7 +109,7 @@ object implementations {
     def inV(v: RawVertex, e: Edge): RawInVertex
   }
 
-  trait VertexInImpl[E <: AnyEdge, V, InE, InV] extends AnyVertexInImpl {
+  trait VertexInImpl[E <: AnyEdge, V, InE, InV] extends Any with AnyVertexInImpl{
 
     type Edge = E
     type RawVertex = V
@@ -119,7 +119,7 @@ object implementations {
 
 
   // TODO: probably it makes sense to separate it
-  trait AnyVertexOutImpl {
+  trait AnyVertexOutImpl extends Any {
 
     type Edge <: AnyEdge
     type RawVertex
@@ -140,7 +140,7 @@ object implementations {
   }
 
 
-  trait AnyPropertyImpl {
+  trait AnyPropertyImpl extends Any {
 
     type Property <: AnyGraphProperty
     type RawElement
@@ -151,7 +151,7 @@ object implementations {
     def lookup(r: RawValue, p: Property): RawElement
   }
 
-  trait PropertyImpl[P <: AnyGraphProperty, RE, RV] extends AnyPropertyImpl {
+  trait PropertyImpl[P <: AnyGraphProperty, RE, RV] extends Any with AnyPropertyImpl {
 
     type Property = P
     type RawElement = RE
@@ -159,7 +159,7 @@ object implementations {
   }
 
 
-  trait AnyUnitImpl {
+  trait AnyUnitImpl extends Any {
 
     // TODO: probably this should be an AnyGraphElement?
     type Object <: AnyGraphObject
@@ -171,7 +171,7 @@ object implementations {
     def toUnit(s: RawObject): RawUnit
   }
 
-  trait UnitImpl[O <: AnyGraphObject, RO, RU] extends AnyUnitImpl {
+  trait UnitImpl[O <: AnyGraphObject, RO, RU] extends Any with AnyUnitImpl {
 
     type Object = O
     type RawObject = RO
@@ -179,7 +179,7 @@ object implementations {
   }
 
 
-  trait AnyPredicateImpl {
+  trait AnyPredicateImpl extends Any {
 
     type RawPredicate
     def quantify[P <: AnyPredicate](e: RawElement, p: P): RawPredicate
@@ -188,7 +188,7 @@ object implementations {
     def coerce(p: RawPredicate): RawElement
   }
 
-  trait PredicateImpl[P, E] extends AnyPredicateImpl {
+  trait PredicateImpl[P, E] extends Any with AnyPredicateImpl {
 
     type RawPredicate = P
     type RawElement = E
