@@ -131,7 +131,7 @@ object implementations {
     def outV(v: RawVertex, e: Edge): RawOutVertex
   }
 
-  trait VertexOutImpl[E <: AnyEdge, V, OutE, OutV] extends AnyVertexOutImpl {
+  trait VertexOutImpl[E <: AnyEdge, V, OutE, OutV] extends Any with AnyVertexOutImpl {
 
     type Edge = E
     type RawVertex = V
