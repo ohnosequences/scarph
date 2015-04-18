@@ -187,7 +187,7 @@ object graphTypes {
         GraphMorphismOps[F] =
     new GraphMorphismOps[F](f)
 
-  class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
+  case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
 
     def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
 

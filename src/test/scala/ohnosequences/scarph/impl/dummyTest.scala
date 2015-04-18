@@ -7,7 +7,7 @@ import twitter._, dummy._
 class DummyTests extends org.scalatest.FunSuite {
 
   test("record property bound works") {
-
+    val query1 = lookup(user.name)
     val query2 = duplicate(user)
     val query3 = inE(posted)
     val query4 = inE(posted) >=> source(posted)
@@ -50,7 +50,13 @@ class DummyTests extends org.scalatest.FunSuite {
     println("------------")
     println(query14.present)
     println("------------")
-    //println(query15.present)*/
+    // no distribute eval
+    // println(query15.present)*/
+
+    val uh2 = query2.runOn(user := Dummy)
+
+    val uh1 = query1.runOn(name := Dummy)
+    println(uh1.value)
 
 
   }
