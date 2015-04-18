@@ -6,13 +6,22 @@ object evals {
   import ohnosequences.cosas._, types._, fns._
   import graphTypes._, morphisms._, implementations._, predicates._
 
-  implicit final def evalWith[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
-    EvalWith[I0,F0,O0] = 
-    EvalWith(f0, ev)
+  implicit final def getEvaluate[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
+    evaluate[I0,F0,O0] = 
+    new evaluate(f0, ev)
 
-  case class EvalWith[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
+  object evaluate {
 
-    final def runOn(input: F#In := I): F#Out := O = eval(f)(input)
+    def apply[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
+      evaluate[I0,F0,O0] = 
+      new evaluate(f0, ev)
+  }
+  
+  final class evaluate[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
+
+    final def on(input: F#In := I): F#Out := O = eval(f)(input)
+
+    final def :=>:(input: F#In := I): F#Out := O = eval(f)(input)
 
     // TODO: this should output the computational behavior of the eval here
     final def evalPlan: String = eval.present(f)
