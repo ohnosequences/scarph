@@ -28,3 +28,5 @@ publishArtifact in (Test, packageBin) := true
 
 // no name hashing, funny stuff happens
 incOptions := incOptions.value.withNameHashing(false)
+
+s3credentials := file(System.getProperty("user.home")) / ".aws" / "credentials"

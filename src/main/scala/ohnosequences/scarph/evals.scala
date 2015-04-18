@@ -7,12 +7,11 @@ object evals {
   import graphTypes._, morphisms._, implementations._, predicates._
 
   implicit def evalSyntax[I0,F <: AnyGraphMorphism, O0](f: F)(implicit ev: EvalOn[I0,F,O0]): EvalSyntax[I0,F,O0]
-    = EvalSyntax(f)
+    = EvalSyntax(f, ev)
 
-  case class EvalSyntax[I,F <: AnyGraphMorphism,O](val f: F) {
+  case class EvalSyntax[I,F <: AnyGraphMorphism,O](val f: F, eval: EvalOn[I,F,O]) {
 
-    def runOn(input: F#In := I)
-      (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
+    def runOn(input: F#In := I): F#Out := O = eval(f)(input)
 
     // def present(implicit eval: Eval[F]): String = eval.present(f)
   }
