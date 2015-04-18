@@ -284,6 +284,20 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
+    implicit def eval_inV[
+      I, E <: AnyEdge, IE, IV
+    ](implicit
+      vImpl:  VertexInImpl[I, IE, IV]
+    ):  EvalOn[I, inV[E], IV] =
+    new EvalOn[I, inV[E], IV] {
+
+      def apply(morph: Morph)(input: Input): Output = {
+        (morph.out: Morph#Out) := vImpl.inV(input.value, morph.edge)
+      }
+
+      def present(morph: Morph): String = morph.label
+    }
+
     implicit def eval_outE[
       I, E <: AnyEdge, OE, OV
     ](implicit
@@ -298,19 +312,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_inV[
-      I, E <: AnyEdge, IE, IV
-    ](implicit
-      vImpl:  VertexInImpl[I, IE, IV]
-    ):  EvalOn[I, inV[E], IV] =
-    new EvalOn[I, inV[E], IV] {
-
-      def apply(morph: Morph)(input: Input): Output = {
-        morph.out := vImpl.inV(input.value, morph.edge)
-      }
-
-      def present(morph: Morph): String = morph.label
-    }
+    
 
     implicit def eval_outV[
       I, E <: AnyEdge, OE, OV

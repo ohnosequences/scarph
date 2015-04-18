@@ -42,7 +42,16 @@ object isomorphisms {
   }
 
   case class undistribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
-    (u: U, a: A, b: B) extends DaggerOf(distribute[U, A, B](u, a, b)) {
+    (u: U, a: A, b: B) extends AnyIsomorphism {
+
+    type     Out = U ⊗ (A ⊕ B)
+    lazy val out = u ⊗ (a ⊕ b)
+
+    type     In = (U ⊗ A) ⊕ (U ⊗ B)
+    lazy val in = (u ⊗ a) ⊕ (u ⊗ b)
+
+    type     Dagger = distribute[U, A, B]
+    lazy val dagger = distribute(u, a, b)
 
     lazy val label: String = s"undistribute((${u.label} ⊗ ${a.label}) ⊕ (${u.label} ⊗ ${b.label}))"
   }
@@ -64,8 +73,20 @@ object isomorphisms {
   }
 
   // X → I ⊗ X
-  case class leftCounit[X <: AnyGraphObject](x: X)
-    extends DaggerOf(leftUnit(x)) { lazy val label = s"leftCounit(${x.label})"}
+  case class leftCounit[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+
+    type     Out = unit ⊗ X
+    lazy val out = unit ⊗ x
+
+    type     In = X
+    lazy val in = x
+
+    type     Dagger = leftUnit[X]
+    lazy val dagger = leftUnit(x)
+
+    lazy val label = s"leftCounit(${x.label})"
+
+  }
 
 
   // X ⊗ I → X
@@ -84,8 +105,19 @@ object isomorphisms {
   }
 
   // X → I ⊗ X
-  case class rightCounit[X <: AnyGraphObject](x: X)
-    extends DaggerOf(rightUnit(x)) { lazy val label = s"rightCounit(${x.label})" }
+  case class rightCounit[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+
+    type     Out = X ⊗ unit
+    lazy val out = x ⊗ unit
+
+    type     In = X
+    lazy val in = x
+
+    type     Dagger = rightUnit[X]
+    lazy val dagger = rightUnit(x)
+
+    lazy val label = s"rightCounit(${x.label})" 
+  }
 
 
   // 0 ⊕ X → X
@@ -104,8 +136,20 @@ object isomorphisms {
   }
 
   // X → 0 ⊕ X
-  case class leftCozero[X <: AnyGraphObject](x: X)
-    extends DaggerOf(leftZero(x)) { lazy val label = s"leftCozero(${x.label})"}
+  case class leftCozero[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+
+    type     Out = zero ⊕ X
+    lazy val out = zero ⊕ x
+
+    type     In = X
+    lazy val in = x
+
+    type     Dagger = leftZero[X]
+    lazy val dagger = leftZero(x)
+
+    lazy val label = s"leftCozero(${x.label})"
+
+  }
 
 
   // X ⊕ 0 → X
@@ -124,7 +168,18 @@ object isomorphisms {
   }
 
   // X → 0 ⊕ X
-  case class rightCozero[X <: AnyGraphObject](x: X)
-    extends DaggerOf(rightZero(x)) { lazy val label = s"rightCozero(${x.label})" }
+  case class rightCozero[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+
+    type     Out = X ⊕ zero
+    lazy val out = x ⊕ zero
+
+    type     In = X
+    lazy val in = x
+
+    type     Dagger = rightZero[X]
+    lazy val dagger = rightZero(x)
+
+    lazy val label = s"rightCozero(${x.label})" 
+  }
 
 }
