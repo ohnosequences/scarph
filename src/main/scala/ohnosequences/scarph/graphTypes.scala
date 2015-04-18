@@ -38,13 +38,14 @@ object graphTypes {
 
 
   trait AnyArity {
+
     type Vertex <: AnyVertex
     val  vertex: Vertex
   }
-  abstract class Arity[V <:AnyVertex](val vertex: V)
-    extends AnyArity { type Vertex = V }
 
-  case class OneOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+  abstract class Arity[V <:AnyVertex](val vertex: V) extends AnyArity { type Vertex = V }
+
+  case class  OneOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
   case class AtLeastOne[V <: AnyVertex](v: V) extends Arity[V](v)
   case class ExactlyOne[V <: AnyVertex](v: V) extends Arity[V](v)
   case class ManyOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
@@ -67,9 +68,8 @@ object graphTypes {
     val  targetVertex: TargetVertex
   }
 
-  class Edge[S <: AnyArity, T <: AnyArity]( st: (S, T))(val label: String)
-    extends AnyEdge
-{
+  /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
+  class Edge[S <: AnyArity, T <: AnyArity]( st: (S, T))(val label: String) extends AnyEdge {
 
     type SourceArity = S
     lazy val sourceArity = st._1
@@ -81,8 +81,6 @@ object graphTypes {
     type TargetVertex = TargetArity#Vertex
     lazy val targetVertex = targetArity.vertex
   }
-  /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
-
 
   object AnyEdge {
 
@@ -90,14 +88,17 @@ object graphTypes {
     type   To[T <: AnyVertex] = AnyEdge { type TargetVertex = T }
   }
 
+  import scala.reflect.ClassTag
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyProperty with AnyGraphObject {
 
-    def rawTag: scala.reflect.ClassTag[Raw]
+    def rawTag: ClassTag[Raw]
   }
 
-  class ValueOfType[R](val label: String)(implicit val rawTag: scala.reflect.ClassTag[R])
-    extends AnyValueType { type Raw = R }
+  class ValueOfType[R](val label: String)(implicit val rawTag: ClassTag[R]) extends AnyValueType { 
+
+    type Raw = R 
+  }
 
   /* This is like an edge between an element and a raw type */
   trait AnyGraphProperty extends AnyGraphType {
@@ -135,15 +136,13 @@ object graphTypes {
   type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
 
   /* Sequential composition of two morphisms */
-  sealed trait AnyComposition extends AnyGraphMorphism {
+  sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
     type First <: AnyGraphMorphism
     type Second <: AnyGraphMorphism //{ type In = First#Out }
 
     type In  <: First#In
     type Out <: Second#Out
-
-    type Dagger <: Composition[Second#Dagger, First#Dagger]
   }
 
   case class Composition[
@@ -161,7 +160,7 @@ object graphTypes {
     lazy val out = second.out: Out
 
     type     Dagger = Composition[Second#Dagger, First#Dagger]
-    lazy val dagger = Composition(second.dagger, first.dagger): Dagger
+    lazy val dagger: Dagger = Composition(second.dagger, first.dagger)
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
   }
@@ -172,10 +171,10 @@ object graphTypes {
 
 
   implicit def graphObjectOps[O <: AnyGraphObject](o: O):
-        GraphObjectOps[O] =
-    new GraphObjectOps[O](o)
+    GraphObjectOps[O] =
+    GraphObjectOps[O](o)
 
-  class GraphObjectOps[O <: AnyGraphObject](val obj: O) {
+  case class GraphObjectOps[O <: AnyGraphObject](val obj: O) extends AnyVal {
 
     import monoidalStructures._
 
@@ -187,7 +186,7 @@ object graphTypes {
         GraphMorphismOps[F] =
     new GraphMorphismOps[F](f)
 
-  case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) {
+  case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) extends AnyVal {
 
     def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
 
@@ -196,9 +195,8 @@ object graphTypes {
     def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
     def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
 
+    // TODO: remove this, use the eval-specific typeclass
     import evals._
-    //def evalOn[I, O](input: F#In := I)
-    //  (implicit eval: Eval[F] { type InVal = I; type OutVal = O }): F#Out := O = eval(f)(input)
 
     def evalOn[I, O](input: F#In := I)
       (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)

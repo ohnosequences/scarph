@@ -35,21 +35,21 @@ object morphisms {
 
 
     def leftCounit:
-      F >=> s.isomorphisms.leftCounit[F#Out] =
-      f >=> s.isomorphisms.leftCounit(f.out)
+      F >=> s.naturalIsomorphisms.leftCounit[F#Out] =
+      f >=> s.naturalIsomorphisms.leftCounit(f.out)
 
     def rightCounit:
-      F >=> s.isomorphisms.rightCounit[F#Out] =
-      f >=> s.isomorphisms.rightCounit(f.out)
+      F >=> s.naturalIsomorphisms.rightCounit[F#Out] =
+      f >=> s.naturalIsomorphisms.rightCounit(f.out)
 
 
     def leftCozero:
-      F >=> s.isomorphisms.leftCozero[F#Out] =
-      f >=> s.isomorphisms.leftCozero(f.out)
+      F >=> s.naturalIsomorphisms.leftCozero[F#Out] =
+      f >=> s.naturalIsomorphisms.leftCozero(f.out)
 
     def rightCozero:
-      F >=> s.isomorphisms.rightCozero[F#Out] =
-      f >=> s.isomorphisms.rightCozero(f.out)
+      F >=> s.naturalIsomorphisms.rightCozero[F#Out] =
+      f >=> s.naturalIsomorphisms.rightCozero(f.out)
 
 
     // biproduct injections
@@ -80,8 +80,8 @@ object morphisms {
   ](val f: F) {
 
     def twist:
-      F >=> s.isomorphisms.symmetry[F#Out#Left, F#Out#Right] =
-      f >=> s.isomorphisms.symmetry(f.out.left, f.out.right)
+      F >=> s.naturalIsomorphisms.symmetry[F#Out#Left, F#Out#Right] =
+      f >=> s.naturalIsomorphisms.symmetry(f.out.left, f.out.right)
   }
 
 
@@ -149,8 +149,8 @@ object morphisms {
   ](val f: F) {
 
     def distribute:
-      F >=> s.isomorphisms.distribute[X,A,B] =
-      f >=> s.isomorphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
+      F >=> s.naturalIsomorphisms.distribute[X,A,B] =
+      f >=> s.naturalIsomorphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
   }
 
   implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):

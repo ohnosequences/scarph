@@ -39,11 +39,14 @@ object monoidalStructures {
     type In  <: AnyTensorObj { type Left = tensor.Left#In; type Right = tensor.Right#In }
     type Out <: AnyTensorObj { type Left = tensor.Left#Out; type Right = tensor.Right#Out }
 
-    type Dagger <: TensorMorph[Left#Dagger, Right#Dagger]
+    type Dagger <: AnyTensorMorph { 
+      type Left = tensor.Left#Dagger; 
+      type Right = tensor.Right#Dagger
+    }
   }
 
   case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
-    (val left: L, val right: R) extends AnyTensorMorph {
+    (val left: L, val right: R) extends AnyTensorMorph { tensor =>
 
     type Left = L
     type Right = R
@@ -55,16 +58,13 @@ object monoidalStructures {
     lazy val out = TensorObj(left.out, right.out): Out
 
     type     Dagger = TensorMorph[Left#Dagger, Right#Dagger]
-    lazy val dagger = TensorMorph(left.dagger, right.dagger): Dagger
+    lazy val dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
 
     lazy val label = s"(${left.label} ⊗ ${right.label})"
   }
 
 
   case object unit extends AnyGraphObject {
-
-    type     Self = this.type
-    lazy val self = this: Self
 
     lazy val label = this.toString
   }
@@ -85,9 +85,6 @@ object monoidalStructures {
   case class BiproductObj[L <: AnyGraphObject, R <: AnyGraphObject]
     (val left: L, val right: R) extends AnyBiproductObj {
 
-    type     Self = this.type
-    lazy val self = this: Self
-
     type Left = L
     type Right = R
 
@@ -96,7 +93,6 @@ object monoidalStructures {
 
   // \oplus symbol: f ⊕ s: F ⊕ S
   type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
-
 
   sealed trait AnyBiproductMorph extends AnyGraphMorphism { biprod =>
 
@@ -109,14 +105,14 @@ object monoidalStructures {
     type In  <: BiproductObj[Left#In, Right#In]
     type Out <: BiproductObj[Left#Out, Right#Out]
 
-    type Dagger <: BiproductMorph[Left#Dagger, Right#Dagger]
+    type Dagger <: AnyBiproductMorph {
+      type Left = biprod.Left#Dagger 
+      type Right = biprod.Right#Dagger
+    }
   }
 
   case class BiproductMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
-    (val left: L, val right: R) extends AnyBiproductMorph {
-
-    type     Self = this.type
-    lazy val self = this: Self
+    (val left: L, val right: R) extends AnyBiproductMorph { biprod =>
 
     type Left = L
     type Right = R
@@ -128,16 +124,13 @@ object monoidalStructures {
     lazy val out = BiproductObj(left.out, right.out): Out
 
     type     Dagger = BiproductMorph[Left#Dagger, Right#Dagger]
-    lazy val dagger = BiproductMorph(left.dagger, right.dagger): Dagger
+    lazy val dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
 
     lazy val label = s"(${left.label} ⊕ ${right.label})"
   }
 
 
   case object zero extends AnyGraphObject {
-
-    type     Self = this.type
-    lazy val self = this: Self
 
     lazy val label = this.toString
   }

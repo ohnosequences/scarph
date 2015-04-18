@@ -2,17 +2,22 @@ package ohnosequences.scarph
 
 
 /* Basic set of morphisms: */
-object isomorphisms {
+object naturalIsomorphisms {
 
   import graphTypes._, predicates._, monoidalStructures._, morphisms._
 
 
-  trait AnyIsomorphism extends AnyStraightPrimitive
+  trait AnyNaturalIsomorphism extends AnyPrimitive { iso =>
+
+    type Dagger <: AnyNaturalIsomorphism {
+      type Dagger >: iso.type <: AnyNaturalIsomorphism
+    }
+  }
 
 
   // σ: L ⊗ R → R ⊗ L
   case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
-    extends AnyIsomorphism {
+    extends AnyNaturalIsomorphism {
 
     type     In = L ⊗ R
     lazy val in = l ⊗ r
@@ -27,7 +32,7 @@ object isomorphisms {
   }
 
   case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
-    (u: U, a: A, b: B) extends AnyIsomorphism {
+    (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
     type     In = U ⊗ (A ⊕ B)
     lazy val in = u ⊗ (a ⊕ b)
@@ -42,7 +47,7 @@ object isomorphisms {
   }
 
   case class undistribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
-    (u: U, a: A, b: B) extends AnyIsomorphism {
+    (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
     type     Out = U ⊗ (A ⊕ B)
     lazy val out = u ⊗ (a ⊕ b)
@@ -58,7 +63,7 @@ object isomorphisms {
 
 
   // I ⊗ X → X
-  case class leftUnit[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
+  case class leftUnit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = unit ⊗ X
     lazy val in = unit ⊗ x
@@ -73,7 +78,7 @@ object isomorphisms {
   }
 
   // X → I ⊗ X
-  case class leftCounit[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+  case class leftCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
 
     type     Out = unit ⊗ X
     lazy val out = unit ⊗ x
@@ -90,7 +95,7 @@ object isomorphisms {
 
 
   // X ⊗ I → X
-  case class rightUnit[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
+  case class rightUnit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = X ⊗ unit
     lazy val in = x ⊗ unit
@@ -105,7 +110,7 @@ object isomorphisms {
   }
 
   // X → I ⊗ X
-  case class rightCounit[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+  case class rightCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
 
     type     Out = X ⊗ unit
     lazy val out = x ⊗ unit
@@ -121,7 +126,7 @@ object isomorphisms {
 
 
   // 0 ⊕ X → X
-  case class leftZero[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
+  case class leftZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = zero ⊕ X
     lazy val in = zero ⊕ x
@@ -136,7 +141,7 @@ object isomorphisms {
   }
 
   // X → 0 ⊕ X
-  case class leftCozero[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+  case class leftCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
 
     type     Out = zero ⊕ X
     lazy val out = zero ⊕ x
@@ -153,7 +158,7 @@ object isomorphisms {
 
 
   // X ⊕ 0 → X
-  case class rightZero[X <: AnyGraphObject](x: X) extends AnyIsomorphism {
+  case class rightZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = X ⊕ zero
     lazy val in = x ⊕ zero
@@ -168,7 +173,7 @@ object isomorphisms {
   }
 
   // X → 0 ⊕ X
-  case class rightCozero[X <: AnyGraphObject](x: X) extends AnyIsomorphism { 
+  case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
 
     type     Out = X ⊕ zero
     lazy val out = x ⊕ zero

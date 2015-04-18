@@ -6,14 +6,16 @@ object evals {
   import ohnosequences.cosas._, types._, fns._
   import graphTypes._, morphisms._, implementations._, predicates._
 
-  implicit def evalSyntax[I0,F <: AnyGraphMorphism, O0](f: F)(implicit ev: EvalOn[I0,F,O0]): EvalSyntax[I0,F,O0]
-    = EvalSyntax(f, ev)
+  implicit final def evalWith[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
+    EvalWith[I0,F0,O0] = 
+    EvalWith(f0, ev)
 
-  case class EvalSyntax[I,F <: AnyGraphMorphism,O](val f: F, eval: EvalOn[I,F,O]) {
+  case class EvalWith[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
 
-    def runOn(input: F#In := I): F#Out := O = eval(f)(input)
+    final def runOn(input: F#In := I): F#Out := O = eval(f)(input)
 
-    // def present(implicit eval: Eval[F]): String = eval.present(f)
+    // TODO: this should output the computational behavior of the eval here
+    final def evalPlan: String = eval.present(f)
   }
 
   trait AnyEval {
@@ -33,7 +35,7 @@ object evals {
 
   trait Eval[M <: AnyGraphMorphism] extends AnyEval { type Morph = M }
 
-  //@annotation.implicitNotFound(msg = "Can't evaluate morphism ${M}")*/
+  @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
   trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] {
 
     type InVal = I
@@ -41,22 +43,25 @@ object evals {
   }
 
 
+  /*
+    This trait contains "structural" evaluators
+  */
   trait DefaultEvals {
 
     // X = X (does nothing)
-    implicit def eval_id[
+    implicit final def eval_id[
       I, X <: AnyGraphObject
     ]:  EvalOn[I, id[X], I] =
     new EvalOn[I, id[X], I] {
 
-      def apply(morph: Morph)(input: Input): Output = input
+      final def apply(morph: Morph)(input: Input): Output = input
 
-      def present(morph: Morph): String = morph.label
+      final def present(morph: Morph): String = morph.label
     }
 
 
     // F >=> S
-    implicit def eval_composition[
+    implicit final def eval_composition[
       I,
       F <: AnyGraphMorphism,
       S <: AnyGraphMorphism { type In = F#Out },
@@ -68,6 +73,7 @@ object evals {
     new EvalOn[I, F >=> S, O] {
 
       def apply(morph: Morph)(input: Input): Output = {
+
         val firstResult = evalFirst(morph.first)(input)
         evalSecond(morph.second)(morph.second.in := firstResult.value)
       }
@@ -76,7 +82,7 @@ object evals {
     }
 
     // IL ⊗ IR → OL ⊗ OR
-    implicit def eval_tensor[
+    implicit final def eval_tensor[
       IL, IR, I,
       L <: AnyGraphMorphism, R <: AnyGraphMorphism,
       OL, OR, O
@@ -99,7 +105,7 @@ object evals {
     }
 
     // IL ⊕ IR → OL ⊕ OR
-    implicit def eval_biproduct[
+    implicit final def eval_biproduct[
       IL, IR, I,
       L <: AnyGraphMorphism, R <: AnyGraphMorphism,
       OL, OR, O
@@ -122,7 +128,7 @@ object evals {
     }
 
     // △: X → X ⊗ X
-    implicit def eval_duplicate[
+    implicit final def eval_duplicate[
       I, T <: AnyGraphObject, O
     ](implicit
       outTens: TensorImpl[O, I, I]
@@ -137,7 +143,7 @@ object evals {
     }
 
     // ▽: X ⊗ X → X
-    implicit def eval_matchUp[
+    implicit final def eval_matchUp[
       I, T <: AnyGraphObject, O
     ](implicit
       tensImpl: TensorImpl[I, O, O],
@@ -153,7 +159,7 @@ object evals {
     }
 
     // X → X ⊕ X
-    implicit def eval_split[
+    implicit final def eval_split[
       I, T <: AnyGraphObject, O
     ](implicit
       outBip: BiproductImpl[O, I, I]
@@ -168,7 +174,7 @@ object evals {
     }
 
     // X ⊕ X → X
-    implicit def eval_merge[
+    implicit final def eval_merge[
       I, T <: AnyGraphObject, O
     ](implicit
       bipImpl: BiproductImpl[I, O, O],
@@ -184,7 +190,7 @@ object evals {
     }
 
     // L → L ⊕ R
-    implicit def eval_leftInj[
+    implicit final def eval_leftInj[
       L <: AnyGraphObject, R <: AnyGraphObject,
       I, OR, O
     ](implicit
@@ -200,7 +206,7 @@ object evals {
     }
 
     // R → L ⊕ R
-    implicit def eval_rightInj[
+    implicit final def eval_rightInj[
       L <: AnyGraphObject, R <: AnyGraphObject,
       OL, OR, O
     ](implicit
@@ -216,7 +222,7 @@ object evals {
     }
 
     // L ⊕ R → L
-    implicit def eval_leftProj[
+    implicit final def eval_leftProj[
       IL, IR, I,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
@@ -232,7 +238,7 @@ object evals {
     }
 
     // L ⊕ R → R
-    implicit def eval_rightProj[
+    implicit final def eval_rightProj[
       IL, IR, I,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
@@ -248,7 +254,7 @@ object evals {
     }
 
     // 0 → X
-    implicit def eval_fromZero[
+    implicit final def eval_fromZero[
       I, X <: AnyGraphObject, O
     ](implicit
       inZero:  ZeroImpl[I],
@@ -264,7 +270,7 @@ object evals {
     }
 
     // X → 0
-    implicit def eval_toZero[
+    implicit final def eval_toZero[
       I, T, X <: AnyGraphObject, O
     ](implicit
       inZero:  ZeroImpl[I],
@@ -279,7 +285,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_inE[
+    implicit final def eval_inE[
       I, E <: AnyEdge, IE, IV
     ](implicit
       vImpl:  VertexInImpl[E, I, IE, IV]
@@ -293,7 +299,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_inV[
+    implicit final def eval_inV[
       I, E <: AnyEdge, IE, IV
     ](implicit
       vImpl:  VertexInImpl[E, I, IE, IV]
@@ -307,7 +313,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_outE[
+    implicit final def eval_outE[
       I, E <: AnyEdge, OE, OV
     ](implicit
       vImpl:  VertexOutImpl[E, I, OE, OV]
@@ -323,7 +329,7 @@ object evals {
 
     
 
-    implicit def eval_outV[
+    implicit final def eval_outV[
       I, E <: AnyEdge, OE, OV
     ](implicit
       vImpl:  VertexOutImpl[E, I, OE, OV]
@@ -337,7 +343,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_source[
+    implicit final def eval_source[
       E <: AnyEdge, I, S, T
     ](implicit
       eImpl: EdgeImpl[I, S, T]
@@ -351,7 +357,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_target[
+    implicit final def eval_target[
       E <: AnyEdge, I, S, T
     ](implicit
       eImpl: EdgeImpl[I, S, T]
@@ -367,7 +373,7 @@ object evals {
 
 
     // I → X
-    implicit def eval_fromUnit[
+    implicit final def eval_fromUnit[
       O <: AnyGraphObject, RawObj, RawUnit
     ](implicit
       unitImpl:  UnitImpl[O, RawObj, RawUnit]
@@ -382,7 +388,7 @@ object evals {
     }
 
     // X → I
-    implicit def eval_toUnit[
+    implicit final def eval_toUnit[
       O <: AnyGraphObject, RawObj, RawUnit
     ](implicit
       unitImpl:  UnitImpl[O, RawObj, RawUnit]
@@ -397,7 +403,7 @@ object evals {
     }
 
 
-    implicit def eval_get[
+    implicit final def eval_get[
       P <: AnyGraphProperty, RawElem, RawValue
     ](implicit
       propImpl: PropertyImpl[P, RawElem, RawValue]
@@ -411,7 +417,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    implicit def eval_lookup[
+    implicit final def eval_lookup[
       P <: AnyGraphProperty, RawElem, RawValue
     ](implicit
       propImpl: PropertyImpl[P, RawElem, RawValue]
@@ -426,7 +432,7 @@ object evals {
     }
 
 
-    implicit def eval_quantify[
+    implicit final def eval_quantify[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
       predImpl: PredicateImpl[RawPred, RawElem]
@@ -441,7 +447,7 @@ object evals {
     }
 
 
-    implicit def eval_coerce[
+    implicit final def eval_coerce[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
       predImpl: PredicateImpl[RawPred, RawElem]
