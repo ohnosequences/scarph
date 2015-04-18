@@ -91,9 +91,12 @@ object graphTypes {
   }
 
   /* Property values have raw types that are covered as graph objects */
-  trait AnyValueType extends AnyProperty with AnyGraphObject
+  trait AnyValueType extends AnyProperty with AnyGraphObject {
 
-  abstract class ValueOfType[R](val label: String)
+    def rawTag: scala.reflect.ClassTag[Raw]
+  }
+
+  class ValueOfType[R](val label: String)(implicit val rawTag: scala.reflect.ClassTag[R])
     extends AnyValueType { type Raw = R }
 
   /* This is like an edge between an element and a raw type */

@@ -12,7 +12,7 @@ object isomorphisms {
 
   // σ: L ⊗ R → R ⊗ L
   case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
-    extends AnyIsomorphism with AnyDaggerPrimitive {
+    extends AnyIsomorphism {
 
     type     In = L ⊗ R
     lazy val in = l ⊗ r

@@ -50,7 +50,7 @@ class DummyTests extends org.scalatest.FunSuite {
     println("------------")
     println(query14.present)
     println("------------")
-    println(query15.present)
+    //println(query15.present)*/
 
 
   }

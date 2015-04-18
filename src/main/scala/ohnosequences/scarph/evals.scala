@@ -273,7 +273,7 @@ object evals {
     implicit def eval_inE[
       I, E <: AnyEdge, IE, IV
     ](implicit
-      vImpl:  VertexInImpl[I, IE, IV]
+      vImpl:  VertexInImpl[E, I, IE, IV]
     ):  EvalOn[I, inE[E], IE] =
     new EvalOn[I, inE[E], IE] {
 
@@ -287,7 +287,7 @@ object evals {
     implicit def eval_inV[
       I, E <: AnyEdge, IE, IV
     ](implicit
-      vImpl:  VertexInImpl[I, IE, IV]
+      vImpl:  VertexInImpl[E, I, IE, IV]
     ):  EvalOn[I, inV[E], IV] =
     new EvalOn[I, inV[E], IV] {
 
@@ -301,7 +301,7 @@ object evals {
     implicit def eval_outE[
       I, E <: AnyEdge, OE, OV
     ](implicit
-      vImpl:  VertexOutImpl[I, OE, OV]
+      vImpl:  VertexOutImpl[E, I, OE, OV]
     ):  EvalOn[I, outE[E], OE] =
     new EvalOn[I, outE[E], OE] {
 
@@ -317,7 +317,7 @@ object evals {
     implicit def eval_outV[
       I, E <: AnyEdge, OE, OV
     ](implicit
-      vImpl:  VertexOutImpl[I, OE, OV]
+      vImpl:  VertexOutImpl[E, I, OE, OV]
     ):  EvalOn[I, outV[E], OV] =
     new EvalOn[I, outV[E], OV] {
 
@@ -359,14 +359,14 @@ object evals {
 
     // I → X
     implicit def eval_fromUnit[
-      I, X <: AnyGraphObject, O
+      O <: AnyGraphObject, RawObj, RawUnit
     ](implicit
-      unitImpl:  UnitImpl[I, O]
-    ):  EvalOn[I, fromUnit[X], O] =
-    new EvalOn[I, fromUnit[X], O] {
+      unitImpl:  UnitImpl[O, RawObj, RawUnit]
+    ):  EvalOn[RawUnit, fromUnit[O], RawObj] =
+    new EvalOn[RawUnit, fromUnit[O], RawObj] {
 
       def apply(morph: Morph)(input: Input): Output = {
-        morph.out := unitImpl.fromUnit(input.value)
+        morph.out := unitImpl.fromUnit(input.value, morph.obj)
       }
 
       def present(morph: Morph): String = morph.label
@@ -374,11 +374,11 @@ object evals {
 
     // X → I
     implicit def eval_toUnit[
-      I, X <: AnyGraphObject, O
+      O <: AnyGraphObject, RawObj, RawUnit
     ](implicit
-      unitImpl:  UnitImpl[O, I]
-    ):  EvalOn[I, toUnit[X], O] =
-    new EvalOn[I, toUnit[X], O] {
+      unitImpl:  UnitImpl[O, RawObj, RawUnit]
+    ):  EvalOn[RawObj, toUnit[O], RawUnit] =
+    new EvalOn[RawObj, toUnit[O], RawUnit] {
 
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := unitImpl.toUnit(input.value)
@@ -389,11 +389,11 @@ object evals {
 
 
     implicit def eval_get[
-      P <: AnyGraphProperty, ElemImpl, RawImpl
+      P <: AnyGraphProperty, RawElem, RawValue
     ](implicit
-      propImpl: PropertyImpl[P, RawImpl, ElemImpl]
-    ):  EvalOn[ElemImpl, get[P], RawImpl] =
-    new EvalOn[ElemImpl, get[P], RawImpl] {
+      propImpl: PropertyImpl[P, RawElem, RawValue]
+    ):  EvalOn[RawElem, get[P], RawValue] =
+    new EvalOn[RawElem, get[P], RawValue] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := propImpl.get(input.value, morph.property)
@@ -403,11 +403,11 @@ object evals {
     }
 
     implicit def eval_lookup[
-      P <: AnyGraphProperty, ElemImpl, RawImpl
+      P <: AnyGraphProperty, RawElem, RawValue
     ](implicit
-      propImpl: PropertyImpl[P, RawImpl, ElemImpl]
-    ):  EvalOn[RawImpl, lookup[P], ElemImpl] =
-    new EvalOn[RawImpl, lookup[P], ElemImpl] {
+      propImpl: PropertyImpl[P, RawElem, RawValue]
+    ):  EvalOn[RawValue, lookup[P], RawElem] =
+    new EvalOn[RawValue, lookup[P], RawElem] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := propImpl.lookup(input.value, morph.property)
@@ -418,11 +418,11 @@ object evals {
 
 
     implicit def eval_quantify[
-      P <: AnyPredicate, ElemImpl, PredImpl
+      P <: AnyPredicate, RawPred, RawElem
     ](implicit
-      predImpl: PredicateImpl[PredImpl, ElemImpl]
-    ):  EvalOn[ElemImpl, quantify[P], PredImpl] =
-    new EvalOn[ElemImpl, quantify[P], PredImpl] {
+      predImpl: PredicateImpl[RawPred, RawElem]
+    ):  EvalOn[RawElem, quantify[P], RawPred] =
+    new EvalOn[RawElem, quantify[P], RawPred] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := predImpl.quantify(input.value, morph.predicate)
@@ -433,11 +433,11 @@ object evals {
 
 
     implicit def eval_coerce[
-      P <: AnyPredicate, ElemImpl, PredImpl
+      P <: AnyPredicate, RawPred, RawElem
     ](implicit
-      predImpl: PredicateImpl[PredImpl, ElemImpl]
-    ):  EvalOn[PredImpl, coerce[P], ElemImpl] =
-    new EvalOn[PredImpl, coerce[P], ElemImpl] {
+      predImpl: PredicateImpl[RawPred, RawElem]
+    ):  EvalOn[RawPred, coerce[P], RawElem] =
+    new EvalOn[RawPred, coerce[P], RawElem] {
 
       def apply(morph: Morph)(input: Input): Output = {
         (morph.out: Morph#Out) := predImpl.coerce(input.value)

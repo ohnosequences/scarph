@@ -15,23 +15,23 @@ object morphisms {
     }
   }
 
-  trait AnyDaggerPrimitive extends AnyPrimitive {
+  // trait AnyDaggerPrimitive extends AnyPrimitive {
 
-    type Dagger <: AnyStraightPrimitive
-    val  dagger: Dagger
-  }
+  //   type Dagger <: AnyStraightPrimitive
+  //   val  dagger: Dagger
+  // }
 
-  abstract class DaggerOf[M <: AnyStraightPrimitive](val m: M) extends AnyDaggerPrimitive {
+  // abstract class DaggerOf[M <: AnyStraightPrimitive](val m: M) extends AnyDaggerPrimitive {
 
-    type     Dagger = M
-    lazy val dagger = m
+  //   type     Dagger = M
+  //   lazy val dagger = m
 
-    type     In = Dagger#Out
-    lazy val in = dagger.out
+  //   type     In = Dagger#Out
+  //   lazy val in = dagger.out
 
-    type     Out = Dagger#In
-    lazy val out = dagger.in
-  }
+  //   type     Out = Dagger#In
+  //   lazy val out = dagger.in
+  // }
 
 
   // id: X → X
@@ -51,22 +51,26 @@ object morphisms {
 
 
   // I → X
-  case class fromUnit[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
+  case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyStraightPrimitive {
+    
+    type Obj = X
 
     type     In = unit
     lazy val in = unit
 
-    type     Out = X
-    lazy val out = x
+    type     Out = Obj
+    lazy val out = obj
 
-    type     Dagger = toUnit[X]
-    lazy val dagger = toUnit(x)
+    type     Dagger = toUnit[Obj]
+    lazy val dagger = toUnit(obj)
 
-    lazy val label = s"fromUnit(${x.label})"
+    lazy val label = s"fromUnit(${obj.label})"
   }
 
   // X → I
   case class toUnit[X <: AnyGraphObject](x: X) extends AnyStraightPrimitive {
+
+    type Obj = X
 
     type     Out = unit
     lazy val out = unit
