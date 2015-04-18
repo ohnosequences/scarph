@@ -2,78 +2,62 @@
 ```scala
 package ohnosequences.scarph.test
 
-import ohnosequences.cosas._, typeSets._
+object Queries {
 
-import ohnosequences.{ scarph => s }
-import s.graphTypes._, s.schemas._
+  import ohnosequences.{ scarph => s }
+  import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.conditions._, s.predicates._
+  import s.syntax._, morphisms._, conditions._, predicates._
+  import s.test.twitter._
 
+   val edus    = user ? (user.name === "@eparejatobes")
+  // val alexeys = twitter.query(user ? (name === "@laughedelic"))
+  // val kims    = twitter.query(user ? (name === "@evdokim"))
+  // val tweets  = twitter.query(tweet ? (text === "back to twitter :)"))
+  // val posts   = twitter.query(posted ? (time === "13.11.2012"))
 
-object twitter extends AnyGraphSchema {
+  val userName   = id(user).get(user.name)
+  val tweetText  = id(tweet).get(tweet.text)
+  val postedTime = id(posted).get(posted.time)
+  implicitly[ userName.type <:< (user.type --> name.type) ]
 
-  lazy val label = this.toString
+  val tweetPosterName = inE(posted).source.get(user.name)
 
-  lazy val vertices: Set[AnyVertex] = Set(user, tweet)
+  val fffolowees = outV(follows).outV(follows).outV(follows)
 
-  lazy val edges: Set[AnyEdge] = Set(posted, follows, liked)
+  val sourceAndTarget = duplicate(posted).andThen( source(posted) ⊗ target(posted) )
 
-  lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
+  val friends = inV(follows) ⊗ outV(follows)
 
-  lazy val properties: Set[AnyGraphProperty] = Set(
-    user.name,
-    user.age,
-    user.bio,
-    user.webpage,
-    tweet.text,
-    tweet.url,
-    posted.time,
-    liked.time,
-    reposted.time
-  )
-```
+  val friends1 = duplicate(user) >=> ( friends )
+  val friends2 = duplicate(user) >=> ( friends >=> friends )
+  val friends3 = duplicate(user) >=> ( friends >=> friends >=> friends )
 
-Property value types
+  implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
+  implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
 
-```scala
-  case object name extends ValueOfType[String]("name")
-  case object age  extends ValueOfType[Integer]("age")
-  case object text extends ValueOfType[String]("text")
-  case object time extends ValueOfType[String]("time") // should have some better raw type
-  case object url  extends ValueOfType[String]("url")
-```
+  val twist1 = friends.twist
+  val twist2 = friends.duplicate.twist
+  val twist3 = duplicate(user).twist
+  val twist4 = duplicate(user).twist.twist
 
-Vertices with their properties
+  val match1 = friends.matchUp
+  val match2 = friends.twist.matchUp
+  val match3 = friends.duplicate.matchUp
+  val match4 = duplicate(tweet).matchUp
+  //val match5 = (id(user) ⊗ id(tweet)).matchUp
 
-```scala
-  case object user extends Vertex("user") {
-    case object name    extends Property(user -> twitter.name)("name")
-    case object age     extends Property(user -> twitter.age)("age")
-    // example of shared value types:
-    case object bio     extends Property(user -> twitter.text)("bio")
-    case object webpage extends Property(user -> twitter.url)("webpage")
-  }
+  val bip = inV(follows) ⊕ outV(follows)
+  val inFriends  = bip.leftProj
+  val outFriends = bip.rightProj
+  val allFriends = bip.merge
 
-  case object tweet extends Vertex("tweet") {
-    case object text extends Property(tweet -> twitter.text)("text")
-    case object url  extends Property(tweet -> twitter.url)("url")
-  }
-```
+  val injectL = outV(liked).leftInj(tweet ⊕ user)
+  val injectR = inV(posted).rightInj(tweet ⊕ user)
 
-Edges with their properties
+  // funny check / coerce
+  val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
 
-```scala
-  case object posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted") {
-    case object time  extends Property(posted -> twitter.time)("time")
-  }
-
-  case object follows extends Edge(ManyOrNone(user) -> ManyOrNone(user))("follows")
-
-  case object liked extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("liked") {
-    case object time extends Property(liked -> twitter.time)("time")
-  }
-
-  case object reposted extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("reposted") {
-    case object time extends Property(reposted -> twitter.time)("time")
-  }
+  val edusTweets = edusAgain andThen edusAgain.dagger.outV(posted)
 
 }
 
