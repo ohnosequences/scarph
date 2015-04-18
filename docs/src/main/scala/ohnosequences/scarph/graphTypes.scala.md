@@ -1,38 +1,52 @@
+
+```scala
 package ohnosequences.scarph
 
 object graphTypes {
 
   import monoidalStructures._
   import ohnosequences.cosas._, types._, properties._
+```
 
-  /* A graph type is kind of an n-morphism
+A graph type is kind of an n-morphism
 
-     The full hierarchy looks like this:
+The full hierarchy looks like this:
 
-     - AnyGraphType
-         - AnyGraphObject
-             - AnyGraphElement (sealed)
-                 - AnyVertex
-                 - AnyEdge
-             - AnyGraphProperty
-             - AnyPredicate
-             - AnyIndex
-             - AnyGraphSchema
-         - AnyGraphMorphism
-             - AnyComposition (sealed)
-             - AnyTensor (sealed)
-             - AnyBiproduct (sealed)
-             - primitives
-  */
+- AnyGraphType
+    - AnyGraphObject
+        - AnyGraphElement (sealed)
+            - AnyVertex
+            - AnyEdge
+        - AnyGraphProperty
+        - AnyPredicate
+        - AnyIndex
+        - AnyGraphSchema
+    - AnyGraphMorphism
+        - AnyComposition (sealed)
+        - AnyTensor (sealed)
+        - AnyBiproduct (sealed)
+        - primitives
+
+
+```scala
   trait AnyGraphType extends AnyType
+```
 
-  /* Graph objects are represented as their id-morphisms */
+Graph objects are represented as their id-morphisms
+
+```scala
   trait AnyGraphObject extends AnyGraphType
+```
 
-  /* A graph element is either a vertex or an edge, only they can have properties */
+A graph element is either a vertex or an edge, only they can have properties
+
+```scala
   sealed trait AnyGraphElement extends AnyGraphObject
+```
 
-  /* Vertex type is very simple */
+Vertex type is very simple
+
+```scala
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
 
@@ -49,9 +63,11 @@ object graphTypes {
   case class AtLeastOne[V <: AnyVertex](v: V) extends Arity[V](v)
   case class ExactlyOne[V <: AnyVertex](v: V) extends Arity[V](v)
   case class ManyOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+```
 
+Edges connect vertices and have in/out arities
 
-  /* Edges connect vertices and have in/out arities */
+```scala
   trait AnyEdge extends AnyGraphElement {
 
     type SourceArity <: AnyArity
@@ -67,8 +83,11 @@ object graphTypes {
     type TargetVertex <: TargetArity#Vertex
     val  targetVertex: TargetVertex
   }
+```
 
-  /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
+This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted")
+
+```scala
   class Edge[S <: AnyArity, T <: AnyArity]( st: (S, T))(val label: String) extends AnyEdge {
 
     type SourceArity = S
@@ -89,7 +108,11 @@ object graphTypes {
   }
 
   import scala.reflect.ClassTag
-  /* Property values have raw types that are covered as graph objects */
+```
+
+Property values have raw types that are covered as graph objects
+
+```scala
   trait AnyValueType extends AnyProperty with AnyGraphObject {
 
     def rawTag: ClassTag[Raw]
@@ -99,8 +122,11 @@ object graphTypes {
 
     type Raw = R 
   }
+```
 
-  /* This is like an edge between an element and a raw type */
+This is like an edge between an element and a raw type
+
+```scala
   trait AnyGraphProperty extends AnyGraphType {
 
     type Owner <: AnyGraphElement
@@ -119,8 +145,11 @@ object graphTypes {
     type Value = V
     val value: V = st._2
   }
+```
 
-  /* Morphisms are spans */
+Morphisms are spans
+
+```scala
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
 
     type In <: AnyGraphObject
@@ -134,8 +163,11 @@ object graphTypes {
   }
 
   type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+```
 
-  /* Sequential composition of two morphisms */
+Sequential composition of two morphisms
+
+```scala
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
     type First <: AnyGraphMorphism
@@ -164,9 +196,11 @@ object graphTypes {
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
   }
+```
 
+Basic aliases
 
-  /* Basic aliases */
+```scala
   type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
 
 
@@ -205,3 +239,57 @@ object graphTypes {
   }
 
 }
+
+```
+
+
+------
+
+### Index
+
++ src
+  + test
+    + scala
+      + ohnosequences
+        + scarph
+          + [TwitterQueries.scala][test/scala/ohnosequences/scarph/TwitterQueries.scala]
+          + impl
+            + [dummyTest.scala][test/scala/ohnosequences/scarph/impl/dummyTest.scala]
+            + [dummy.scala][test/scala/ohnosequences/scarph/impl/dummy.scala]
+          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
+  + main
+    + scala
+      + ohnosequences
+        + scarph
+          + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
+          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
+          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
+          + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
+          + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
+          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
+          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
+          + syntax
+            + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
+            + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
+            + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
+            + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
+          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
+
+[test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
+[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
+[test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/morphisms.scala]: morphisms.scala.md
+[main/scala/ohnosequences/scarph/predicates.scala]: predicates.scala.md
+[main/scala/ohnosequences/scarph/monoidalStructures.scala]: monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/evals.scala]: evals.scala.md
+[main/scala/ohnosequences/scarph/implementations.scala]: implementations.scala.md
+[main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
+[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: naturalIsomorphisms.scala.md
+[main/scala/ohnosequences/scarph/graphTypes.scala]: graphTypes.scala.md
+[main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
+[main/scala/ohnosequences/scarph/syntax/predicates.scala]: syntax/predicates.scala.md
+[main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: syntax/graphTypes.scala.md
+[main/scala/ohnosequences/scarph/syntax/conditions.scala]: syntax/conditions.scala.md
+[main/scala/ohnosequences/scarph/conditions.scala]: conditions.scala.md

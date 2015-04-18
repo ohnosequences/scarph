@@ -17,7 +17,7 @@ object conditions {
     lazy val element = property.owner
 
     val label: String
-    override def toString = label
+    override final def toString = label
   }
 
   object AnyCondition {
