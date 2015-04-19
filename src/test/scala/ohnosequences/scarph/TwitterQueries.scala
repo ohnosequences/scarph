@@ -1,15 +1,15 @@
 package ohnosequences.scarph.test
 
-object Queries {
+case object Queries {
 
   import ohnosequences.{ scarph => s }
   import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.conditions._, s.predicates._
   import s.syntax._, morphisms._, conditions._, predicates._
   import s.test.twitter._
 
-   val edus    = user ? (user.name === "@eparejatobes")
-  // val alexeys = twitter.query(user ? (name === "@laughedelic"))
-  // val kims    = twitter.query(user ? (name === "@evdokim"))
+  val edus    = user ? (user.name === "@eparejatobes")
+  val alexeys = user ? (user.name === "@laughedelic")
+  val kims    = user ? (user.name === "@evdokim")
   // val tweets  = twitter.query(tweet ? (text === "back to twitter :)"))
   // val posts   = twitter.query(posted ? (time === "13.11.2012"))
 
@@ -42,7 +42,6 @@ object Queries {
   val match2 = friends.twist.matchUp
   val match3 = friends.duplicate.matchUp
   val match4 = duplicate(tweet).matchUp
-  //val match5 = (id(user) ⊗ id(tweet)).matchUp
 
   val bip = inV(follows) ⊕ outV(follows)
   val inFriends  = bip.leftProj
@@ -52,9 +51,7 @@ object Queries {
   val injectL = outV(liked).leftInj(tweet ⊕ user)
   val injectR = inV(posted).rightInj(tweet ⊕ user)
 
-  // funny check / coerce
   val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
 
   val edusTweets = edusAgain andThen edusAgain.dagger.outV(posted)
-
 }
