@@ -54,13 +54,13 @@ class DummyTests extends org.scalatest.FunSuite {
     // no distribute eval
     // println(query15.present)*/
 
-    val uh2 = query2 on (user := Dummy)
+    val uh2 = getEvaluate(query2) on (user := Dummy)
 
-    val uh1 = query1 on (name := Dummy)
+    val uh1 = getEvaluate(query1) on (name := Dummy)
 
-    val uh1a = (name := Dummy) :=>: query1
+    val uh1a = (name := Dummy) :=>: getEvaluate(query1)
 
-    assert( 
+    assert(
       query6.dagger.dagger === query6
     )
   }
