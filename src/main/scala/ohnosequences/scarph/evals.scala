@@ -168,12 +168,12 @@ object evals {
     }
 
     // X → X ⊕ X
-    implicit final def eval_split[
+    implicit final def eval_fork[
       I, T <: AnyGraphObject, O
     ](implicit
       outBip: BiproductImpl[O, I, I]
-    ):  EvalOn[I, split[T], O] =
-    new EvalOn[I, split[T], O] {
+    ):  EvalOn[I, fork[T], O] =
+    new EvalOn[I, fork[T], O] {
 
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip(input.value, input.value)
@@ -444,7 +444,7 @@ object evals {
     implicit final def eval_quantify[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
-      predImpl: PredicateImpl[RawPred, RawElem]
+      predImpl: PredicateImpl[P, RawPred, RawElem]
     ):  EvalOn[RawElem, quantify[P], RawPred] =
     new EvalOn[RawElem, quantify[P], RawPred] {
 
@@ -459,7 +459,7 @@ object evals {
     implicit final def eval_coerce[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
-      predImpl: PredicateImpl[RawPred, RawElem]
+      predImpl: PredicateImpl[P, RawPred, RawElem]
     ):  EvalOn[RawPred, coerce[P], RawElem] =
     new EvalOn[RawPred, coerce[P], RawElem] {
 

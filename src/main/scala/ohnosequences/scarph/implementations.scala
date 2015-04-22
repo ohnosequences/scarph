@@ -181,17 +181,20 @@ object implementations {
 
   trait AnyPredicateImpl extends Any {
 
+    type Predicate <: AnyPredicate
+
     type RawPredicate
-    def quantify[P <: AnyPredicate](e: RawElement, p: P): RawPredicate
+    def quantify(e: RawElement, p: Predicate): RawPredicate
 
     type RawElement
     def coerce(p: RawPredicate): RawElement
   }
 
-  trait PredicateImpl[P, E] extends Any with AnyPredicateImpl {
+  trait PredicateImpl[P <: AnyPredicate, RP, RE] extends Any with AnyPredicateImpl {
 
-    type RawPredicate = P
-    type RawElement = E
+    type Predicate = P
+    type RawPredicate = RP
+    type RawElement = RE
   }
 
 }

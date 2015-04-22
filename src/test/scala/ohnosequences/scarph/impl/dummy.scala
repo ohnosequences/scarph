@@ -95,11 +95,11 @@ object dummy extends DefaultEvals {
   }
 
 
-  implicit def dummyPredicateImpl:
-      PredicateImpl[Dummy, Dummy] =
-  new PredicateImpl[Dummy, Dummy] {
+  implicit def dummyPredicateImpl[P <: AnyPredicate]:
+      PredicateImpl[P, Dummy, Dummy] =
+  new PredicateImpl[P, Dummy, Dummy] {
 
-    def quantify[P <: AnyPredicate](e: RawElement, p: P): RawPredicate = Dummy
+    def quantify(e: RawElement, p: Predicate): RawPredicate = Dummy
     def coerce(p: RawPredicate): RawElement = Dummy
   }
 
