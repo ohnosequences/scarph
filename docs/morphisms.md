@@ -29,7 +29,7 @@
 
 | `X <: AnyGraphObject` |    type     | syntax   |
 |----------------------:|:-----------:|:---------|
-|            `split[X]` | `X → X ⊕ X` | `.split` |
+|             `fork[X]` | `X → X ⊕ X` | `.fork`  |
 |            `merge[X]` | `X ⊕ X → X` | `.merge` |
 
 
@@ -89,7 +89,7 @@
 |         `coerce[P]` | `P → P#Element` | `.coerce`                |
 
 
-#### Additional syntax 
+#### Additional syntax
 
 - `a.andThen(b) = a >=> b`
 - `.filter(predicate) = .quantify(predicate).coerce`

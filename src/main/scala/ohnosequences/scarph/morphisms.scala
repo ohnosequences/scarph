@@ -31,7 +31,7 @@ object morphisms {
 
   // I → X
   case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitive {
-    
+
     type Obj = X
 
     type     In = unit
@@ -60,7 +60,7 @@ object morphisms {
     type     Dagger = fromUnit[X]
     lazy val dagger = fromUnit(x)
 
-    lazy val label = s"toUnit(${x.label})" 
+    lazy val label = s"toUnit(${x.label})"
   }
 
   // △: X → X ⊗ X
@@ -80,7 +80,7 @@ object morphisms {
 
   // ▽: X ⊗ X → X
   case class matchUp[X <: AnyGraphObject](x: X) extends AnyPrimitive {
-    
+
     type     Out = X
     lazy val out = x
 
@@ -111,7 +111,7 @@ object morphisms {
 
   // X → 0
   case class toZero[X <: AnyGraphObject](x: X) extends AnyPrimitive {
-    
+
     type     Out = zero
     lazy val out = zero
 
@@ -121,11 +121,11 @@ object morphisms {
     type     Dagger = fromZero[X]
     lazy val dagger = fromZero(x)
 
-    lazy val label = s"toZero(${x.label})" 
+    lazy val label = s"toZero(${x.label})"
   }
-  
+
   // X -> X ⊕ X
-  case class split[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = X
     lazy val in = x
@@ -136,20 +136,20 @@ object morphisms {
     type     Dagger = merge[X]
     lazy val dagger = merge(x)
 
-    lazy val label = s"split(${x.label})"
+    lazy val label = s"fork(${x.label})"
   }
 
   // X ⊕ X -> X
   case class merge[X <: AnyGraphObject](x: X) extends AnyPrimitive {
-    
+
     type     Out = X
     lazy val out = x
 
     type     In = BiproductObj[X, X]
     lazy val in = BiproductObj(x, x)
 
-    type     Dagger = split[X]
-    lazy val dagger = split(x)
+    type     Dagger = fork[X]
+    lazy val dagger = fork(x)
 
     lazy val label = s"merge(${x.label} ⊕ ${x.label})"
   }
@@ -157,7 +157,7 @@ object morphisms {
 
   // L → L ⊕ R
   case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
-    
+
     type Biproduct = B
 
     type     In = Biproduct#Left
@@ -174,7 +174,7 @@ object morphisms {
 
   // L ⊕ R → L
   case class leftProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
-    
+
     type Biproduct = B
 
     type     Out = Biproduct#Left
@@ -186,7 +186,7 @@ object morphisms {
     type     Dagger = leftInj[Biproduct]
     lazy val dagger = leftInj(biproduct)
 
-    lazy val label = s"leftProj(${biproduct.label})" 
+    lazy val label = s"leftProj(${biproduct.label})"
   }
 
 
@@ -208,7 +208,7 @@ object morphisms {
 
   // L ⊕ R → R
   case class rightProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
-    
+
     type Biproduct = B
 
     type     Out = Biproduct#Right
@@ -220,12 +220,12 @@ object morphisms {
     type     Dagger = rightInj[Biproduct]
     lazy val dagger = rightInj(biproduct)
 
-    lazy val label = s"leftProj(${biproduct.label})" 
+    lazy val label = s"leftProj(${biproduct.label})"
   }
 
 
   case class target[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     In = Edge
@@ -241,7 +241,7 @@ object morphisms {
   }
 
   case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     Out = Edge
@@ -259,7 +259,7 @@ object morphisms {
 
 
   case class source[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     In = Edge
@@ -275,7 +275,7 @@ object morphisms {
   }
 
   case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     Out = Edge
@@ -292,7 +292,7 @@ object morphisms {
 
 
   case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     In = Edge#SourceVertex
@@ -308,7 +308,7 @@ object morphisms {
   }
 
   case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     Out = Edge#SourceVertex
@@ -357,7 +357,7 @@ object morphisms {
 
 
   case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitive {
-    
+
     type Predicate = P
 
     type     In = Predicate#Element
@@ -374,7 +374,7 @@ object morphisms {
 
 
   case class coerce[P <: AnyPredicate](val predicate: P) extends AnyPrimitive {
-    
+
     type Predicate = P
 
     type     Out = Predicate#Element

@@ -6,17 +6,17 @@ object evals {
   import ohnosequences.cosas._, types._, fns._
   import graphTypes._, morphisms._, implementations._, predicates._
 
-  implicit final def getEvaluate[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
-    evaluate[I0,F0,O0] = 
+  implicit final def getEvaluate[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
+    evaluate[I0,F0,O0] =
     new evaluate(f0, ev)
 
   object evaluate {
 
-    def apply[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
-      evaluate[I0,F0,O0] = 
+    def apply[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
+      evaluate[I0,F0,O0] =
       new evaluate(f0, ev)
   }
-  
+
   final class evaluate[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
 
     final def on(input: F#In := I): F#Out := O = eval(f)(input)
@@ -336,7 +336,7 @@ object evals {
       def present(morph: Morph): String = morph.label
     }
 
-    
+
 
     implicit final def eval_outV[
       I, E <: AnyEdge, OE, OV

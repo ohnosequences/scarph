@@ -20,9 +20,9 @@ object morphisms {
       F >=> s.morphisms.duplicate[F#Out] =
       f >=> s.morphisms.duplicate(f.out)
 
-    def split:
-      F >=> s.morphisms.split[F#Out] =
-      f >=> s.morphisms.split(f.out)
+    def fork:
+      F >=> s.morphisms.fork[F#Out] =
+      f >=> s.morphisms.fork(f.out)
 
 
     def toUnit:
