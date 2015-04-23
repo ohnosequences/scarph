@@ -95,9 +95,9 @@ object graphTypes {
     def rawTag: ClassTag[Raw]
   }
 
-  class ValueOfType[R](val label: String)(implicit val rawTag: ClassTag[R]) extends AnyValueType { 
+  class ValueOfType[R](val label: String)(implicit val rawTag: ClassTag[R]) extends AnyValueType {
 
-    type Raw = R 
+    type Raw = R
   }
 
   /* This is like an edge between an element and a raw type */
@@ -133,7 +133,7 @@ object graphTypes {
     val  dagger: Dagger
   }
 
-  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
 
   /* Sequential composition of two morphisms */
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
@@ -194,14 +194,6 @@ object graphTypes {
 
     def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
     def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
-
-    // TODO: remove this, use the eval-specific typeclass
-    import evals._
-
-    def evalOn[I, O](input: F#In := I)
-      (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
-
-    def present(implicit eval: Eval[F]): String = eval.present(f)
   }
 
 }

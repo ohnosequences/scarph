@@ -6,30 +6,15 @@ object evals {
   import ohnosequences.cosas._, types._, fns._
   import graphTypes._, morphisms._, implementations._, predicates._
 
-  implicit final def getEvaluate[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
-    evaluate[I0,F0,O0] =
-    new evaluate(f0, ev)
-
-  object evaluate {
-
-    def apply[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
-      evaluate[I0,F0,O0] =
-      new evaluate(f0, ev)
-  }
-
-  final class evaluate[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
-
-    final def on(input: F#In := I): F#Out := O = eval(f)(input)
-
-    final def :=>:(input: F#In := I): F#Out := O = eval(f)(input)
-
-    // TODO: this should output the computational behavior of the eval here
-    final def evalPlan: String = eval.present(f)
-  }
-
-  trait AnyEval {
+  trait AnyMorphismFunctor {
 
     type Morph <: AnyGraphMorphism
+    type OutMorph
+
+    def apply(morph: Morph): OutMorph
+  }
+
+  trait AnyEval extends AnyMorphismFunctor {
 
     type InVal
     type OutVal
@@ -37,25 +22,69 @@ object evals {
     type Input = Morph#In := InVal
     type Output = Morph#Out := OutVal
 
-    def apply(morph: Morph)(input: Input): Output
+    type OutMorph = Function1[Input, Output]
 
     def present(morph: Morph): String
   }
 
-  trait Eval[M <: AnyGraphMorphism] extends AnyEval { type Morph = M }
-
   @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
-  trait EvalOn[I, M <: AnyGraphMorphism, O] extends Eval[M] {
+  trait EvalOn[I, M <: AnyGraphMorphism, O] extends AnyEval {
 
+    type Morph = M
     type InVal = I
     type OutVal = O
   }
 
+  trait AnyRewrite extends AnyMorphismFunctor {
 
-  /*
-    This trait contains "structural" evaluators
-  */
-  trait DefaultEvals {
+    type OutMorph <: Morph#In --> Morph#Out
+  }
+
+  @annotation.implicitNotFound(msg = "Cannot rewrite morphism ${M} to ${OM}")
+  trait Rewrite[M <: AnyGraphMorphism, OM <: M#In --> M#Out] extends AnyRewrite {
+
+    type Morph = M
+    type OutMorph = OM
+  }
+
+
+  def rewrite[M <: AnyGraphMorphism, OM <: M#In --> M#Out]
+    (m: M)(implicit rewr: Rewrite[M, OM]): OM = rewr(m)
+
+
+  object evaluate {
+
+    // def apply[I, M <: AnyGraphMorphism, O](m: M)(implicit
+    //   ev: EvalOn[I, M, O]
+    // ): evaluate[I, M, O] = new evaluate(m, ev)
+
+    def apply[I, M <: AnyGraphMorphism, OM <: M#In --> M#Out, O](m: M)(implicit
+      rewrite: Rewrite[M, OM],
+      ev: EvalOn[I, OM, O]
+    ): evaluate[I, OM, O] = new evaluate(rewrite(m), ev)
+  }
+
+  final class evaluate[I, M <: AnyGraphMorphism, O](val f: M, val eval: EvalOn[I, M, O]) {
+
+    final def on(input: M#In := I): M#Out := O = eval(f).apply(input)
+
+    // TODO: this should output the computational behavior of the eval here
+    final def evalPlan: String = eval.present(f)
+  }
+
+
+  trait DefaultEvals extends AfterRewritingEvals {
+
+    implicit def id_rewrite[
+      M <: AnyGraphMorphism
+    ]:  Rewrite[M, M] =
+    new Rewrite[M, M] {
+
+      def apply(morph: Morph): OutMorph = morph
+    }
+  }
+
+  trait AfterRewritingEvals {
 
     // X = X (does nothing)
     implicit final def eval_id[
@@ -63,7 +92,7 @@ object evals {
     ]:  EvalOn[I, id[X], I] =
     new EvalOn[I, id[X], I] {
 
-      final def apply(morph: Morph)(input: Input): Output = input
+      final def apply(morph: Morph): OutMorph = { input: Input => input }
 
       final def present(morph: Morph): String = morph.label
     }
@@ -81,7 +110,7 @@ object evals {
     ):  EvalOn[I, F >=> S, O] =
     new EvalOn[I, F >=> S, O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
 
         val firstResult = evalFirst(morph.first)(input)
         evalSecond(morph.second)(morph.second.in := firstResult.value)
@@ -103,7 +132,7 @@ object evals {
     ):  EvalOn[I, TensorMorph[L, R], O] =
     new EvalOn[I, TensorMorph[L, R], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outTens(
           evalLeft(morph.left)  ( (morph.left.in:  L#In) := inTens.leftProj(input.value) ).value,
           evalRight(morph.right)( (morph.right.in: R#In) := inTens.rightProj(input.value) ).value
@@ -126,7 +155,7 @@ object evals {
     ):  EvalOn[I, BiproductMorph[L, R], O] =
     new EvalOn[I, BiproductMorph[L, R], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outBip(
           evalLeft(morph.left)  ( (morph.left.in:  L#In) := inBip.leftProj(input.value) ).value,
           evalRight(morph.right)( (morph.right.in: R#In) := inBip.rightProj(input.value) ).value
@@ -144,7 +173,7 @@ object evals {
     ):  EvalOn[I, duplicate[T], O] =
     new EvalOn[I, duplicate[T], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outTens(input.value, input.value)
       }
 
@@ -160,7 +189,7 @@ object evals {
     ):  EvalOn[I, matchUp[T], O] =
     new EvalOn[I, matchUp[T], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := matchImpl.matchUp(tensImpl.leftProj(input.value), tensImpl.rightProj(input.value))
       }
 
@@ -175,7 +204,7 @@ object evals {
     ):  EvalOn[I, fork[T], O] =
     new EvalOn[I, fork[T], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outBip(input.value, input.value)
       }
 
@@ -191,7 +220,7 @@ object evals {
     ):  EvalOn[I, merge[T], O] =
     new EvalOn[I, merge[T], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := mergeImpl.merge(bipImpl.leftProj(input.value), bipImpl.rightProj(input.value))
       }
 
@@ -207,7 +236,7 @@ object evals {
     ):  EvalOn[I, leftInj[L ⊕ R], O] =
     new EvalOn[I, leftInj[L ⊕ R], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outBip.leftInj(input.value)
       }
 
@@ -223,7 +252,7 @@ object evals {
     ):  EvalOn[OR, rightInj[L ⊕ R], O] =
     new EvalOn[OR, rightInj[L ⊕ R], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outBip.rightInj(input.value)
       }
 
@@ -239,7 +268,7 @@ object evals {
     ):  EvalOn[I, leftProj[L ⊕ R], IL] =
     new EvalOn[I, leftProj[L ⊕ R], IL] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outBip.leftProj(input.value)
       }
 
@@ -255,7 +284,7 @@ object evals {
     ):  EvalOn[I, rightProj[L ⊕ R], IR] =
     new EvalOn[I, rightProj[L ⊕ R], IR] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outBip.rightProj(input.value)
       }
 
@@ -271,7 +300,7 @@ object evals {
     ):  EvalOn[I, fromZero[X], O] =
     new EvalOn[I, fromZero[X], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outZero()
       }
 
@@ -287,7 +316,7 @@ object evals {
     ):  EvalOn[I, toZero[X], O] =
     new EvalOn[I, toZero[X], O] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := outZero()
       }
 
@@ -301,7 +330,7 @@ object evals {
     ):  EvalOn[I, inE[E], IE] =
     new EvalOn[I, inE[E], IE] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := vImpl.inE(input.value, morph.edge)
       }
 
@@ -315,7 +344,7 @@ object evals {
     ):  EvalOn[I, inV[E], IV] =
     new EvalOn[I, inV[E], IV] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := vImpl.inV(input.value, morph.edge)
       }
 
@@ -329,7 +358,7 @@ object evals {
     ):  EvalOn[I, outE[E], OE] =
     new EvalOn[I, outE[E], OE] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := vImpl.outE(input.value, morph.edge)
       }
 
@@ -345,7 +374,7 @@ object evals {
     ):  EvalOn[I, outV[E], OV] =
     new EvalOn[I, outV[E], OV] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := vImpl.outV(input.value, morph.edge)
       }
 
@@ -359,7 +388,7 @@ object evals {
     ):  EvalOn[I, source[E], S] =
     new EvalOn[I, source[E], S] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := eImpl.source(input.value)
       }
 
@@ -373,7 +402,7 @@ object evals {
     ):  EvalOn[I, target[E], T] =
     new EvalOn[I, target[E], T] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := eImpl.target(input.value)
       }
 
@@ -389,7 +418,7 @@ object evals {
     ):  EvalOn[RawUnit, fromUnit[O], RawObj] =
     new EvalOn[RawUnit, fromUnit[O], RawObj] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := unitImpl.fromUnit(input.value, morph.obj)
       }
 
@@ -404,7 +433,7 @@ object evals {
     ):  EvalOn[RawObj, toUnit[O], RawUnit] =
     new EvalOn[RawObj, toUnit[O], RawUnit] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         morph.out := unitImpl.toUnit(input.value)
       }
 
@@ -419,7 +448,7 @@ object evals {
     ):  EvalOn[RawElem, get[P], RawValue] =
     new EvalOn[RawElem, get[P], RawValue] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := propImpl.get(input.value, morph.property)
       }
 
@@ -433,7 +462,7 @@ object evals {
     ):  EvalOn[RawValue, lookup[P], RawElem] =
     new EvalOn[RawValue, lookup[P], RawElem] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := propImpl.lookup(input.value, morph.property)
       }
 
@@ -448,7 +477,7 @@ object evals {
     ):  EvalOn[RawElem, quantify[P], RawPred] =
     new EvalOn[RawElem, quantify[P], RawPred] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := predImpl.quantify(input.value, morph.predicate)
       }
 
@@ -463,7 +492,7 @@ object evals {
     ):  EvalOn[RawPred, coerce[P], RawElem] =
     new EvalOn[RawPred, coerce[P], RawElem] {
 
-      def apply(morph: Morph)(input: Input): Output = {
+      def apply(morph: Morph): OutMorph = { input: Input =>
         (morph.out: Morph#Out) := predImpl.coerce(input.value)
       }
 
