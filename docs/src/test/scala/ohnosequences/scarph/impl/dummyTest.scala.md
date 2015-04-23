@@ -3,7 +3,7 @@
 package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, objects._, morphisms._, evals._
-import syntax.morphisms._, syntax.conditions._, syntax.predicates._
+import syntax.morphisms._, syntax.objects._
 import twitter._, dummy._
 
 class DummyTests extends org.scalatest.FunSuite {
@@ -98,9 +98,7 @@ class DummyTests extends org.scalatest.FunSuite {
           + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
-            + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
-            + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
+            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: dummyTest.scala.md
@@ -113,6 +111,4 @@ class DummyTests extends org.scalatest.FunSuite {
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/schemas.scala.md
 [main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
-[main/scala/ohnosequences/scarph/syntax/predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/predicates.scala.md
-[main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/graphTypes.scala.md
-[main/scala/ohnosequences/scarph/syntax/conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/objects.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/objects.scala.md

@@ -53,9 +53,7 @@ object schemas {
           + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
-            + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
-            + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
+            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
@@ -68,6 +66,4 @@ object schemas {
 [main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
 [main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
-[main/scala/ohnosequences/scarph/syntax/predicates.scala]: syntax/predicates.scala.md
-[main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: syntax/graphTypes.scala.md
-[main/scala/ohnosequences/scarph/syntax/conditions.scala]: syntax/conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/objects.scala]: syntax/objects.scala.md
