@@ -1,10 +1,12 @@
 package ohnosequences.scarph
 
+import ohnosequences.cosas._, types._, fns._
+
 object evals {
 
-  import monoidalStructures._
-  import ohnosequences.cosas._, types._, fns._
-  import graphTypes._, morphisms._, implementations._, predicates._
+  import objects._
+  import morphisms._ 
+  import implementations._
 
   implicit final def getEvaluate[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
     evaluate[I0,F0,O0] =

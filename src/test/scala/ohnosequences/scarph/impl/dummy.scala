@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, implementations._, graphTypes._, evals._, predicates._
+import ohnosequences.scarph._, implementations._, objects._, evals._
 
 object dummy extends DefaultEvals {
 
@@ -15,7 +15,6 @@ object dummy extends DefaultEvals {
     def leftProj(t: RawTensor): RawLeft = Dummy
     def rightProj(t: RawTensor): RawRight = Dummy
   }
-
 
   implicit def matchUpImpl:
       MatchUpImpl[Dummy] =

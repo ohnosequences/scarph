@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, graphTypes._, morphisms._, evals._
+import ohnosequences.scarph._, objects._, morphisms._, evals._
 import syntax.morphisms._, syntax.conditions._, syntax.predicates._
 import twitter._, dummy._
 
@@ -25,31 +25,31 @@ class DummyTests extends org.scalatest.FunSuite {
     val query15 = (query6 ⊗ query7) distribute
 
     println("------------")
-    println(query2.present)
+    println(evaluate(query2) evalPlan)
     println("------------")
-    println(query3.present)
+    println(evaluate(query3) evalPlan)
     println("------------")
-    println(query4.present)
+    println(evaluate(query4) evalPlan)
     println("------------")
-    println(query5.present)
+    println(evaluate(query5) evalPlan)
     println("------------")
-    println(query6.present)
+    println(evaluate(query6) evalPlan)
     println("------------")
-    println(query7.present)
+    println(evaluate(query7) evalPlan)
     println("------------")
-    println(query8.present)
+    println(evaluate(query8) evalPlan)
     println("------------")
-    println(query9.present)
+    println(evaluate(query9) evalPlan)
     println("------------")
-    println(query10.present)
+    println(evaluate(query10) evalPlan)
     println("------------")
-    println(query11.present)
+    println(evaluate(query11) evalPlan)
     println("------------")
-    println(query12.present)
+    println(evaluate(query12) evalPlan)
     println("------------")
-    println(query13.present)
+    println(evaluate(query13) evalPlan)
     println("------------")
-    println(query14.present)
+    println(evaluate(query14) evalPlan)
     println("------------")
     // no distribute eval
     // println(query15.present)*/

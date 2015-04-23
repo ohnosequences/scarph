@@ -2,19 +2,30 @@
 ```scala
 package ohnosequences.scarph
 
+import ohnosequences.cosas._, types._, fns._
+
 object evals {
 
-  import monoidalStructures._
-  import ohnosequences.cosas._, types._, fns._
-  import graphTypes._, morphisms._, implementations._, predicates._
+  import objects._
+  import morphisms._ 
+  import implementations._
 
-  implicit final def evalWith[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]): 
-    EvalWith[I0,F0,O0] = 
-    EvalWith(f0, ev)
+  implicit final def getEvaluate[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
+    evaluate[I0,F0,O0] =
+    new evaluate(f0, ev)
 
-  case class EvalWith[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
+  object evaluate {
 
-    final def runOn(input: F#In := I): F#Out := O = eval(f)(input)
+    def apply[I0, F0 <: AnyGraphMorphism, O0](f0: F0)(implicit ev: EvalOn[I0,F0,O0]):
+      evaluate[I0,F0,O0] =
+      new evaluate(f0, ev)
+  }
+
+  final class evaluate[I,F <: AnyGraphMorphism,O](val f: F, val eval: EvalOn[I,F,O]) {
+
+    final def on(input: F#In := I): F#Out := O = eval(f)(input)
+
+    final def :=>:(input: F#In := I): F#Out := O = eval(f)(input)
 
     // TODO: this should output the computational behavior of the eval here
     final def evalPlan: String = eval.present(f)
@@ -163,12 +174,12 @@ This trait contains "structural" evaluators
     }
 
     // X → X ⊕ X
-    implicit final def eval_split[
+    implicit final def eval_fork[
       I, T <: AnyGraphObject, O
     ](implicit
       outBip: BiproductImpl[O, I, I]
-    ):  EvalOn[I, split[T], O] =
-    new EvalOn[I, split[T], O] {
+    ):  EvalOn[I, fork[T], O] =
+    new EvalOn[I, fork[T], O] {
 
       def apply(morph: Morph)(input: Input): Output = {
         morph.out := outBip(input.value, input.value)
@@ -331,7 +342,7 @@ This trait contains "structural" evaluators
       def present(morph: Morph): String = morph.label
     }
 
-    
+
 
     implicit final def eval_outV[
       I, E <: AnyEdge, OE, OV
@@ -439,7 +450,7 @@ This trait contains "structural" evaluators
     implicit final def eval_quantify[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
-      predImpl: PredicateImpl[RawPred, RawElem]
+      predImpl: PredicateImpl[P, RawPred, RawElem]
     ):  EvalOn[RawElem, quantify[P], RawPred] =
     new EvalOn[RawElem, quantify[P], RawPred] {
 
@@ -454,7 +465,7 @@ This trait contains "structural" evaluators
     implicit final def eval_coerce[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
-      predImpl: PredicateImpl[RawPred, RawElem]
+      predImpl: PredicateImpl[P, RawPred, RawElem]
     ):  EvalOn[RawPred, coerce[P], RawElem] =
     new EvalOn[RawPred, coerce[P], RawElem] {
 
@@ -491,34 +502,28 @@ This trait contains "structural" evaluators
       + ohnosequences
         + scarph
           + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
-          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
           + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
-          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
             + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
             + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
-          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
 [test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: morphisms.scala.md
-[main/scala/ohnosequences/scarph/predicates.scala]: predicates.scala.md
-[main/scala/ohnosequences/scarph/monoidalStructures.scala]: monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: objects.scala.md
 [main/scala/ohnosequences/scarph/evals.scala]: evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
 [main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: naturalIsomorphisms.scala.md
-[main/scala/ohnosequences/scarph/graphTypes.scala]: graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/predicates.scala]: syntax/predicates.scala.md
 [main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: syntax/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/conditions.scala]: syntax/conditions.scala.md
-[main/scala/ohnosequences/scarph/conditions.scala]: conditions.scala.md

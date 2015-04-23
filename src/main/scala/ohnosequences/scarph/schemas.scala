@@ -2,8 +2,7 @@ package ohnosequences.scarph
 
 object schemas {
 
-  import graphTypes._
-
+  import objects._
 
   trait AnyGraphSchema extends AnyGraphObject {
 

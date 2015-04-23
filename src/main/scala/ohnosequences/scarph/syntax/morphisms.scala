@@ -3,7 +3,23 @@ package ohnosequences.scarph.syntax
 object morphisms {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.predicates._
+  import s.objects._, s.morphisms._
+  import ohnosequences.cosas.types._
+
+  implicit def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
+        GraphMorphismValOps[F, VF] =
+    new GraphMorphismValOps[F, VF](vt)
+
+  class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF) {
+
+    // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
+    def ⊗[S <: AnyGraphMorphism, VS](vs: S := VS): TensorMorph[F, S] := (VF, VS) =
+      new Denotes( (vt.value, vs.value) )
+
+    // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
+    def ⊕[S <: AnyGraphMorphism, VS](vs: S := VS): BiproductMorph[F, S] := (VF, VS) =
+      new Denotes( (vt.value, vs.value) )
+  }
 
   implicit def graphMorphismSyntax[F <: AnyGraphMorphism](f: F):
         GraphMorphismSyntax[F] =

@@ -1,9 +1,8 @@
 package ohnosequences.scarph
 
+import objects._
+
 object implementations {
-
-  import graphTypes._, predicates._
-
 
   trait AnyTensorImpl extends Any {
 

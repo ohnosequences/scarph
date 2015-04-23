@@ -3,7 +3,7 @@ package ohnosequences.scarph.syntax
 object conditions {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.conditions._
+  import s.objects._
 
 
   /* Method aliases for predicate constructors */

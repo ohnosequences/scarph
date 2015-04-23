@@ -1,10 +1,80 @@
 package ohnosequences.scarph
 
+import ohnosequences.cosas.types._
 
 /* Basic set of morphisms: */
 object morphisms {
 
-  import graphTypes._, predicates._, monoidalStructures._
+  import objects._
+
+  /* Morphisms are spans */
+  trait AnyGraphMorphism extends AnyGraphType { morphism =>
+
+    type In <: AnyGraphObject
+    val  in: In
+
+    type Out <: AnyGraphObject
+    val  out: Out
+
+    type Dagger <: AnyGraphMorphism
+    val  dagger: Dagger
+  }
+
+  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+
+  /* Sequential composition of two morphisms */
+  sealed trait AnyComposition extends AnyGraphMorphism { composition =>
+
+    type First <: AnyGraphMorphism
+    type Second <: AnyGraphMorphism //{ type In = First#Out }
+
+    type In  <: First#In
+    type Out <: Second#Out
+  }
+
+  case class Composition[
+    F <: AnyGraphMorphism,
+    S <: AnyGraphMorphism //{ type In = F#Out }
+  ] (val first: F, val second: S) extends AnyComposition { cc =>
+
+    type First = F
+    type Second = S
+
+    type     In = First#In
+    lazy val in = first.in: In
+
+    type     Out = Second#Out
+    lazy val out = second.out: Out
+
+    type     Dagger = Composition[Second#Dagger, First#Dagger]
+    lazy val dagger: Dagger = Composition(second.dagger, first.dagger)
+
+    lazy val label: String = s"(${first.label} >=> ${second.label})"
+  }
+
+
+  /* Basic aliases */
+  type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+
+  implicit def graphMorphismOps[F <: AnyGraphMorphism](f: F):
+        GraphMorphismOps[F] =
+    new GraphMorphismOps[F](f)
+
+  case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) extends AnyVal {
+
+    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
+
+    def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
+    def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
+
+    // TODO: remove this, use the eval-specific typeclass
+    // import evals._
+
+    // def evalOn[I, O](input: F#In := I)
+    //   (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
+
+    // def present(implicit eval: Eval[F]): String = eval.present(f)
+  }
 
   trait AnyPrimitive extends AnyGraphMorphism { morph =>
 
@@ -388,5 +458,78 @@ object morphisms {
 
     lazy val label: String = s"coerce(${predicate.label})"
   }
+
+
+
+  sealed trait AnyTensorMorph extends AnyGraphMorphism { tensor =>
+
+    type Left <: AnyGraphMorphism
+    val  left: Left
+
+    type Right <: AnyGraphMorphism
+    val  right: Right
+
+    type In  <: AnyTensorObj { type Left = tensor.Left#In; type Right = tensor.Right#In }
+    type Out <: AnyTensorObj { type Left = tensor.Left#Out; type Right = tensor.Right#Out }
+
+    type Dagger <: AnyTensorMorph { 
+      type Left = tensor.Left#Dagger; 
+      type Right = tensor.Right#Dagger
+    }
+  }
+
+  case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
+    (val left: L, val right: R) extends AnyTensorMorph { tensor =>
+
+    type Left = L
+    type Right = R
+
+    type     In = TensorObj[Left#In, Right#In]
+    lazy val in = TensorObj(left.in, right.in): In
+
+    type     Out = TensorObj[Left#Out, Right#Out]
+    lazy val out = TensorObj(left.out, right.out): Out
+
+    type     Dagger = TensorMorph[Left#Dagger, Right#Dagger]
+    lazy val dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+
+    lazy val label = s"(${left.label} ⊗ ${right.label})"
+  }
+
+  sealed trait AnyBiproductMorph extends AnyGraphMorphism { biprod =>
+
+    type Left <: AnyGraphMorphism
+    val  left: Left
+
+    type Right <: AnyGraphMorphism
+    val  right: Right
+
+    type In  <: BiproductObj[Left#In, Right#In]
+    type Out <: BiproductObj[Left#Out, Right#Out]
+
+    type Dagger <: AnyBiproductMorph {
+      type Left = biprod.Left#Dagger 
+      type Right = biprod.Right#Dagger
+    }
+  }
+
+  case class BiproductMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
+    (val left: L, val right: R) extends AnyBiproductMorph { biprod =>
+
+    type Left = L
+    type Right = R
+
+    type     In = BiproductObj[Left#In, Right#In]
+    lazy val in = BiproductObj(left.in, right.in): In
+
+    type     Out = BiproductObj[Left#Out, Right#Out]
+    lazy val out = BiproductObj(left.out, right.out): Out
+
+    type     Dagger = BiproductMorph[Left#Dagger, Right#Dagger]
+    lazy val dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+
+    lazy val label = s"(${left.label} ⊕ ${right.label})"
+  }
+
 
 }

@@ -2,7 +2,7 @@
 ```scala
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, implementations._, graphTypes._, evals._, predicates._
+import ohnosequences.scarph._, implementations._, objects._, evals._
 
 object dummy extends DefaultEvals {
 
@@ -17,7 +17,6 @@ object dummy extends DefaultEvals {
     def leftProj(t: RawTensor): RawLeft = Dummy
     def rightProj(t: RawTensor): RawRight = Dummy
   }
-
 
   implicit def matchUpImpl:
       MatchUpImpl[Dummy] =
@@ -97,11 +96,11 @@ object dummy extends DefaultEvals {
   }
 
 
-  implicit def dummyPredicateImpl:
-      PredicateImpl[Dummy, Dummy] =
-  new PredicateImpl[Dummy, Dummy] {
+  implicit def dummyPredicateImpl[P <: AnyPredicate]:
+      PredicateImpl[P, Dummy, Dummy] =
+  new PredicateImpl[P, Dummy, Dummy] {
 
-    def quantify[P <: AnyPredicate](e: RawElement, p: P): RawPredicate = Dummy
+    def quantify(e: RawElement, p: Predicate): RawPredicate = Dummy
     def coerce(p: RawPredicate): RawElement = Dummy
   }
 
@@ -129,34 +128,28 @@ object dummy extends DefaultEvals {
       + ohnosequences
         + scarph
           + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
-          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
           + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
-          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
             + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
             + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
-          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: dummyTest.scala.md
 [test/scala/ohnosequences/scarph/impl/dummy.scala]: dummy.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../TwitterSchema.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/morphisms.scala.md
-[main/scala/ohnosequences/scarph/predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/predicates.scala.md
-[main/scala/ohnosequences/scarph/monoidalStructures.scala]: ../../../../../main/scala/ohnosequences/scarph/monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: ../../../../../main/scala/ohnosequences/scarph/objects.scala.md
 [main/scala/ohnosequences/scarph/evals.scala]: ../../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../../../../../main/scala/ohnosequences/scarph/implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/schemas.scala.md
 [main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/naturalIsomorphisms.scala.md
-[main/scala/ohnosequences/scarph/graphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/predicates.scala.md
 [main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/conditions.scala.md
-[main/scala/ohnosequences/scarph/conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/conditions.scala.md

@@ -1,11 +1,10 @@
 package ohnosequences.scarph
 
-
 /* Basic set of morphisms: */
 object naturalIsomorphisms {
 
-  import graphTypes._, predicates._, monoidalStructures._, morphisms._
-
+  import objects._
+  import morphisms._
 
   trait AnyNaturalIsomorphism extends AnyPrimitive { iso =>
 

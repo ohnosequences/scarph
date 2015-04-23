@@ -2,7 +2,7 @@
 ```scala
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, graphTypes._, morphisms._, evals._
+import ohnosequences.scarph._, objects._, morphisms._, evals._
 import syntax.morphisms._, syntax.conditions._, syntax.predicates._
 import twitter._, dummy._
 
@@ -27,38 +27,40 @@ class DummyTests extends org.scalatest.FunSuite {
     val query15 = (query6 ⊗ query7) distribute
 
     println("------------")
-    println(query2.present)
+    println(evaluate(query2) evalPlan)
     println("------------")
-    println(query3.present)
+    println(evaluate(query3) evalPlan)
     println("------------")
-    println(query4.present)
+    println(evaluate(query4) evalPlan)
     println("------------")
-    println(query5.present)
+    println(evaluate(query5) evalPlan)
     println("------------")
-    println(query6.present)
+    println(evaluate(query6) evalPlan)
     println("------------")
-    println(query7.present)
+    println(evaluate(query7) evalPlan)
     println("------------")
-    println(query8.present)
+    println(evaluate(query8) evalPlan)
     println("------------")
-    println(query9.present)
+    println(evaluate(query9) evalPlan)
     println("------------")
-    println(query10.present)
+    println(evaluate(query10) evalPlan)
     println("------------")
-    println(query11.present)
+    println(evaluate(query11) evalPlan)
     println("------------")
-    println(query12.present)
+    println(evaluate(query12) evalPlan)
     println("------------")
-    println(query13.present)
+    println(evaluate(query13) evalPlan)
     println("------------")
-    println(query14.present)
+    println(evaluate(query14) evalPlan)
     println("------------")
     // no distribute eval
     // println(query15.present)*/
 
-    val uh2 = query2.runOn(user := Dummy)
+    val uh2 = query2 on (user := Dummy)
 
-    val uh1 = query1.runOn(name := Dummy)
+    val uh1 = query1 on (name := Dummy)
+
+    val uh1a = (name := Dummy) :=>: query1
 
     assert( 
       query6.dagger.dagger === query6
@@ -89,34 +91,28 @@ class DummyTests extends org.scalatest.FunSuite {
       + ohnosequences
         + scarph
           + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
-          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
           + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
-          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
             + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
             + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
-          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: dummyTest.scala.md
 [test/scala/ohnosequences/scarph/impl/dummy.scala]: dummy.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../TwitterSchema.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/morphisms.scala.md
-[main/scala/ohnosequences/scarph/predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/predicates.scala.md
-[main/scala/ohnosequences/scarph/monoidalStructures.scala]: ../../../../../main/scala/ohnosequences/scarph/monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: ../../../../../main/scala/ohnosequences/scarph/objects.scala.md
 [main/scala/ohnosequences/scarph/evals.scala]: ../../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../../../../../main/scala/ohnosequences/scarph/implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/schemas.scala.md
 [main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/naturalIsomorphisms.scala.md
-[main/scala/ohnosequences/scarph/graphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/predicates.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/predicates.scala.md
 [main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/conditions.scala.md
-[main/scala/ohnosequences/scarph/conditions.scala]: ../../../../../main/scala/ohnosequences/scarph/conditions.scala.md

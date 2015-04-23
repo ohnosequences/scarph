@@ -3,7 +3,7 @@ package ohnosequences.scarph.test
 import ohnosequences.cosas._, typeSets._
 
 import ohnosequences.{ scarph => s }
-import s.graphTypes._, s.schemas._
+import s.objects._, s.schemas._
 
 
 object twitter extends AnyGraphSchema {

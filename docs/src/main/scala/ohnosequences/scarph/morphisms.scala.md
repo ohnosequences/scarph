@@ -1,6 +1,8 @@
 
 ```scala
 package ohnosequences.scarph
+
+import ohnosequences.cosas.types._
 ```
 
 Basic set of morphisms:
@@ -8,7 +10,84 @@ Basic set of morphisms:
 ```scala
 object morphisms {
 
-  import graphTypes._, predicates._, monoidalStructures._
+  import objects._
+```
+
+Morphisms are spans
+
+```scala
+  trait AnyGraphMorphism extends AnyGraphType { morphism =>
+
+    type In <: AnyGraphObject
+    val  in: In
+
+    type Out <: AnyGraphObject
+    val  out: Out
+
+    type Dagger <: AnyGraphMorphism
+    val  dagger: Dagger
+  }
+
+  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+```
+
+Sequential composition of two morphisms
+
+```scala
+  sealed trait AnyComposition extends AnyGraphMorphism { composition =>
+
+    type First <: AnyGraphMorphism
+    type Second <: AnyGraphMorphism //{ type In = First#Out }
+
+    type In  <: First#In
+    type Out <: Second#Out
+  }
+
+  case class Composition[
+    F <: AnyGraphMorphism,
+    S <: AnyGraphMorphism //{ type In = F#Out }
+  ] (val first: F, val second: S) extends AnyComposition { cc =>
+
+    type First = F
+    type Second = S
+
+    type     In = First#In
+    lazy val in = first.in: In
+
+    type     Out = Second#Out
+    lazy val out = second.out: Out
+
+    type     Dagger = Composition[Second#Dagger, First#Dagger]
+    lazy val dagger: Dagger = Composition(second.dagger, first.dagger)
+
+    lazy val label: String = s"(${first.label} >=> ${second.label})"
+  }
+```
+
+Basic aliases
+
+```scala
+  type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+
+  implicit def graphMorphismOps[F <: AnyGraphMorphism](f: F):
+        GraphMorphismOps[F] =
+    new GraphMorphismOps[F](f)
+
+  case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) extends AnyVal {
+
+    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
+
+    def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
+    def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
+
+    // TODO: remove this, use the eval-specific typeclass
+    // import evals._
+
+    // def evalOn[I, O](input: F#In := I)
+    //   (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
+
+    // def present(implicit eval: Eval[F]): String = eval.present(f)
+  }
 
   trait AnyPrimitive extends AnyGraphMorphism { morph =>
 
@@ -35,7 +114,7 @@ object morphisms {
 
   // I → X
   case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitive {
-    
+
     type Obj = X
 
     type     In = unit
@@ -64,7 +143,7 @@ object morphisms {
     type     Dagger = fromUnit[X]
     lazy val dagger = fromUnit(x)
 
-    lazy val label = s"toUnit(${x.label})" 
+    lazy val label = s"toUnit(${x.label})"
   }
 
   // △: X → X ⊗ X
@@ -84,7 +163,7 @@ object morphisms {
 
   // ▽: X ⊗ X → X
   case class matchUp[X <: AnyGraphObject](x: X) extends AnyPrimitive {
-    
+
     type     Out = X
     lazy val out = x
 
@@ -115,7 +194,7 @@ object morphisms {
 
   // X → 0
   case class toZero[X <: AnyGraphObject](x: X) extends AnyPrimitive {
-    
+
     type     Out = zero
     lazy val out = zero
 
@@ -125,11 +204,11 @@ object morphisms {
     type     Dagger = fromZero[X]
     lazy val dagger = fromZero(x)
 
-    lazy val label = s"toZero(${x.label})" 
+    lazy val label = s"toZero(${x.label})"
   }
-  
+
   // X -> X ⊕ X
-  case class split[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitive {
 
     type     In = X
     lazy val in = x
@@ -140,20 +219,20 @@ object morphisms {
     type     Dagger = merge[X]
     lazy val dagger = merge(x)
 
-    lazy val label = s"split(${x.label})"
+    lazy val label = s"fork(${x.label})"
   }
 
   // X ⊕ X -> X
   case class merge[X <: AnyGraphObject](x: X) extends AnyPrimitive {
-    
+
     type     Out = X
     lazy val out = x
 
     type     In = BiproductObj[X, X]
     lazy val in = BiproductObj(x, x)
 
-    type     Dagger = split[X]
-    lazy val dagger = split(x)
+    type     Dagger = fork[X]
+    lazy val dagger = fork(x)
 
     lazy val label = s"merge(${x.label} ⊕ ${x.label})"
   }
@@ -161,7 +240,7 @@ object morphisms {
 
   // L → L ⊕ R
   case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
-    
+
     type Biproduct = B
 
     type     In = Biproduct#Left
@@ -178,7 +257,7 @@ object morphisms {
 
   // L ⊕ R → L
   case class leftProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
-    
+
     type Biproduct = B
 
     type     Out = Biproduct#Left
@@ -190,7 +269,7 @@ object morphisms {
     type     Dagger = leftInj[Biproduct]
     lazy val dagger = leftInj(biproduct)
 
-    lazy val label = s"leftProj(${biproduct.label})" 
+    lazy val label = s"leftProj(${biproduct.label})"
   }
 
 
@@ -212,7 +291,7 @@ object morphisms {
 
   // L ⊕ R → R
   case class rightProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
-    
+
     type Biproduct = B
 
     type     Out = Biproduct#Right
@@ -224,12 +303,12 @@ object morphisms {
     type     Dagger = rightInj[Biproduct]
     lazy val dagger = rightInj(biproduct)
 
-    lazy val label = s"leftProj(${biproduct.label})" 
+    lazy val label = s"leftProj(${biproduct.label})"
   }
 
 
   case class target[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     In = Edge
@@ -245,7 +324,7 @@ object morphisms {
   }
 
   case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     Out = Edge
@@ -263,7 +342,7 @@ object morphisms {
 
 
   case class source[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     In = Edge
@@ -279,7 +358,7 @@ object morphisms {
   }
 
   case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     Out = Edge
@@ -296,7 +375,7 @@ object morphisms {
 
 
   case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     In = Edge#SourceVertex
@@ -312,7 +391,7 @@ object morphisms {
   }
 
   case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
-    
+
     type Edge = E
 
     type     Out = Edge#SourceVertex
@@ -361,7 +440,7 @@ object morphisms {
 
 
   case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitive {
-    
+
     type Predicate = P
 
     type     In = Predicate#Element
@@ -378,7 +457,7 @@ object morphisms {
 
 
   case class coerce[P <: AnyPredicate](val predicate: P) extends AnyPrimitive {
-    
+
     type Predicate = P
 
     type     Out = Predicate#Element
@@ -392,6 +471,79 @@ object morphisms {
 
     lazy val label: String = s"coerce(${predicate.label})"
   }
+
+
+
+  sealed trait AnyTensorMorph extends AnyGraphMorphism { tensor =>
+
+    type Left <: AnyGraphMorphism
+    val  left: Left
+
+    type Right <: AnyGraphMorphism
+    val  right: Right
+
+    type In  <: AnyTensorObj { type Left = tensor.Left#In; type Right = tensor.Right#In }
+    type Out <: AnyTensorObj { type Left = tensor.Left#Out; type Right = tensor.Right#Out }
+
+    type Dagger <: AnyTensorMorph { 
+      type Left = tensor.Left#Dagger; 
+      type Right = tensor.Right#Dagger
+    }
+  }
+
+  case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
+    (val left: L, val right: R) extends AnyTensorMorph { tensor =>
+
+    type Left = L
+    type Right = R
+
+    type     In = TensorObj[Left#In, Right#In]
+    lazy val in = TensorObj(left.in, right.in): In
+
+    type     Out = TensorObj[Left#Out, Right#Out]
+    lazy val out = TensorObj(left.out, right.out): Out
+
+    type     Dagger = TensorMorph[Left#Dagger, Right#Dagger]
+    lazy val dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+
+    lazy val label = s"(${left.label} ⊗ ${right.label})"
+  }
+
+  sealed trait AnyBiproductMorph extends AnyGraphMorphism { biprod =>
+
+    type Left <: AnyGraphMorphism
+    val  left: Left
+
+    type Right <: AnyGraphMorphism
+    val  right: Right
+
+    type In  <: BiproductObj[Left#In, Right#In]
+    type Out <: BiproductObj[Left#Out, Right#Out]
+
+    type Dagger <: AnyBiproductMorph {
+      type Left = biprod.Left#Dagger 
+      type Right = biprod.Right#Dagger
+    }
+  }
+
+  case class BiproductMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
+    (val left: L, val right: R) extends AnyBiproductMorph { biprod =>
+
+    type Left = L
+    type Right = R
+
+    type     In = BiproductObj[Left#In, Right#In]
+    lazy val in = BiproductObj(left.in, right.in): In
+
+    type     Out = BiproductObj[Left#Out, Right#Out]
+    lazy val out = BiproductObj(left.out, right.out): Out
+
+    type     Dagger = BiproductMorph[Left#Dagger, Right#Dagger]
+    lazy val dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+
+    lazy val label = s"(${left.label} ⊕ ${right.label})"
+  }
+
 
 }
 
@@ -417,34 +569,28 @@ object morphisms {
       + ohnosequences
         + scarph
           + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
-          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
           + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
-          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
             + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
             + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
-          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
 [test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: morphisms.scala.md
-[main/scala/ohnosequences/scarph/predicates.scala]: predicates.scala.md
-[main/scala/ohnosequences/scarph/monoidalStructures.scala]: monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: objects.scala.md
 [main/scala/ohnosequences/scarph/evals.scala]: evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
 [main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: naturalIsomorphisms.scala.md
-[main/scala/ohnosequences/scarph/graphTypes.scala]: graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/predicates.scala]: syntax/predicates.scala.md
 [main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: syntax/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/conditions.scala]: syntax/conditions.scala.md
-[main/scala/ohnosequences/scarph/conditions.scala]: conditions.scala.md
