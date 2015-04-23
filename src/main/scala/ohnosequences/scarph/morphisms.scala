@@ -20,7 +20,7 @@ object morphisms {
     val  dagger: Dagger
   }
 
-  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
 
   /* Sequential composition of two morphisms */
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
@@ -472,8 +472,8 @@ object morphisms {
     type In  <: AnyTensorObj { type Left = tensor.Left#In; type Right = tensor.Right#In }
     type Out <: AnyTensorObj { type Left = tensor.Left#Out; type Right = tensor.Right#Out }
 
-    type Dagger <: AnyTensorMorph { 
-      type Left = tensor.Left#Dagger; 
+    type Dagger <: AnyTensorMorph {
+      type Left = tensor.Left#Dagger;
       type Right = tensor.Right#Dagger
     }
   }
@@ -508,7 +508,7 @@ object morphisms {
     type Out <: BiproductObj[Left#Out, Right#Out]
 
     type Dagger <: AnyBiproductMorph {
-      type Left = biprod.Left#Dagger 
+      type Left = biprod.Left#Dagger
       type Right = biprod.Right#Dagger
     }
   }

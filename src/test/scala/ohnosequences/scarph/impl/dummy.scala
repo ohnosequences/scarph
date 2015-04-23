@@ -2,7 +2,7 @@ package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, implementations._, objects._, evals._
 
-object dummy extends DefaultEvals {
+trait DummyEvals extends DefaultEvals {
 
   case object Dummy
   type Dummy = Dummy.type
@@ -103,3 +103,5 @@ object dummy extends DefaultEvals {
   }
 
 }
+
+object dummy extends DummyEvals
