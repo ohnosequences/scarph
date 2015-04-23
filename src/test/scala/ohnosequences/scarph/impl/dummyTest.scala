@@ -73,7 +73,7 @@ class DummyTests extends org.scalatest.FunSuite {
     ]:  Rewrite[(F >=> G) >=> H, F >=> (G >=> H)] =
     new Rewrite[(F >=> G) >=> H, F >=> (G >=> H)] {
 
-      def apply(morph: Morph): OutMorph = {
+      def apply(morph: InMorph): OutMorph = {
         val f = morph.first.first
         val g = morph.first.second
         val h = morph.second
