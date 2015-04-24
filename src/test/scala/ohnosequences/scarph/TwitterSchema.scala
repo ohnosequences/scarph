@@ -16,7 +16,7 @@ object twitter extends AnyGraphSchema {
 
   lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
 
-  lazy val properties: Set[AnyGraphProperty] = Set(
+  lazy val properties: Set[AnyProperty] = Set(
     user.name,
     user.age,
     user.bio,

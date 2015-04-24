@@ -4,12 +4,13 @@ object schemas {
 
   import objects._
 
-  trait AnyGraphSchema extends AnyGraphObject {
+
+  trait AnyGraphSchema extends AnyGraphType {
 
     val vertices: Set[AnyVertex]
     val edges: Set[AnyEdge]
     val valueTypes: Set[AnyValueType]
-    val properties: Set[AnyGraphProperty]
+    val properties: Set[AnyProperty]
   }
 
   class GraphSchema(
@@ -17,7 +18,7 @@ object schemas {
     val vertices: Set[AnyVertex],
     val edges: Set[AnyEdge],
     val valueTypes: Set[AnyValueType],
-    val properties: Set[AnyGraphProperty]
+    val properties: Set[AnyProperty]
   ) extends AnyGraphSchema
 
 }

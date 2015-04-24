@@ -2,9 +2,10 @@ package ohnosequences.scarph.syntax
 
 object morphisms {
 
+  import ohnosequences.cosas.types._
   import ohnosequences.{ scarph => s }
   import s.objects._, s.morphisms._
-  import ohnosequences.cosas.types._
+
 
   implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
     GraphMorphismValOps[F, VF] =
@@ -211,7 +212,7 @@ object morphisms {
 
   case class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) extends AnyVal {
 
-    def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
+    def get[P <: AnyProperty { type Owner = F#Out }](p: P):
       F >=> s.morphisms.get[P] =
       f >=> s.morphisms.get(p)
 

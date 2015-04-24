@@ -2,8 +2,7 @@ package ohnosequences.scarph
 
 object objects {
 
-  import ohnosequences.cosas._, types._, properties._, typeSets._
-  import java.lang.Comparable
+  import ohnosequences.cosas._, types._, typeSets._
 
 
   trait AnyGraphType extends AnyType
@@ -72,18 +71,18 @@ object objects {
 
   import scala.reflect.ClassTag
   /* Property values have raw types that are covered as graph objects */
-  trait AnyValueType extends AnyProperty with AnyGraphObject {
+  trait AnyValueType extends properties.AnyProperty with AnyGraphObject {
 
     def rawTag: ClassTag[Raw]
   }
 
-  class ValueOfType[R](val label: String)(implicit val rawTag: ClassTag[R]) extends AnyValueType { 
+  class ValueOfType[R](val label: String)(implicit val rawTag: ClassTag[R]) extends AnyValueType {
 
-    type Raw = R 
+    type Raw = R
   }
 
   /* This is like an edge between an element and a raw type */
-  trait AnyGraphProperty extends AnyGraphType {
+  trait AnyProperty extends AnyGraphType {
 
     type Owner <: AnyGraphElement
     val  owner: Owner
@@ -93,7 +92,7 @@ object objects {
   }
 
   class Property[O <: AnyGraphElement, V <: AnyValueType](val st: (O,V))(val label: String)
-    extends AnyGraphProperty
+    extends AnyProperty
   {
 
     type Owner = O
@@ -158,7 +157,7 @@ object objects {
   /* A condition is a restriction on the property values */
   trait AnyCondition {
 
-    type Property <: AnyGraphProperty
+    type Property <: AnyProperty
     val  property: Property
 
     type     Element = Property#Owner
@@ -170,24 +169,24 @@ object objects {
 
   object AnyCondition {
 
-    type OnProperty[P <: AnyGraphProperty] = AnyCondition { type Property = P }
+    type OnProperty[P <: AnyProperty] = AnyCondition { type Property = P }
     type OnElement[E <: AnyGraphElement] = AnyCondition { type Element = E }
   }
 
 
   /* Comparison conditions with **One** property value */
   trait AnyCompareCondition extends AnyCondition {
-    type Property <: AnyGraphProperty //{ type Raw <: Comparable[_] }
+    type Property <: AnyProperty //{ type Raw <: Comparable[_] }
 
     val value: Property#Value#Raw
   }
 
-  trait CompareCondition[P <: AnyGraphProperty]
+  trait CompareCondition[P <: AnyProperty]
     extends AnyCompareCondition { type Property = P }
 
 
   trait AnyEqual extends AnyCompareCondition
-  case class Equal[P <: AnyGraphProperty](
+  case class Equal[P <: AnyProperty](
     val property: P,
     val value: P#Value#Raw
   ) extends AnyEqual with CompareCondition[P] {
@@ -195,7 +194,7 @@ object objects {
   }
 
   trait AnyNotEqual extends AnyCompareCondition
-  case class NotEqual[P <: AnyGraphProperty](
+  case class NotEqual[P <: AnyProperty](
     val property: P,
     val value: P#Value#Raw
   ) extends AnyNotEqual with CompareCondition[P] {
@@ -204,7 +203,7 @@ object objects {
 
 
   trait AnyLess extends AnyCompareCondition
-  case class Less[P <: AnyGraphProperty](
+  case class Less[P <: AnyProperty](
     val property: P,
     val value: P#Value#Raw
   ) extends AnyLess with CompareCondition[P] {
@@ -212,7 +211,7 @@ object objects {
   }
 
   trait AnyLessOrEqual extends AnyCompareCondition
-  case class LessOrEqual[P <: AnyGraphProperty](
+  case class LessOrEqual[P <: AnyProperty](
     val property: P,
     val value: P#Value#Raw
   ) extends AnyLessOrEqual with CompareCondition[P] {
@@ -221,7 +220,7 @@ object objects {
 
 
   trait AnyGreater extends AnyCompareCondition
-  case class Greater[P <: AnyGraphProperty](
+  case class Greater[P <: AnyProperty](
     val property: P,
     val value: P#Value#Raw
   ) extends AnyGreater with CompareCondition[P] {
@@ -229,7 +228,7 @@ object objects {
   }
 
   trait AnyGreaterOrEqual extends AnyCompareCondition
-  case class GreaterOrEqual[P <: AnyGraphProperty](
+  case class GreaterOrEqual[P <: AnyProperty](
     val property: P,
     val value: P#Value#Raw
   ) extends AnyGreaterOrEqual with CompareCondition[P] {
@@ -238,13 +237,13 @@ object objects {
 
 
   trait AnyInterval extends AnyCondition {
-    type Property <: AnyGraphProperty
+    type Property <: AnyProperty
 
     val start: Property#Value#Raw
     val end: Property#Value#Raw
   }
 
-  case class Interval[P <: AnyGraphProperty](
+  case class Interval[P <: AnyProperty](
     val property: P,
     val start: P#Value#Raw,
     val end: P#Value#Raw
@@ -252,16 +251,6 @@ object objects {
     type Property = P
     lazy val label = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"
   }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -315,9 +304,6 @@ object objects {
     lazy val label = s"(${left.label} ⊕ ${right.label})"
   }
 
-  // \oplus symbol: f ⊕ s: F ⊕ S
-  type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
-
 
   case object zero extends AnyGraphObject {
 
@@ -325,6 +311,9 @@ object objects {
   }
   type zero = zero.type
 
+
+  // \oplus symbol: f ⊕ s: F ⊕ S
+  type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
 
   implicit def graphObjectOps[O <: AnyGraphObject](o: O):
     GraphObjectOps[O] =

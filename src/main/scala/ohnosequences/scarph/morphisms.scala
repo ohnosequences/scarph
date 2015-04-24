@@ -1,11 +1,10 @@
 package ohnosequences.scarph
 
-import ohnosequences.cosas.types._
-
-/* Basic set of morphisms: */
 object morphisms {
 
+  import ohnosequences.cosas.types._
   import objects._
+
 
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
@@ -66,25 +65,17 @@ object morphisms {
 
     def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
     def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
-
-    // TODO: remove this, use the eval-specific typeclass
-    // import evals._
-
-    // def evalOn[I, O](input: F#In := I)
-    //   (implicit eval: EvalOn[I, F, O]): F#Out := O = eval(f)(input)
-
-    // def present(implicit eval: Eval[F]): String = eval.present(f)
   }
 
-  trait AnyPrimitive extends AnyGraphMorphism { morph =>
+  trait AnyPrimitiveMorph extends AnyGraphMorphism { morph =>
 
-    type Dagger <: AnyPrimitive {
-      type Dagger >: morph.type <: AnyPrimitive
+    type Dagger <: AnyPrimitiveMorph {
+      type Dagger >: morph.type <: AnyPrimitiveMorph
     }
   }
 
   // id: X → X
-  case class id[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class id[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     In = X
     lazy val in = x
@@ -100,7 +91,7 @@ object morphisms {
 
 
   // I → X
-  case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitive {
+  case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitiveMorph {
 
     type Obj = X
 
@@ -117,7 +108,7 @@ object morphisms {
   }
 
   // X → I
-  case class toUnit[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class toUnit[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type Obj = X
 
@@ -134,7 +125,7 @@ object morphisms {
   }
 
   // △: X → X ⊗ X
-  case class duplicate[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class duplicate[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     In = X
     lazy val in = x
@@ -149,7 +140,7 @@ object morphisms {
   }
 
   // ▽: X ⊗ X → X
-  case class matchUp[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class matchUp[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     Out = X
     lazy val out = x
@@ -165,7 +156,7 @@ object morphisms {
 
 
   // 0 → X
-  case class fromZero[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fromZero[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     In = zero
     lazy val in = zero
@@ -180,7 +171,7 @@ object morphisms {
   }
 
   // X → 0
-  case class toZero[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class toZero[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     Out = zero
     lazy val out = zero
@@ -195,7 +186,7 @@ object morphisms {
   }
 
   // X -> X ⊕ X
-  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     In = X
     lazy val in = x
@@ -210,7 +201,7 @@ object morphisms {
   }
 
   // X ⊕ X -> X
-  case class merge[X <: AnyGraphObject](x: X) extends AnyPrimitive {
+  case class merge[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
 
     type     Out = X
     lazy val out = x
@@ -226,7 +217,7 @@ object morphisms {
 
 
   // L → L ⊕ R
-  case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+  case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
 
     type Biproduct = B
 
@@ -243,7 +234,7 @@ object morphisms {
   }
 
   // L ⊕ R → L
-  case class leftProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+  case class leftProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
 
     type Biproduct = B
 
@@ -261,7 +252,7 @@ object morphisms {
 
 
   // R → L ⊕ R
-  case class rightInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+  case class rightInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
     type Biproduct = B
 
     type     In = Biproduct#Right
@@ -277,7 +268,7 @@ object morphisms {
   }
 
   // L ⊕ R → R
-  case class rightProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitive {
+  case class rightProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
 
     type Biproduct = B
 
@@ -294,7 +285,7 @@ object morphisms {
   }
 
 
-  case class target[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class target[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
@@ -310,7 +301,7 @@ object morphisms {
     lazy val label: String = s"target(${edge.label})"
   }
 
-  case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
@@ -328,7 +319,7 @@ object morphisms {
   }
 
 
-  case class source[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class source[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
@@ -344,7 +335,7 @@ object morphisms {
     lazy val label: String = s"source(${edge.label})"
   }
 
-  case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
@@ -361,7 +352,7 @@ object morphisms {
   }
 
 
-  case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
@@ -377,7 +368,7 @@ object morphisms {
     lazy val label: String = s"outV(${edge.label})"
   }
 
-  case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitive {
+  case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
@@ -394,7 +385,7 @@ object morphisms {
   }
 
 
-  case class get[P <: AnyGraphProperty](val property: P) extends AnyPrimitive {
+  case class get[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
     type Property = P
 
     type     In = Property#Owner
@@ -409,7 +400,7 @@ object morphisms {
     lazy val label: String = s"get(${property.label})"
   }
 
-  case class lookup[P <: AnyGraphProperty](val property: P) extends AnyPrimitive {
+  case class lookup[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
 
     type Property = P
 
@@ -426,7 +417,7 @@ object morphisms {
   }
 
 
-  case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitive {
+  case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitiveMorph {
 
     type Predicate = P
 
@@ -443,7 +434,7 @@ object morphisms {
   }
 
 
-  case class coerce[P <: AnyPredicate](val predicate: P) extends AnyPrimitive {
+  case class coerce[P <: AnyPredicate](val predicate: P) extends AnyPrimitiveMorph {
 
     type Predicate = P
 

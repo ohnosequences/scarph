@@ -85,7 +85,7 @@ trait DummyEvals extends DefaultEvals {
   }
 
 
-  implicit def dummyPropertyImpl[P <: AnyGraphProperty]:
+  implicit def dummyPropertyImpl[P <: AnyProperty]:
       PropertyImpl[P, Dummy, Dummy] =
   new PropertyImpl[P, Dummy, Dummy] {
 

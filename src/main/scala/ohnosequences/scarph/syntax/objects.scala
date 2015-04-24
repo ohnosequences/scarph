@@ -3,9 +3,8 @@ package ohnosequences.scarph.syntax
 object objects {
 
   import ohnosequences.cosas.types._
+  import ohnosequences.scarph.objects._
 
-  import ohnosequences.{ scarph => s }
-  import s.objects._
 
   implicit final def graphObjectValOps[F <: AnyGraphObject, VF](vt: F := VF):
     GraphObjectValOps[F, VF] =
@@ -49,11 +48,11 @@ object objects {
   }
 
   /* Method aliases for predicate constructors */
-  implicit final def conditionOps[P <: AnyGraphProperty](property: P):
+  implicit final def conditionOps[P <: AnyProperty](property: P):
     ConditionOps[P] =
     ConditionOps[P](property)
 
-  case class ConditionOps[P <: AnyGraphProperty](property: P) extends AnyVal {
+  case class ConditionOps[P <: AnyProperty](property: P) extends AnyVal {
 
     def ===(value: P#Value#Raw): Equal[P] = Equal(property, value)
     def =/=(value: P#Value#Raw): NotEqual[P] = NotEqual(property, value)

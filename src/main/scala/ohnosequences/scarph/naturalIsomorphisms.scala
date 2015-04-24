@@ -1,12 +1,11 @@
 package ohnosequences.scarph
 
-/* Basic set of morphisms: */
 object naturalIsomorphisms {
 
-  import objects._
-  import morphisms._
+  import objects._, morphisms._
 
-  trait AnyNaturalIsomorphism extends AnyPrimitive { iso =>
+
+  trait AnyNaturalIsomorphism extends AnyPrimitiveMorph { iso =>
 
     type Dagger <: AnyNaturalIsomorphism {
       type Dagger >: iso.type <: AnyNaturalIsomorphism
@@ -77,7 +76,7 @@ object naturalIsomorphisms {
   }
 
   // X → I ⊗ X
-  case class leftCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
+  case class leftCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     Out = unit ⊗ X
     lazy val out = unit ⊗ x
@@ -109,7 +108,7 @@ object naturalIsomorphisms {
   }
 
   // X → I ⊗ X
-  case class rightCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
+  case class rightCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     Out = X ⊗ unit
     lazy val out = x ⊗ unit
@@ -120,7 +119,7 @@ object naturalIsomorphisms {
     type     Dagger = rightUnit[X]
     lazy val dagger = rightUnit(x)
 
-    lazy val label = s"rightCounit(${x.label})" 
+    lazy val label = s"rightCounit(${x.label})"
   }
 
 
@@ -140,7 +139,7 @@ object naturalIsomorphisms {
   }
 
   // X → 0 ⊕ X
-  case class leftCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
+  case class leftCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     Out = zero ⊕ X
     lazy val out = zero ⊕ x
@@ -172,7 +171,7 @@ object naturalIsomorphisms {
   }
 
   // X → 0 ⊕ X
-  case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism { 
+  case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     Out = X ⊕ zero
     lazy val out = x ⊕ zero
@@ -183,7 +182,7 @@ object naturalIsomorphisms {
     type     Dagger = rightZero[X]
     lazy val dagger = rightZero(x)
 
-    lazy val label = s"rightCozero(${x.label})" 
+    lazy val label = s"rightCozero(${x.label})"
   }
 
 }
