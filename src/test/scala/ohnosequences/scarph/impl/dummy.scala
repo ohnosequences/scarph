@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, implementations._, graphTypes._, evals._, predicates._
+import ohnosequences.scarph._, implementations._, objects._, evals._
 
 trait DummyEvals extends DefaultEvals {
 
@@ -15,7 +15,6 @@ trait DummyEvals extends DefaultEvals {
     def leftProj(t: RawTensor): RawLeft = Dummy
     def rightProj(t: RawTensor): RawRight = Dummy
   }
-
 
   implicit def matchUpImpl:
       MatchUpImpl[Dummy] =
@@ -86,7 +85,7 @@ trait DummyEvals extends DefaultEvals {
   }
 
 
-  implicit def dummyPropertyImpl[P <: AnyGraphProperty]:
+  implicit def dummyPropertyImpl[P <: AnyProperty]:
       PropertyImpl[P, Dummy, Dummy] =
   new PropertyImpl[P, Dummy, Dummy] {
 

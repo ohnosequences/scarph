@@ -2,14 +2,31 @@ package ohnosequences.scarph.syntax
 
 object morphisms {
 
+  import ohnosequences.cosas.types._
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.predicates._
+  import s.objects._, s.morphisms._
+
+
+  implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
+    GraphMorphismValOps[F, VF] =
+    GraphMorphismValOps[F, VF](vt.value)
+
+  case class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vf: VF) extends AnyVal {
+
+    // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
+    def ⊗[S <: AnyGraphMorphism, VS](vs: S := VS): TensorMorph[F, S] := (VF, VS) =
+      new Denotes( (vf, vs.value) )
+
+    // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
+    def ⊕[S <: AnyGraphMorphism, VS](vs: S := VS): BiproductMorph[F, S] := (VF, VS) =
+      new Denotes( (vf, vs.value) )
+  }
 
   implicit def graphMorphismSyntax[F <: AnyGraphMorphism](f: F):
-        GraphMorphismSyntax[F] =
-    new GraphMorphismSyntax[F](f)
+    GraphMorphismSyntax[F] =
+    GraphMorphismSyntax[F](f)
 
-  class GraphMorphismSyntax[F <: AnyGraphMorphism](f: F) {
+  case class GraphMorphismSyntax[F <: AnyGraphMorphism](f: F) extends AnyVal {
 
     // just an alias for >=> composition:
     def andThen[T <: AnyGraphMorphism { type In = F#Out }](t: T):
@@ -35,21 +52,21 @@ object morphisms {
 
 
     def leftCounit:
-      F >=> s.naturalIsomorphisms.leftCounit[F#Out] =
-      f >=> s.naturalIsomorphisms.leftCounit(f.out)
+      F >=> s.morphisms.leftCounit[F#Out] =
+      f >=> s.morphisms.leftCounit(f.out)
 
     def rightCounit:
-      F >=> s.naturalIsomorphisms.rightCounit[F#Out] =
-      f >=> s.naturalIsomorphisms.rightCounit(f.out)
+      F >=> s.morphisms.rightCounit[F#Out] =
+      f >=> s.morphisms.rightCounit(f.out)
 
 
     def leftCozero:
-      F >=> s.naturalIsomorphisms.leftCozero[F#Out] =
-      f >=> s.naturalIsomorphisms.leftCozero(f.out)
+      F >=> s.morphisms.leftCozero[F#Out] =
+      f >=> s.morphisms.leftCozero(f.out)
 
     def rightCozero:
-      F >=> s.naturalIsomorphisms.rightCozero[F#Out] =
-      f >=> s.naturalIsomorphisms.rightCozero(f.out)
+      F >=> s.morphisms.rightCozero[F#Out] =
+      f >=> s.morphisms.rightCozero(f.out)
 
 
     // biproduct injections
@@ -73,15 +90,15 @@ object morphisms {
         TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]] =
     new TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]](refine(f))
 
-  class TensorSyntax[
+  case class TensorSyntax[
     L <: AnyGraphObject,
     R <: AnyGraphObject,
     F <: AnyGraphMorphism { type Out = L ⊗ R }
-  ](val f: F) {
+  ](f: RefineTensorOut[F]) extends AnyVal {
 
     def twist:
-      F >=> s.naturalIsomorphisms.symmetry[F#Out#Left, F#Out#Right] =
-      f >=> s.naturalIsomorphisms.symmetry(f.out.left, f.out.right)
+      F >=> s.morphisms.symmetry[F#Out#Left, F#Out#Right] =
+      f >=> s.morphisms.symmetry(f.out.left, f.out.right)
   }
 
 
@@ -96,7 +113,7 @@ object morphisms {
         MatchUpSyntax[F#Out#Left, SameTensorOut[F]] =
     new MatchUpSyntax[F#Out#Left, SameTensorOut[F]](refine(f))
 
-  class MatchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: F) {
+  case class MatchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: SameTensorOut[F]) extends AnyVal {
 
     def matchUp:
       F >=> s.morphisms.matchUp[F#Out#Left] =
@@ -141,7 +158,7 @@ object morphisms {
             DistributableOut[F]
           ](refine(f))
 
-  class DistributableSyntax[
+  case class DistributableSyntax[
     X <: AnyGraphObject,
     A <: AnyGraphObject,
     B <: AnyGraphObject,
@@ -149,15 +166,15 @@ object morphisms {
   ](val f: F) {
 
     def distribute:
-      F >=> s.naturalIsomorphisms.distribute[X,A,B] =
-      f >=> s.naturalIsomorphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
+      F >=> s.morphisms.distribute[X,A,B] =
+      f >=> s.morphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
   }
 
   implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
         BiproductSyntax[F] =
     new BiproductSyntax[F](f)
 
-  class BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F) {
+  case class BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F) extends AnyVal {
 
     def leftProj:
       F >=> s.morphisms.leftProj[F#Out] =
@@ -180,7 +197,7 @@ object morphisms {
         MergeSyntax[F#Out#Left, SameBiproductOut[F]] =
     new MergeSyntax[F#Out#Left, SameBiproductOut[F]](refine(f))
 
-  class MergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: F) {
+  case class MergeSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊕ T }](f: SameBiproductOut[F]) extends AnyVal {
 
     def merge:
       F >=> s.morphisms.merge[F#Out#Left] =
@@ -193,9 +210,9 @@ object morphisms {
         ElementSyntax[F] =
     new ElementSyntax[F](f)
 
-  class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) {
+  case class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) extends AnyVal {
 
-    def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
+    def get[P <: AnyProperty { type Owner = F#Out }](p: P):
       F >=> s.morphisms.get[P] =
       f >=> s.morphisms.get(p)
 
@@ -212,7 +229,7 @@ object morphisms {
         PredicateSyntax[F] =
     new PredicateSyntax[F](f)
 
-  class PredicateSyntax[F <: AnyGraphMorphism { type Out <: AnyPredicate }](f: F) {
+  case class PredicateSyntax[F <: AnyGraphMorphism { type Out <: AnyPredicate }](f: F) extends AnyVal {
 
     def coerce:
       F >=> s.morphisms.coerce[F#Out] =
@@ -223,7 +240,7 @@ object morphisms {
         ZeroSyntax[F] =
     new ZeroSyntax[F](f)
 
-  class ZeroSyntax[F <: AnyGraphMorphism { type Out = zero }](f: F) {
+  case class ZeroSyntax[F <: AnyGraphMorphism { type Out = zero }](f: F) extends AnyVal {
 
     def fromZero[X <: AnyGraphObject](x: X):
       F >=> s.morphisms.fromZero[X] =
@@ -234,7 +251,7 @@ object morphisms {
         UnitSyntax[F] =
     new UnitSyntax[F](f)
 
-  class UnitSyntax[F <: AnyGraphMorphism { type Out = unit }](f: F) {
+  case class UnitSyntax[F <: AnyGraphMorphism { type Out = unit }](f: F) extends AnyVal {
 
     def fromUnit[X <: AnyGraphObject](x: X):
       F >=> s.morphisms.fromUnit[X] =
@@ -246,7 +263,7 @@ object morphisms {
         EdgeSyntax[F] =
     new EdgeSyntax[F](f)
 
-  class EdgeSyntax[F <: AnyGraphMorphism { type Out <: AnyEdge }](f: F) {
+  case class EdgeSyntax[F <: AnyGraphMorphism { type Out <: AnyEdge }](f: F) extends AnyVal {
 
     // NOTE: in gremlin this is called .outV
     def source: F >=> s.morphisms.source[F#Out] =
@@ -262,7 +279,7 @@ object morphisms {
         VertexSyntax[F] =
     new VertexSyntax[F](f)
 
-  class VertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F) {
+  case class VertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F) extends AnyVal {
 
     def inE[E <: AnyEdge.To[F#Out]](e: E):
       F >=> s.morphisms.inE[E] =

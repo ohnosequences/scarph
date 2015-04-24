@@ -2,20 +2,26 @@
 ```scala
 package ohnosequences.scarph.syntax
 
-object predicates {
+object objects {
 
-  import ohnosequences.cosas._, types._
+  import ohnosequences.cosas.types._
+  import ohnosequences.scarph.objects._
 
-  import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.conditions._, s.predicates._, s.morphisms._
-```
 
-When you don't want to restrict the query anyhow (let's imagine it makes sence),
-you can just say: `query(user).out(..).blah.evalOn(any(user))`
+  implicit final def graphObjectValOps[F <: AnyGraphObject, VF](vt: F := VF):
+    GraphObjectValOps[F, VF] =
+    GraphObjectValOps[F, VF](vt.value)
 
-```scala
-  //implicit def any[E <: AnyGraphElement](e: E): EmptyPredicate[E] = EmptyPredicate[E](e)
+  case class GraphObjectValOps[F <: AnyGraphObject, VF](vf: VF) extends AnyVal {
 
+    // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
+    def ⊗[S <: AnyGraphObject, VS](vs: S := VS): (F ⊗ S) := (VF, VS) =
+      new Denotes( (vf, vs.value) )
+
+    // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
+    def ⊕[S <: AnyGraphObject, VS](vs: S := VS): (F ⊕ S) := (VF, VS) =
+      new Denotes( (vf, vs.value) )
+  }
 ```
 
 A way of building a predicate from an element
@@ -25,7 +31,7 @@ A way of building a predicate from an element
       ElementPredicateOps[E] =
       ElementPredicateOps[E](e)
 
-  case class ElementPredicateOps[E <: AnyGraphElement](e: E) {
+  case class ElementPredicateOps[E <: AnyGraphElement](e: E) extends AnyVal {
 ```
 
 For example: `user ? (user.name === "bob")`
@@ -44,7 +50,7 @@ Adding more conditions to a predicate
       PredicateOps[P] =
       PredicateOps[P](p)
 
-  case class PredicateOps[P <: AnyPredicate](pred: P) {
+  case class PredicateOps[P <: AnyPredicate](pred: P) extends AnyVal {
 ```
 
 It's basically cons for the internal conditions type-set,
@@ -54,7 +60,28 @@ but with a restriction on the condtion's element type
     def and[C <: AnyCondition.OnElement[P#Element]](c: C):
       AndPredicate[P, C] = AndPredicate(pred, c)
   }
+```
 
+Method aliases for predicate constructors
+
+```scala
+  implicit final def conditionOps[P <: AnyProperty](property: P):
+    ConditionOps[P] =
+    ConditionOps[P](property)
+
+  case class ConditionOps[P <: AnyProperty](property: P) extends AnyVal {
+
+    def ===(value: P#Value#Raw): Equal[P] = Equal(property, value)
+    def =/=(value: P#Value#Raw): NotEqual[P] = NotEqual(property, value)
+
+    def <(value: P#Value#Raw): Less[P] = Less(property, value)
+    def ≤(value: P#Value#Raw): LessOrEqual[P] = LessOrEqual(property, value)
+
+    def >(value: P#Value#Raw): Greater[P] = Greater(property, value)
+    def ≥(value: P#Value#Raw): GreaterOrEqual[P] = GreaterOrEqual(property, value)
+
+    def between(s: P#Value#Raw, e: P#Value#Raw): Interval[P] = Interval(property, s, e)
+  }
 }
 
 ```
@@ -79,34 +106,22 @@ but with a restriction on the condtion's element type
       + ohnosequences
         + scarph
           + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
-          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
-          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
-            + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
-            + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
-          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
+            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
 [test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../morphisms.scala.md
-[main/scala/ohnosequences/scarph/predicates.scala]: ../predicates.scala.md
-[main/scala/ohnosequences/scarph/monoidalStructures.scala]: ../monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: ../objects.scala.md
 [main/scala/ohnosequences/scarph/evals.scala]: ../evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../naturalIsomorphisms.scala.md
-[main/scala/ohnosequences/scarph/graphTypes.scala]: ../graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: morphisms.scala.md
-[main/scala/ohnosequences/scarph/syntax/predicates.scala]: predicates.scala.md
-[main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: graphTypes.scala.md
-[main/scala/ohnosequences/scarph/syntax/conditions.scala]: conditions.scala.md
-[main/scala/ohnosequences/scarph/conditions.scala]: ../conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/objects.scala]: objects.scala.md

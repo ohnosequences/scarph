@@ -3,8 +3,8 @@ package ohnosequences.scarph.test
 object Queries {
 
   import ohnosequences.{ scarph => s }
-  import s.graphTypes._, s.monoidalStructures._, s.morphisms._, s.conditions._, s.predicates._
-  import s.syntax._, morphisms._, conditions._, predicates._
+  import s.objects._, s.morphisms._
+  import s.syntax._, morphisms._, objects._
   import s.test.twitter._
 
    val edus    = user ? (user.name === "@eparejatobes")

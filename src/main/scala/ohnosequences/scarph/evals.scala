@@ -2,9 +2,9 @@ package ohnosequences.scarph
 
 object evals {
 
-  import monoidalStructures._
-  import ohnosequences.cosas._, types._, fns._
-  import graphTypes._, morphisms._, implementations._, predicates._
+  import ohnosequences.cosas.types._
+  import objects._, morphisms._, implementations._
+
 
   trait AnyMorphismTransform {
 
@@ -14,6 +14,7 @@ object evals {
     def apply(morph: InMorph): OutMorph
   }
 
+  /* Transforms a morphism to a function */
   trait AnyEval extends AnyMorphismTransform {
 
     type InVal
@@ -36,6 +37,7 @@ object evals {
   }
 
 
+  /* Transforms a morphism to another morphism with same domain/codomain */
   trait AnyRewrite extends AnyMorphismTransform {
 
     type OutMorph <: InMorph#In --> InMorph#Out
@@ -439,7 +441,7 @@ object evals {
 
 
     implicit final def eval_get[
-      P <: AnyGraphProperty, RawElem, RawValue
+      P <: AnyProperty, RawElem, RawValue
     ](implicit
       propImpl: PropertyImpl[P, RawElem, RawValue]
     ):  Eval[RawElem, get[P], RawValue] =
@@ -453,7 +455,7 @@ object evals {
     }
 
     implicit final def eval_lookup[
-      P <: AnyGraphProperty, RawElem, RawValue
+      P <: AnyProperty, RawElem, RawValue
     ](implicit
       propImpl: PropertyImpl[P, RawElem, RawValue]
     ):  Eval[RawValue, lookup[P], RawElem] =

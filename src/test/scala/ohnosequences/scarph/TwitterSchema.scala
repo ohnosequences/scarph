@@ -3,7 +3,7 @@ package ohnosequences.scarph.test
 import ohnosequences.cosas._, typeSets._
 
 import ohnosequences.{ scarph => s }
-import s.graphTypes._, s.schemas._
+import s.objects._, s.schemas._
 
 
 object twitter extends AnyGraphSchema {
@@ -16,7 +16,7 @@ object twitter extends AnyGraphSchema {
 
   lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
 
-  lazy val properties: Set[AnyGraphProperty] = Set(
+  lazy val properties: Set[AnyProperty] = Set(
     user.name,
     user.age,
     user.bio,
