@@ -18,7 +18,7 @@ object twitter extends AnyGraphSchema {
 
   lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
 
-  lazy val properties: Set[AnyGraphProperty] = Set(
+  lazy val properties: Set[AnyProperty] = Set(
     user.name,
     user.age,
     user.bio,
@@ -103,7 +103,6 @@ Edges with their properties
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
@@ -117,6 +116,5 @@ Edges with their properties
 [main/scala/ohnosequences/scarph/evals.scala]: ../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../../../../main/scala/ohnosequences/scarph/implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../main/scala/ohnosequences/scarph/schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../../../../main/scala/ohnosequences/scarph/naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/objects.scala.md

@@ -2,9 +2,10 @@
 ```scala
 package ohnosequences.scarph
 
-import objects._
-
 object implementations {
+
+  import objects._
+
 
   trait AnyTensorImpl extends Any {
 
@@ -143,7 +144,7 @@ object implementations {
 
   trait AnyPropertyImpl extends Any {
 
-    type Property <: AnyGraphProperty
+    type Property <: AnyProperty
     type RawElement
     type RawValue
 
@@ -152,7 +153,7 @@ object implementations {
     def lookup(r: RawValue, p: Property): RawElement
   }
 
-  trait PropertyImpl[P <: AnyGraphProperty, RE, RV] extends Any with AnyPropertyImpl {
+  trait PropertyImpl[P <: AnyProperty, RE, RV] extends Any with AnyPropertyImpl {
 
     type Property = P
     type RawElement = RE
@@ -226,7 +227,6 @@ object implementations {
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
@@ -240,6 +240,5 @@ object implementations {
 [main/scala/ohnosequences/scarph/evals.scala]: evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: syntax/objects.scala.md

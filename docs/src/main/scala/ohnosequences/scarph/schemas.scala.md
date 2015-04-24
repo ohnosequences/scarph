@@ -6,12 +6,13 @@ object schemas {
 
   import objects._
 
-  trait AnyGraphSchema extends AnyGraphObject {
+
+  trait AnyGraphSchema extends AnyGraphType {
 
     val vertices: Set[AnyVertex]
     val edges: Set[AnyEdge]
     val valueTypes: Set[AnyValueType]
-    val properties: Set[AnyGraphProperty]
+    val properties: Set[AnyProperty]
   }
 
   class GraphSchema(
@@ -19,7 +20,7 @@ object schemas {
     val vertices: Set[AnyVertex],
     val edges: Set[AnyEdge],
     val valueTypes: Set[AnyValueType],
-    val properties: Set[AnyGraphProperty]
+    val properties: Set[AnyProperty]
   ) extends AnyGraphSchema
 
 }
@@ -50,7 +51,6 @@ object schemas {
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
@@ -64,6 +64,5 @@ object schemas {
 [main/scala/ohnosequences/scarph/evals.scala]: evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: syntax/objects.scala.md
