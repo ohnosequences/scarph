@@ -19,8 +19,6 @@ object rewrites {
 
   case class apply[RS <: AnyRewriteStrategy](val rewriteStrategy: RS) {
 
-    import rewriteStrategy._
-
     def to[M <: AnyGraphMorphism, OM <: M#In --> M#Out](m: M)(implicit rewrite: RewriteFrom[RS,M,OM]): OM = rewrite(m)
   }
 
