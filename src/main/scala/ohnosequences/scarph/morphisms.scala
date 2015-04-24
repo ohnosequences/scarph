@@ -21,6 +21,15 @@ object morphisms {
 
   type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
 
+
+  trait AnyMorphismTransform {
+
+    type InMorph <: AnyGraphMorphism
+    type OutMorph
+
+    def apply(morph: InMorph): OutMorph
+  }
+
   /* Sequential composition of two morphisms */
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
