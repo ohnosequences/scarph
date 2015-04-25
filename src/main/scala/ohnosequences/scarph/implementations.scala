@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 object implementations {
 
-  import graphTypes._, predicates._
+  import objects._
 
 
   trait AnyTensorImpl extends Any {
@@ -142,7 +142,7 @@ object implementations {
 
   trait AnyPropertyImpl extends Any {
 
-    type Property <: AnyGraphProperty
+    type Property <: AnyProperty
     type RawElement
     type RawValue
 
@@ -151,7 +151,7 @@ object implementations {
     def lookup(r: RawValue, p: Property): RawElement
   }
 
-  trait PropertyImpl[P <: AnyGraphProperty, RE, RV] extends Any with AnyPropertyImpl {
+  trait PropertyImpl[P <: AnyProperty, RE, RV] extends Any with AnyPropertyImpl {
 
     type Property = P
     type RawElement = RE
@@ -181,17 +181,20 @@ object implementations {
 
   trait AnyPredicateImpl extends Any {
 
+    type Predicate <: AnyPredicate
+
     type RawPredicate
-    def quantify[P <: AnyPredicate](e: RawElement, p: P): RawPredicate
+    def quantify(e: RawElement, p: Predicate): RawPredicate
 
     type RawElement
     def coerce(p: RawPredicate): RawElement
   }
 
-  trait PredicateImpl[P, E] extends Any with AnyPredicateImpl {
+  trait PredicateImpl[P <: AnyPredicate, RP, RE] extends Any with AnyPredicateImpl {
 
-    type RawPredicate = P
-    type RawElement = E
+    type Predicate = P
+    type RawPredicate = RP
+    type RawElement = RE
   }
 
 }

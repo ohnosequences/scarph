@@ -5,7 +5,7 @@ package ohnosequences.scarph.test
 import ohnosequences.cosas._, typeSets._
 
 import ohnosequences.{ scarph => s }
-import s.graphTypes._, s.schemas._
+import s.objects._, s.schemas._
 
 
 object twitter extends AnyGraphSchema {
@@ -18,7 +18,7 @@ object twitter extends AnyGraphSchema {
 
   lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
 
-  lazy val properties: Set[AnyGraphProperty] = Set(
+  lazy val properties: Set[AnyProperty] = Set(
     user.name,
     user.age,
     user.bio,
@@ -99,34 +99,22 @@ Edges with their properties
       + ohnosequences
         + scarph
           + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [predicates.scala][main/scala/ohnosequences/scarph/predicates.scala]
-          + [monoidalStructures.scala][main/scala/ohnosequences/scarph/monoidalStructures.scala]
+          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
-          + [graphTypes.scala][main/scala/ohnosequences/scarph/graphTypes.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [predicates.scala][main/scala/ohnosequences/scarph/syntax/predicates.scala]
-            + [graphTypes.scala][main/scala/ohnosequences/scarph/syntax/graphTypes.scala]
-            + [conditions.scala][main/scala/ohnosequences/scarph/syntax/conditions.scala]
-          + [conditions.scala][main/scala/ohnosequences/scarph/conditions.scala]
+            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
 
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: TwitterQueries.scala.md
 [test/scala/ohnosequences/scarph/impl/dummyTest.scala]: impl/dummyTest.scala.md
 [test/scala/ohnosequences/scarph/impl/dummy.scala]: impl/dummy.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: TwitterSchema.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../../../../main/scala/ohnosequences/scarph/morphisms.scala.md
-[main/scala/ohnosequences/scarph/predicates.scala]: ../../../../main/scala/ohnosequences/scarph/predicates.scala.md
-[main/scala/ohnosequences/scarph/monoidalStructures.scala]: ../../../../main/scala/ohnosequences/scarph/monoidalStructures.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: ../../../../main/scala/ohnosequences/scarph/objects.scala.md
 [main/scala/ohnosequences/scarph/evals.scala]: ../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../../../../main/scala/ohnosequences/scarph/implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../main/scala/ohnosequences/scarph/schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../../../../main/scala/ohnosequences/scarph/naturalIsomorphisms.scala.md
-[main/scala/ohnosequences/scarph/graphTypes.scala]: ../../../../main/scala/ohnosequences/scarph/graphTypes.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
-[main/scala/ohnosequences/scarph/syntax/predicates.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/predicates.scala.md
-[main/scala/ohnosequences/scarph/syntax/graphTypes.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/graphTypes.scala.md
-[main/scala/ohnosequences/scarph/syntax/conditions.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/conditions.scala.md
-[main/scala/ohnosequences/scarph/conditions.scala]: ../../../../main/scala/ohnosequences/scarph/conditions.scala.md
+[main/scala/ohnosequences/scarph/syntax/objects.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/objects.scala.md
