@@ -6,7 +6,7 @@ organization  := "ohnosequences"
 bucketSuffix  := "era7.com"
 
 scalaVersion        := "2.11.6"
-crossScalaVersions  := Seq("2.10.5")
+crossScalaVersions  := Seq("2.10.5", scalaVersion.value)
 
 libraryDependencies ++= Seq(
   "ohnosequences"   %% "cosas"       % "0.6.0",
