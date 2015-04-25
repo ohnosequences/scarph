@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-object rewrites {
+case object rewrites extends module(morphisms) {
   
   import morphisms._
 

@@ -1,8 +1,11 @@
 package ohnosequences.scarph
 
-object objects {
+import ohnosequences.cosas._
+import ohnosequences.statika.bundles._
 
-  import ohnosequences.cosas._, types._, typeSets._
+case object objects extends module {
+
+  import types._, typeSets._
 
 
   trait AnyGraphType extends AnyType

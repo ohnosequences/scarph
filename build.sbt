@@ -10,6 +10,7 @@ crossScalaVersions  := Seq("2.10.5")
 
 libraryDependencies ++= Seq(
   "ohnosequences"   %% "cosas"       % "0.6.0",
+  "ohnosequences"   %% "statika"     % "2.0.0-feature-no-typesets-SNAPSHOT",
   "org.scalatest"   %% "scalatest"   % "2.2.4" % Test
 )
 

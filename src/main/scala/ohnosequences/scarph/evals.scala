@@ -1,8 +1,9 @@
 package ohnosequences.scarph
 
-object evals {
+import ohnosequences.cosas.types._
 
-  import ohnosequences.cosas.types._
+case object evals extends module(objects, morphisms, implementations) {
+
   import objects._, morphisms._, implementations._
 
   /* Transforms a morphism to a function */
