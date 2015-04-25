@@ -5,15 +5,6 @@ object evals {
   import ohnosequences.cosas.types._
   import objects._, morphisms._, implementations._
 
-
-  trait AnyMorphismTransform {
-
-    type InMorph <: AnyGraphMorphism
-    type OutMorph
-
-    def apply(morph: InMorph): OutMorph
-  }
-
   /* Transforms a morphism to a function */
   trait AnyEval extends AnyMorphismTransform {
 
@@ -37,27 +28,6 @@ object evals {
   }
 
 
-  /* Transforms a morphism to another morphism with same domain/codomain */
-  trait AnyRewrite extends AnyMorphismTransform {
-
-    type OutMorph <: InMorph#In --> InMorph#Out
-  }
-
-  @annotation.implicitNotFound(msg = "Cannot rewrite morphism ${M} to ${OM}")
-  trait Rewrite[M <: AnyGraphMorphism, OM <: M#In --> M#Out] extends AnyRewrite {
-
-    type InMorph = M
-    type OutMorph = OM
-  }
-
-
-  object rewrite {
-
-    def apply[M <: AnyGraphMorphism, OM <: M#In --> M#Out]
-      (m: M)(implicit rewr: Rewrite[M, OM]): OM = rewr(m)
-  }
-
-
   final class evaluate[I, M <: AnyGraphMorphism, O](val f: M, val eval: Eval[I, M, O]) {
 
     final def on(input: M#In := I): M#Out := O = eval(f).apply(input)
@@ -68,22 +38,13 @@ object evals {
 
   object evaluate {
 
-    def apply[I, IM <: AnyGraphMorphism, OM <: IM#In --> IM#Out, O](m: IM)(implicit
-      rewrite: Rewrite[IM, OM],
-      eval: Eval[I, OM, O]
-    ):  evaluate[I, OM, O] =
-    new evaluate[I, OM, O](rewrite(m), eval)
+    def apply[I, IM <: AnyGraphMorphism, O](m: IM)(implicit
+      eval: Eval[I, IM, O]
+    ):  evaluate[I, IM, O] =
+    new evaluate[I, IM, O](m, eval)
   }
 
-
-  trait DefaultEvals extends AfterRewritingEvals {
-
-    implicit def id_rewrite[M <: AnyGraphMorphism]:
-        Rewrite[M, M] =
-    new Rewrite[M, M] { def apply(morph: InMorph): OutMorph = morph }
-  }
-
-  trait AfterRewritingEvals {
+  trait DefaultEvals {
 
     // X = X (does nothing)
     implicit final def eval_id[

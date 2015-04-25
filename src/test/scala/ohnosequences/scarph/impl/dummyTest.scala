@@ -64,31 +64,35 @@ class DummyTests extends org.scalatest.FunSuite {
     )
   }
 
-  object rewrittingDummy extends DummyEvals {
+  import rewrites._
 
-    implicit def right_bias_assoc[
+  object compositionToRight extends AnyRewriteStrategy {
+
+    implicit final def right_bias_assoc[
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
       H <: AnyGraphMorphism { type In = G#Out }
-    ]:  Rewrite[(F >=> G) >=> H, F >=> (G >=> H)] =
-    new Rewrite[(F >=> G) >=> H, F >=> (G >=> H)] {
+    ]
+    : ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) ) 
+    = rewriteTo( fg_h => {
 
-      def apply(morph: InMorph): OutMorph = {
-        val f = morph.first.first
-        val g = morph.first.second
-        val h = morph.second
+        val fg  = fg_h.first
+        val h   = fg_h.second
+
+        val f = fg.first
+        val g = fg.second
+        
         f >=> (g >=> h)
-      }
-    }
-
+      })
   }
 
   test("rewriting composition") {
-    import rewrittingDummy._
-    //import dummy._*/
-
+    
     val morph = outV(follows) >=> inV(follows) >=> outV(follows)
+
+    val rmorph = apply(compositionToRight) to morph
+
     println(morph.label)
-    println(evaluate(morph).evalPlan)
+    println(rmorph.label)
   }
 }
