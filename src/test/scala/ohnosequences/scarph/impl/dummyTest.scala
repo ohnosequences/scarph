@@ -68,13 +68,13 @@ class DummyTests extends org.scalatest.FunSuite {
 
   object compositionToRight extends AnyRewriteStrategy {
 
-    implicit def right_bias_assoc[
+    implicit final def right_bias_assoc[
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
       H <: AnyGraphMorphism { type In = G#Out }
-    ]: ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) ) =
-    rewriteTo( 
-      fg_h => {
+    ]
+    : ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) ) 
+    = rewriteTo( fg_h => {
 
         val fg  = fg_h.first
         val h   = fg_h.second
@@ -83,8 +83,7 @@ class DummyTests extends org.scalatest.FunSuite {
         val g = fg.second
         
         f >=> (g >=> h)
-      }
-    )
+      })
   }
 
   test("rewriting composition") {
@@ -92,7 +91,6 @@ class DummyTests extends org.scalatest.FunSuite {
     val morph = outV(follows) >=> inV(follows) >=> outV(follows)
 
     val rmorph = apply(compositionToRight) to morph
-
 
     println(morph.label)
     println(rmorph.label)
