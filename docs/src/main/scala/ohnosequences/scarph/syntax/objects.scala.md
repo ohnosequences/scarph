@@ -5,9 +5,8 @@ package ohnosequences.scarph.syntax
 object objects {
 
   import ohnosequences.cosas.types._
+  import ohnosequences.scarph.objects._
 
-  import ohnosequences.{ scarph => s }
-  import s.objects._
 
   implicit final def graphObjectValOps[F <: AnyGraphObject, VF](vt: F := VF):
     GraphObjectValOps[F, VF] =
@@ -66,11 +65,11 @@ but with a restriction on the condtion's element type
 Method aliases for predicate constructors
 
 ```scala
-  implicit final def conditionOps[P <: AnyGraphProperty](property: P):
+  implicit final def conditionOps[P <: AnyProperty](property: P):
     ConditionOps[P] =
     ConditionOps[P](property)
 
-  case class ConditionOps[P <: AnyGraphProperty](property: P) extends AnyVal {
+  case class ConditionOps[P <: AnyProperty](property: P) extends AnyVal {
 
     def ===(value: P#Value#Raw): Equal[P] = Equal(property, value)
     def =/=(value: P#Value#Raw): NotEqual[P] = NotEqual(property, value)
@@ -111,7 +110,6 @@ Method aliases for predicate constructors
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
@@ -125,6 +123,5 @@ Method aliases for predicate constructors
 [main/scala/ohnosequences/scarph/evals.scala]: ../evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: objects.scala.md

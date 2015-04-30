@@ -6,7 +6,7 @@ import ohnosequences.{ scarph => s }
 import s.objects._, s.schemas._
 
 
-object twitter extends AnyGraphSchema {
+case object twitter extends AnyGraphSchema {
 
   lazy val label = this.toString
 

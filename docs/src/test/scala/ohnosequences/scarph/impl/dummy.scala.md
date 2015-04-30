@@ -4,7 +4,7 @@ package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, implementations._, objects._, evals._
 
-object dummy extends DefaultEvals {
+trait DummyEvals extends DefaultEvals {
 
   case object Dummy
   type Dummy = Dummy.type
@@ -87,7 +87,7 @@ object dummy extends DefaultEvals {
   }
 
 
-  implicit def dummyPropertyImpl[P <: AnyGraphProperty]:
+  implicit def dummyPropertyImpl[P <: AnyProperty]:
       PropertyImpl[P, Dummy, Dummy] =
   new PropertyImpl[P, Dummy, Dummy] {
 
@@ -105,6 +105,8 @@ object dummy extends DefaultEvals {
   }
 
 }
+
+object dummy extends DummyEvals
 
 ```
 
@@ -132,7 +134,6 @@ object dummy extends DefaultEvals {
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
@@ -146,6 +147,5 @@ object dummy extends DefaultEvals {
 [main/scala/ohnosequences/scarph/evals.scala]: ../../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../../../../../main/scala/ohnosequences/scarph/implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/objects.scala.md

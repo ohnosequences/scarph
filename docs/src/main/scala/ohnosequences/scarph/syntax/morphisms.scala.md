@@ -4,9 +4,10 @@ package ohnosequences.scarph.syntax
 
 object morphisms {
 
+  import ohnosequences.cosas.types._
   import ohnosequences.{ scarph => s }
   import s.objects._, s.morphisms._
-  import ohnosequences.cosas.types._
+
 
   implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
     GraphMorphismValOps[F, VF] =
@@ -53,21 +54,21 @@ object morphisms {
 
 
     def leftCounit:
-      F >=> s.naturalIsomorphisms.leftCounit[F#Out] =
-      f >=> s.naturalIsomorphisms.leftCounit(f.out)
+      F >=> s.morphisms.leftCounit[F#Out] =
+      f >=> s.morphisms.leftCounit(f.out)
 
     def rightCounit:
-      F >=> s.naturalIsomorphisms.rightCounit[F#Out] =
-      f >=> s.naturalIsomorphisms.rightCounit(f.out)
+      F >=> s.morphisms.rightCounit[F#Out] =
+      f >=> s.morphisms.rightCounit(f.out)
 
 
     def leftCozero:
-      F >=> s.naturalIsomorphisms.leftCozero[F#Out] =
-      f >=> s.naturalIsomorphisms.leftCozero(f.out)
+      F >=> s.morphisms.leftCozero[F#Out] =
+      f >=> s.morphisms.leftCozero(f.out)
 
     def rightCozero:
-      F >=> s.naturalIsomorphisms.rightCozero[F#Out] =
-      f >=> s.naturalIsomorphisms.rightCozero(f.out)
+      F >=> s.morphisms.rightCozero[F#Out] =
+      f >=> s.morphisms.rightCozero(f.out)
 
 
     // biproduct injections
@@ -98,8 +99,8 @@ object morphisms {
   ](f: RefineTensorOut[F]) extends AnyVal {
 
     def twist:
-      F >=> s.naturalIsomorphisms.symmetry[F#Out#Left, F#Out#Right] =
-      f >=> s.naturalIsomorphisms.symmetry(f.out.left, f.out.right)
+      F >=> s.morphisms.symmetry[F#Out#Left, F#Out#Right] =
+      f >=> s.morphisms.symmetry(f.out.left, f.out.right)
   }
 
 
@@ -167,8 +168,8 @@ object morphisms {
   ](val f: F) {
 
     def distribute:
-      F >=> s.naturalIsomorphisms.distribute[X,A,B] =
-      f >=> s.naturalIsomorphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
+      F >=> s.morphisms.distribute[X,A,B] =
+      f >=> s.morphisms.distribute(f.out.left, f.out.right.left, f.out.right.right)
   }
 
   implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
@@ -215,7 +216,7 @@ Element types
 
   case class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) extends AnyVal {
 
-    def get[P <: AnyGraphProperty { type Owner = F#Out }](p: P):
+    def get[P <: AnyProperty { type Owner = F#Out }](p: P):
       F >=> s.morphisms.get[P] =
       f >=> s.morphisms.get(p)
 
@@ -336,7 +337,6 @@ Vertex types
           + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
           + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
           + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + [naturalIsomorphisms.scala][main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]
           + syntax
             + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
             + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
@@ -350,6 +350,5 @@ Vertex types
 [main/scala/ohnosequences/scarph/evals.scala]: ../evals.scala.md
 [main/scala/ohnosequences/scarph/implementations.scala]: ../implementations.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../schemas.scala.md
-[main/scala/ohnosequences/scarph/naturalIsomorphisms.scala]: ../naturalIsomorphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: objects.scala.md
