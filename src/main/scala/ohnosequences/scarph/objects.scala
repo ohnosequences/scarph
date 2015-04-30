@@ -106,8 +106,7 @@ object objects {
     type Element <: AnyGraphElement
     val  element: Element
 
-    type Conditions <: AnyTypeSet //.Of[AnyCondition]
-    val  conditions: Conditions
+    val  conditions: List[AnyCondition]
 
     lazy val label: String = s"(${element.label} ? ${conditions.toString})"
   }
@@ -119,8 +118,7 @@ object objects {
 
   /* Empty predicate doesn't have any restrictions */
   trait AnyEmptyPredicate extends AnyPredicate {
-    type Conditions = ∅
-    val  conditions = ∅
+    lazy val conditions = List[AnyCondition]()
   }
 
   case class EmptyPredicate[E <: AnyGraphElement](val element: E)
@@ -142,8 +140,7 @@ object objects {
     type Condition <: AnyCondition.OnElement[Body#Element]
     val  condition: Condition
 
-    type     Conditions = Condition :~: Body#Conditions
-    lazy val conditions = condition :~: (body.conditions: Body#Conditions)
+    lazy val conditions = condition :: body.conditions
   }
 
   case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElement[B#Element]]
