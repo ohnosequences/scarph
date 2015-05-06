@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-object implementations {
+case object implementations extends module(objects) {
 
   import objects._
 

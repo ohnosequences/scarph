@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-object schemas {
+case object schemas extends module(objects) {
 
   import objects._
 

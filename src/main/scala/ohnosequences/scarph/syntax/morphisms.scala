@@ -1,11 +1,11 @@
 package ohnosequences.scarph.syntax
 
-object morphisms {
-
   import ohnosequences.cosas.types._
   import ohnosequences.{ scarph => s }
-  import s.objects._, s.morphisms._
 
+case object morphisms extends module(objects, s.objects, s.morphisms) {
+
+  import s.objects._, s.morphisms._
 
   implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
     GraphMorphismValOps[F, VF] =

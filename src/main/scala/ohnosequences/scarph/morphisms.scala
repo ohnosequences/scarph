@@ -1,10 +1,10 @@
 package ohnosequences.scarph
 
-object morphisms {
+import ohnosequences.cosas.types._
 
-  import ohnosequences.cosas.types._
+case object morphisms extends module(objects) {
+
   import objects._
-
 
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
