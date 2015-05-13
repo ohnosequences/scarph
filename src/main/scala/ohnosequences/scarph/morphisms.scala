@@ -5,8 +5,15 @@ object morphisms {
   import ohnosequences.cosas.types._
   import objects._
 
+  object AnyGraphMorphism {
 
-  /* Morphisms are spans */
+    type is[M <: AnyGraphMorphism] = M with AnyGraphMorphism {
+
+      type In = M#In
+      type Out = M#Out
+      type Dagger = M#Dagger
+    }
+  }
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
 
     type In <: AnyGraphObject

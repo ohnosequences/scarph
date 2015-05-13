@@ -44,7 +44,26 @@ object evals {
     new evaluate[I, IM, O](m, eval)
   }
 
+  final class on[IV, IM <: AnyGraphMorphism,O](val m: IM, val v: IV)(implicit evvv: Eval[IV,IM,O]) {
+
+    def evaluate: IM#Out := O = evvv(m)((m.in: IM#In) := v)
+
+  }
+
+  object on {
+
+    def apply[I, IM <: AnyGraphMorphism, O](m: IM)(v: I)(implicit
+      eval: Eval[I, IM, O]
+    ): on[I,IM,O] = new on(m,v)(eval)
+  }
+
+  final case class ev[M <: AnyGraphMorphism](val morphism: M) {
+
+    def on[I,O](input: M#In := I)(implicit ev: Eval[I,M,O]): M#Out := O = ev(morphism)(input)
+  }
+
   trait DefaultEvals {
+ 
 
     // X = X (does nothing)
     implicit final def eval_id[

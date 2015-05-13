@@ -55,6 +55,8 @@ class DummyTests extends org.scalatest.FunSuite {
     // no distribute eval
     // println(evaluate(query15).evalPlan)*/
 
+    val uhh2 = on(query2)(Dummy).evaluate
+
     val uh2 = evaluate(query2) on (user := Dummy)
 
     val uh1 = evaluate(query1) on (name := Dummy)
