@@ -2,13 +2,41 @@ package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, objects._, morphisms._, evals._
 import syntax.morphisms._, syntax.objects._
-import twitter._
+import twitter._, dummy._
 
 class DummyTests extends org.scalatest.FunSuite {
 
-  test("dummy evaluators on sample queries") {
-    import dummy._
+  //def evalObj: preeval[DummyObject, DummyObject] = new preeval[DummyObject, DummyObject]
+  //def evalTens[L <: Dummy, R <: Dummy]: preeval[DummyTensor[L, R], DummyTensor[L, R]] = new preeval[DummyTensor[L, R], DummyTensor[L, R]]
 
+  test("dummy evals for the basic structure") {
+    import dummy.categoryStructure._
+
+    val q_id = id(user)
+    val q_comp = q_id >=> q_id
+
+    println("------------")
+    println(evalOn[DummyObject](q_id).evalPlan)
+    println(evalOn[DummyObject](q_comp).evalPlan)
+  }
+
+  test("dummy evals for the tensor structure") {
+    import dummy.categoryStructure._
+    import dummy.tensorStructure._
+
+    val q_tensor = id(user) ⊗ id(user)
+    val q_dupl = duplicate(user)
+    val q_match = matchUp(user)
+    val q_comp = q_dupl >=> q_tensor >=> q_match
+
+    println("------------")
+    println(evalOn[DummyTensor[DummyObject, DummyObject]](q_tensor).evalPlan)
+    println(evalOn[DummyObject](q_dupl).evalPlan)
+    println(evalOn[DummyTensor[DummyObject, DummyObject]](q_match).evalPlan)
+    println(evalOn[DummyObject](q_comp).evalPlan)
+  }
+
+/*
     val query1  = lookup(user.name)
     val query2  = duplicate(user)
     val query3  = inE(posted)
@@ -32,7 +60,7 @@ class DummyTests extends org.scalatest.FunSuite {
     println("------------")
     println(evaluate(query4).evalPlan)
     println("------------")
-    println(evaluate(query5).evalPlan)
+    //println(evaluate(query5).evalPlan)
     println("------------")
     println(evaluate(query6).evalPlan)
     println("------------")
@@ -53,7 +81,7 @@ class DummyTests extends org.scalatest.FunSuite {
     println(evaluate(query14).evalPlan)
     println("------------")
     // no distribute eval
-    // println(evaluate(query15).evalPlan)*/
+    // println(evaluate(query15).evalPlan)
 
     val uh2 = evaluate(query2) on (user := Dummy)
 
@@ -64,6 +92,8 @@ class DummyTests extends org.scalatest.FunSuite {
     )
   }
 
+*/
+
   import rewrites._
 
   object compositionToRight extends AnyRewriteStrategy {
@@ -73,7 +103,7 @@ class DummyTests extends org.scalatest.FunSuite {
       G <: AnyGraphMorphism { type In = F#Out },
       H <: AnyGraphMorphism { type In = G#Out }
     ]
-    : ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) ) 
+    : ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) )
     = rewriteTo( fg_h => {
 
         val fg  = fg_h.first
@@ -81,13 +111,13 @@ class DummyTests extends org.scalatest.FunSuite {
 
         val f = fg.first
         val g = fg.second
-        
+
         f >=> (g >=> h)
       })
   }
 
   test("rewriting composition") {
-    
+
     val morph = outV(follows) >=> inV(follows) >=> outV(follows)
 
     val rmorph = apply(compositionToRight) to morph

@@ -8,7 +8,7 @@ object implementations {
   trait AnyTensorImpl extends Any {
 
     type RawTensor
-    def apply(l: RawLeft, r: RawRight): RawTensor
+    def construct(l: RawLeft, r: RawRight): RawTensor
 
     type RawLeft
     def leftProj(t: RawTensor): RawLeft

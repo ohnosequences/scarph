@@ -1,7 +1,7 @@
 ## Morphisms list
 
 
-- From/to unit
+1. From/to unit
 
 | `X <: AnyGraphObject` |    type    | syntax           |
 |----------------------:|:----------:|:-----------------|
@@ -9,7 +9,7 @@
 |           `toUnit[X]` | `X → unit` | `.toUnit`        |
 
 
-- From/to zero
+1. From/to zero
 
 | `X <: AnyGraphObject` |    type    | syntax           |
 |----------------------:|:----------:|:-----------------|
@@ -17,7 +17,7 @@
 |           `toZero[X]` | `X → zero` | `.toZero`        |
 
 
-- Tensor diagonal & condiagonal (`△` & `▽`)
+1. Tensor diagonal & condiagonal (`△` & `▽`)
 
 | `X <: AnyGraphObject` |    type     | syntax       |
 |----------------------:|:-----------:|:-------------|
@@ -25,7 +25,7 @@
 |          `matchUp[X]` | `X ⊗ X → X` | `.matchUp`   |
 
 
-- Biproduct diagonal & condiagonal
+1. Biproduct diagonal & condiagonal
 
 | `X <: AnyGraphObject` |    type     | syntax   |
 |----------------------:|:-----------:|:---------|
@@ -33,7 +33,7 @@
 |            `merge[X]` | `X ⊕ X → X` | `.merge` |
 
 
-- Biproduct left injection/projection
+1. Biproduct left injection/projection
 
 | `A, B <: AnyGraphObject` |    type     | syntax              |
 |-------------------------:|:-----------:|:--------------------|
@@ -41,7 +41,7 @@
 |         `leftProj[A, B]` | `A ⊕ B → A` | `.leftProj`         |
 
 
-- Biproduct right injection/projection
+1. Biproduct right injection/projection
 
 | `A, B <: AnyGraphObject` |    type     | syntax               |
 |-------------------------:|:-----------:|:---------------------|
@@ -49,7 +49,7 @@
 |        `rightProj[A, B]` | `A ⊕ B → B` | `.rightProj`         |
 
 
-- Edge target & vertex incoming edges
+1. Edge target & vertex incoming edges
 
 | `E <: AnyEdge` |      type      | syntax         |
 |---------------:|:--------------:|:---------------|
@@ -57,7 +57,7 @@
 |       `inE[E]` | `E#Target → E` | `.inE(<edge>)` |
 
 
-- Edge source & vertex outgoing edges
+1. Edge source & vertex outgoing edges
 
 | `E <: AnyEdge` |      type      | syntax          |
 |---------------:|:--------------:|:----------------|
@@ -65,7 +65,7 @@
 |      `outE[E]` | `E#Source → E` | `.outE(<edge>)` |
 
 
-- Vertex incoming/outgoing edges
+1. Vertex incoming/outgoing edges
 
 | `E <: AnyEdge` |         type          | syntax          |
 |---------------:|:---------------------:|:----------------|
@@ -73,7 +73,7 @@
 |       `inV[E]` | `E#Target → E#Source` | `.inV(<edge>)`  |
 
 
-- Get element property & lookup element by property value
+1. Get element property & lookup element by property value
 
 | `P <: AnyProperty` |        type         | syntax             |
 |-------------------:|:-------------------:|:-------------------|
@@ -81,7 +81,7 @@
 |        `lookup[P]` | `P#Value → P#Owner` |                    |
 
 
-- Predicate quantification/coercion
+1. Predicate quantification/coercion
 
 | `P <: AnyPredicate` |      type       | syntax                   |
 |--------------------:|:---------------:|:-------------------------|

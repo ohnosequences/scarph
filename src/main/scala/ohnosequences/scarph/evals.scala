@@ -16,6 +16,13 @@ object evals {
 
     type OutMorph = Input => Output
 
+    def rawApply(morph: InMorph): InVal => OutVal
+
+    // same but with tags:
+    final def apply(morph: InMorph): OutMorph = { input: Input =>
+      (morph.out: InMorph#Out) := rawApply(morph)(input.value)
+    }
+
     def present(morph: InMorph): String
   }
 
@@ -36,23 +43,30 @@ object evals {
     final def evalPlan: String = eval.present(f)
   }
 
-  object evaluate {
+  class preeval[I] {
 
-    def apply[I, IM <: AnyGraphMorphism, O](m: IM)(implicit
+    def apply[IM <: AnyGraphMorphism, O](m: IM)(implicit
       eval: Eval[I, IM, O]
     ):  evaluate[I, IM, O] =
     new evaluate[I, IM, O](m, eval)
   }
 
-  trait DefaultEvals {
+  def evalOn[I]: preeval[I] = new preeval[I] {}
 
-    // X = X (does nothing)
+
+  trait AnyStructure {
+
+    type RawObject
+  }
+
+  trait CategoryStructure extends AnyStructure {
+
     implicit final def eval_id[
-      I, X <: AnyGraphObject
+      I <: RawObject, X <: AnyGraphObject
     ]:  Eval[I, id[X], I] =
     new Eval[I, id[X], I] {
 
-      final def apply(morph: InMorph): OutMorph = { input: Input => input }
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal => inVal }
 
       final def present(morph: InMorph): String = morph.label
     }
@@ -60,47 +74,87 @@ object evals {
 
     // F >=> S
     implicit final def eval_composition[
-      I,
       F <: AnyGraphMorphism,
       S <: AnyGraphMorphism { type In = F#Out },
-      X, O
+      I <: RawObject, X <: RawObject, O <: RawObject
     ](implicit
       evalFirst:  Eval[I, F, X],
       evalSecond: Eval[X, S, O]
     ):  Eval[I, F >=> S, O] =
     new Eval[I, F >=> S, O] {
 
-      def apply(morph: InMorph): OutMorph = { input: Input =>
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
 
-        val firstResult = evalFirst(morph.first)(input)
-        evalSecond(morph.second)(morph.second.in := firstResult.value)
+        val firstResult = evalFirst.rawApply(morph.first)(inVal)
+        evalSecond.rawApply(morph.second)(firstResult)
       }
 
       def present(morph: InMorph): String = s"(${evalFirst.present(morph.first)} >=> ${evalSecond.present(morph.second)})"
     }
 
+  }
+
+  trait TensorStructure extends AnyStructure {
+
+    type RawTensor[L <: RawObject, R <: RawObject] //<: RawObject
+
+    def construct[L <: RawObject, R <: RawObject](l: L, r: R): RawTensor[L, R]
+    def leftProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): L
+    def rightProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): R
+    def matchUpRaw[X <: RawObject](t: RawTensor[X, X]): X
+
+
     // IL ⊗ IR → OL ⊗ OR
     implicit final def eval_tensor[
-      IL, IR, I,
-      L <: AnyGraphMorphism, R <: AnyGraphMorphism,
-      OL, OR, O
+      IL <: RawObject, IR <: RawObject,
+      OL <: RawObject, OR <: RawObject,
+      L <: AnyGraphMorphism, R <: AnyGraphMorphism
     ](implicit
-      inTens:  TensorImpl[I, IL, IR],
-      outTens: TensorImpl[O, OL, OR],
       evalLeft:  Eval[IL, L, OL],
       evalRight: Eval[IR, R, OR]
-    ):  Eval[I, TensorMorph[L, R], O] =
-    new Eval[I, TensorMorph[L, R], O] {
+    ):  Eval[RawTensor[IL, IR], TensorMorph[L, R], RawTensor[OL, OR]] =
+    new Eval[RawTensor[IL, IR], TensorMorph[L, R], RawTensor[OL, OR]] {
 
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := outTens(
-          evalLeft(morph.left)  ( (morph.left.in:  L#In) := inTens.leftProj(input.value) ).value,
-          evalRight(morph.right)( (morph.right.in: R#In) := inTens.rightProj(input.value) ).value
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        construct[OL, OR](
+          evalLeft.rawApply(morph.left)  ( leftProjRaw[IL, IR](inVal) ),
+          evalRight.rawApply(morph.right)( rightProjRaw[IL, IR](inVal) )
         )
       }
 
       def present(morph: InMorph): String = s"(${evalLeft.present(morph.left)} ⊗ ${evalRight.present(morph.right)})"
     }
+
+    // △: X → X ⊗ X
+    implicit final def eval_duplicate[
+      I <: RawObject, T <: AnyGraphObject
+    ]:  Eval[I, duplicate[T], RawTensor[I, I]] =
+    new Eval[I, duplicate[T], RawTensor[I, I]] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        construct[I, I](inVal, inVal)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+    // ▽: X ⊗ X → X
+    implicit final def eval_matchUp[
+      O <: RawObject, T <: AnyGraphObject
+    ]:  Eval[RawTensor[O, O], matchUp[T], O] =
+    new Eval[RawTensor[O, O], matchUp[T], O] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        matchUpRaw(inVal)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+  }
+
+/*
+  trait BiproductStructure extends AnyBiproductImpl {
 
     // IL ⊕ IR → OL ⊕ OR
     implicit final def eval_biproduct[
@@ -123,37 +177,6 @@ object evals {
       }
 
       def present(morph: InMorph): String = s"(${evalLeft.present(morph.left)} ⊕ ${evalRight.present(morph.right)})"
-    }
-
-    // △: X → X ⊗ X
-    implicit final def eval_duplicate[
-      I, T <: AnyGraphObject, O
-    ](implicit
-      outTens: TensorImpl[O, I, I]
-    ):  Eval[I, duplicate[T], O] =
-    new Eval[I, duplicate[T], O] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := outTens(input.value, input.value)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    // ▽: X ⊗ X → X
-    implicit final def eval_matchUp[
-      I, T <: AnyGraphObject, O
-    ](implicit
-      tensImpl: TensorImpl[I, O, O],
-      matchImpl: MatchUpImpl[O]
-    ):  Eval[I, matchUp[T], O] =
-    new Eval[I, matchUp[T], O] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := matchImpl.matchUp(tensImpl.leftProj(input.value), tensImpl.rightProj(input.value))
-      }
-
-      def present(morph: InMorph): String = morph.label
     }
 
     // X → X ⊕ X
@@ -460,5 +483,6 @@ object evals {
     }
 
   }
+*/
 
 }
