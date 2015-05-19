@@ -6,34 +6,47 @@ import twitter._, dummy._
 
 class DummyTests extends org.scalatest.FunSuite {
 
-  //def evalObj: preeval[DummyObject, DummyObject] = new preeval[DummyObject, DummyObject]
-  //def evalTens[L <: Dummy, R <: Dummy]: preeval[DummyTensor[L, R], DummyTensor[L, R]] = new preeval[DummyTensor[L, R], DummyTensor[L, R]]
-
   test("dummy evals for the basic structure") {
     import dummy.categoryStructure._
 
     val q_id = id(user)
     val q_comp = q_id >=> q_id
 
-    println("------------")
-    println(evalOn[DummyObject](q_id).evalPlan)
-    println(evalOn[DummyObject](q_comp).evalPlan)
+    info(evalOn[Dummy](q_id).evalPlan)
+    info(evalOn[Dummy](q_comp).evalPlan)
   }
 
   test("dummy evals for the tensor structure") {
     import dummy.categoryStructure._
     import dummy.tensorStructure._
 
-    val q_tensor = id(user) ⊗ id(user)
-    val q_dupl = duplicate(user)
+    val q_tensor = id(user) ⊗ id(user) ⊗ id(user)
+    val q_dupl = duplicate(user) ⊗ id(user)
     val q_match = matchUp(user)
-    val q_comp = q_dupl >=> q_tensor >=> q_match
+    val q_comp = q_dupl >=> q_tensor >=> (id(user ⊗ user) ⊗ duplicate(user)) >=> (q_match ⊗ q_match) >=> q_match
 
-    println("------------")
-    println(evalOn[DummyTensor[DummyObject, DummyObject]](q_tensor).evalPlan)
-    println(evalOn[DummyObject](q_dupl).evalPlan)
-    println(evalOn[DummyTensor[DummyObject, DummyObject]](q_match).evalPlan)
-    println(evalOn[DummyObject](q_comp).evalPlan)
+    info(evalOn[
+      DummyTensor[
+        DummyTensor[Dummy, Dummy],
+        Dummy
+      ]
+    ](q_tensor).evalPlan)
+    info(evalOn[DummyTensor[Dummy, Dummy]](q_dupl).evalPlan)
+    info(evalOn[DummyTensor[Dummy, Dummy]](q_match).evalPlan)
+    info(evalOn[DummyTensor[Dummy, Dummy]](q_comp).evalPlan)
+  }
+
+  test("dummy evals for the graph structure") {
+    import dummy.categoryStructure._
+    import dummy.graphStructure._
+
+    val q_out = outV(posted)
+    val q_in = inV(liked)
+    val q_comp = q_out >=> q_in
+
+    info(evalOn[DummyVertex](q_out).evalPlan)
+    info(evalOn[DummyVertex](q_in).evalPlan)
+    info(evalOn[DummyVertex](q_comp).evalPlan)
   }
 
 /*
@@ -122,7 +135,7 @@ class DummyTests extends org.scalatest.FunSuite {
 
     val rmorph = apply(compositionToRight) to morph
 
-    println(morph.label)
-    println(rmorph.label)
+    info(morph.label)
+    info(rmorph.label)
   }
 }

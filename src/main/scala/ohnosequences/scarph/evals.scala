@@ -97,11 +97,14 @@ object evals {
   trait TensorStructure extends AnyStructure {
 
     type RawTensor[L <: RawObject, R <: RawObject] //<: RawObject
+    type RawUnit
 
     def construct[L <: RawObject, R <: RawObject](l: L, r: R): RawTensor[L, R]
     def leftProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): L
     def rightProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): R
     def matchUpRaw[X <: RawObject](t: RawTensor[X, X]): X
+    //def fromUnitRaw[X <: RawObject](u: RawUnit): X*/
+    def toUnitRaw[X <: RawObject](x: X): RawUnit
 
 
     // IL ⊗ IR → OL ⊗ OR
@@ -151,10 +154,134 @@ object evals {
       def present(morph: InMorph): String = morph.label
     }
 
+    /*
+    // I → X
+    implicit final def eval_fromUnit[
+      T <: AnyGraphObject, O <: RawObject
+    ]:  Eval[RawUnit, fromUnit[T], O] =
+    new Eval[RawUnit, fromUnit[T], O] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        fromUnitRaw(inVal)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+    */
+
+    // X → I
+    implicit final def eval_toUnit[
+      T <: AnyGraphObject, I <: RawObject
+    ]:  Eval[I, toUnit[T], RawUnit] =
+    new Eval[I, toUnit[T], RawUnit] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        toUnitRaw(inVal)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+  }
+
+  trait GraphStructure extends AnyStructure {
+
+    type RawEdge
+    type RawSource
+    type RawTarget
+
+    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget
+    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource
+
+
+    implicit final def eval_outV[
+      E <: AnyEdge
+    ]:  Eval[RawSource, outV[E], RawTarget] =
+    new Eval[RawSource, outV[E], RawTarget] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        outVRaw(morph.edge)(inVal)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+    implicit final def eval_inV[
+      E <: AnyEdge
+    ]:  Eval[RawTarget, inV[E], RawSource] =
+    new Eval[RawTarget, inV[E], RawSource] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        inVRaw(morph.edge)(inVal)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+
+    /*
+    implicit final def eval_outE[
+      I, E <: AnyEdge, OE, OV
+    ](implicit
+      vImpl:  VertexOutImpl[E, I, OE, OV]
+    ):  Eval[I, outE[E], OE] =
+    new Eval[I, outE[E], OE] {
+
+      def apply(morph: InMorph): OutMorph = { input: Input =>
+        morph.out := vImpl.outE(input.value, morph.edge)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+    implicit final def eval_source[
+      E <: AnyEdge, I, S, T
+    ](implicit
+      eImpl: EdgeImpl[I, S, T]
+    ):  Eval[I, source[E], S] =
+    new Eval[I, source[E], S] {
+
+      def apply(morph: InMorph): OutMorph = { input: Input =>
+        (morph.out: InMorph#Out) := eImpl.source(input.value)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+
+    implicit final def eval_inE[
+      I, E <: AnyEdge, IE, IV
+    ](implicit
+      vImpl:  VertexInImpl[E, I, IE, IV]
+    ):  Eval[I, inE[E], IE] =
+    new Eval[I, inE[E], IE] {
+
+      def apply(morph: InMorph): OutMorph = { input: Input =>
+        morph.out := vImpl.inE(input.value, morph.edge)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+
+    implicit final def eval_target[
+      E <: AnyEdge, I, S, T
+    ](implicit
+      eImpl: EdgeImpl[I, S, T]
+    ):  Eval[I, target[E], T] =
+    new Eval[I, target[E], T] {
+
+      def apply(morph: InMorph): OutMorph = { input: Input =>
+        (morph.out: InMorph#Out) := eImpl.target(input.value)
+      }
+
+      def present(morph: InMorph): String = morph.label
+    }
+    */
+
   }
 
 /*
-  trait BiproductStructure extends AnyBiproductImpl {
+  trait BiproductStructure extends AnyStructure {
 
     // IL ⊕ IR → OL ⊕ OR
     implicit final def eval_biproduct[
@@ -301,123 +428,6 @@ object evals {
 
       def apply(morph: InMorph): OutMorph = { input: Input =>
         morph.out := outZero()
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    implicit final def eval_inE[
-      I, E <: AnyEdge, IE, IV
-    ](implicit
-      vImpl:  VertexInImpl[E, I, IE, IV]
-    ):  Eval[I, inE[E], IE] =
-    new Eval[I, inE[E], IE] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := vImpl.inE(input.value, morph.edge)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    implicit final def eval_inV[
-      I, E <: AnyEdge, IE, IV
-    ](implicit
-      vImpl:  VertexInImpl[E, I, IE, IV]
-    ):  Eval[I, inV[E], IV] =
-    new Eval[I, inV[E], IV] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := vImpl.inV(input.value, morph.edge)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    implicit final def eval_outE[
-      I, E <: AnyEdge, OE, OV
-    ](implicit
-      vImpl:  VertexOutImpl[E, I, OE, OV]
-    ):  Eval[I, outE[E], OE] =
-    new Eval[I, outE[E], OE] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := vImpl.outE(input.value, morph.edge)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-
-
-    implicit final def eval_outV[
-      I, E <: AnyEdge, OE, OV
-    ](implicit
-      vImpl:  VertexOutImpl[E, I, OE, OV]
-    ):  Eval[I, outV[E], OV] =
-    new Eval[I, outV[E], OV] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := vImpl.outV(input.value, morph.edge)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    implicit final def eval_source[
-      E <: AnyEdge, I, S, T
-    ](implicit
-      eImpl: EdgeImpl[I, S, T]
-    ):  Eval[I, source[E], S] =
-    new Eval[I, source[E], S] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := eImpl.source(input.value)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    implicit final def eval_target[
-      E <: AnyEdge, I, S, T
-    ](implicit
-      eImpl: EdgeImpl[I, S, T]
-    ):  Eval[I, target[E], T] =
-    new Eval[I, target[E], T] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := eImpl.target(input.value)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-
-    // I → X
-    implicit final def eval_fromUnit[
-      O <: AnyGraphObject, RawObj, RawUnit
-    ](implicit
-      unitImpl:  UnitImpl[O, RawObj, RawUnit]
-    ):  Eval[RawUnit, fromUnit[O], RawObj] =
-    new Eval[RawUnit, fromUnit[O], RawObj] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := unitImpl.fromUnit(input.value, morph.obj)
-      }
-
-      def present(morph: InMorph): String = morph.label
-    }
-
-    // X → I
-    implicit final def eval_toUnit[
-      O <: AnyGraphObject, RawObj, RawUnit
-    ](implicit
-      unitImpl:  UnitImpl[O, RawObj, RawUnit]
-    ):  Eval[RawObj, toUnit[O], RawUnit] =
-    new Eval[RawObj, toUnit[O], RawUnit] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := unitImpl.toUnit(input.value)
       }
 
       def present(morph: InMorph): String = morph.label

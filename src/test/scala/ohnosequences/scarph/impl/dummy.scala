@@ -6,10 +6,17 @@ case object dummy {
 
   trait Dummy
 
-  case object DummyObject extends Dummy
-  type DummyObject = DummyObject.type
-
   case class DummyTensor[L <: Dummy, R <: Dummy](l: L, r: R) extends Dummy
+
+  case object DummyUnit extends Dummy
+  type DummyUnit = DummyUnit.type
+
+  case object DummyEdge extends Dummy
+  type DummyEdge = DummyEdge.type
+
+  case object DummyVertex extends Dummy
+  type DummyVertex = DummyVertex.type
+
 
   case object categoryStructure extends CategoryStructure {
 
@@ -20,13 +27,25 @@ case object dummy {
 
     type RawObject = Dummy
     type RawTensor[L <: RawObject, R <: RawObject] = DummyTensor[L, R]
+    type RawUnit = DummyUnit
 
     def construct[L <: RawObject, R <: RawObject](l: L, r: R): RawTensor[L, R] = DummyTensor(l, r)
     def leftProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): L = t.l
     def rightProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): R = t.r
     def matchUpRaw[X <: RawObject](t: RawTensor[X, X]): X = t.l
+    //def fromUnitRaw[X <: RawObject](u: RawUnit): X*/
+    def toUnitRaw[X <: RawObject](x: X): RawUnit = DummyUnit
   }
 
+  case object graphStructure extends GraphStructure {
+
+    type RawEdge = DummyEdge
+    type RawSource = DummyVertex
+    type RawTarget = DummyVertex
+
+    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
+    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
+  }
 }
 
 /*

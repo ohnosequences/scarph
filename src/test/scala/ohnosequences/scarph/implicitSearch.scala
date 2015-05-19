@@ -58,6 +58,6 @@ class testPriority extends org.scalatest.FunSuite {
 
   test("priorities") {
 
-    println(useOps.hola)
+    info(useOps.hola)
   }
 }
