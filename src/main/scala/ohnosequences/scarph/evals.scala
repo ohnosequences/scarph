@@ -94,6 +94,26 @@ object evals {
 
   }
 
+  trait Matchable[T0] {
+
+    type T = T0
+    def matchUp(l: T, r: T): T
+  }
+
+  trait FromUnit[U0, T0] {
+
+    type U = U0
+    type T = T0
+    def fromUnit(u: U, e: AnyGraphObject): T
+  }
+
+  object FromUnit {
+
+    implicit def unitToUnit[U]:
+        FromUnit[U, U] =
+    new FromUnit[U, U] { def fromUnit(u: U, e: AnyGraphObject): T = u }
+  }
+
   trait TensorStructure extends AnyStructure {
 
     type RawTensor[L <: RawObject, R <: RawObject] //<: RawObject
@@ -102,8 +122,15 @@ object evals {
     def construct[L <: RawObject, R <: RawObject](l: L, r: R): RawTensor[L, R]
     def leftProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): L
     def rightProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): R
-    def matchUpRaw[X <: RawObject](t: RawTensor[X, X]): X
-    //def fromUnitRaw[X <: RawObject](u: RawUnit): X*/
+
+    def matchUpRaw[X <: RawObject](t: RawTensor[X, X])
+      (implicit m: Matchable[X]): X =
+        m.matchUp(leftProjRaw(t), rightProjRaw(t))
+
+    def fromUnitRaw[X <: RawObject](u: RawUnit, e: AnyGraphObject)
+      (implicit fu: FromUnit[RawUnit, X]): X =
+        fu.fromUnit(u, e)
+
     def toUnitRaw[X <: RawObject](x: X): RawUnit
 
 
@@ -144,7 +171,9 @@ object evals {
     // ▽: X ⊗ X → X
     implicit final def eval_matchUp[
       O <: RawObject, T <: AnyGraphObject
-    ]:  Eval[RawTensor[O, O], matchUp[T], O] =
+    ](implicit
+      matchable: Matchable[O]
+    ):  Eval[RawTensor[O, O], matchUp[T], O] =
     new Eval[RawTensor[O, O], matchUp[T], O] {
 
       def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
@@ -154,20 +183,21 @@ object evals {
       def present(morph: InMorph): String = morph.label
     }
 
-    /*
+
     // I → X
     implicit final def eval_fromUnit[
       T <: AnyGraphObject, O <: RawObject
-    ]:  Eval[RawUnit, fromUnit[T], O] =
+    ](implicit
+      fu: FromUnit[RawUnit, O]
+    ):  Eval[RawUnit, fromUnit[T], O] =
     new Eval[RawUnit, fromUnit[T], O] {
 
       def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-        fromUnitRaw(inVal)
+        fromUnitRaw(inVal, morph.obj)
       }
 
       def present(morph: InMorph): String = morph.label
     }
-    */
 
     // X → I
     implicit final def eval_toUnit[

@@ -17,6 +17,37 @@ case object dummy {
   case object DummyVertex extends Dummy
   type DummyVertex = DummyVertex.type
 
+  implicit def dummyMatch[T <: Dummy]:
+      Matchable[T] =
+  new Matchable[T] { def matchUp(l: T, r: T): T = l }
+
+
+  implicit def dummyUnitToEdge[U]:
+      FromUnit[U, DummyEdge] =
+  new FromUnit[U, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
+
+  implicit def dummyUnitToVertex[U]:
+      FromUnit[U, DummyVertex] =
+  new FromUnit[U, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
+
+  implicit def dummyUnitToUnit[U]:
+      FromUnit[U, DummyUnit] =
+  new FromUnit[U, DummyUnit] { def fromUnit(u: U, e: AnyGraphObject): T = DummyUnit }
+
+  implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
+  (implicit
+    l: FromUnit[U, L],
+    r: FromUnit[U, R]
+  ):  FromUnit[U, DummyTensor[L, R]] =
+  new FromUnit[U, DummyTensor[L, R]] {
+
+    def fromUnit(u: U, e: AnyGraphObject): T =
+      DummyTensor(
+        l.fromUnit(u, e),
+        r.fromUnit(u, e)
+      )
+  }
+
 
   case object categoryStructure extends CategoryStructure {
 
@@ -32,8 +63,6 @@ case object dummy {
     def construct[L <: RawObject, R <: RawObject](l: L, r: R): RawTensor[L, R] = DummyTensor(l, r)
     def leftProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): L = t.l
     def rightProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): R = t.r
-    def matchUpRaw[X <: RawObject](t: RawTensor[X, X]): X = t.l
-    //def fromUnitRaw[X <: RawObject](u: RawUnit): X*/
     def toUnitRaw[X <: RawObject](x: X): RawUnit = DummyUnit
   }
 
@@ -49,15 +78,6 @@ case object dummy {
 }
 
 /*
-    implicit def unitImpl[O <: AnyGraphObject]:
-        UnitImpl[O, Dummy, Dummy] =
-    new UnitImpl[O, Dummy, Dummy] {
-
-      def fromUnit(u: RawUnit, o: Object): RawObject = Dummy
-      def toUnit(s: RawObject): RawUnit = Dummy
-    }
-
-
     implicit def biproductImpl:
         BiproductImpl[Dummy, Dummy, Dummy] =
     new BiproductImpl[Dummy, Dummy, Dummy] {
