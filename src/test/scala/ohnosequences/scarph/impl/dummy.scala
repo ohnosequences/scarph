@@ -74,6 +74,12 @@ case object dummy {
 
     def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
     def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
+
+    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge = DummyEdge
+    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource = DummyVertex
+
+    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge = DummyEdge
+    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget = DummyVertex
   }
 }
 

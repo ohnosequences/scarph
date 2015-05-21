@@ -23,7 +23,7 @@ object evals {
       (morph.out: InMorph#Out) := rawApply(morph)(input.value)
     }
 
-    def present(morph: InMorph): String
+    def present(morph: InMorph): Seq[String]
   }
 
   @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
@@ -40,7 +40,7 @@ object evals {
     final def on(input: M#In := I): M#Out := O = eval(f).apply(input)
 
     // TODO: this should output the computational behavior of the eval here
-    final def evalPlan: String = eval.present(f)
+    final def evalPlan: String = eval.present(f).mkString("")
   }
 
   class preeval[I] {
@@ -68,7 +68,7 @@ object evals {
 
       def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal => inVal }
 
-      final def present(morph: InMorph): String = morph.label
+      final def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
 
@@ -89,7 +89,9 @@ object evals {
         evalSecond.rawApply(morph.second)(firstResult)
       }
 
-      def present(morph: InMorph): String = s"(${evalFirst.present(morph.first)} >=> ${evalSecond.present(morph.second)})"
+      def present(morph: InMorph): Seq[String] =
+        ("(" +: evalFirst.present(morph.first)) ++
+        (" >=> " +: evalSecond.present(morph.second) :+ ")")
     }
 
   }
@@ -104,14 +106,14 @@ object evals {
 
     type U = U0
     type T = T0
-    def fromUnit(u: U, e: AnyGraphObject): T
+    def fromUnit(u: U, o: AnyGraphObject): T
   }
 
   object FromUnit {
 
     implicit def unitToUnit[U]:
         FromUnit[U, U] =
-    new FromUnit[U, U] { def fromUnit(u: U, e: AnyGraphObject): T = u }
+    new FromUnit[U, U] { def fromUnit(u: U, o: AnyGraphObject): T = u }
   }
 
   trait TensorStructure extends AnyStructure {
@@ -127,9 +129,9 @@ object evals {
       (implicit m: Matchable[X]): X =
         m.matchUp(leftProjRaw(t), rightProjRaw(t))
 
-    def fromUnitRaw[X <: RawObject](u: RawUnit, e: AnyGraphObject)
+    def fromUnitRaw[X <: RawObject](o: AnyGraphObject)(u: RawUnit)
       (implicit fu: FromUnit[RawUnit, X]): X =
-        fu.fromUnit(u, e)
+        fu.fromUnit(u, o)
 
     def toUnitRaw[X <: RawObject](x: X): RawUnit
 
@@ -152,7 +154,9 @@ object evals {
         )
       }
 
-      def present(morph: InMorph): String = s"(${evalLeft.present(morph.left)} ⊗ ${evalRight.present(morph.right)})"
+      def present(morph: InMorph): Seq[String] =
+        ("(" +: evalLeft.present(morph.left)) ++
+        (" ⊗ " +: evalRight.present(morph.right) :+ ")")
     }
 
     // △: X → X ⊗ X
@@ -165,7 +169,7 @@ object evals {
         construct[I, I](inVal, inVal)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     // ▽: X ⊗ X → X
@@ -176,11 +180,9 @@ object evals {
     ):  Eval[RawTensor[O, O], matchUp[T], O] =
     new Eval[RawTensor[O, O], matchUp[T], O] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-        matchUpRaw(inVal)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = matchUpRaw
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
 
@@ -192,11 +194,9 @@ object evals {
     ):  Eval[RawUnit, fromUnit[T], O] =
     new Eval[RawUnit, fromUnit[T], O] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-        fromUnitRaw(inVal, morph.obj)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = fromUnitRaw[O](morph.obj)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     // X → I
@@ -205,11 +205,9 @@ object evals {
     ]:  Eval[I, toUnit[T], RawUnit] =
     new Eval[I, toUnit[T], RawUnit] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-        toUnitRaw(inVal)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = toUnitRaw
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
   }
@@ -223,17 +221,21 @@ object evals {
     def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget
     def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource
 
+    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge
+    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource
+
+    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge
+    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget
+
 
     implicit final def eval_outV[
       E <: AnyEdge
     ]:  Eval[RawSource, outV[E], RawTarget] =
     new Eval[RawSource, outV[E], RawTarget] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-        outVRaw(morph.edge)(inVal)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = outVRaw(morph.edge)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     implicit final def eval_inV[
@@ -241,72 +243,52 @@ object evals {
     ]:  Eval[RawTarget, inV[E], RawSource] =
     new Eval[RawTarget, inV[E], RawSource] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-        inVRaw(morph.edge)(inVal)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = inVRaw(morph.edge)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
 
-    /*
     implicit final def eval_outE[
-      I, E <: AnyEdge, OE, OV
-    ](implicit
-      vImpl:  VertexOutImpl[E, I, OE, OV]
-    ):  Eval[I, outE[E], OE] =
-    new Eval[I, outE[E], OE] {
+      E <: AnyEdge
+    ]:  Eval[RawSource, outE[E], RawEdge] =
+    new Eval[RawSource, outE[E], RawEdge] {
 
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := vImpl.outE(input.value, morph.edge)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = outERaw(morph.edge)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     implicit final def eval_source[
-      E <: AnyEdge, I, S, T
-    ](implicit
-      eImpl: EdgeImpl[I, S, T]
-    ):  Eval[I, source[E], S] =
-    new Eval[I, source[E], S] {
+      E <: AnyEdge
+    ]:  Eval[RawEdge, source[E], RawSource] =
+    new Eval[RawEdge, source[E], RawSource] {
 
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := eImpl.source(input.value)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = sourceRaw(morph.edge)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
 
     implicit final def eval_inE[
-      I, E <: AnyEdge, IE, IV
-    ](implicit
-      vImpl:  VertexInImpl[E, I, IE, IV]
-    ):  Eval[I, inE[E], IE] =
-    new Eval[I, inE[E], IE] {
+      E <: AnyEdge
+    ]:  Eval[RawTarget, inE[E], RawEdge] =
+    new Eval[RawTarget, inE[E], RawEdge] {
 
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        morph.out := vImpl.inE(input.value, morph.edge)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = inERaw(morph.edge)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     implicit final def eval_target[
-      E <: AnyEdge, I, S, T
-    ](implicit
-      eImpl: EdgeImpl[I, S, T]
-    ):  Eval[I, target[E], T] =
-    new Eval[I, target[E], T] {
+      E <: AnyEdge
+    ]:  Eval[RawEdge, target[E], RawTarget] =
+    new Eval[RawEdge, target[E], RawTarget] {
 
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := eImpl.target(input.value)
-      }
+      def rawApply(morph: InMorph): InVal => OutVal = targetRaw(morph.edge)
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
-    */
 
   }
 
@@ -333,7 +315,7 @@ object evals {
         )
       }
 
-      def present(morph: InMorph): String = s"(${evalLeft.present(morph.left)} ⊕ ${evalRight.present(morph.right)})"
+      def present(morph: InMorph): Seq[String] = s"(${evalLeft.present(morph.left)} ⊕ ${evalRight.present(morph.right)})"
     }
 
     // X → X ⊕ X
@@ -348,7 +330,7 @@ object evals {
         morph.out := outBip(input.value, input.value)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // X ⊕ X → X
@@ -364,7 +346,7 @@ object evals {
         morph.out := mergeImpl.merge(bipImpl.leftProj(input.value), bipImpl.rightProj(input.value))
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // L → L ⊕ R
@@ -380,7 +362,7 @@ object evals {
         morph.out := outBip.leftInj(input.value)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // R → L ⊕ R
@@ -396,7 +378,7 @@ object evals {
         morph.out := outBip.rightInj(input.value)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // L ⊕ R → L
@@ -412,7 +394,7 @@ object evals {
         morph.out := outBip.leftProj(input.value)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // L ⊕ R → R
@@ -428,7 +410,7 @@ object evals {
         morph.out := outBip.rightProj(input.value)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // 0 → X
@@ -444,7 +426,7 @@ object evals {
         morph.out := outZero()
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     // X → 0
@@ -460,7 +442,7 @@ object evals {
         morph.out := outZero()
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
 
@@ -475,7 +457,7 @@ object evals {
         (morph.out: InMorph#Out) := propImpl.get(input.value, morph.property)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
     implicit final def eval_lookup[
@@ -489,7 +471,7 @@ object evals {
         (morph.out: InMorph#Out) := propImpl.lookup(input.value, morph.property)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
 
@@ -504,7 +486,7 @@ object evals {
         (morph.out: InMorph#Out) := predImpl.quantify(input.value, morph.predicate)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
 
@@ -519,7 +501,7 @@ object evals {
         (morph.out: InMorph#Out) := predImpl.coerce(input.value)
       }
 
-      def present(morph: InMorph): String = morph.label
+      def present(morph: InMorph): Seq[String] = morph.label
     }
 
   }
