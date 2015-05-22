@@ -1,5 +1,5 @@
 ---
-title: Scarph vaporware introduction
+title: Scarph introduction
 author: Alexey Alekhin
 date: 22.05.2015
 ---
@@ -46,28 +46,13 @@ Actually, it is an **embedded domain specific language** for accessing **graph d
 - they are everywhere!
 - it's just nodes and relationships
 - social networks: Twitter, Facebook, Linkedin
+- protein interaction networks, etc.
 
 ![](resources/pics/diseases-graph.png)
 
 <aside class="notes">
   - Graph database is a technology for data storage using graph structures, so that every element is directly linked to its neighbor element.
   - Graphs and networks surround us everywhere and are extremely useful for representing connected data.
-</aside>
-
-
------
-
-### Property graph model
-
-- labeled **vertices**
-- labeled directed **edges** connecting vertices
-- **properties** attached to vertices or edges
-
-![](resources/pics/graph-example.jpg)
-
-<aside class="notes">
-  - How data is modeled in graph DBs
-  - Props are like edges
 </aside>
 
 -----
@@ -87,6 +72,22 @@ Actually, it is an **embedded domain specific language** for accessing **graph d
 - TitanDB backend
 
 See [`bio4j.com`](http://bio4j.com)
+
+
+-----
+
+### Property graph model
+
+- labeled **vertices**
+- labeled directed **edges** connecting vertices
+- **properties** attached to vertices or edges
+
+![](resources/pics/graph-example.jpg)
+
+<aside class="notes">
+  - How data is modeled in graph DBs
+  - Props are like edges
+</aside>
 
 
 
@@ -185,20 +186,6 @@ object posted extends Edge(ExactlyOne(user) → ManyOrNone(tweet)) {
 
 -----
 
-### Independent implementations
-
-- Different graph database technologies:
-    + **TitanDB**
-    - Neo4j
-    - OrientDB
-    - DEX/Sparksee
-    - Bigdata
-    - Bitsy
-- `scarph-titan` is (almost) ready to use!
-
-
------
-
 ### Pluggable syntax
 
 > "get text of the tweets posted by someone's followers"
@@ -217,6 +204,20 @@ user.inV(follows).outV(posted).get(tweet.text)
 // core syntax
 inV(follows) >=> outV(posted) >=> get(tweet.text)
 ```
+
+
+-----
+
+### Independent implementations
+
+- Different graph database technologies:
+    + **TitanDB**
+    - Neo4j
+    - OrientDB
+    - DEX/Sparksee
+    - Bigdata
+    - Bitsy
+- `scarph-titan` is (almost) ready to use!
 
 
 -----
@@ -247,6 +248,29 @@ inV(follows) >=> outV(posted) >=> get(tweet.text)
 
 ![](resources/pics/bio4j-schema-modules.png)
 
+-----
+
+### `github.com/bio4j/bio4j-scala`
+
+```scala
+val assemblySequences =
+  assembly <--<(contigAssembly)<--< contig |>>|
+  contig >-->(contigSequence)>--> sequence
+```
+
+```scala
+val allAssembliesFromScaffold =
+  scaffold >-->(scaffoldContigs)>--> contig |>>|
+  contig >-->(contigAssembly)>--> assembly
+```
+
+```scala
+val annotationsOverSequencesOfType =
+  sequenceType <--<(hasSequenceType)<--< sequence |>>|
+  sequence <--<(annotationInterval)<--< annotation
+```
+
+
 
 
 
@@ -268,7 +292,8 @@ inV(follows) >=> outV(posted) >=> get(tweet.text)
 
 - testing and benchmarking
 - writing documentation
-- more implementations (Neo4j, OrientDB)
+- more implementations  
+  (OrientDB, DynamoDB, Neo4j?)
 - interactive query console
 - query visualization and visual editing
 
@@ -283,3 +308,152 @@ inV(follows) >=> outV(posted) >=> get(tweet.text)
 - discussion:
     + <https://gitter.im/ohnosequences/scarph>
     + <aalekhin@ohnosequences.com>
+
+
+
+
+
+# Scarph morphisms
+
+-----
+
+### Vertex incoming/outgoing edges
+
+|           |                       |
+|----------:|:---------------------:|
+| `outV[E]` | `E#Source → E#Target` |
+|  `inV[E]` | `E#Target → E#Source` |
+
+where `E` is any edge
+
+
+-----
+
+### Get element property & lookup element by property value
+
+|             |                     |
+|------------:|:-------------------:|
+|    `get[P]` | `P#Owner → P#Value` |
+| `lookup[P]` | `P#Value → P#Owner` |
+
+where `P` is any property
+
+
+-----
+
+### Dagger categories
+
+$†: \mathbf{C^{op}} → \mathbf{C}$:  
+for every $f: A → B$, $f^†: B → A$
+
+- $f^{††} = f$,
+- $id^†_A = id_A$,
+- $(g ∘ f)^† = f^† ∘ g^†$.
+
+-----
+
+### Symmetric monoidal structure
+
+$(\mathbf{C}, ⊗, I)$
+
+- parallel computation
+- diagonal & codiagonal maps:
+    + $△: A → A ⊗ A$
+    + $▽: A ⊗ A → A$
+
+
+-----
+
+### Tensor diagonal & codiagonal (`△` & `▽`)
+
+|                |             |
+|---------------:|:-----------:|
+| `duplicate[X]` | `X → X ⊗ X` |
+|   `matchUp[X]` | `X ⊗ X → X` |
+
+where `X` is any object
+
+
+-----
+
+### Compact closed structure with self-duality
+
+Every object $A ∈ \mathbf{C}$ is equipped with
+
+- $A^* = A$
+- $η_A: I → A ⊗ A$
+- $ε_A: A ⊗ A → I$
+
+
+-----
+
+### From/to unit
+
+|               |            |
+|--------------:|:----------:|
+| `fromUnit[X]` | `unit → X` |
+|   `toUnit[X]` | `X → unit` |
+
+where `X` is any object and `unit` is the whole graph
+
+
+-----
+
+### Biproduct structure
+
+$(\mathbf{C}, ⊕, 0)$
+
+- computation with choice:  
+  $A ⊕ B$ is "maybe $A$ _and_ maybe $B$"
+- diagonal & codiagonal maps:
+    + $δ: A → A ⊕ A$
+    + $ε: A ⊕ A → A$
+- trace $\operatorname{Tr}^X_{A, B}:\mathbf{C}(A ⊕ X, B ⊕ X) → \mathbf{C}(A, B)$  
+
+
+-----
+
+### From/to zero
+
+|               |            |
+|--------------:|:----------:|
+| `fromZero[X]` | `zero → X` |
+|   `toZero[X]` | `X → zero` |
+
+where `X` is any object
+
+-----
+
+### Biproduct diagonal & codiagonal
+
+|            |             |
+|-----------:|:-----------:|
+|  `fork[X]` | `X → X ⊕ X` |
+| `merge[X]` | `X ⊕ X → X` |
+
+where `X` is any object
+
+-----
+
+### Biproduct injections/projections
+
+|                  |             |
+|-----------------:|:-----------:|
+|  `leftInj[A, B]` | `A → A ⊕ B` |
+| `leftProj[A, B]` | `A ⊕ B → A` |
+
+|                   |             |
+|------------------:|:-----------:|
+|  `rightInj[A, B]` | `B → A ⊕ B` |
+| `rightProj[A, B]` | `A ⊕ B → B` |
+
+where `A` and `B` are any objects
+
+
+-----
+
+### Combining morphisms
+
+- composition: `f >=> g`
+- tensor product: `f ⊗ g`
+- biproduct: `f ⊕ g`

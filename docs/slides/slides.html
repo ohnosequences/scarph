@@ -38,7 +38,7 @@
 <div class="slides">
 
 <section>
-<h2>Scarph vaporware introduction</h2><br/>
+<h2>Scarph introduction</h2><br/>
 <h3>Alexey Alekhin</h3><br/>
 <h5>22.05.2015</h5><br/><br/>
 <img width="200" style="background:trasparent; border:none; box-shadow:none;" src="resources/logos/ohnoseq-logo.png"><br/>
@@ -83,6 +83,7 @@
 <li>they are everywhere!</li>
 <li>it’s just nodes and relationships</li>
 <li>social networks: Twitter, Facebook, Linkedin</li>
+<li>protein interaction networks, etc.</li>
 </ul>
 <figure>
 <img src="resources/pics/diseases-graph.png" />
@@ -91,23 +92,6 @@
 <ul>
 <li>Graph database is a technology for data storage using graph structures, so that every element is directly linked to its neighbor element.</li>
 <li>Graphs and networks surround us everywhere and are extremely useful for representing connected data.</li>
-</ul>
-</aside>
-</section><section class="slide level2">
-
-<h3 id="property-graph-model">Property graph model</h3>
-<ul>
-<li>labeled <strong>vertices</strong></li>
-<li>labeled directed <strong>edges</strong> connecting vertices</li>
-<li><strong>properties</strong> attached to vertices or edges</li>
-</ul>
-<figure>
-<img src="resources/pics/graph-example.jpg" />
-</figure>
-<aside class="notes">
-<ul>
-<li>How data is modeled in graph DBs</li>
-<li>Props are like edges</li>
 </ul>
 </aside>
 </section><section class="slide level2">
@@ -127,6 +111,23 @@
 <li>TitanDB backend</li>
 </ul>
 <p>See <a href="http://bio4j.com"><code>bio4j.com</code></a></p>
+</section><section class="slide level2">
+
+<h3 id="property-graph-model">Property graph model</h3>
+<ul>
+<li>labeled <strong>vertices</strong></li>
+<li>labeled directed <strong>edges</strong> connecting vertices</li>
+<li><strong>properties</strong> attached to vertices or edges</li>
+</ul>
+<figure>
+<img src="resources/pics/graph-example.jpg" />
+</figure>
+<aside class="notes">
+<ul>
+<li>How data is modeled in graph DBs</li>
+<li>Props are like edges</li>
+</ul>
+</aside>
 </section></section>
 <section><section id="graph-query-languages" class="titleslide slide level1"><h1>Graph query languages</h1></section><section class="slide level2">
 
@@ -211,6 +212,18 @@ object posted extends Edge(ExactlyOne(user) → ManyOrNone(tweet)) {
 </ul>
 </section><section class="slide level2">
 
+<h3 id="pluggable-syntax">Pluggable syntax</h3>
+<blockquote>
+<p>“get text of the tweets posted by someone’s followers”</p>
+</blockquote>
+<pre class="scala"><code>// arrows syntax
+user &lt;--(follows)--&lt; user &gt;--(posted)--&gt; tweet.text</code></pre>
+<pre class="scala"><code>// flow syntax (Gremlin-like)
+user.inV(follows).outV(posted).get(tweet.text)</code></pre>
+<pre class="scala"><code>// core syntax
+inV(follows) &gt;=&gt; outV(posted) &gt;=&gt; get(tweet.text)</code></pre>
+</section><section class="slide level2">
+
 <h3 id="independent-implementations">Independent implementations</h3>
 <ul>
 <li>Different graph database technologies:
@@ -224,18 +237,6 @@ object posted extends Edge(ExactlyOne(user) → ManyOrNone(tweet)) {
 </ul></li>
 <li><code>scarph-titan</code> is (almost) ready to use!</li>
 </ul>
-</section><section class="slide level2">
-
-<h3 id="pluggable-syntax">Pluggable syntax</h3>
-<blockquote>
-<p>“get text of the tweets posted by someone’s followers”</p>
-</blockquote>
-<pre class="scala"><code>// arrows syntax
-user &lt;--(follows)--&lt; user &gt;--(posted)--&gt; tweet.text</code></pre>
-<pre class="scala"><code>// flow syntax (Gremlin-like)
-user.inV(follows).outV(posted).get(tweet.text)</code></pre>
-<pre class="scala"><code>// core syntax
-inV(follows) &gt;=&gt; outV(posted) &gt;=&gt; get(tweet.text)</code></pre>
 </section><section class="slide level2">
 
 <h3 id="query-rewriting">Query rewriting</h3>
@@ -262,6 +263,18 @@ inV(follows) &gt;=&gt; outV(posted) &gt;=&gt; get(tweet.text)</code></pre>
 <figure>
 <img src="resources/pics/bio4j-schema-modules.png" />
 </figure>
+</section><section class="slide level2">
+
+<h3 id="github.combio4jbio4j-scala"><code>github.com/bio4j/bio4j-scala</code></h3>
+<pre class="scala"><code>val assemblySequences =
+  assembly &lt;--&lt;(contigAssembly)&lt;--&lt; contig |&gt;&gt;|
+  contig &gt;--&gt;(contigSequence)&gt;--&gt; sequence</code></pre>
+<pre class="scala"><code>val allAssembliesFromScaffold =
+  scaffold &gt;--&gt;(scaffoldContigs)&gt;--&gt; contig |&gt;&gt;|
+  contig &gt;--&gt;(contigAssembly)&gt;--&gt; assembly</code></pre>
+<pre class="scala"><code>val annotationsOverSequencesOfType =
+  sequenceType &lt;--&lt;(hasSequenceType)&lt;--&lt; sequence |&gt;&gt;|
+  sequence &lt;--&lt;(annotationInterval)&lt;--&lt; annotation</code></pre>
 </section></section>
 <section><section id="conclusion" class="titleslide slide level1"><h1>Conclusion</h1></section><section class="slide level2">
 
@@ -279,7 +292,7 @@ inV(follows) &gt;=&gt; outV(posted) &gt;=&gt; get(tweet.text)</code></pre>
 <ul>
 <li>testing and benchmarking</li>
 <li>writing documentation</li>
-<li>more implementations (Neo4j, OrientDB)</li>
+<li>more implementations<br /> (OrientDB, DynamoDB, Neo4j?)</li>
 <li>interactive query console</li>
 <li>query visualization and visual editing</li>
 </ul>
@@ -302,6 +315,182 @@ document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\
 // -->
 </script><noscript>&#x61;&#x61;&#108;&#x65;&#x6b;&#104;&#x69;&#110;&#32;&#x61;&#116;&#32;&#x6f;&#104;&#110;&#x6f;&#x73;&#x65;&#x71;&#x75;&#x65;&#110;&#x63;&#x65;&#x73;&#32;&#100;&#x6f;&#116;&#32;&#x63;&#x6f;&#x6d;</noscript></li>
 </ul></li>
+</ul>
+</section></section>
+<section><section id="scarph-morphisms" class="titleslide slide level1"><h1>Scarph morphisms</h1></section><section class="slide level2">
+
+<h3 id="vertex-incomingoutgoing-edges">Vertex incoming/outgoing edges</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>outV[E]</code></td>
+<td style="text-align: center;"><code>E#Source → E#Target</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>inV[E]</code></td>
+<td style="text-align: center;"><code>E#Target → E#Source</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>E</code> is any edge</p>
+</section><section class="slide level2">
+
+<h3 id="get-element-property-lookup-element-by-property-value">Get element property &amp; lookup element by property value</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>get[P]</code></td>
+<td style="text-align: center;"><code>P#Owner → P#Value</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>lookup[P]</code></td>
+<td style="text-align: center;"><code>P#Value → P#Owner</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>P</code> is any property</p>
+</section><section class="slide level2">
+
+<h3 id="dagger-categories">Dagger categories</h3>
+<p><span class="math"> †  : <strong>C</strong><sup><strong>o</strong><strong>p</strong></sup> → <strong>C</strong></span>:<br />for every <span class="math"><em>f</em> : <em>A</em> → <em>B</em></span>, <span class="math"><em>f</em><sup> † </sup> : <em>B</em> → <em>A</em></span></p>
+<ul>
+<li><span class="math"><em>f</em><sup> †  † </sup> = <em>f</em></span>,</li>
+<li><span class="math"><em>i</em><em>d</em><sub><em>A</em></sub><sup> † </sup> = <em>i</em><em>d</em><sub><em>A</em></sub></span>,</li>
+<li><span class="math">(<em>g</em> ∘ <em>f</em>)<sup> † </sup> = <em>f</em><sup> † </sup> ∘ <em>g</em><sup> † </sup></span>.</li>
+</ul>
+</section><section class="slide level2">
+
+<h3 id="symmetric-monoidal-structure">Symmetric monoidal structure</h3>
+<p><span class="math">(<strong>C</strong>,  ⊗ , <em>I</em>)</span></p>
+<ul>
+<li>parallel computation</li>
+<li>diagonal &amp; codiagonal maps:
+<ul>
+<li><span class="math"> △  : <em>A</em> → <em>A</em> ⊗ <em>A</em></span></li>
+<li><span class="math"> ▽  : <em>A</em> ⊗ <em>A</em> → <em>A</em></span></li>
+</ul></li>
+</ul>
+</section><section class="slide level2">
+
+<h3 id="tensor-diagonal-codiagonal">Tensor diagonal &amp; codiagonal (<code>△</code> &amp; <code>▽</code>)</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>duplicate[X]</code></td>
+<td style="text-align: center;"><code>X → X ⊗ X</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>matchUp[X]</code></td>
+<td style="text-align: center;"><code>X ⊗ X → X</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>X</code> is any object</p>
+</section><section class="slide level2">
+
+<h3 id="compact-closed-structure-with-self-duality">Compact closed structure with self-duality</h3>
+<p>Every object <span class="math"><em>A</em> ∈ <strong>C</strong></span> is equipped with</p>
+<ul>
+<li><span class="math"><em>A</em><sup> * </sup> = <em>A</em></span></li>
+<li><span class="math"><em>η</em><sub><em>A</em></sub> : <em>I</em> → <em>A</em> ⊗ <em>A</em></span></li>
+<li><span class="math"><em>ε</em><sub><em>A</em></sub> : <em>A</em> ⊗ <em>A</em> → <em>I</em></span></li>
+</ul>
+</section><section class="slide level2">
+
+<h3 id="fromto-unit">From/to unit</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>fromUnit[X]</code></td>
+<td style="text-align: center;"><code>unit → X</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>toUnit[X]</code></td>
+<td style="text-align: center;"><code>X → unit</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>X</code> is any object and <code>unit</code> is the whole graph</p>
+</section><section class="slide level2">
+
+<h3 id="biproduct-structure">Biproduct structure</h3>
+<p><span class="math">(<strong>C</strong>,  ⊕ , 0)</span></p>
+<ul>
+<li>computation with choice:<br /> <span class="math"><em>A</em> ⊕ <em>B</em></span> is “maybe <span class="math"><em>A</em></span> <em>and</em> maybe <span class="math"><em>B</em></span>”</li>
+<li>diagonal &amp; codiagonal maps:
+<ul>
+<li><span class="math"><em>δ</em> : <em>A</em> → <em>A</em> ⊕ <em>A</em></span></li>
+<li><span class="math"><em>ε</em> : <em>A</em> ⊕ <em>A</em> → <em>A</em></span></li>
+</ul></li>
+<li>trace <span class="math">Tr<sub><em>A</em>, <em>B</em></sub><sup><em>X</em></sup> : <strong>C</strong>(<em>A</em> ⊕ <em>X</em>, <em>B</em> ⊕ <em>X</em>) → <strong>C</strong>(<em>A</em>, <em>B</em>)</span></li>
+</ul>
+</section><section class="slide level2">
+
+<h3 id="fromto-zero">From/to zero</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>fromZero[X]</code></td>
+<td style="text-align: center;"><code>zero → X</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>toZero[X]</code></td>
+<td style="text-align: center;"><code>X → zero</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>X</code> is any object</p>
+</section><section class="slide level2">
+
+<h3 id="biproduct-diagonal-codiagonal">Biproduct diagonal &amp; codiagonal</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>fork[X]</code></td>
+<td style="text-align: center;"><code>X → X ⊕ X</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>merge[X]</code></td>
+<td style="text-align: center;"><code>X ⊕ X → X</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>X</code> is any object</p>
+</section><section class="slide level2">
+
+<h3 id="biproduct-injectionsprojections">Biproduct injections/projections</h3>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>leftInj[A, B]</code></td>
+<td style="text-align: center;"><code>A → A ⊕ B</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>leftProj[A, B]</code></td>
+<td style="text-align: center;"><code>A ⊕ B → A</code></td>
+</tr>
+</tbody>
+</table>
+<table>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><code>rightInj[A, B]</code></td>
+<td style="text-align: center;"><code>B → A ⊕ B</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><code>rightProj[A, B]</code></td>
+<td style="text-align: center;"><code>A ⊕ B → B</code></td>
+</tr>
+</tbody>
+</table>
+<p>where <code>A</code> and <code>B</code> are any objects</p>
+</section><section class="slide level2">
+
+<h3 id="combining-morphisms">Combining morphisms</h3>
+<ul>
+<li>composition: <code>f &gt;=&gt; g</code></li>
+<li>tensor product: <code>f ⊗ g</code></li>
+<li>biproduct: <code>f ⊕ g</code></li>
 </ul>
 </section></section>
 
