@@ -84,24 +84,24 @@ object morphisms {
   }
 
   // id: X → X
-  case class id[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class id[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
-    type     In = X
-    lazy val in = x
+    type     In = Obj
+    lazy val in = obj
 
-    type     Out = X
-    lazy val out = x
+    type     Out = Obj
+    lazy val out = obj
 
-    type     Dagger = id[X]
-    lazy val dagger = id(x)
+    type     Dagger = id[Obj]
+    lazy val dagger = id(obj)
 
-    lazy val label = s"id(${x.label})"
+    lazy val label = s"id(${obj.label})"
   }
 
 
   // I → X
   case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitiveMorph {
-
     type Obj = X
 
     type     In = unit
@@ -117,111 +117,116 @@ object morphisms {
   }
 
   // X → I
-  case class toUnit[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
-
+  case class toUnit[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
     type     Out = unit
     lazy val out = unit
 
-    type     In = X
-    lazy val in = x
+    type     In = Obj
+    lazy val in = obj
 
-    type     Dagger = fromUnit[X]
-    lazy val dagger = fromUnit(x)
+    type     Dagger = fromUnit[Obj]
+    lazy val dagger = fromUnit(obj)
 
-    lazy val label = s"toUnit(${x.label})"
+    lazy val label = s"toUnit(${obj.label})"
   }
 
   // △: X → X ⊗ X
-  case class duplicate[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class duplicate[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
-    type     In = X
-    lazy val in = x
+    type     In = Obj
+    lazy val in = obj
 
-    type     Out = X ⊗ X
-    lazy val out = x ⊗ x
+    type     Out = Obj ⊗ Obj
+    lazy val out = obj ⊗ obj
 
-    type     Dagger = matchUp[X]
-    lazy val dagger = matchUp(x)
+    type     Dagger = matchUp[Obj]
+    lazy val dagger = matchUp(obj)
 
-    lazy val label = s"duplicate(${x.label})"
+    lazy val label = s"duplicate(${obj.label})"
   }
 
   // ▽: X ⊗ X → X
-  case class matchUp[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class matchUp[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
-    type     Out = X
-    lazy val out = x
+    type     Out = Obj
+    lazy val out = obj
 
-    type     In = X ⊗ X
-    lazy val in = x ⊗ x
+    type     In = Obj ⊗ Obj
+    lazy val in = obj ⊗ obj
 
-    type     Dagger = duplicate[X]
-    lazy val dagger = duplicate(x)
+    type     Dagger = duplicate[Obj]
+    lazy val dagger = duplicate(obj)
 
-    lazy val label = s"matchUp(${x.label} ⊗ ${x.label})"
+    lazy val label = s"matchUp(${obj.label} ⊗ ${obj.label})"
   }
 
 
   // 0 → X
-  case class fromZero[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class fromZero[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
     type     In = zero
     lazy val in = zero
 
-    type     Out = X
-    lazy val out = x
+    type     Out = Obj
+    lazy val out = obj
 
-    type     Dagger = toZero[X]
-    lazy val dagger = toZero(x)
+    type     Dagger = toZero[Obj]
+    lazy val dagger = toZero(obj)
 
-    lazy val label = s"fromZero(${x.label})"
+    lazy val label = s"fromZero(${obj.label})"
   }
 
   // X → 0
-  case class toZero[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class toZero[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
     type     Out = zero
     lazy val out = zero
 
-    type     In = X
-    lazy val in = x
+    type     In = Obj
+    lazy val in = obj
 
-    type     Dagger = fromZero[X]
-    lazy val dagger = fromZero(x)
+    type     Dagger = fromZero[Obj]
+    lazy val dagger = fromZero(obj)
 
-    lazy val label = s"toZero(${x.label})"
+    lazy val label = s"toZero(${obj.label})"
   }
 
   // X -> X ⊕ X
-  case class fork[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class fork[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
-    type     In = X
-    lazy val in = x
+    type     In = Obj
+    lazy val in = obj
 
-    type     Out = BiproductObj[X, X]
-    lazy val out = BiproductObj(x, x)
+    type     Out = BiproductObj[Obj, Obj]
+    lazy val out = BiproductObj(obj, obj)
 
-    type     Dagger = merge[X]
-    lazy val dagger = merge(x)
+    type     Dagger = merge[Obj]
+    lazy val dagger = merge(obj)
 
-    lazy val label = s"fork(${x.label})"
+    lazy val label = s"fork(${obj.label})"
   }
 
   // X ⊕ X -> X
-  case class merge[X <: AnyGraphObject](x: X) extends AnyPrimitiveMorph {
+  case class merge[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+    type Obj = X
 
-    type     Out = X
-    lazy val out = x
+    type     Out = Obj
+    lazy val out = obj
 
-    type     In = BiproductObj[X, X]
-    lazy val in = BiproductObj(x, x)
+    type     In = BiproductObj[Obj, Obj]
+    lazy val in = BiproductObj(obj, obj)
 
-    type     Dagger = fork[X]
-    lazy val dagger = fork(x)
+    type     Dagger = fork[Obj]
+    lazy val dagger = fork(obj)
 
-    lazy val label = s"merge(${x.label} ⊕ ${x.label})"
+    lazy val label = s"merge(${obj.label} ⊕ ${obj.label})"
   }
 
 

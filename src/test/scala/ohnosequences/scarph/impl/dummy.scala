@@ -6,10 +6,23 @@ case object dummy {
 
   trait Dummy
 
+  trait AnyContainer {
+    type Inside <: Dummy
+  }
+
+  case class Container[X <: Dummy]() extends AnyContainer {
+    type Inside = X
+  }
+
   case class DummyTensor[L <: Dummy, R <: Dummy](l: L, r: R) extends Dummy
 
   case object DummyUnit extends Dummy
   type DummyUnit = DummyUnit.type
+
+  case class DummyBiproduct[L <: Container[Dummy], R <: Container[Dummy]](l: L, r: R) extends Dummy
+
+  case object DummyZero extends Dummy
+  type DummyZero = DummyZero.type
 
   case object DummyEdge extends Dummy
   type DummyEdge = DummyEdge.type
@@ -20,6 +33,10 @@ case object dummy {
   implicit def dummyMatch[T <: Dummy]:
       Matchable[T] =
   new Matchable[T] { def matchUp(l: T, r: T): T = l }
+
+  implicit def dummyMerge[T <: Dummy]:
+      Mergeable[T] =
+  new Mergeable[T] { def merge(l: T, r: T): T = r }
 
 
   implicit def dummyUnitToEdge[U]:
@@ -49,6 +66,19 @@ case object dummy {
   }
 
 
+  implicit def dummyZeroToEdge[U]:
+      FromZero[U, DummyEdge] =
+  new FromZero[U, DummyEdge] { def fromZero(u: U, e: AnyGraphObject): T = DummyEdge }
+
+  implicit def dummyZeroToVertex[U]:
+      FromZero[U, DummyVertex] =
+  new FromZero[U, DummyVertex] { def fromZero(u: U, e: AnyGraphObject): T = DummyVertex }
+
+  implicit def dummyZeroToZero[U]:
+      FromZero[U, DummyZero] =
+  new FromZero[U, DummyZero] { def fromZero(u: U, e: AnyGraphObject): T = DummyZero }
+
+
   case object categoryStructure extends CategoryStructure {
 
     type RawObject = Dummy
@@ -64,6 +94,26 @@ case object dummy {
     def leftProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): L = t.l
     def rightProjRaw[L <: RawObject, R <: RawObject](t: RawTensor[L, R]): R = t.r
     def toUnitRaw[X <: RawObject](x: X): RawUnit = DummyUnit
+  }
+
+  case object biproductStructure extends BiproductStructure {
+
+    type RawObject = AnyContainer
+    type RawBiproduct[L <: RawObject, R <: RawObject] = DummyBiproduct[L, R]
+    type RawZero = DummyZero
+
+    def construct[L <: RawObject, R <: RawObject](l: L, r: R): RawBiproduct[L, R] =
+      DummyBiproduct[L, R](l, r)
+
+    def leftProjRaw[L <: RawObject, R <: RawObject](t: RawBiproduct[L, R]): L = t.l
+    def rightProjRaw[L <: RawObject, R <: RawObject](t: RawBiproduct[L, R]): R = t.r
+
+    def leftInjRaw[L <: RawObject, R <: RawObject](l: L): RawBiproduct[L, R] =
+      DummyBiproduct(l, Container[R#Inside]())
+    def rightInjRaw[L <: RawObject, R <: RawObject](r: R): RawBiproduct[L, R] =
+      DummyBiproduct(Container(), r)
+
+    def toZeroRaw[X <: RawObject](x: X): RawZero = DummyZero
   }
 
   case object graphStructure extends GraphStructure {
