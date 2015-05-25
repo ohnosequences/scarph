@@ -347,7 +347,7 @@ object evals {
         (" ⊕ " +: evalRight.present(morph.right) :+ ")")
     }
 
-    // △: X → X ⊗ X
+    // X → X ⊕ X
     implicit final def eval_fork[
       I <: RawObject, T <: AnyGraphObject
     ]:  Eval[I, fork[T], RawBiproduct[I, I]] =
@@ -360,13 +360,13 @@ object evals {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    // ▽: X ⊗ X → X
-    implicit final def eval_matchUp[
+    // X ⊕ X → X
+    implicit final def eval_merge[
       O <: RawObject, T <: AnyGraphObject
     ](implicit
       mergeable: Mergeable[O]
-    ):  Eval[RawBiproduct[O, O], matchUp[T], O] =
-    new Eval[RawBiproduct[O, O], matchUp[T], O] {
+    ):  Eval[RawBiproduct[O, O], merge[T], O] =
+    new Eval[RawBiproduct[O, O], merge[T], O] {
 
       def rawApply(morph: InMorph): InVal => OutVal = mergeRaw
 
