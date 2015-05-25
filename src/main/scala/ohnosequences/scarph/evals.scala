@@ -210,6 +210,16 @@ object evals {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
+    implicit def fromUnitTensor[U, L <: RawObject, R <: RawObject]
+    (implicit
+      l: FromUnit[U, L],
+      r: FromUnit[U, R]
+    ):  FromUnit[U, RawTensor[L, R]] =
+    new FromUnit[U, RawTensor[L, R]] {
+
+      def fromUnit(u: U, o: AnyGraphObject): T = construct(l.fromUnit(u, o), r.fromUnit(u, o))
+    }
+
   }
 
   trait GraphStructure extends AnyStructure {
@@ -452,6 +462,26 @@ object evals {
         construct(a.zero(morph.biproduct.right), _)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit def zeroForBiproduct[L <: RawObject, R <: RawObject]
+    (implicit
+      l: ZeroFor[L],
+      r: ZeroFor[R]
+    ):  ZeroFor[RawBiproduct[L, R]] =
+    new ZeroFor[RawBiproduct[L, R]] {
+
+      def zero(o: AnyGraphObject): T = construct(l.zero(o), r.zero(o))
+    }
+
+    implicit def fromUnitBiproduct[U, L <: RawObject, R <: RawObject]
+    (implicit
+      l: FromUnit[U, L],
+      r: FromUnit[U, R]
+    ):  FromUnit[U, RawBiproduct[L, R]] =
+    new FromUnit[U, RawBiproduct[L, R]] {
+
+      def fromUnit(u: U, o: AnyGraphObject): T = construct(l.fromUnit(u, o), r.fromUnit(u, o))
     }
 
   }
