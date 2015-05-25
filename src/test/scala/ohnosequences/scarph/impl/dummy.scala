@@ -114,6 +114,27 @@ case object dummy {
     def toZeroRaw[X <: RawObject](x: X): RawZero = DummyZero
   }
 
+
+  case class vertexPropertyStructure[V](default: V) extends PropertyStructure {
+
+    type RawObject = Dummy
+    type RawElement = DummyVertex
+    type RawValue = V
+
+    def getRaw[P <: AnyProperty { type Value = RawValue }](p: P)(e: RawElement): RawValue = default
+    def lookupRaw[P <: AnyProperty { type Value = RawValue }](p: P)(v: RawValue): RawElement = DummyVertex
+  }
+
+  case class edgePropertyStructure[V](default: V) extends PropertyStructure {
+
+    type RawObject = Dummy
+    type RawElement = DummyEdge
+    type RawValue = V
+
+    def getRaw[P <: AnyProperty { type Value = RawValue }](p: P)(e: RawElement): RawValue = default
+    def lookupRaw[P <: AnyProperty { type Value = RawValue }](p: P)(v: RawValue): RawElement = DummyEdge
+  }
+
 }
 
 /*

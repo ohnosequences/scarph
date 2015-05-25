@@ -49,6 +49,27 @@ class DummyTests extends org.scalatest.FunSuite {
     info(evalOn[DummyVertex](q_comp).evalPlan)
   }
 
+  test("dummy evals for the biproduct structure") {
+    import dummy.categoryStructure._
+    import dummy.biproductStructure._
+
+    val q_inj = rightInj((user ⊕ user) ⊕ tweet)
+    val q_biproduct = id(user) ⊕ id(user) ⊕ id(tweet)
+    val q_fork = fork(user) ⊕ id(tweet)
+    val q_merge = merge(user)
+    val q_comp = q_fork >=> q_biproduct >=> (id(user ⊕ user) ⊕ fork(tweet)) >=> (merge(user) ⊕ merge(tweet)) >=> rightProj(user ⊕ tweet)
+
+    info(evalOn[
+      DummyBiproduct[
+        DummyBiproduct[Dummy, Dummy],
+        Dummy
+      ]
+    ](q_biproduct).evalPlan)
+    info(evalOn[DummyBiproduct[Dummy, Dummy]](q_fork).evalPlan)
+    info(evalOn[DummyBiproduct[Dummy, Dummy]](q_merge).evalPlan)
+    info(evalOn[DummyBiproduct[Dummy, Dummy]](q_comp).evalPlan)
+  }
+
 /*
     val query1  = lookup(user.name)
     val query2  = duplicate(user)

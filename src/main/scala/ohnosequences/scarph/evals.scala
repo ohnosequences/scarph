@@ -486,36 +486,36 @@ object evals {
 
   }
 
+  trait PropertyStructure extends AnyStructure {
+
+    type RawElement
+    type RawValue
+
+    def getRaw[P <: AnyProperty { type Value = RawValue }](p: P)(e: RawElement): RawValue
+    def lookupRaw[P <: AnyProperty { type Value = RawValue }](p: P)(v: RawValue): RawElement
+
+
+    implicit final def eval_get[P <: AnyProperty { type Value = RawValue }]:
+        Eval[RawElement, get[P], P#Value] =
+    new Eval[RawElement, get[P], P#Value] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = getRaw(morph.property)
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit final def eval_lookup[P <: AnyProperty { type Value = RawValue }]:
+        Eval[P#Value, lookup[P], RawElement] =
+    new Eval[P#Value, lookup[P], RawElement] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = lookupRaw(morph.property)
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+  }
+
 /*
-    implicit final def eval_get[
-      P <: AnyProperty, RawElem, RawValue
-    ](implicit
-      propImpl: PropertyImpl[P, RawElem, RawValue]
-    ):  Eval[RawElem, get[P], RawValue] =
-    new Eval[RawElem, get[P], RawValue] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := propImpl.get(input.value, morph.property)
-      }
-
-      def present(morph: InMorph): Seq[String] = morph.label
-    }
-
-    implicit final def eval_lookup[
-      P <: AnyProperty, RawElem, RawValue
-    ](implicit
-      propImpl: PropertyImpl[P, RawElem, RawValue]
-    ):  Eval[RawValue, lookup[P], RawElem] =
-    new Eval[RawValue, lookup[P], RawElem] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := propImpl.lookup(input.value, morph.property)
-      }
-
-      def present(morph: InMorph): Seq[String] = morph.label
-    }
-
-
     implicit final def eval_quantify[
       P <: AnyPredicate, RawPred, RawElem
     ](implicit
