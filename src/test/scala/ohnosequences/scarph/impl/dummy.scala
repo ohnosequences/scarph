@@ -119,21 +119,33 @@ case object dummy {
 
     type RawObject = Dummy
     type RawElement = DummyVertex
-    type RawValue = V
+    type PropertyBound = AnyProperty { type Value <: AnyValueType { type Raw = V } }
 
-    def getRaw[P <: AnyProperty { type Value = RawValue }](p: P)(e: RawElement): RawValue = default
-    def lookupRaw[P <: AnyProperty { type Value = RawValue }](p: P)(v: RawValue): RawElement = DummyVertex
+    def getRaw[P <: PropertyBound](p: P)(e: RawElement): P#Value#Raw = default
+    def lookupRaw[P <: PropertyBound](p: P)(v: P#Value#Raw): RawElement = DummyVertex
   }
 
   case class edgePropertyStructure[V](default: V) extends PropertyStructure {
 
     type RawObject = Dummy
     type RawElement = DummyEdge
+    type PropertyBound = AnyProperty { type Value <: AnyValueType { type Raw = V } }
+
+    def getRaw[P <: PropertyBound](p: P)(e: RawElement): P#Value#Raw = default
+    def lookupRaw[P <: PropertyBound](p: P)(v: P#Value#Raw): RawElement = DummyEdge
+  }
+
+  /*
+  case class edgePropertyStructure[V](default: V) extends PropertyStructure {
+
+    type RawObject = Dummy
+    type RawElement = DummyEdge
     type RawValue = V
 
-    def getRaw[P <: AnyProperty { type Value = RawValue }](p: P)(e: RawElement): RawValue = default
-    def lookupRaw[P <: AnyProperty { type Value = RawValue }](p: P)(v: RawValue): RawElement = DummyEdge
+    def getRaw[P <: AnyProperty { type Value <: AnyValueType { type Raw = RawValue } }](p: P)(e: RawElement): RawValue = default
+    def lookupRaw[P <: AnyProperty { type Value <: AnyValueType { type Raw = RawValue } }](p: P)(v: RawValue): RawElement = DummyEdge
   }
+  */
 
 }
 

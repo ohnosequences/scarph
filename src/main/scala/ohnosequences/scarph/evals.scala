@@ -486,27 +486,34 @@ object evals {
 
   }
 
+
+  trait Lookupable[X, Y] {
+
+    type E = Y
+    def lookup[P <: AnyProperty](p: P)(v: P#Value#Raw): E
+  }
+
   trait PropertyStructure extends AnyStructure {
 
+    type PropertyBound <: AnyProperty
     type RawElement
-    type RawValue
 
-    def getRaw[P <: AnyProperty { type Value = RawValue }](p: P)(e: RawElement): RawValue
-    def lookupRaw[P <: AnyProperty { type Value = RawValue }](p: P)(v: RawValue): RawElement
+    def getRaw[P <: PropertyBound](p: P)(e: RawElement): P#Value#Raw
+    def lookupRaw[P <: PropertyBound](p: P)(v: P#Value#Raw): RawElement
 
 
-    implicit final def eval_get[P <: AnyProperty { type Value = RawValue }]:
-        Eval[RawElement, get[P], P#Value] =
-    new Eval[RawElement, get[P], P#Value] {
+    implicit final def eval_get[P <: PropertyBound]:
+        Eval[RawElement, get[P], P#Value#Raw] =
+    new Eval[RawElement, get[P], P#Value#Raw] {
 
       def rawApply(morph: InMorph): InVal => OutVal = getRaw(morph.property)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit final def eval_lookup[P <: AnyProperty { type Value = RawValue }]:
-        Eval[P#Value, lookup[P], RawElement] =
-    new Eval[P#Value, lookup[P], RawElement] {
+    implicit final def eval_lookup[P <: PropertyBound]:  
+        Eval[P#Value#Raw, lookup[P], RawElement] =
+    new Eval[P#Value#Raw, lookup[P], RawElement] {
 
       def rawApply(morph: InMorph): InVal => OutVal = lookupRaw(morph.property)
 

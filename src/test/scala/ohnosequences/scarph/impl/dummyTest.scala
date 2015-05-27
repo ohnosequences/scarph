@@ -40,13 +40,21 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.categoryStructure._
     import dummy.graphStructure._
 
-    val q_out = outV(posted)
-    val q_in = inV(liked)
-    val q_comp = q_out >=> q_in
+    val q_outV = outV(posted)
+    val q_inV = inV(liked)
+    val q_compV = q_outV >=> q_inV
 
-    info(evalOn[DummyVertex](q_out).evalPlan)
-    info(evalOn[DummyVertex](q_in).evalPlan)
-    info(evalOn[DummyVertex](q_comp).evalPlan)
+    info(evalOn[DummyVertex](q_outV).evalPlan)
+    info(evalOn[DummyVertex](q_inV).evalPlan)
+    info(evalOn[DummyVertex](q_compV).evalPlan)
+
+    val q_outE = outE(posted) >=> target(posted)
+    val q_inE = inE(liked) >=> source(liked)
+    val q_compE = q_outE >=> q_inE
+
+    info(evalOn[DummyVertex](q_outE).evalPlan)
+    info(evalOn[DummyVertex](q_inE).evalPlan)
+    info(evalOn[DummyVertex](q_compE).evalPlan)
   }
 
   test("dummy evals for the biproduct structure") {
@@ -57,7 +65,12 @@ class DummyTests extends org.scalatest.FunSuite {
     val q_biproduct = id(user) ⊕ id(user) ⊕ id(tweet)
     val q_fork = fork(user) ⊕ id(tweet)
     val q_merge = merge(user)
-    val q_comp = q_fork >=> q_biproduct >=> (id(user ⊕ user) ⊕ fork(tweet)) >=> (merge(user) ⊕ merge(tweet)) >=> rightProj(user ⊕ tweet)
+    val q_comp =
+      q_fork >=>
+      q_biproduct >=>
+      (id(user ⊕ user) ⊕ fork(tweet)) >=>
+      (merge(user) ⊕ merge(tweet)) >=>
+      rightProj(user ⊕ tweet)
 
     info(evalOn[
       DummyBiproduct[
@@ -68,6 +81,24 @@ class DummyTests extends org.scalatest.FunSuite {
     info(evalOn[DummyBiproduct[Dummy, Dummy]](q_fork).evalPlan)
     info(evalOn[DummyBiproduct[Dummy, Dummy]](q_merge).evalPlan)
     info(evalOn[DummyBiproduct[Dummy, Dummy]](q_comp).evalPlan)
+  }
+
+  test("dummy evals for the property structure") {
+    import dummy.categoryStructure._
+
+    val vertexInteger = dummy.vertexPropertyStructure[Integer](0); import vertexInteger._
+    //val vertexString = dummy.vertexPropertyStructure[String](""); import vertexString._*/
+
+    //val edgeInteger = dummy.edgePropertyStructure[Integer](0); import edgeInteger._
+    val edgeString = dummy.edgePropertyStructure[String](""); import edgeString._
+
+    val q_get = get(user.age)
+    val q_lookup = lookup(user.age)
+    val q_comp = q_lookup >=> q_get
+
+    info(evalOn[DummyEdge](q_get).evalPlan)
+    //info(evalOn[Integer](q_lookup).evalPlan)*/
+    //info(evalOn[DummyVertex](q_comp).evalPlan)*/
   }
 
 /*
