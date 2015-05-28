@@ -86,18 +86,19 @@ class DummyTests extends org.scalatest.FunSuite {
   test("dummy evals for the property structure") {
     import dummy.categoryStructure._
 
-    val vertexInteger = dummy.vertexPropertyStructure[Integer](0); import vertexInteger._
-    //val vertexString = dummy.vertexPropertyStructure[String](""); import vertexString._*/
+    val vertexInteger = dummy.vertexPropertyStructure[Integer](); import vertexInteger._
+    // FIXME: this implicit doesn't even fit for the eval, but still conflicts with the Integer one "/
+    //val vertexString = dummy.vertexPropertyStructure[String](); import vertexString._*/
 
     //val edgeInteger = dummy.edgePropertyStructure[Integer](0); import edgeInteger._
-    val edgeString = dummy.edgePropertyStructure[String](""); import edgeString._
+    //val edgeString = dummy.edgePropertyStructure[String](""); import edgeString._*/
 
     val q_get = get(user.age)
     val q_lookup = lookup(user.age)
     val q_comp = q_lookup >=> q_get
 
-    info(evalOn[DummyEdge](q_get).evalPlan)
-    //info(evalOn[Integer](q_lookup).evalPlan)*/
+    info(evalInOut[DummyVertex, Seq[Integer]](q_get).evalPlan)
+    info(evalInOut[Seq[Integer], DummyVertex](q_lookup).evalPlan)
     //info(evalOn[DummyVertex](q_comp).evalPlan)*/
   }
 

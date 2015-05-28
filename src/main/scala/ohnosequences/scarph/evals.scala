@@ -43,7 +43,7 @@ object evals {
     final def evalPlan: String = eval.present(f).mkString("")
   }
 
-  class preeval[I] {
+  class evalWithIn[I] {
 
     def apply[IM <: AnyGraphMorphism, O](m: IM)(implicit
       eval: Eval[I, IM, O]
@@ -51,7 +51,17 @@ object evals {
     new evaluate[I, IM, O](m, eval)
   }
 
-  def evalOn[I]: preeval[I] = new preeval[I] {}
+  def evalOn[I]: evalWithIn[I] = new evalWithIn[I] {}
+
+  class evalWithInOut[I, O] {
+
+    def apply[IM <: AnyGraphMorphism](m: IM)(implicit
+      eval: Eval[I, IM, O]
+    ):  evaluate[I, IM, O] =
+    new evaluate[I, IM, O](m, eval)
+  }
+
+  def evalInOut[I, O]: evalWithInOut[I, O] = new evalWithInOut[I, O] {}
 
 
   trait AnyStructure {
@@ -493,27 +503,29 @@ object evals {
     def lookup[P <: AnyProperty](p: P)(v: P#Value#Raw): E
   }
 
-  trait PropertyStructure extends AnyStructure {
+  trait AnyPropertyStructure extends AnyStructure {
 
     type PropertyBound <: AnyProperty
+    //type PropertyBound = AnyProperty { type Value <: AnyValueType { type Raw = RawValue } }*/
     type RawElement
+    type RawValue
 
-    def getRaw[P <: PropertyBound](p: P)(e: RawElement): P#Value#Raw
-    def lookupRaw[P <: PropertyBound](p: P)(v: P#Value#Raw): RawElement
+    def getRaw[P <: PropertyBound](p: P)(e: RawElement): RawValue
+    def lookupRaw[P <: PropertyBound](p: P)(v: RawValue): RawElement
 
 
     implicit final def eval_get[P <: PropertyBound]:
-        Eval[RawElement, get[P], P#Value#Raw] =
-    new Eval[RawElement, get[P], P#Value#Raw] {
+        Eval[RawElement, get[P], RawValue] =
+    new Eval[RawElement, get[P], RawValue] {
 
       def rawApply(morph: InMorph): InVal => OutVal = getRaw(morph.property)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit final def eval_lookup[P <: PropertyBound]:  
-        Eval[P#Value#Raw, lookup[P], RawElement] =
-    new Eval[P#Value#Raw, lookup[P], RawElement] {
+    implicit final def eval_lookup[P <: PropertyBound]:
+        Eval[RawValue, lookup[P], RawElement] =
+    new Eval[RawValue, lookup[P], RawElement] {
 
       def rawApply(morph: InMorph): InVal => OutVal = lookupRaw(morph.property)
 

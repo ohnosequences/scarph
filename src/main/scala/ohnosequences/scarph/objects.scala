@@ -101,6 +101,11 @@ object objects {
     val value: V = st._2
   }
 
+  object AnyProperty {
+
+    type withRaw[R] = AnyProperty { type Value <: AnyValueType { type Raw = R } }
+  }
+
   trait AnyPredicate extends AnyGraphObject {
 
     type Element <: AnyGraphElement
