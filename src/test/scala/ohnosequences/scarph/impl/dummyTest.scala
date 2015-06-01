@@ -85,21 +85,15 @@ class DummyTests extends org.scalatest.FunSuite {
 
   test("dummy evals for the property structure") {
     import dummy.categoryStructure._
-
-    val vertexInteger = dummy.vertexPropertyStructure[Integer](); import vertexInteger._
-    // FIXME: this implicit doesn't even fit for the eval, but still conflicts with the Integer one "/
-    //val vertexString = dummy.vertexPropertyStructure[String](); import vertexString._*/
-
-    //val edgeInteger = dummy.edgePropertyStructure[Integer](0); import edgeInteger._
-    //val edgeString = dummy.edgePropertyStructure[String](""); import edgeString._*/
+    import dummy.propertyStructure._
 
     val q_get = get(user.age)
-    val q_lookup = lookup(user.age)
+    val q_lookup = lookup(user.name)
     val q_comp = q_lookup >=> q_get
 
     info(evalInOut[DummyVertex, Seq[Integer]](q_get).evalPlan)
-    info(evalInOut[Seq[Integer], DummyVertex](q_lookup).evalPlan)
-    //info(evalOn[DummyVertex](q_comp).evalPlan)*/
+    info(evalOn[Seq[String]](q_lookup).evalPlan)
+    info(evalInOut[Seq[String], Seq[Integer]](q_comp).evalPlan)
   }
 
 /*
@@ -168,8 +162,7 @@ class DummyTests extends org.scalatest.FunSuite {
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
       H <: AnyGraphMorphism { type In = G#Out }
-    ]
-    : ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) )
+    ]: ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) )
     = rewriteTo( fg_h => {
 
         val fg  = fg_h.first
