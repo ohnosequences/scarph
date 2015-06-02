@@ -6,34 +6,94 @@ import twitter._, dummy._
 
 class DummyTests extends org.scalatest.FunSuite {
 
-  //def evalObj: preeval[DummyObject, DummyObject] = new preeval[DummyObject, DummyObject]
-  //def evalTens[L <: Dummy, R <: Dummy]: preeval[DummyTensor[L, R], DummyTensor[L, R]] = new preeval[DummyTensor[L, R], DummyTensor[L, R]]
-
   test("dummy evals for the basic structure") {
     import dummy.categoryStructure._
 
     val q_id = id(user)
     val q_comp = q_id >=> q_id
 
-    println("------------")
-    println(evalOn[DummyObject](q_id).evalPlan)
-    println(evalOn[DummyObject](q_comp).evalPlan)
+    info(evalOn[Dummy](q_id).evalPlan)
+    info(evalOn[Dummy](q_comp).evalPlan)
   }
 
   test("dummy evals for the tensor structure") {
     import dummy.categoryStructure._
     import dummy.tensorStructure._
 
-    val q_tensor = id(user) ⊗ id(user)
-    val q_dupl = duplicate(user)
+    val q_tensor = id(user) ⊗ id(user) ⊗ id(user)
+    val q_dupl = duplicate(user) ⊗ id(user)
     val q_match = matchUp(user)
-    val q_comp = q_dupl >=> q_tensor >=> q_match
+    val q_comp = q_dupl >=> q_tensor >=> (id(user ⊗ user) ⊗ duplicate(user)) >=> (q_match ⊗ q_match) >=> q_match
 
-    println("------------")
-    println(evalOn[DummyTensor[DummyObject, DummyObject]](q_tensor).evalPlan)
-    println(evalOn[DummyObject](q_dupl).evalPlan)
-    println(evalOn[DummyTensor[DummyObject, DummyObject]](q_match).evalPlan)
-    println(evalOn[DummyObject](q_comp).evalPlan)
+    info(evalOn[
+      DummyTensor[
+        DummyTensor[Dummy, Dummy],
+        Dummy
+      ]
+    ](q_tensor).evalPlan)
+    info(evalOn[DummyTensor[Dummy, Dummy]](q_dupl).evalPlan)
+    info(evalOn[DummyTensor[Dummy, Dummy]](q_match).evalPlan)
+    info(evalOn[DummyTensor[Dummy, Dummy]](q_comp).evalPlan)
+  }
+
+  test("dummy evals for the graph structure") {
+    import dummy.categoryStructure._
+    import dummy.graphStructure._
+
+    val q_outV = outV(posted)
+    val q_inV = inV(liked)
+    val q_compV = q_outV >=> q_inV
+
+    info(evalOn[DummyVertex](q_outV).evalPlan)
+    info(evalOn[DummyVertex](q_inV).evalPlan)
+    info(evalOn[DummyVertex](q_compV).evalPlan)
+
+    val q_outE = outE(posted) >=> target(posted)
+    val q_inE = inE(liked) >=> source(liked)
+    val q_compE = q_outE >=> q_inE
+
+    info(evalOn[DummyVertex](q_outE).evalPlan)
+    info(evalOn[DummyVertex](q_inE).evalPlan)
+    info(evalOn[DummyVertex](q_compE).evalPlan)
+  }
+
+  test("dummy evals for the biproduct structure") {
+    import dummy.categoryStructure._
+    import dummy.biproductStructure._
+
+    val q_inj = rightInj((user ⊕ user) ⊕ tweet)
+    val q_biproduct = id(user) ⊕ id(user) ⊕ id(tweet)
+    val q_fork = fork(user) ⊕ id(tweet)
+    val q_merge = merge(user)
+    val q_comp =
+      q_fork >=>
+      q_biproduct >=>
+      (id(user ⊕ user) ⊕ fork(tweet)) >=>
+      (merge(user) ⊕ merge(tweet)) >=>
+      rightProj(user ⊕ tweet)
+
+    info(evalOn[
+      DummyBiproduct[
+        DummyBiproduct[Dummy, Dummy],
+        Dummy
+      ]
+    ](q_biproduct).evalPlan)
+    info(evalOn[DummyBiproduct[Dummy, Dummy]](q_fork).evalPlan)
+    info(evalOn[DummyBiproduct[Dummy, Dummy]](q_merge).evalPlan)
+    info(evalOn[DummyBiproduct[Dummy, Dummy]](q_comp).evalPlan)
+  }
+
+  test("dummy evals for the property structure") {
+    import dummy.categoryStructure._
+    import dummy.propertyStructure._
+
+    val q_get = get(user.age)
+    val q_lookup = lookup(user.name)
+    val q_comp = q_lookup >=> q_get
+
+    info(evalInOut[DummyVertex, Seq[Integer]](q_get).evalPlan)
+    info(evalOn[Seq[String]](q_lookup).evalPlan)
+    info(evalInOut[Seq[String], Seq[Integer]](q_comp).evalPlan)
   }
 
 /*
@@ -102,8 +162,7 @@ class DummyTests extends org.scalatest.FunSuite {
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
       H <: AnyGraphMorphism { type In = G#Out }
-    ]
-    : ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) )
+    ]: ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) )
     = rewriteTo( fg_h => {
 
         val fg  = fg_h.first
@@ -122,7 +181,7 @@ class DummyTests extends org.scalatest.FunSuite {
 
     val rmorph = apply(compositionToRight) to morph
 
-    println(morph.label)
-    println(rmorph.label)
+    info(morph.label)
+    info(rmorph.label)
   }
 }
