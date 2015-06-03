@@ -57,48 +57,14 @@ case object queries {
 
   object propertyStructure extends TestBlock("Property structure") {
 
-    val q_get = get(user.age)
-    val q_lookup = lookup(user.name)
-    val q_comp1 = q_lookup >=> q_get
-    val q_comp2 = get(tweet.text) >=> lookup(tweet.text)
+    val q_getV = get(user.age)
+    val q_lookupV = lookup(user.name)
+    val q_compV = q_lookupV >=> q_getV
+
+    val q_getE = get(posted.time)
+    val q_lookupE = lookup(posted.time)
+    val q_compE = q_getE >=> q_lookupE
   }
 
-  /*
-  val tweetPosterName = inE(posted).source.get(user.name)
-
-  val fffolowees = outV(follows).outV(follows).outV(follows)
-
-  val sourceAndTarget = duplicate(posted).andThen( source(posted) ⊗ target(posted) )
-
-  val friends = inV(follows) ⊗ outV(follows)
-
-  val friends1 = duplicate(user) >=> ( friends )
-  val friends2 = duplicate(user) >=> ( friends >=> friends )
-  val friends3 = duplicate(user) >=> ( friends >=> friends >=> friends )
-
-  implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
-  implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
-
-  val twist1 = friends.twist
-  val twist2 = friends.duplicate.twist
-  val twist3 = duplicate(user).twist
-  val twist4 = duplicate(user).twist.twist
-
-  val match1 = friends.matchUp
-  val match2 = friends.twist.matchUp
-  val match3 = friends.duplicate.matchUp
-  val match4 = duplicate(tweet).matchUp
-
-  val bip = inV(follows) ⊕ outV(follows)
-  val inFriends  = bip.leftProj
-  val outFriends = bip.rightProj
-  val allFriends = bip.merge
-
-  val injectL = outV(liked).leftInj(tweet ⊕ user)
-  val injectR = inV(posted).rightInj(tweet ⊕ user)
-
-  val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
-
-  val edusTweets = edusAgain andThen edusAgain.dagger.outV(posted)
-  */
+  // TODO: predicates-related queries
 }

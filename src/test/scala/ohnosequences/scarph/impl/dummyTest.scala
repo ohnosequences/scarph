@@ -8,6 +8,12 @@ class DummyTests extends org.scalatest.FunSuite {
 
   val du = user := DummyVertex
   val dt = tweet := DummyVertex
+  val dp = posted := DummyEdge
+
+  val dages = age := Seq[Integer]()
+  val dnames = name := Seq[String]()
+  val dtexts = text := Seq[String]()
+  val dtimes = time := Seq[String]()
 
 
   test("dummy evals for the basic structure") {
@@ -35,7 +41,7 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.biproductStructure._
     import queries.biproductStructure._
 
-    //assert{ eval(q_inj)(dt) == du ⊕ du ⊕ dt }*/
+    assert{ eval(q_inj)(dt) == du ⊕ du ⊕ dt }
     assert{ eval(q_bip)(du ⊕ du ⊕ dt) == du ⊕ du ⊕ dt }
     assert{ eval(q_fork)(du ⊕ dt) == du ⊕ du ⊕ dt }
     assert{ eval(q_merge)(du ⊕ du) == du }
@@ -59,21 +65,25 @@ class DummyTests extends org.scalatest.FunSuite {
   test("dummy evals for the property structure") {
     import dummy.categoryStructure._
     import dummy.propertyStructure._
+    import queries.propertyStructure._
 
-    val q_get = get(user.age)
-    val q_lookup = lookup(user.name)
-    val q_comp = q_lookup >=> q_get
+    // FIXME: this works if you put dnames on the right (no tag/type parameter check)
+    assert{ eval(q_getV)(du) == dages }
+    assert{ eval(q_lookupV)(dnames) == du }
+    assert{ eval(q_compV)(dnames) == dages }
 
-    info(evalInOut[DummyVertex, Seq[Integer]](q_get).evalPlan)
-    info(evalOn[Seq[String]](q_lookup).evalPlan)
-    info(evalInOut[Seq[String], Seq[Integer]](q_comp).evalPlan)
+    assert{ eval(q_getE)(dp) == dtimes }
+    assert{ eval(q_lookupE)(dtimes) == dp }
+    assert{ eval(q_compE)(dp) == dp }
   }
 
+  // TODO: predicates test
 
   import rewrites._
 
   object compositionToRight extends AnyRewriteStrategy {
 
+    /*
     implicit final def right_bias_assoc[
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
@@ -89,15 +99,19 @@ class DummyTests extends org.scalatest.FunSuite {
 
         f >=> (g >=> h)
       })
+    */
   }
 
-  test("rewriting composition") {
+  ignore("rewriting composition") {
+    import compositionToRight._
 
-    val morph = outV(follows) >=> inV(follows) >=> outV(follows)
-
+    val morph = (outV(follows) >=> inV(follows)) >=> outV(follows)
     val rmorph = apply(compositionToRight) to morph
 
     info(morph.label)
     info(rmorph.label)
+
+    // FIXME
+    assert{ rmorph == (outV(follows) >=> (inV(follows) >=> outV(follows)))}
   }
 }

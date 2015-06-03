@@ -37,33 +37,6 @@ case object dummy {
   case object DummyUnit extends Dummy
   type DummyUnit = DummyUnit.type
 
-
-  implicit def dummyMatch[T <: Dummy]:
-      Matchable[T] =
-  new Matchable[T] { def matchUp(l: T, r: T): T = l }
-
-  implicit def dummyUnitToEdge[U]:
-      FromUnit[U, DummyEdge] =
-  new FromUnit[U, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
-
-  implicit def dummyUnitToVertex[U]:
-      FromUnit[U, DummyVertex] =
-  new FromUnit[U, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
-
-  implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
-  (implicit
-    l: FromUnit[U, L],
-    r: FromUnit[U, R]
-  ):  FromUnit[U, DummyTensor[L, R]] =
-  new FromUnit[U, DummyTensor[L, R]] {
-
-    def fromUnit(u: U, e: AnyGraphObject): T =
-      DummyTensor(
-        l.fromUnit(u, e),
-        r.fromUnit(u, e)
-      )
-  }
-
   case object tensorStructure extends TensorStructure {
 
     type TensorBound = Dummy
@@ -74,8 +47,35 @@ case object dummy {
     def leftRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L = t.l
     def rightRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): R = t.r
     def toUnitRaw[X <: TensorBound](x: X): RawUnit = DummyUnit
-  }
 
+
+    implicit def dummyMatch[T <: Dummy]:
+        Matchable[T] =
+    new Matchable[T] { def matchUp(l: T, r: T): T = l }
+
+    implicit def dummyUnitToEdge[U]:
+        FromUnit[U, DummyEdge] =
+    new FromUnit[U, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
+
+    implicit def dummyUnitToVertex[U]:
+        FromUnit[U, DummyVertex] =
+    new FromUnit[U, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
+
+    implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
+    (implicit
+      l: FromUnit[U, L],
+      r: FromUnit[U, R]
+    ):  FromUnit[U, DummyTensor[L, R]] =
+    new FromUnit[U, DummyTensor[L, R]] {
+
+      def fromUnit(u: U, e: AnyGraphObject): T =
+        DummyTensor(
+          l.fromUnit(u, e),
+          r.fromUnit(u, e)
+        )
+    }
+
+  }
 
 
   case class DummyBiproduct[L <: Dummy, R <: Dummy](l: L, r: R) extends Dummy
@@ -83,18 +83,6 @@ case object dummy {
   case object DummyZero extends Dummy
   type DummyZero = DummyZero.type
 
-
-  implicit def dummyMerge[T <: Dummy]:
-      Mergeable[T] =
-  new Mergeable[T] { def merge(l: T, r: T): T = r }
-
-  implicit def dummyZeroForEdge:
-      ZeroFor[DummyEdge] =
-  new ZeroFor[DummyEdge] { def zero(e: AnyGraphObject): T = DummyEdge }
-
-  implicit def dummyZeroForVertex:
-      ZeroFor[DummyVertex] =
-  new ZeroFor[DummyVertex] { def zero(e: AnyGraphObject): T = DummyVertex }
 
   case object biproductStructure extends BiproductStructure {
 
@@ -109,6 +97,21 @@ case object dummy {
     def rightProjRaw[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): R = t.r
 
     def toZeroRaw[X <: BiproductBound](x: X): RawZero = DummyZero
+
+
+    implicit def dummyMerge[T <: Dummy]:
+        Mergeable[T] =
+    new Mergeable[T] { def merge(l: T, r: T): T = r }
+
+
+    implicit def dummyZeroEdge[E <: AnyEdge]:
+        ZeroFor[E, DummyEdge] =
+    new ZeroFor[E, DummyEdge] { def zero(o: Obj): T = DummyEdge }
+
+    implicit def dummyZeroVertex[V <: AnyVertex]:
+        ZeroFor[V, DummyVertex] =
+    new ZeroFor[V, DummyVertex] { def zero(o: Obj): T = DummyVertex }
+
   }
 
 
@@ -124,7 +127,6 @@ case object dummy {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    /*
     implicit def eval_getE[P <: AnyProperty { type Owner <: AnyEdge }]:
         Eval[DummyEdge, get[P], Seq[P#Value#Raw]] =
     new Eval[DummyEdge, get[P], Seq[P#Value#Raw]] {
@@ -133,7 +135,6 @@ case object dummy {
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
-    */
 
 
     implicit def eval_lookupV[VT, P <: AnyProperty.withRaw[VT] { type Owner <: AnyVertex }]:
@@ -145,7 +146,6 @@ case object dummy {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    /*
     implicit def eval_lookupE[VT, P <: AnyProperty.withRaw[VT] { type Owner <: AnyEdge }]:
         Eval[Seq[VT], lookup[P], DummyEdge] =
     new Eval[Seq[VT], lookup[P], DummyEdge] {
@@ -154,9 +154,11 @@ case object dummy {
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
-    */
 
   }
+
+  // TODO: predicateStructure
+
 
   object syntax {
     import ohnosequences.cosas.types._

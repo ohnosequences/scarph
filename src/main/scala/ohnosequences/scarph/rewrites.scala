@@ -83,20 +83,20 @@ object rewrites {
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
       H <: AnyGraphMorphism { type In = G#Out },
-      S <: AnyGraphMorphism { type In = F#Out; type Out = H#Out },
-      M <: AnyGraphMorphism { type In = F#In; type Out = H#Out }
+      A <: AnyGraphMorphism { type In = F#In; type Out = F#Out },
+      B <: AnyGraphMorphism { type In = F#Out; type Out = H#Out }
     ](implicit
-      rewrGH: Rewrite[G >=> H, S],
-      rewrFS: Rewrite[F >=> S, M]
-    ):  RewriteFrom[rs.type, (F >=> G) >=> H, M] =
-    new RewriteFrom[rs.type, (F >=> G) >=> H, M]({ fg_h =>
+      rewrF: RewriteFrom[rs.type, F, A],
+      rewrGH: RewriteFrom[rs.type, G >=> H, B]
+    ):  RewriteFrom[rs.type, (F >=> G) >=> H, A >=> B] =
+    new RewriteFrom[rs.type, (F >=> G) >=> H, A >=> B]({ fg_h =>
 
       val fg = fg_h.first
       val f = fg.first
       val g = fg.second
       val h  = fg_h.second
 
-      rewrFS(f >=> (rewrGH(g >=> h)))
+      rewrF(f) >=> rewrGH(g >=> h)
     })
   }
 }
