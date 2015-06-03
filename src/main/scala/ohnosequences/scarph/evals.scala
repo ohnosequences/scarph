@@ -3,7 +3,7 @@ package ohnosequences.scarph
 object evals {
 
   import ohnosequences.cosas.types._
-  import objects._, morphisms._, implementations._
+  import objects._, morphisms._
 
   /* Transforms a morphism to a function */
   trait AnyEval extends AnyMorphismTransform {
@@ -42,6 +42,11 @@ object evals {
     // TODO: this should output the computational behavior of the eval here
     final def evalPlan: String = eval.present(f).mkString("")
   }
+
+  def eval[I, IM <: AnyGraphMorphism, O](m: IM)(i: IM#In := I)(implicit
+      eval: Eval[I, IM, O]
+    ): IM#Out := O =
+    new evaluate[I, IM, O](m, eval).on(i)
 
   class evalWithIn[I] {
 
