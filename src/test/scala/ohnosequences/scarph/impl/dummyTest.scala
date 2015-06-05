@@ -2,7 +2,7 @@ package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, objects._, morphisms._, evals._
 import syntax.morphisms._
-import twitter._, dummy._, dummy.syntax._
+import asserts._, twitter._, dummy._, dummy.syntax._
 
 class DummyTests extends org.scalatest.FunSuite {
 
@@ -20,9 +20,9 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.categoryStructure._
     import queries.categoryStructure._
 
-    assert{ eval(q_id)(du) == du }
-    assert{ eval(q_comp1)(du) == du }
-    assert{ eval(q_comp2)(du) == du }
+    assertTaggedEq( eval(q_id)(du), du )
+    assertTaggedEq( eval(q_comp1)(du), du )
+    assertTaggedEq( eval(q_comp2)(du), du )
   }
 
   test("dummy evals for the tensor structure") {
@@ -30,10 +30,10 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.tensorStructure._
     import queries.tensorStructure._
 
-    assert{ eval(q_tensor)(du ⊗ du ⊗ du) == du ⊗ du ⊗ du }
-    assert{ eval(q_dupl)(du ⊗ du) == du ⊗ du ⊗ du }
-    assert{ eval(q_match)(du ⊗ du) == du }
-    assert{ eval(q_comp)(du ⊗ du) == du }
+    assertTaggedEq( eval(q_tensor)(du ⊗ du ⊗ du), du ⊗ du ⊗ du )
+    assertTaggedEq( eval(q_dupl)(du ⊗ du), du ⊗ du ⊗ du )
+    assertTaggedEq( eval(q_match)(du ⊗ du), du )
+    assertTaggedEq( eval(q_comp)(du ⊗ du), du )
   }
 
   test("dummy evals for the biproduct structure") {
@@ -41,11 +41,11 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.biproductStructure._
     import queries.biproductStructure._
 
-    assert{ eval(q_inj)(dt) == du ⊕ du ⊕ dt }
-    assert{ eval(q_bip)(du ⊕ du ⊕ dt) == du ⊕ du ⊕ dt }
-    assert{ eval(q_fork)(du ⊕ dt) == du ⊕ du ⊕ dt }
-    assert{ eval(q_merge)(du ⊕ du) == du }
-    assert{ eval(q_comp)(du ⊕ dt) == dt }
+    assertTaggedEq( eval(q_inj)(dt), du ⊕ du ⊕ dt )
+    assertTaggedEq( eval(q_bip)(du ⊕ du ⊕ dt), du ⊕ du ⊕ dt )
+    assertTaggedEq( eval(q_fork)(du ⊕ dt), du ⊕ du ⊕ dt )
+    assertTaggedEq( eval(q_merge)(du ⊕ du), du )
+    assertTaggedEq( eval(q_comp)(du ⊕ dt), dt )
   }
 
   test("dummy evals for the graph structure") {
@@ -53,13 +53,13 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.graphStructure._
     import queries.graphStructure._
 
-    assert{ eval(q_outV)(du) == dt }
-    assert{ eval(q_inV)(dt) == du }
-    assert{ eval(q_compV)(du) == du }
+    assertTaggedEq( eval(q_outV)(du), dt )
+    assertTaggedEq( eval(q_inV)(dt), du )
+    assertTaggedEq( eval(q_compV)(du), du )
 
-    assert{ eval(q_outE)(du) == dt }
-    assert{ eval(q_inE)(dt) == du }
-    assert{ eval(q_compE)(du) == du }
+    assertTaggedEq( eval(q_outE)(du), dt )
+    assertTaggedEq( eval(q_inE)(dt), du )
+    assertTaggedEq( eval(q_compE)(du), du )
   }
 
   test("dummy evals for the property structure") {
@@ -67,17 +67,25 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.propertyStructure._
     import queries.propertyStructure._
 
-    // FIXME: this works if you put dnames on the right (no tag/type parameter check)
-    assert{ eval(q_getV)(du) == dages }
-    assert{ eval(q_lookupV)(dnames) == du }
-    assert{ eval(q_compV)(dnames) == dages }
+    assertTaggedEq( eval(q_getV)(du), dages )
+    assertTaggedEq( eval(q_lookupV)(dnames), du )
+    assertTaggedEq( eval(q_compV)(dnames), dages )
 
-    assert{ eval(q_getE)(dp) == dtimes }
-    assert{ eval(q_lookupE)(dtimes) == dp }
-    assert{ eval(q_compE)(dp) == dp }
+    assertTaggedEq( eval(q_getE)(dp), dtimes )
+    assertTaggedEq( eval(q_lookupE)(dtimes), dp )
+    assertTaggedEq( eval(q_compE)(dp), dp )
   }
 
-  // TODO: predicates test
+  test("dummy evals for the predicate structure") {
+    import dummy.categoryStructure._
+    import dummy.predicateStructure._
+    import queries.predicateStructure._
+
+    assertTaggedEq( eval(q_quant)(du), pred := du.value )
+    assertTaggedEq( eval(q_coerce)(pred := du.value), du )
+    assertTaggedEq( eval(q_comp)(du), du )
+  }
+
 
   import rewrites._
 
@@ -111,7 +119,7 @@ class DummyTests extends org.scalatest.FunSuite {
     info(morph.label)
     info(rmorph.label)
 
-    // FIXME
+    // FIXME: this rewrite strategy doesn't work
     assert{ rmorph == (outV(follows) >=> (inV(follows) >=> outV(follows)))}
   }
 }

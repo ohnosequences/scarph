@@ -66,5 +66,12 @@ case object queries {
     val q_compE = q_getE >=> q_lookupE
   }
 
-  // TODO: predicates-related queries
+  object predicateStructure extends TestBlock("Predicate structure") {
+
+    val pred = user ? (user.age > 10) and (user.name =/= "")
+
+    val q_quant = quantify(pred)
+    val q_coerce = coerce(pred)
+    val q_comp = q_quant >=> q_coerce
+  }
 }

@@ -1,6 +1,7 @@
 package ohnosequences.scarph.test
 
 import ohnosequences.scarph._, objects._, evals._
+import scala.Function.const
 
 case object dummy {
 
@@ -118,11 +119,11 @@ case object dummy {
   case object propertyStructure {
     import morphisms._
 
-    implicit def eval_getV[VT, P <: AnyProperty { type Owner <: AnyVertex }]:
-        Eval[DummyVertex, get[P], Seq[VT]] =
-    new Eval[DummyVertex, get[P], Seq[VT]] {
+    implicit def eval_getV[P <: AnyProperty { type Owner <: AnyVertex }]:
+        Eval[DummyVertex, get[P], Seq[P#Value#Raw]] =
+    new Eval[DummyVertex, get[P], Seq[P#Value#Raw]] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => Seq[VT]()
+      def rawApply(morph: InMorph): InVal => OutVal = const(Seq[P#Value#Raw]())
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -131,7 +132,7 @@ case object dummy {
         Eval[DummyEdge, get[P], Seq[P#Value#Raw]] =
     new Eval[DummyEdge, get[P], Seq[P#Value#Raw]] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => Seq[P#Value#Raw]()
+      def rawApply(morph: InMorph): InVal => OutVal = const(Seq[P#Value#Raw]())
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -141,7 +142,7 @@ case object dummy {
         Eval[Seq[VT], lookup[P], DummyVertex] =
     new Eval[Seq[VT], lookup[P], DummyVertex] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => DummyVertex
+      def rawApply(morph: InMorph): InVal => OutVal = const(DummyVertex)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -150,14 +151,37 @@ case object dummy {
         Eval[Seq[VT], lookup[P], DummyEdge] =
     new Eval[Seq[VT], lookup[P], DummyEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => DummyEdge
+      def rawApply(morph: InMorph): InVal => OutVal = const(DummyEdge)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
   }
 
-  // TODO: predicateStructure
+
+  case object predicateStructure {
+    import morphisms._
+
+    implicit def eval_quantify[D <: Dummy, P <: AnyPredicate]:
+        Eval[D, quantify[P], D] =
+    new Eval[D, quantify[P], D] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit def eval_coerce[D <: Dummy, P <: AnyPredicate]:
+        Eval[D, coerce[P], D] =
+    new Eval[D, coerce[P], D] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+  }
+
 
 
   object syntax {
