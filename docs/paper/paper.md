@@ -105,6 +105,19 @@ It is not a limitation, but a particularity of the use case that it is going to 
 
 
 
+# Some links
+
+1. Ian Robinson, Jim Webber, Emil Eifrém, [Graph Databases: The Definitive Book on Graph Databases](http://graphdatabases.com/), O'Reilly 2013
+2. Chad Vicknair, Michael Macias, et al., [A Comparison of a Graph Database and a Relational Database](http://cs.olemiss.edu/~ychen/publications/conference/vicknair_acmse10.pdf)
+3. Peter T. Wood, [Query Languages for Graph Databases](http://users.dcc.uchile.cl/~pbarcelo/wood.pdf)
+4. Salim Jouili, Valentin Vansteenberghe, [An empirical comparison of graph databases](http://euranova.eu/upl_docs/publications/an-empirical-comparison-of-graph-databases.pdf)
+5. Marko A. Rodriguez, Peter Neubauer [The Graph Traversal Pattern](http://arxiv.org/abs/1004.1001), CoRR 2010
+6. [Scala Query: A type-safe database API for Scala][scalaQuery]
+7. [Squeryl: A Scala ORM and DSL for talking with Databases with minimum verbosity and maximum type safety][squeryl]
+8. [sqltyped: Embedding SQL as an external DSL into Scala][sqltyped]
+9. [A quick tour of relational database access with Scala](http://manuel.bernhardt.io/2014/02/04/a-quick-tour-of-relational-database-access-with-scala/)
+10. [Slick: Functional Relational Mapping for Scala][slick]
+
 <!--  -->
 
 [statika]: http://ohnosequences.com/statika/
