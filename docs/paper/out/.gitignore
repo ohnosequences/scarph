@@ -1,9 +1,10 @@
 # TeX garbage
-paper.aux
-paper.log
-paper.out
-paper.toc
-paper.bbl
-paper.bcf
-paper.blg
-paper.run.xml
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*.tex

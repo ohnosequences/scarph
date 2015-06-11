@@ -101,7 +101,7 @@
 
 |            isomorphism            |                   → | syntax   |                     ← | syntax         |
 |:---------------------------------:|--------------------:|:---------|----------------------:|:---------------|
-|              `X ≃ X`              |       `identity[X]` | --       |                    -- |                |
+|              `X ≃ X`              |             `id[X]` | --       |                    -- |                |
 |          `A ⊗ B ≃ B ⊗ A`          |     `symmetry[A,B]` | `.twist` |                    -- |                |
 | `U ⊗ (A ⊕ B) ≃ (U ⊗ A) ⊕ (U ⊗ B)` | `distribute[U,A,B]` | `TODO`   | `undistribute[U,A,B]` | `TODO`         |
 |            `I ⊗ X ≃ X`            |       `leftUnit[X]` | `.right` |                    -- | `.leftCounit`  |
