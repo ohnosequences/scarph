@@ -18,3 +18,8 @@ testOptions     in Test               += Tests.Argument("-oD")
 publishArtifact in (Test, packageBin) := true
 
 incOptions := incOptions.value.withNameHashing(false)
+
+dependencyOverrides ++= Set(
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3",
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.3"
+)
