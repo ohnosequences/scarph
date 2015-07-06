@@ -21,8 +21,6 @@ object morphisms {
 
   type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
 
-  type DaggerOf[M <: AnyGraphMorphism] = M#Out --> M#In
-
 
   trait AnyMorphismTransform {
 
@@ -721,48 +719,4 @@ object morphisms {
 
     lazy val label = s"rightCozero(${x.label})"
   }
-
-
-  // Trace
-  case class trace[
-    A <: AnyGraphObject,
-    B <: AnyGraphObject,
-    X <: AnyGraphObject,
-    M <: (A ⊗ X) --> (B ⊗ X)
-  ](morph: M) extends AnyPrimitiveMorph {
-    type Morph = M
-
-    type     In = Morph#In#Left
-    lazy val in = morph.in.left
-
-    type     Out = Morph#Out#Left
-    lazy val out = morph.out.left
-
-    type     Dagger = traceDagger[A, B, X, Morph]
-    lazy val dagger = traceDagger[A, B, X, Morph](morph)
-
-    lazy val label = s"trace(${morph.label})"
-  }
-
-  // NOTE: this is needed just because we cannot express that `trace(f).dagger = trace(f.dagger)` "/
-  case class traceDagger[
-    A <: AnyGraphObject,
-    B <: AnyGraphObject,
-    X <: AnyGraphObject,
-    M <: (A ⊗ X) --> (B ⊗ X)
-  ](morph: M) extends AnyPrimitiveMorph {
-    type Morph = M
-
-    type     In = Morph#Out#Left
-    lazy val in = morph.out.left
-
-    type     Out = Morph#In#Left
-    lazy val out = morph.in.left
-
-    type     Dagger = trace[A, B, X, Morph]
-    lazy val dagger = trace[A, B, X, Morph](morph)
-
-    lazy val label = s"trace(${morph.label})"
-  }
-
 }
