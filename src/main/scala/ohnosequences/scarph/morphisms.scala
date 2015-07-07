@@ -19,7 +19,13 @@ object morphisms {
     val  dagger: Dagger
   }
 
+  // strict:
+  type ==>[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+
+  // non-strict:
   type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
+
+  type DaggerOf[M <: AnyGraphMorphism] = M#Out --> M#In
 
 
   trait AnyMorphismTransform {
@@ -564,6 +570,37 @@ object morphisms {
     lazy val label: String = s"symmetry(${l.label}, ${r.label})"
   }
 
+  case class associateLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
+    (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
+
+    type     In = A ⊗ (B ⊗ C)
+    lazy val in = a ⊗ (b ⊗ c)
+
+    type     Out = (A ⊗ B) ⊗ C
+    lazy val out = (a ⊗ b) ⊗ c
+
+    type     Dagger = associateRight[A, B, C]
+    lazy val dagger = associateRight(a, b, c)
+
+    lazy val label: String = s"associateLeft(${a.label} ⊗ (${b.label} ⊕ ${c.label}))"
+  }
+
+  case class associateRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
+    (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
+
+    type     In = (A ⊗ B) ⊗ C
+    lazy val in = (a ⊗ b) ⊗ c
+
+    type     Out = A ⊗ (B ⊗ C)
+    lazy val out = a ⊗ (b ⊗ c)
+
+    type     Dagger = associateLeft[A, B, C]
+    lazy val dagger = associateLeft(a, b, c)
+
+    lazy val label: String = s"associateRight((${a.label} ⊗ ${b.label}) ⊗ ${c.label})"
+  }
+
+
   case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
     (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
@@ -719,4 +756,49 @@ object morphisms {
 
     lazy val label = s"rightCozero(${x.label})"
   }
+
+
+  /* A derived morphism is just an alias for some other morphisms (we can derive eval for it)*/
+  trait AnyDerivedMorphism extends AnyGraphMorphism {
+    type Morph <: AnyGraphMorphism
+    val  morph: Morph
+
+    type     In = Morph#In
+    lazy val in = morph.in
+
+    type     Out = Morph#Out
+    lazy val out = morph.out
+
+    type     Dagger = Morph#Dagger
+    lazy val dagger = morph.dagger
+  }
+
+  abstract class DerivedMorphism[M <: AnyGraphMorphism](val morph: M)
+    extends AnyDerivedMorphism { type Morph = M }
+
+
+  // Trace
+  case class trace[
+    A <: AnyGraphObject,
+    B <: AnyGraphObject,
+    X <: AnyGraphObject,
+    M <: (A ⊗ X) ==> (B ⊗ X)
+  ](m: M) extends DerivedMorphism({
+    lazy val a: A = m.in.left
+    lazy val x: X = m.in.right
+    lazy val b: B = m.out.left
+
+    rightCounit(a) >=>
+    (id(a) ⊗ fromUnit(x)) >=>
+    (id(a) ⊗ duplicate(x)) >=>
+    associateLeft(a, x, x) >=>
+    (m ⊗ id(x)) >=>
+    associateRight(b, x, x) >=>
+    (id(b) ⊗ matchUp(x)) >=>
+    (id(b) ⊗ toUnit(x)) >=>
+    rightUnit(b)
+  }) {
+    lazy val label = s"trace(${morph.label})"
+  }
+
 }
