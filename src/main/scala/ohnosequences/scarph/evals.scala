@@ -64,7 +64,7 @@ object evals {
   def evalInOut[I, O]: evalWithInOut[I, O] = new evalWithInOut[I, O] {}
 
 
-  trait CategoryStructure {
+  trait CategoryStructure extends CategoryStructure2 {
 
     implicit final def eval_id[I, X <: AnyGraphObject]:
         Eval[I, id[X], I] =
@@ -97,10 +97,14 @@ object evals {
         ("(" +: evalFirst.present(morph.first)) ++
         (" >=> " +: evalSecond.present(morph.second) :+ ")")
     }
+  }
+
+  trait CategoryStructure2 {
 
     implicit final def eval_derived[
       I, M <: AnyGraphMorphism, O,
       D <: AnyDerivedMorphism { type Morph <: M }
+      // D <: DerivedMorphism[M]
     ](implicit
       inner: Eval[I, M, O]
     ):  Eval[I, D, O] =
