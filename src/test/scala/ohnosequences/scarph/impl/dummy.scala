@@ -1,6 +1,7 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, implementations._, objects._, evals._
+import ohnosequences.scarph._, objects._, evals._
+import scala.Function.const
 
 case object dummy {
 
@@ -37,33 +38,6 @@ case object dummy {
   case object DummyUnit extends Dummy
   type DummyUnit = DummyUnit.type
 
-
-  implicit def dummyMatch[T <: Dummy]:
-      Matchable[T] =
-  new Matchable[T] { def matchUp(l: T, r: T): T = l }
-
-  implicit def dummyUnitToEdge[U]:
-      FromUnit[U, DummyEdge] =
-  new FromUnit[U, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
-
-  implicit def dummyUnitToVertex[U]:
-      FromUnit[U, DummyVertex] =
-  new FromUnit[U, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
-
-  implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
-  (implicit
-    l: FromUnit[U, L],
-    r: FromUnit[U, R]
-  ):  FromUnit[U, DummyTensor[L, R]] =
-  new FromUnit[U, DummyTensor[L, R]] {
-
-    def fromUnit(u: U, e: AnyGraphObject): T =
-      DummyTensor(
-        l.fromUnit(u, e),
-        r.fromUnit(u, e)
-      )
-  }
-
   case object tensorStructure extends TensorStructure {
 
     type TensorBound = Dummy
@@ -74,8 +48,35 @@ case object dummy {
     def leftRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L = t.l
     def rightRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): R = t.r
     def toUnitRaw[X <: TensorBound](x: X): RawUnit = DummyUnit
-  }
 
+
+    implicit def dummyMatch[T <: Dummy]:
+        Matchable[T] =
+    new Matchable[T] { def matchUp(l: T, r: T): T = l }
+
+    implicit def dummyUnitToEdge[U]:
+        FromUnit[U, DummyEdge] =
+    new FromUnit[U, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
+
+    implicit def dummyUnitToVertex[U]:
+        FromUnit[U, DummyVertex] =
+    new FromUnit[U, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
+
+    implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
+    (implicit
+      l: FromUnit[U, L],
+      r: FromUnit[U, R]
+    ):  FromUnit[U, DummyTensor[L, R]] =
+    new FromUnit[U, DummyTensor[L, R]] {
+
+      def fromUnit(u: U, e: AnyGraphObject): T =
+        DummyTensor(
+          l.fromUnit(u, e),
+          r.fromUnit(u, e)
+        )
+    }
+
+  }
 
 
   case class DummyBiproduct[L <: Dummy, R <: Dummy](l: L, r: R) extends Dummy
@@ -83,18 +84,6 @@ case object dummy {
   case object DummyZero extends Dummy
   type DummyZero = DummyZero.type
 
-
-  implicit def dummyMerge[T <: Dummy]:
-      Mergeable[T] =
-  new Mergeable[T] { def merge(l: T, r: T): T = r }
-
-  implicit def dummyZeroForEdge:
-      ZeroFor[DummyEdge] =
-  new ZeroFor[DummyEdge] { def zero(e: AnyGraphObject): T = DummyEdge }
-
-  implicit def dummyZeroForVertex:
-      ZeroFor[DummyVertex] =
-  new ZeroFor[DummyVertex] { def zero(e: AnyGraphObject): T = DummyVertex }
 
   case object biproductStructure extends BiproductStructure {
 
@@ -109,127 +98,108 @@ case object dummy {
     def rightProjRaw[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): R = t.r
 
     def toZeroRaw[X <: BiproductBound](x: X): RawZero = DummyZero
+
+
+    implicit def dummyMerge[T <: Dummy]:
+        Mergeable[T] =
+    new Mergeable[T] { def merge(l: T, r: T): T = r }
+
+
+    implicit def dummyZeroEdge[E <: AnyEdge]:
+        ZeroFor[E, DummyEdge] =
+    new ZeroFor[E, DummyEdge] { def zero(o: Obj): T = DummyEdge }
+
+    implicit def dummyZeroVertex[V <: AnyVertex]:
+        ZeroFor[V, DummyVertex] =
+    new ZeroFor[V, DummyVertex] { def zero(o: Obj): T = DummyVertex }
+
   }
 
 
   case object propertyStructure {
     import morphisms._
 
-    implicit def eval_getV[VT, P <: AnyProperty { type Owner <: AnyVertex }]:
-        Eval[DummyVertex, get[P], Seq[VT]] =
-    new Eval[DummyVertex, get[P], Seq[VT]] {
+    implicit def eval_getV[P <: AnyProperty { type Owner <: AnyVertex }]:
+        Eval[DummyVertex, get[P], Seq[P#Value#Raw]] =
+    new Eval[DummyVertex, get[P], Seq[P#Value#Raw]] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => Seq[VT]()
+      def rawApply(morph: InMorph): InVal => OutVal = const(Seq[P#Value#Raw]())
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    /*
     implicit def eval_getE[P <: AnyProperty { type Owner <: AnyEdge }]:
         Eval[DummyEdge, get[P], Seq[P#Value#Raw]] =
     new Eval[DummyEdge, get[P], Seq[P#Value#Raw]] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => Seq[P#Value#Raw]()
+      def rawApply(morph: InMorph): InVal => OutVal = const(Seq[P#Value#Raw]())
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
-    */
 
 
     implicit def eval_lookupV[VT, P <: AnyProperty.withRaw[VT] { type Owner <: AnyVertex }]:
         Eval[Seq[VT], lookup[P], DummyVertex] =
     new Eval[Seq[VT], lookup[P], DummyVertex] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => DummyVertex
+      def rawApply(morph: InMorph): InVal => OutVal = const(DummyVertex)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    /*
     implicit def eval_lookupE[VT, P <: AnyProperty.withRaw[VT] { type Owner <: AnyEdge }]:
         Eval[Seq[VT], lookup[P], DummyEdge] =
     new Eval[Seq[VT], lookup[P], DummyEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = _ => DummyEdge
+      def rawApply(morph: InMorph): InVal => OutVal = const(DummyEdge)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
-    */
 
+  }
+
+
+  case object predicateStructure {
+    import morphisms._
+
+    implicit def eval_quantify[D <: Dummy, P <: AnyPredicate]:
+        Eval[D, quantify[P], D] =
+    new Eval[D, quantify[P], D] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit def eval_coerce[D <: Dummy, P <: AnyPredicate]:
+        Eval[D, coerce[P], D] =
+    new Eval[D, coerce[P], D] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+  }
+
+
+
+  object syntax {
+    import ohnosequences.cosas.types._
+    import ohnosequences.scarph.objects._
+
+    implicit def dummyObjectValOps[F <: AnyGraphObject, VF <: Dummy](vf: F := VF):
+      DummyObjectValOps[F, VF] =
+      DummyObjectValOps[F, VF](vf.value)
+
+    case class DummyObjectValOps[F <: AnyGraphObject, VF <: Dummy](vf: VF) extends AnyVal {
+
+      def ⊗[S <: AnyGraphObject, VS <: Dummy](vs: S := VS): (F ⊗ S) := DummyTensor[VF, VS] =
+        new Denotes( DummyTensor(vf, vs.value) )
+
+      def ⊕[S <: AnyGraphObject, VS <: Dummy](vs: S := VS): (F ⊕ S) := DummyBiproduct[VF, VS] =
+        new Denotes( DummyBiproduct(vf, vs.value) )
+    }
   }
 
 }
-
-/*
-    implicit def biproductImpl:
-        BiproductImpl[Dummy, Dummy, Dummy] =
-    new BiproductImpl[Dummy, Dummy, Dummy] {
-
-      def apply(l: RawLeft, r: RawRight): RawBiproduct = Dummy
-      def leftProj(b: RawBiproduct): RawLeft = Dummy
-      def leftInj(l: RawLeft): RawBiproduct = Dummy
-      def rightProj(b: RawBiproduct): RawRight = Dummy
-      def rightInj(r: RawRight): RawBiproduct = Dummy
-    }
-
-
-    implicit def mergeImpl:
-        MergeImpl[Dummy] =
-    new MergeImpl[Dummy] {
-
-      def merge(l: Raw, r: Raw): Raw = Dummy
-    }
-
-
-    implicit def zeroImpl:
-        ZeroImpl[Dummy] =
-    new ZeroImpl[Dummy] { def apply(): Raw = Dummy }
-
-
-    implicit def edgeImpl:
-        EdgeImpl[Dummy, Dummy, Dummy] =
-    new EdgeImpl[Dummy, Dummy, Dummy] {
-
-      def source(e: RawEdge): RawSource = Dummy
-      def target(e: RawEdge): RawTarget = Dummy
-    }
-
-
-    implicit def vertexInImpl[E <: AnyEdge]:
-        VertexInImpl[E, Dummy, Dummy, Dummy] =
-    new VertexInImpl[E, Dummy, Dummy, Dummy] {
-
-      def inE(v: RawVertex, e: Edge): RawInEdge = Dummy
-      def inV(v: RawVertex, e: Edge): RawInVertex = Dummy
-    }
-
-
-    implicit def vertexOutImpl[E <: AnyEdge]:
-        VertexOutImpl[E, Dummy, Dummy, Dummy] =
-    new VertexOutImpl[E, Dummy, Dummy, Dummy] {
-
-      def outE(v: RawVertex, e: Edge): RawOutEdge = Dummy
-      def outV(v: RawVertex, e: Edge): RawOutVertex = Dummy
-    }
-
-
-    implicit def dummyPropertyImpl[P <: AnyProperty]:
-        PropertyImpl[P, Dummy, Dummy] =
-    new PropertyImpl[P, Dummy, Dummy] {
-
-      def get(e: RawElement, p: Property): RawValue = Dummy
-      def lookup(r: RawValue, p: Property): RawElement = Dummy
-    }
-
-
-    implicit def dummyPredicateImpl[P <: AnyPredicate]:
-        PredicateImpl[P, Dummy, Dummy] =
-    new PredicateImpl[P, Dummy, Dummy] {
-
-      def quantify(e: RawElement, p: Predicate): RawPredicate = Dummy
-      def coerce(p: RawPredicate): RawElement = Dummy
-    }
-
-  }
-
-*/

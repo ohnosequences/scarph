@@ -6,21 +6,6 @@ object objects {
   import ohnosequences.scarph.objects._
 
 
-  implicit final def graphObjectValOps[F <: AnyGraphObject, VF](vt: F := VF):
-    GraphObjectValOps[F, VF] =
-    GraphObjectValOps[F, VF](vt.value)
-
-  case class GraphObjectValOps[F <: AnyGraphObject, VF](vf: VF) extends AnyVal {
-
-    // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
-    def ⊗[S <: AnyGraphObject, VS](vs: S := VS): (F ⊗ S) := (VF, VS) =
-      new Denotes( (vf, vs.value) )
-
-    // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
-    def ⊕[S <: AnyGraphObject, VS](vs: S := VS): (F ⊕ S) := (VF, VS) =
-      new Denotes( (vf, vs.value) )
-  }
-
   /* A way of building a predicate from an element */
   implicit def elementPredicateOps[E <: AnyGraphElement](e: E):
       ElementPredicateOps[E] =

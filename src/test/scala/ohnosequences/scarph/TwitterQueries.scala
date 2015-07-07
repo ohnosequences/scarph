@@ -1,57 +1,77 @@
 package ohnosequences.scarph.test
 
-case object Queries {
+case object queries {
 
   import ohnosequences.{ scarph => s }
   import s.objects._, s.morphisms._
   import s.syntax._, morphisms._, objects._
   import s.test.twitter._
 
-  val edus    = user ? (user.name === "@eparejatobes")
-  val alexeys = user ? (user.name === "@laughedelic")
-  val kims    = user ? (user.name === "@evdokim")
-  // val tweets  = twitter.query(tweet ? (text === "back to twitter :)"))
-  // val posts   = twitter.query(posted ? (time === "13.11.2012"))
+  class TestBlock(val label: String)
 
-  val userName   = id(user).get(user.name)
-  val tweetText  = id(tweet).get(tweet.text)
-  val postedTime = id(posted).get(posted.time)
-  implicitly[ userName.type <:< (user.type --> name.type) ]
 
-  val tweetPosterName = inE(posted).source.get(user.name)
+  object categoryStructure extends TestBlock("Categorical structure"){
 
-  val fffolowees = outV(follows).outV(follows).outV(follows)
+    val q_id = id(user)
+    val q_comp1 = q_id >=> q_id
+    val q_comp2 = q_comp1 >=> q_id >=> q_comp1
+  }
 
-  val sourceAndTarget = duplicate(posted).andThen( source(posted) ⊗ target(posted) )
+  object tensorStructure extends TestBlock("Tensor structure") {
 
-  val friends = inV(follows) ⊗ outV(follows)
+    val q_tensor = id(user) ⊗ id(user) ⊗ id(user)
+    val q_dupl = duplicate(user) ⊗ id(user)
+    val q_match = matchUp(user)
+    val q_comp =
+      q_dupl >=>
+      q_tensor >=>
+      (id(user ⊗ user) ⊗ duplicate(user)) >=>
+      (q_match ⊗ q_match) >=>
+      q_match
+  }
 
-  val friends1 = duplicate(user) >=> ( friends )
-  val friends2 = duplicate(user) >=> ( friends >=> friends )
-  val friends3 = duplicate(user) >=> ( friends >=> friends >=> friends )
+  object biproductStructure extends TestBlock("Biproduct structure") {
 
-  implicitly[ friends1.type <:< (user.type --> TensorObj[user.type, user.type]) ]
-  implicitly[ friends2.type <:< (user.type --> TensorObj[user.type, user.type]) ]
+    val q_inj   = rightInj((user ⊕ user) ⊕ tweet)
+    val q_bip   = id(user) ⊕ id(user) ⊕ id(tweet)
+    val q_fork  = fork(user) ⊕ id(tweet)
+    val q_merge = merge(user)
+    val q_comp  =
+      q_fork >=>
+      q_bip >=>
+      (id(user ⊕ user) ⊕ fork(tweet)) >=>
+      (merge(user) ⊕ merge(tweet)) >=>
+      rightProj(user ⊕ tweet)
+  }
 
-  val twist1 = friends.twist
-  val twist2 = friends.duplicate.twist
-  val twist3 = duplicate(user).twist
-  val twist4 = duplicate(user).twist.twist
+  object graphStructure extends TestBlock("Graph structure") {
 
-  val match1 = friends.matchUp
-  val match2 = friends.twist.matchUp
-  val match3 = friends.duplicate.matchUp
-  val match4 = duplicate(tweet).matchUp
+    val q_outV  = outV(posted)
+    val q_inV   = inV(posted)
+    val q_compV = q_outV >=> q_inV
 
-  val bip = inV(follows) ⊕ outV(follows)
-  val inFriends  = bip.leftProj
-  val outFriends = bip.rightProj
-  val allFriends = bip.merge
+    val q_outE  = outE(posted) >=> target(posted)
+    val q_inE   = inE(posted) >=> source(posted)
+    val q_compE = q_outE >=> q_inE
+  }
 
-  val injectL = outV(liked).leftInj(tweet ⊕ user)
-  val injectR = inV(posted).rightInj(tweet ⊕ user)
+  object propertyStructure extends TestBlock("Property structure") {
 
-  val edusAgain = quantify(user ? (user.name === "@eparejatobes"))
+    val q_getV = get(user.age)
+    val q_lookupV = lookup(user.name)
+    val q_compV = q_lookupV >=> q_getV
 
-  val edusTweets = edusAgain andThen edusAgain.dagger.outV(posted)
+    val q_getE = get(posted.time)
+    val q_lookupE = lookup(posted.time)
+    val q_compE = q_getE >=> q_lookupE
+  }
+
+  object predicateStructure extends TestBlock("Predicate structure") {
+
+    val pred = user ? (user.age > 10) and (user.name =/= "")
+
+    val q_quant = quantify(pred)
+    val q_coerce = coerce(pred)
+    val q_comp = q_quant >=> q_coerce
+  }
 }
