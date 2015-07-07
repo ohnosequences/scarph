@@ -98,6 +98,19 @@ object evals {
         (" >=> " +: evalSecond.present(morph.second) :+ ")")
     }
 
+    implicit final def eval_derived[
+      I, M <: AnyGraphMorphism, O,
+      D <: AnyDerivedMorphism { type Morph <: M }
+    ](implicit
+      inner: Eval[I, M, O]
+    ):  Eval[I, D, O] =
+    new Eval[I, D, O] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = inner.rawApply(morph.morph)
+
+      def present(morph: InMorph): Seq[String] = inner.present(morph.morph)
+    }
+
   }
 
   trait Matchable[T0] {
@@ -123,7 +136,7 @@ object evals {
   trait TensorStructure {
 
     type TensorBound
-    type RawTensor[L <: TensorBound, R <: TensorBound] //<: TensorBound
+    type RawTensor[L <: TensorBound, R <: TensorBound] <: TensorBound
     type RawUnit
 
     def tensorRaw[L <: TensorBound, R <: TensorBound](l: L, r: R): RawTensor[L, R]
@@ -223,6 +236,40 @@ object evals {
     new FromUnit[U, RawTensor[L, R]] {
 
       def fromUnit(u: U, o: AnyGraphObject): T = tensorRaw(l.fromUnit(u, o), r.fromUnit(u, o))
+    }
+
+    implicit final def eval_associateLeft[
+      A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
+      X <: TensorBound, Y <: TensorBound, Z <: TensorBound
+    ]:  Eval[RawTensor[X, RawTensor[Y, Z]], associateLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] =
+    new Eval[RawTensor[X, RawTensor[Y, Z]], associateLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        val x: X = leftRaw(inVal)
+        val y: Y = leftRaw(rightRaw(inVal))
+        val z: Z = rightRaw(rightRaw(inVal))
+
+        tensorRaw(tensorRaw(x, y), z)
+      }
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit final def eval_associateRight[
+      A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
+      X <: TensorBound, Y <: TensorBound, Z <: TensorBound
+    ]:  Eval[RawTensor[RawTensor[X, Y], Z], associateRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] =
+    new Eval[RawTensor[RawTensor[X, Y], Z], associateRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        val x: X = leftRaw(leftRaw(inVal))
+        val y: Y = rightRaw(leftRaw(inVal))
+        val z: Z = rightRaw(inVal)
+
+        tensorRaw(x, tensorRaw(y, z))
+      }
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
   }
