@@ -54,27 +54,27 @@ case object dummy {
         Matchable[T] =
     new Matchable[T] { def matchUp(l: T, r: T): T = l }
 
-    implicit def dummyUnitToEdge[U]:
-        FromUnit[U, DummyEdge] =
-    new FromUnit[U, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
+    // implicit def dummyUnitToEdge:
+    //     FromUnit[DummyUnit, DummyEdge] =
+    // new FromUnit[DummyUnit, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
 
-    implicit def dummyUnitToVertex[U]:
-        FromUnit[U, DummyVertex] =
-    new FromUnit[U, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
+    implicit def dummyUnitToVertex:
+        FromUnit[DummyUnit, DummyVertex] =
+    new FromUnit[DummyUnit, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
 
-    implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
-    (implicit
-      l: FromUnit[U, L],
-      r: FromUnit[U, R]
-    ):  FromUnit[U, DummyTensor[L, R]] =
-    new FromUnit[U, DummyTensor[L, R]] {
-
-      def fromUnit(u: U, e: AnyGraphObject): T =
-        DummyTensor(
-          l.fromUnit(u, e),
-          r.fromUnit(u, e)
-        )
-    }
+    // implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
+    // (implicit
+    //   l: FromUnit[U, L],
+    //   r: FromUnit[U, R]
+    // ):  FromUnit[U, DummyTensor[L, R]] =
+    // new FromUnit[U, DummyTensor[L, R]] {
+    //
+    //   def fromUnit(u: U, e: AnyGraphObject): T =
+    //     DummyTensor(
+    //       l.fromUnit(u, e),
+    //       r.fromUnit(u, e)
+    //     )
+    // }
 
   }
 

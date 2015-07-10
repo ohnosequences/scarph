@@ -106,17 +106,17 @@ object evals {
 
   trait CategoryStructure2 {
 
-    implicit final def eval_derived[
-      I, O, D <: AnyDerivedMorphism
-    ](implicit
-      inner: Eval[I, D#Morph, O]
-    ):  Eval[I, D, O] =
-    new Eval[I, D, O] {
-
-      def rawApply(morph: InMorph): InVal => OutVal = inner.rawApply(morph.morph)
-
-      def present(morph: InMorph): Seq[String] = inner.present(morph.morph)
-    }
+    // implicit final def eval_derived[
+    //   I, O, D <: AnyDerivedMorphism
+    // ](implicit
+    //   inner: Eval[I, D#Morph, O]
+    // ):  Eval[I, D, O] =
+    // new Eval[I, D, O] {
+    //
+    //   def rawApply(morph: InMorph): InVal => OutVal = inner.rawApply(morph.morph)
+    //
+    //   def present(morph: InMorph): Seq[String] = inner.present(morph.morph)
+    // }
 
   }
 
@@ -144,7 +144,7 @@ object evals {
 
     type TensorBound
     type RawTensor[L <: TensorBound, R <: TensorBound] <: TensorBound
-    type RawUnit
+    type RawUnit <: TensorBound
 
     def tensorRaw[L <: TensorBound, R <: TensorBound](l: L, r: R): RawTensor[L, R]
     def leftRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L
@@ -182,6 +182,20 @@ object evals {
       def present(morph: InMorph): Seq[String] =
         ("(" +: evalLeft.present(morph.left)) ++
         (" ⊗ " +: evalRight.present(morph.right) :+ ")")
+    }
+
+    // A ⊗ B → B ⊗ A
+    implicit final def eval_symmetry[
+      A <: TensorBound, B <: TensorBound,
+      L <: AnyGraphObject, R <: AnyGraphObject
+    ]:  Eval[RawTensor[A, B], symmetry[L, R], RawTensor[B, A]] =
+    new Eval[RawTensor[A, B], symmetry[L, R], RawTensor[B, A]] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        tensorRaw[B, A](rightRaw(inVal), leftRaw(inVal))
+      }
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     // △: X → X ⊗ X
@@ -279,6 +293,43 @@ object evals {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
+    implicit final def eval_trace[
+      I, O,
+      A <: AnyGraphObject,
+      B <: AnyGraphObject,
+      X <: AnyGraphObject,
+      M <: (A ⊗ X) ==> (B ⊗ X)
+    ](implicit
+      inner: Eval[I, trace[A, B, X, M]#Morph, O]
+    ):  Eval[I, trace[A, B, X, M], O] =
+    new Eval[I, trace[A, B, X, M], O] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = inner.rawApply(morph.morph)
+
+      def present(morph: InMorph): Seq[String] = inner.present(morph.morph)
+    }
+
+    implicit final def eval_rightUnit[
+      I <: TensorBound, T <: AnyGraphObject
+    ]:  Eval[RawTensor[I, RawUnit], rightUnit[T], I] =
+    new Eval[RawTensor[I, RawUnit], rightUnit[T], I] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = leftRaw
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit final def eval_rightCounit[
+      I <: TensorBound, T <: AnyGraphObject
+    ]:  Eval[I, rightCounit[T], RawTensor[I, RawUnit]] =
+    new Eval[I, rightCounit[T], RawTensor[I, RawUnit]] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        tensorRaw(inVal, toUnitRaw[I](inVal))
+      }
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
   }
 
   trait GraphStructure {

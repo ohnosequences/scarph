@@ -6,6 +6,7 @@ import asserts._, twitter._, dummy._, dummy.syntax._
 
 class DummyTests extends org.scalatest.FunSuite {
 
+  val I = unit := DummyUnit
   val du = user := DummyVertex
   val dt = tweet := DummyVertex
   val dp = posted := DummyEdge
@@ -30,6 +31,9 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.tensorStructure._
     import queries.tensorStructure._
 
+    assertTaggedEq( eval(q_symmetry)(du ⊗ dt), dt ⊗ du )
+    assertTaggedEq( eval(q_fromUnit)(I), du )
+    assertTaggedEq( eval(q_toUnit)(du), I )
     assertTaggedEq( eval(q_tensor)(du ⊗ du ⊗ du), du ⊗ du ⊗ du )
     assertTaggedEq( eval(q_dupl)(du ⊗ du), du ⊗ du ⊗ du )
     assertTaggedEq( eval(q_match)(du ⊗ du), du )
