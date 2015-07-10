@@ -28,6 +28,7 @@ case object queries {
       (id(user ⊗ user) ⊗ duplicate(user)) >=>
       (q_match ⊗ q_match) >=>
       q_match
+    val q_trace = trace(user, user, user, id(user) ⊗ id(user))
   }
 
   object biproductStructure extends TestBlock("Biproduct structure") {

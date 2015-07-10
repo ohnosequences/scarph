@@ -682,11 +682,11 @@ object morphisms {
   // X → I ⊗ X
   case class rightCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
-    type     Out = X ⊗ unit
-    lazy val out = x ⊗ unit
-
     type     In = X
     lazy val in = x
+
+    type     Out = X ⊗ unit
+    lazy val out = x ⊗ unit
 
     type     Dagger = rightUnit[X]
     lazy val dagger = rightUnit(x)
@@ -783,7 +783,7 @@ object morphisms {
     B <: AnyGraphObject,
     X <: AnyGraphObject,
     M <: (A ⊗ X) ==> (B ⊗ X)
-  ](m: M) extends DerivedMorphism({
+  ](aa: A, bb: B, xx: X, m: M) extends DerivedMorphism({
     lazy val a: A = m.in.left
     lazy val x: X = m.in.right
     lazy val b: B = m.out.left

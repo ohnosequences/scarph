@@ -107,11 +107,9 @@ object evals {
   trait CategoryStructure2 {
 
     implicit final def eval_derived[
-      I, M <: AnyGraphMorphism, O,
-      D <: AnyDerivedMorphism { type Morph <: M }
-      // D <: DerivedMorphism[M]
+      I, O, D <: AnyDerivedMorphism
     ](implicit
-      inner: Eval[I, M, O]
+      inner: Eval[I, D#Morph, O]
     ):  Eval[I, D, O] =
     new Eval[I, D, O] {
 
