@@ -745,11 +745,11 @@ object morphisms {
   // X → 0 ⊕ X
   case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
-    type     Out = X ⊕ zero
-    lazy val out = x ⊕ zero
-
     type     In = X
     lazy val in = x
+
+    type     Out = X ⊕ zero
+    lazy val out = x ⊕ zero
 
     type     Dagger = rightZero[X]
     lazy val dagger = rightZero(x)
@@ -758,47 +758,68 @@ object morphisms {
   }
 
 
-  /* A derived morphism is just an alias for some other morphisms (we can derive eval for it)*/
-  trait AnyDerivedMorphism extends AnyGraphMorphism {
-    type Morph <: AnyGraphMorphism
-    val  morph: Morph
+  // /* A derived morphism is just an alias for some other morphisms (we can derive eval for it)*/
+  // trait AnyDerivedMorphism extends AnyGraphMorphism { self =>
+  //
+  //   type Morph <: AnyGraphMorphism
+  //   val  morph: Morph
+  //
+  //   type     In = Morph#In
+  //   lazy val in = morph.in
+  //
+  //   type     Out = Morph#Out
+  //   lazy val out = morph.out
+  //
+  //   type     Dagger <: AnyDerivedMorphism {
+  //     type Morph = self.Dagger
+  //   }
+  //   // lazy val dagger = morph.dagger
+  // }
+  //
+  // abstract class DerivedMorphism[M <: AnyGraphMorphism](val morph: M)
+  //   extends AnyDerivedMorphism { type Morph = M }
 
-    type     In = Morph#In
-    lazy val in = morph.in
-
-    type     Out = Morph#Out
-    lazy val out = morph.out
-
-    type     Dagger = Morph#Dagger
-    lazy val dagger = morph.dagger
-  }
-
-  abstract class DerivedMorphism[M <: AnyGraphMorphism](val morph: M)
-    extends AnyDerivedMorphism { type Morph = M }
 
 
   // Trace
-  case class trace[
-    A <: AnyGraphObject,
-    B <: AnyGraphObject,
-    X <: AnyGraphObject,
-    M <: (A ⊗ X) ==> (B ⊗ X)
-  ](aa: A, bb: B, xx: X, m: M) extends DerivedMorphism({
-    lazy val a: A = m.in.left
-    lazy val x: X = m.in.right
-    lazy val b: B = m.out.left
+  case class tensorTrace[
+    M <: AnyGraphMorphism {
+      type In <: AnyTensorObj
+      type Out <: AnyTensorObj { type Right = In#Right }
+    }
+  ](morph: M) extends AnyPrimitiveMorph {
+    type Morph = M
 
-    rightCounit(a) >=>
-    (id(a) ⊗ fromUnit(x)) >=>
-    (id(a) ⊗ duplicate(x)) >=>
-    associateLeft(a, x, x) >=>
-    (m ⊗ id(x)) >=>
-    associateRight(b, x, x) >=>
-    (id(b) ⊗ matchUp(x)) >=>
-    (id(b) ⊗ toUnit(x)) >=>
-    rightUnit(b)
-  }) {
-    lazy val label = s"trace(${morph.label})"
+    type     In = Morph#In#Left
+    lazy val in = morph.in.left
+
+    type     Out = Morph#Out#Left
+    lazy val out = morph.out.left
+
+    type Dagger = daggerTensorTrace[Morph]
+    lazy val dagger = daggerTensorTrace[Morph](morph)
+
+    lazy val label = s"tensorTrace(${morph.label})"
+  }
+
+  case class daggerTensorTrace[
+    M <: AnyGraphMorphism {
+      type In <: AnyTensorObj
+      type Out <: AnyTensorObj { type Right = In#Right }
+    }
+  ](morph: M) extends AnyPrimitiveMorph {
+    type Morph = M
+
+    type     In = Morph#Out#Left
+    lazy val in = morph.out.left
+
+    type     Out = Morph#In#Left
+    lazy val out = morph.in.left
+
+    type Dagger = tensorTrace[Morph]
+    lazy val dagger = tensorTrace[Morph](morph)
+
+    lazy val label = s"tensorTrace(${morph.label})"
   }
 
 }

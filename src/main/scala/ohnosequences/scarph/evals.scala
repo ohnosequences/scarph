@@ -293,20 +293,33 @@ object evals {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit final def eval_trace[
+    implicit final def eval_tensorTrace[
       I, O,
       A <: AnyGraphObject,
       B <: AnyGraphObject,
       X <: AnyGraphObject,
       M <: (A ⊗ X) ==> (B ⊗ X)
-    ](implicit
-      inner: Eval[I, trace[A, B, X, M]#Morph, O]
-    ):  Eval[I, trace[A, B, X, M], O] =
-    new Eval[I, trace[A, B, X, M], O] {
+    ]:  Eval[I, tensorTrace[M], O] =
+    new Eval[I, tensorTrace[M], O] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = inner.rawApply(morph.morph)
+      def rawApply(morph: InMorph): InVal => OutVal = ???
+      // ({
+      //   lazy val a: A = m.in.left
+      //   lazy val x: X = m.in.right
+      //   lazy val b: B = m.out.left
+      //
+      //   rightCounit(a) >=>
+      //   (id(a) ⊗ fromUnit(x)) >=>
+      //   (id(a) ⊗ duplicate(x)) >=>
+      //   associateLeft(a, x, x) >=>
+      //   (m ⊗ id(x)) >=>
+      //   associateRight(b, x, x) >=>
+      //   (id(b) ⊗ matchUp(x)) >=>
+      //   (id(b) ⊗ toUnit(x)) >=>
+      //   rightUnit(b)
+      // }) {
 
-      def present(morph: InMorph): Seq[String] = inner.present(morph.morph)
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
     implicit final def eval_rightUnit[
