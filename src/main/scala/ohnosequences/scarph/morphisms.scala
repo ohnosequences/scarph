@@ -15,7 +15,20 @@ object morphisms {
     type Out <: AnyGraphObject
     val  out: Out
 
-    type Dagger <: AnyGraphMorphism
+    type Self >: morphism.type <: AnyGraphMorphism {
+      type In = morphism.In // <: morphism.In
+      type Out = morphism.Out // <: morphism.Out
+      type Dagger = morphism.Dagger //= morphism.Dagger
+    }
+    val self: Self = this
+
+    type Dagger <: AnyGraphMorphism {
+
+      type In = morphism.Out// <: morphism.Out
+      type Out = morphism.In //<: morphism.In
+
+      type Dagger = morphism.Self// <: morphism.Self
+    }
     val  dagger: Dagger
   }
 
@@ -34,28 +47,59 @@ object morphisms {
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
     type First <: AnyGraphMorphism
-    type Second <: AnyGraphMorphism //{ type In = First#Out }
+    type Second <: AnyGraphMorphism { type In = composition.First#Out }
 
+    type Self >: composition.type <: AnyComposition {
+
+      type In = composition.In
+      type Out = composition.Out
+      type Dagger = composition.Dagger
+
+      type First = composition.First
+      type Second = composition.Second //{ type In <: composition.First#Out }
+    }
     type In  <: First#In
     type Out <: Second#Out
+
+    type Dagger <: AnyComposition {
+
+      type In = composition.Out //<: composition.Out
+      type Dagger = composition.Self //<: composition.Self
+      type Out = composition.In
+
+      type First = composition.Second#Dagger
+      type Second = composition.First#Dagger { type In = composition.First#Out  }
+    }
   }
 
   case class Composition[
-    F <: AnyGraphMorphism,
-    S <: AnyGraphMorphism //{ type In = F#Out }
+    F <: AnyGraphMorphism ,
+    S <: AnyGraphMorphism { type In = F#Out }
   ] (val first: F, val second: S) extends AnyComposition { cc =>
 
     type First = F
     type Second = S
 
-    type     In = First#In
+    type     In = F#In
     lazy val in = first.in: In
 
-    type     Out = Second#Out
+    type     Out = S#Out
     lazy val out = second.out: Out
 
-    type     Dagger = Composition[Second#Dagger, First#Dagger]
-    lazy val dagger: Dagger = Composition(second.dagger, first.dagger)
+    type Self = Composition[F,S]
+
+    // f dagger in = s dagger out
+    type Dagger = Composition[S#Dagger, F#Dagger { type In = S#Dagger#Out } ] {
+
+      type Dagger = Composition[F,S]
+      type In = S#Out
+      type Out = F#In
+
+      type First = S#Dagger
+      type Second = F#Dagger { type In = F#Out  }
+    }
+
+    lazy val dagger: Dagger = new Composition[S#Dagger, F#Dagger { type In = S#Dagger#Out }](second.dagger, first.dagger.asInstanceOf[F#Dagger { type In = S#Dagger#Out }]).asInstanceOf[Dagger]
 
     lazy val label: String = s"(${first.label} >=> ${second.label})"
   }
@@ -68,18 +112,21 @@ object morphisms {
         GraphMorphismOps[F] =
     new GraphMorphismOps[F](f)
 
-  case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) extends AnyVal {
+  case class GraphMorphismOps[F0 <: AnyGraphMorphism](val f: F0) extends AnyVal {
 
-    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
+    def >=>[S0 <: AnyGraphMorphism { type In = F0#Out }](s: S0): Composition[F0,S0] = Composition[F0,S0](f, s)
 
-    def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
-    def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
+    def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F0, S] = TensorMorph(f, q)
+    def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F0, S] = BiproductMorph(f, q)
   }
 
   trait AnyPrimitiveMorph extends AnyGraphMorphism { morph =>
 
     type Dagger <: AnyPrimitiveMorph {
-      type Dagger >: morph.type <: AnyPrimitiveMorph
+
+      type Out = morph.In
+      type In = morph.Out
+      type Dagger = morph.Self //<: morph.Self
     }
   }
 
@@ -93,7 +140,9 @@ object morphisms {
     type     Out = Obj
     lazy val out = obj
 
-    type     Dagger = id[Obj]
+    type Self = id[X]
+
+    type     Dagger = id[X]
     lazy val dagger = id(obj)
 
     lazy val label = s"id(${obj.label})"
@@ -103,6 +152,8 @@ object morphisms {
   // I → X
   case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitiveMorph {
     type Obj = X
+
+    type Self = fromUnit[X]
 
     type     In = unit
     lazy val in = unit
@@ -120,6 +171,7 @@ object morphisms {
   case class toUnit[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
+    type Self = toUnit[X]
     type     Out = unit
     lazy val out = unit
 
@@ -136,6 +188,7 @@ object morphisms {
   case class duplicate[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
+    type Self = duplicate[X]
     type     In = Obj
     lazy val in = obj
 
@@ -152,6 +205,7 @@ object morphisms {
   case class matchUp[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
+    type Self = matchUp[X]
     type     Out = Obj
     lazy val out = obj
 
@@ -169,6 +223,7 @@ object morphisms {
   case class fromZero[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
+    type Self = fromZero[X]
     type     In = zero
     lazy val in = zero
 
@@ -185,6 +240,7 @@ object morphisms {
   case class toZero[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
+    type Self = toZero[X]
     type     Out = zero
     lazy val out = zero
 
@@ -201,6 +257,7 @@ object morphisms {
   case class fork[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
 
+    type Self = fork[X]
     type     In = Obj
     lazy val in = obj
 
@@ -216,7 +273,7 @@ object morphisms {
   // X ⊕ X -> X
   case class merge[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
     type Obj = X
-
+    type Self = merge[X]
     type     Out = Obj
     lazy val out = obj
 
@@ -232,7 +289,7 @@ object morphisms {
 
   // L → L ⊕ R
   case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
-
+    type Self = leftInj[B]
     type Biproduct = B
 
     type     In = Biproduct#Left
@@ -249,7 +306,7 @@ object morphisms {
 
   // L ⊕ R → L
   case class leftProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
-
+    type Self = leftProj[B]
     type Biproduct = B
 
     type     Out = Biproduct#Left
@@ -268,7 +325,7 @@ object morphisms {
   // R → L ⊕ R
   case class rightInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
     type Biproduct = B
-
+    type Self = rightInj[B]
     type     In = Biproduct#Right
     lazy val in = biproduct.right
 
@@ -283,7 +340,7 @@ object morphisms {
 
   // L ⊕ R → R
   case class rightProj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
-
+    type Self = rightProj[B]
     type Biproduct = B
 
     type     Out = Biproduct#Right
@@ -300,7 +357,7 @@ object morphisms {
 
 
   case class target[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
+    type Self = target[E]
     type Edge = E
 
     type     In = Edge
@@ -316,7 +373,7 @@ object morphisms {
   }
 
   case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
+    type Self = inE[E]
     type Edge = E
 
     type     Out = Edge
@@ -334,7 +391,7 @@ object morphisms {
 
 
   case class source[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
+    type Self = source[E]
     type Edge = E
 
     type     In = Edge
@@ -350,7 +407,7 @@ object morphisms {
   }
 
   case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
+    type Self = outE[E]
     type Edge = E
 
     type     Out = Edge
@@ -367,7 +424,7 @@ object morphisms {
 
 
   case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
+    type Self = outV[E]
     type Edge = E
 
     type     In = Edge#SourceVertex
@@ -383,7 +440,7 @@ object morphisms {
   }
 
   case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
+    type Self = inV[E]
     type Edge = E
 
     type     Out = Edge#SourceVertex
@@ -401,7 +458,7 @@ object morphisms {
 
   case class get[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
     type Property = P
-
+    type Self = get[P]
     type     In = Property#Owner
     lazy val in = property.owner
 
@@ -415,7 +472,7 @@ object morphisms {
   }
 
   case class lookup[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
-
+    type Self = lookup[P]
     type Property = P
 
     type     Out = Property#Owner
@@ -432,7 +489,7 @@ object morphisms {
 
 
   case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitiveMorph {
-
+    type Self = quantify[P]
     type Predicate = P
 
     type     In = Predicate#Element
@@ -449,7 +506,7 @@ object morphisms {
 
 
   case class coerce[P <: AnyPredicate](val predicate: P) extends AnyPrimitiveMorph {
-
+    type Self = coerce[P]
     type Predicate = P
 
     type     Out = Predicate#Element
@@ -478,14 +535,17 @@ object morphisms {
     type Out <: AnyTensorObj { type Left = tensor.Left#Out; type Right = tensor.Right#Out }
 
     type Dagger <: AnyTensorMorph {
-      type Left = tensor.Left#Dagger;
-      type Right = tensor.Right#Dagger
+
+      type In = tensor.Out
+      type Out = tensor.In
+      type Dagger = tensor.Self
     }
   }
 
   case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
     (val left: L, val right: R) extends AnyTensorMorph { tensor =>
 
+    type Self = TensorMorph[L,R]
     type Left = L
     type Right = R
 
@@ -495,8 +555,13 @@ object morphisms {
     type     Out = TensorObj[Left#Out, Right#Out]
     lazy val out = TensorObj(left.out, right.out): Out
 
-    type     Dagger = TensorMorph[Left#Dagger, Right#Dagger]
-    lazy val dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+    type     Dagger = TensorMorph[Left#Dagger, Right#Dagger] {
+
+      type Out = TensorObj[tensor.Left#In, tensor.Right#In]
+      type In = TensorObj[tensor.Left#Out, tensor.Right#Out]
+      type Dagger = TensorMorph[L,R]
+    }
+    lazy val dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger).asInstanceOf[Dagger]
 
     lazy val label = s"(${left.label} ⊗ ${right.label})"
   }
@@ -513,14 +578,17 @@ object morphisms {
     type Out <: BiproductObj[Left#Out, Right#Out]
 
     type Dagger <: AnyBiproductMorph {
-      type Left = biprod.Left#Dagger
-      type Right = biprod.Right#Dagger
+
+      type Out = biprod.In
+      type In = biprod.Out
+      type Dagger = biprod.Self
     }
   }
 
   case class BiproductMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
     (val left: L, val right: R) extends AnyBiproductMorph { biprod =>
 
+    type Self = BiproductMorph[L,R]
     type Left = L
     type Right = R
 
@@ -530,8 +598,12 @@ object morphisms {
     type     Out = BiproductObj[Left#Out, Right#Out]
     lazy val out = BiproductObj(left.out, right.out): Out
 
-    type     Dagger = BiproductMorph[Left#Dagger, Right#Dagger]
-    lazy val dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+    type     Dagger = BiproductMorph[Left#Dagger, Right#Dagger] {
+      type Out = BiproductObj[biprod.Left#In, biprod.Right#In]
+      type In = BiproductObj[biprod.Left#Out, biprod.Right#Out]
+      type Dagger = BiproductMorph[L,R]
+    }
+    lazy val dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger).asInstanceOf[Dagger]
 
     lazy val label = s"(${left.label} ⊕ ${right.label})"
   }
@@ -543,7 +615,11 @@ object morphisms {
   trait AnyNaturalIsomorphism extends AnyPrimitiveMorph { iso =>
 
     type Dagger <: AnyNaturalIsomorphism {
-      type Dagger >: iso.type <: AnyNaturalIsomorphism
+
+      type In = iso.Out
+      type Out = iso.In
+
+      type Dagger = iso.Self
     }
   }
 
@@ -552,6 +628,7 @@ object morphisms {
   case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
     extends AnyNaturalIsomorphism {
 
+    type Self = symmetry[L,R]
     type     In = L ⊗ R
     lazy val in = l ⊗ r
 
@@ -567,6 +644,7 @@ object morphisms {
   case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
     (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
+    type Self = distribute[U,A,B]
     type     In = U ⊗ (A ⊕ B)
     lazy val in = u ⊗ (a ⊕ b)
 
@@ -582,6 +660,7 @@ object morphisms {
   case class undistribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
     (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
+    type Self = undistribute[U,A,B]
     type     Out = U ⊗ (A ⊕ B)
     lazy val out = u ⊗ (a ⊕ b)
 
@@ -598,6 +677,7 @@ object morphisms {
   // I ⊗ X → X
   case class leftUnit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
+    type Self = leftUnit[X]
     type     In = unit ⊗ X
     lazy val in = unit ⊗ x
 
@@ -613,6 +693,7 @@ object morphisms {
   // X → I ⊗ X
   case class leftCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
+    type Self = leftCounit[X]
     type     Out = unit ⊗ X
     lazy val out = unit ⊗ x
 
@@ -629,7 +710,7 @@ object morphisms {
 
   // X ⊗ I → X
   case class rightUnit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
-
+    type Self = rightUnit[X]
     type     In = X ⊗ unit
     lazy val in = x ⊗ unit
 
@@ -644,7 +725,7 @@ object morphisms {
 
   // X → I ⊗ X
   case class rightCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
-
+    type Self = rightCounit[X]
     type     Out = X ⊗ unit
     lazy val out = x ⊗ unit
 
@@ -660,7 +741,7 @@ object morphisms {
 
   // 0 ⊕ X → X
   case class leftZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
-
+    type Self = leftZero[X]
     type     In = zero ⊕ X
     lazy val in = zero ⊕ x
 
@@ -675,7 +756,7 @@ object morphisms {
 
   // X → 0 ⊕ X
   case class leftCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
-
+    type Self = leftCozero[X]
     type     Out = zero ⊕ X
     lazy val out = zero ⊕ x
 
@@ -692,7 +773,7 @@ object morphisms {
 
   // X ⊕ 0 → X
   case class rightZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
-
+    type Self = rightZero[X]
     type     In = X ⊕ zero
     lazy val in = x ⊕ zero
 
@@ -707,7 +788,7 @@ object morphisms {
 
   // X → 0 ⊕ X
   case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
-
+    type Self = rightCozero[X]
     type     Out = X ⊕ zero
     lazy val out = x ⊕ zero
 

@@ -29,7 +29,7 @@ object morphisms {
   case class GraphMorphismSyntax[F <: AnyGraphMorphism](f: F) extends AnyVal {
 
     // just an alias for >=> composition:
-    def andThen[T <: AnyGraphMorphism { type In = F#Out }](t: T):
+    def andThen[T <: AnyGraphMorphism { type In = F#Out; type Dagger <: AnyGraphMorphism { type In = F#In } }](t: T):
       F >=> T =
       f >=> t
 
