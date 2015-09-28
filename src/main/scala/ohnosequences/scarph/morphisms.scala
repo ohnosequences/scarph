@@ -36,7 +36,7 @@ object morphisms {
     def apply(morph: InMorph): OutMorph
   }
 
-  /* Sequential composition of two morphisms */
+  /* Sequential sition of two morphisms */
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
     type First <: AnyGraphMorphism
@@ -780,20 +780,18 @@ object morphisms {
   //   extends AnyDerivedMorphism { type Morph = M }
 
 
+  trait AnyTensorTrace extends AnyGraphMorphism {
 
-  // Trace
-  case class tensorTrace[
-    M <: AnyGraphMorphism {
+    type Morph <: AnyGraphMorphism {
       type In <: AnyTensorObj
       type Out <: AnyTensorObj { type Right = In#Right }
     }
-  ](morph: M) extends AnyPrimitiveMorph {
-    type Morph = M
+    val morph: Morph
 
-    type     In = Morph#In#Left
-    lazy val in = morph.in.left
+    type     In >: Morph#In#Left <: Morph#In#Left
+    lazy val in: In = morph.in.left
 
-    type     Out = Morph#Out#Left
+    type     Out >: Morph#Out#Left <: Morph#Out#Left
     lazy val out = morph.out.left
 
     type Dagger = daggerTensorTrace[Morph]
@@ -802,12 +800,31 @@ object morphisms {
     lazy val label = s"tensorTrace(${morph.label})"
   }
 
+  // Trace
+  case class tensorTrace[
+    M <: AnyGraphMorphism {
+      type In <: AnyTensorObj
+      type Out <: AnyTensorObj { type Right = In#Right }
+    }
+  ](val morph: M) extends AnyTensorTrace {
+
+    type Morph = M
+    type     In = Morph#In#Left
+    type     Out = Morph#Out#Left
+
+    // type Dagger = daggerTensorTrace[Morph]
+    // lazy val dagger = daggerTensorTrace[Morph](morph)
+    //
+    // lazy val label = s"tensorTrace(${morph.label})"
+  }
+
   case class daggerTensorTrace[
     M <: AnyGraphMorphism {
       type In <: AnyTensorObj
       type Out <: AnyTensorObj { type Right = In#Right }
     }
-  ](morph: M) extends AnyPrimitiveMorph {
+  ](morph: M) extends AnyGraphMorphism {
+
     type Morph = M
 
     type     In = Morph#Out#Left
