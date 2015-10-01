@@ -8,6 +8,7 @@ object morphisms {
 
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
+    // type Raw = Any
 
     type In <: AnyGraphObject
     val  in: In

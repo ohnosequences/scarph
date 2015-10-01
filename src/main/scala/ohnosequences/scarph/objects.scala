@@ -4,14 +4,26 @@ object objects {
 
   import ohnosequences.cosas._, types._, typeSets._
 
-
+  // FIXME: this should be in cosas
   trait AnyGraphType extends AnyType
+
+  type #=[T <: AnyGraphType, V] = Denotes[V, T]
+
+  object AnyGraphType {
+
+    implicit def graphTypeOps[T <: AnyGraphType](t: T): GraphTypeOps[T] = GraphTypeOps(t)
+    case class GraphTypeOps[T <: AnyGraphType](t: T) {
+
+      def #=[V](v: V): Denotes[V, T] = new Denotes[V, T](v)
+    }
+  }
 
   /* Graph objects are represented as their id-morphisms */
   trait AnyGraphObject extends AnyGraphType
 
   /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnyGraphObject
+  // { type Raw = Any }
 
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
@@ -76,9 +88,10 @@ object objects {
     def rawTag: ClassTag[Raw]
   }
 
-  class ValueOfType[R](val label: String)(implicit val rawTag: ClassTag[R]) extends AnyValueType {
+  class ValueOfType[R](val label: String)(implicit rt: ClassTag[R]) extends AnyValueType {
 
     type Raw = R
+    val rawTag = rt
   }
 
   /* This is like an edge between an element and a raw type */

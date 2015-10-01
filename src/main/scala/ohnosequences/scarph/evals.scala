@@ -8,11 +8,11 @@ object evals {
   /* Transforms a morphism to a function */
   trait AnyEval extends AnyMorphismTransform {
 
-    type InVal
-    type OutVal
+    type InVal //<: InMorph#In#Raw
+    type OutVal //<: InMorph#Out#Raw
 
-    type Input = InMorph#In := InVal
-    type Output = InMorph#Out := OutVal
+    type Input = InMorph#In #= InVal
+    type Output = InMorph#Out #= OutVal
 
     type OutMorph = Input => Output
 
@@ -20,7 +20,7 @@ object evals {
 
     // same but with tags:
     final def apply(morph: InMorph): OutMorph = { input: Input =>
-      (morph.out: InMorph#Out) := rawApply(morph)(input.value)
+      (morph.out: InMorph#Out) #= rawApply(morph)(input.value)
     }
 
     def present(morph: InMorph): Seq[String]
@@ -35,17 +35,20 @@ object evals {
   }
 
 
-  final class evaluate[I, M <: AnyGraphMorphism, O](val f: M, val eval: Eval[I, M, O]) {
+  final class evaluate[I, M <: AnyGraphMorphism, O](
+    val f: M,
+    val eval: Eval[I, M, O]
+  ) {
 
-    final def on(input: M#In := I): M#Out := O = eval(f).apply(input)
+    final def on(input: M#In #= I): M#Out #= O = eval(f).apply(input)
 
-    // TODO: this should output the computational behavior of the eval here
+    // FIXME: this should output the computational behavior of the eval here
     final def evalPlan: String = eval.present(f).mkString("")
   }
 
-  def eval[I, IM <: AnyGraphMorphism, O](m: IM)(i: IM#In := I)(implicit
+  def eval[I, IM <: AnyGraphMorphism, O](m: IM)(i: IM#In #= I)(implicit
       eval: Eval[I, IM, O]
-    ): IM#Out := O =
+    ): IM#Out #= O =
     new evaluate[I, IM, O](m, eval).on(i)
 
   class evalWithIn[I] {
@@ -71,7 +74,7 @@ object evals {
 
   trait CategoryStructure extends CategoryStructure2 {
 
-    implicit final def eval_id[I, X <: AnyGraphObject]:
+    implicit final def eval_id[X <: AnyGraphObject, I <: X#Raw]:
         Eval[I, id[X], I] =
     new Eval[I, id[X], I] {
 
@@ -150,13 +153,13 @@ object evals {
     def leftRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L
     def rightRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): R
 
-    def matchUpRaw[X <: TensorBound](t: RawTensor[X, X])
-      (implicit m: Matchable[X]): X =
-        m.matchUp(leftRaw(t), rightRaw(t))
-
-    def fromUnitRaw[X <: TensorBound](o: AnyGraphObject)(u: RawUnit)
-      (implicit fu: FromUnit[RawUnit, X]): X =
-        fu.fromUnit(u, o)
+    // def matchUpRaw[X <: TensorBound](t: RawTensor[X, X])
+    //   (implicit m: Matchable[X]): X =
+    //     m.matchUp(leftRaw(t), rightRaw(t))
+    //
+    // def fromUnitRaw[X <: TensorBound](o: AnyGraphObject)(u: RawUnit)
+    //   (implicit fu: FromUnit[RawUnit, X]): X =
+    //     fu.fromUnit(u, o)
 
     def toUnitRaw[X <: TensorBound](x: X): RawUnit
 
@@ -219,7 +222,9 @@ object evals {
     ):  Eval[RawTensor[O, O], matchUp[T], O] =
     new Eval[RawTensor[O, O], matchUp[T], O] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = matchUpRaw
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        matchable.matchUp(leftRaw(inVal), rightRaw(inVal))
+      }
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -233,7 +238,9 @@ object evals {
     ):  Eval[RawUnit, fromUnit[T], O] =
     new Eval[RawUnit, fromUnit[T], O] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = fromUnitRaw[O](morph.obj)
+      def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+        fu.fromUnit(inVal, morph.obj)
+      }
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -293,40 +300,45 @@ object evals {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit final def eval_tensorTrace[
-      I, O,
-      A <: AnyGraphObject,
-      B <: AnyGraphObject,
-      X <: AnyGraphObject,
-      M <: (A ⊗ X) ==> (B ⊗ X)
-    ]:  Eval[I, tensorTrace[M], O] =
-    new Eval[I, tensorTrace[M], O] {
-
-      def rawApply(morph: InMorph): InVal => OutVal = ???
-      // ({
-      //   lazy val a: A = m.in.left
-      //   lazy val x: X = m.in.right
-      //   lazy val b: B = m.out.left
-      //
-      //   rightCounit(a) >=>
-      //   (id(a) ⊗ fromUnit(x)) >=>
-      //   (id(a) ⊗ duplicate(x)) >=>
-      //   associateLeft(a, x, x) >=>
-      //   (m ⊗ id(x)) >=>
-      //   associateRight(b, x, x) >=>
-      //   (id(b) ⊗ matchUp(x)) >=>
-      //   (id(b) ⊗ toUnit(x)) >=>
-      //   rightUnit(b)
-      // }) {
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+    // implicit final def eval_tensorTrace[
+    //   I <: TensorBound, O <: TensorBound,
+    //   A <: AnyGraphObject,
+    //   B <: AnyGraphObject,
+    //   X <: AnyGraphObject,
+    //   M <: (A ⊗ X) ==> (B ⊗ X)
+    // ](implicit
+    //   bb: FromUnit[RawUnit, B]
+    // ):  Eval[I, tensorTrace[M], O] =
+    // new Eval[I, tensorTrace[M], O] {
+    //
+    //   def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
+    //     bb.fromUnit(toUnitRaw(inVal), morph.out.left)
+    //   }
+    //   // ({
+    //   //   lazy val a: A = m.in.left
+    //   //   lazy val x: X = m.in.right
+    //   //   lazy val b: B = m.out.left
+    //   //
+    //   //   rightCounit(a) >=>
+    //   //   (id(a) ⊗ fromUnit(x)) >=>
+    //   //   (id(a) ⊗ duplicate(x)) >=>
+    //   //   associateLeft(a, x, x) >=>
+    //   //   (m ⊗ id(x)) >=>
+    //   //   associateRight(b, x, x) >=>
+    //   //   (id(b) ⊗ matchUp(x)) >=>
+    //   //   (id(b) ⊗ toUnit(x)) >=>
+    //   //   rightUnit(b)
+    //   // }) {
+    //
+    //   def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    // }
 
     implicit final def eval_rightUnit[
       I <: TensorBound, T <: AnyGraphObject
     ]:  Eval[RawTensor[I, RawUnit], rightUnit[T], I] =
     new Eval[RawTensor[I, RawUnit], rightUnit[T], I] {
 
+      // FIXME: this is wrong!
       def rawApply(morph: InMorph): InVal => OutVal = leftRaw
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
