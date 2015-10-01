@@ -38,7 +38,8 @@ class DummyTests extends org.scalatest.FunSuite {
     assertTaggedEq( eval(q_dupl)(du ⊗ du), du ⊗ du ⊗ du )
     assertTaggedEq( eval(q_match)(du ⊗ du), du )
     assertTaggedEq( eval(q_comp)(du ⊗ du), du )
-    assertTaggedEq( eval(q_trace)(du)(eval_tensorTrace), du )
+
+    // assertTaggedEq( eval(q_trace)(du), du )
   }
 
   test("dummy evals for the biproduct structure") {

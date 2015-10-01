@@ -31,8 +31,8 @@ case object queries {
       (id(user ⊗ user) ⊗ duplicate(user)) >=>
       (q_match ⊗ q_match) >=>
       q_match
-    // val q_trace = tensorTrace(toUnit(user) ⊗ fromUnit(user) >=> symmetry(unit, user))
-    val q_trace = tensorTrace(id(user) ⊗ id(tweet))
+    val q_trace = tensorTrace(toUnit(user) ⊗ fromUnit(user) >=> symmetry(unit, user))
+    // val q_trace_Wrong = tensorTrace(q_match)
   }
 
   object biproductStructure extends TestBlock("Biproduct structure") {

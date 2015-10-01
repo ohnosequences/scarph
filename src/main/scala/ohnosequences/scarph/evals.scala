@@ -301,19 +301,15 @@ object evals {
     }
 
     // implicit final def eval_tensorTrace[
-    //   I <: TensorBound, O <: TensorBound,
-    //   A <: AnyGraphObject,
-    //   B <: AnyGraphObject,
-    //   X <: AnyGraphObject,
-    //   M <: (A ⊗ X) ==> (B ⊗ X)
-    // ](implicit
-    //   bb: FromUnit[RawUnit, B]
-    // ):  Eval[I, tensorTrace[M], O] =
+    //   M <: AnyGraphMorphism {
+    //     type In <: AnyTensorObj
+    //     type Out <: AnyTensorObj { type Right = In#Right }
+    //   },
+    //   I, O
+    // ]:  Eval[I, tensorTrace[M], O] =
     // new Eval[I, tensorTrace[M], O] {
     //
-    //   def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal =>
-    //     bb.fromUnit(toUnitRaw(inVal), morph.out.left)
-    //   }
+    //   def rawApply(morph: InMorph): InVal => OutVal = ???
     //   // ({
     //   //   lazy val a: A = m.in.left
     //   //   lazy val x: X = m.in.right
