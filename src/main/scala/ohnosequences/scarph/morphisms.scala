@@ -8,7 +8,8 @@ object morphisms {
 
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType { morphism =>
-    // type Raw = Any
+
+    type Raw = Any
 
     type In <: AnyGraphObject
     val  in: In
@@ -85,13 +86,16 @@ object morphisms {
 
   trait AnyPrimitiveMorph extends AnyGraphMorphism { morph =>
 
+    // type Raw = Any
+
     type Dagger <: AnyPrimitiveMorph {
       type Dagger >: morph.type <: AnyPrimitiveMorph
     }
   }
 
   // id: X → X
-  case class id[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
+  case class id[X <: AnyGraphObject](val obj: X) extends AnyPrimitiveMorph {
+
     type Obj = X
 
     type     In = Obj
@@ -407,6 +411,7 @@ object morphisms {
 
 
   case class get[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
+
     type Property = P
 
     type     In = Property#Owner

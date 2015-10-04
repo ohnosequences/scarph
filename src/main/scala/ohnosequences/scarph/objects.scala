@@ -1,29 +1,17 @@
 package ohnosequences.scarph
 
-object objects {
+case object objects {
 
   import ohnosequences.cosas._, types._, typeSets._
 
   // FIXME: this should be in cosas
   trait AnyGraphType extends AnyType
 
-  type #=[T <: AnyGraphType, V] = Denotes[V, T]
-
-  object AnyGraphType {
-
-    implicit def graphTypeOps[T <: AnyGraphType](t: T): GraphTypeOps[T] = GraphTypeOps(t)
-    case class GraphTypeOps[T <: AnyGraphType](t: T) {
-
-      def #=[V](v: V): Denotes[V, T] = new Denotes[V, T](v)
-    }
-  }
-
   /* Graph objects are represented as their id-morphisms */
   trait AnyGraphObject extends AnyGraphType
 
   /* A graph element is either a vertex or an edge, only they can have properties */
-  sealed trait AnyGraphElement extends AnyGraphObject
-  // { type Raw = Any }
+  sealed trait AnyGraphElement extends AnyGraphObject { type Raw = Any }
 
   /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
@@ -75,7 +63,7 @@ object objects {
     lazy val targetVertex = targetArity.vertex
   }
 
-  object AnyEdge {
+  case object AnyEdge {
 
     type From[S <: AnyVertex] = AnyEdge { type SourceVertex = S }
     type   To[T <: AnyVertex] = AnyEdge { type TargetVertex = T }
@@ -97,6 +85,8 @@ object objects {
   /* This is like an edge between an element and a raw type */
   trait AnyProperty extends AnyGraphType {
 
+    type Raw = Any
+
     type Owner <: AnyGraphElement
     val  owner: Owner
 
@@ -114,12 +104,14 @@ object objects {
     val value: V = st._2
   }
 
-  object AnyProperty {
+  case object AnyProperty {
 
     type withRaw[R] = AnyProperty { type Value <: AnyValueType { type Raw = R } }
   }
 
   trait AnyPredicate extends AnyGraphObject {
+
+    type Raw = Any
 
     type Element <: AnyGraphElement
     val  element: Element
@@ -129,7 +121,7 @@ object objects {
     lazy val label: String = s"(${element.label} ? ${conditions.toString})"
   }
 
-  object AnyPredicate {
+  case object AnyPredicate {
 
     type On[E <: AnyGraphElement] = AnyPredicate { type Element = E }
   }
@@ -172,6 +164,8 @@ object objects {
   /* A condition is a restriction on the property values */
   trait AnyCondition {
 
+    type Raw = Any
+
     type Property <: AnyProperty
     val  property: Property
 
@@ -205,7 +199,7 @@ object objects {
     val property: P,
     val value: P#Value#Raw
   ) extends AnyEqual with CompareCondition[P] {
-    lazy val label = s"${property.label} = ${value.toString}"
+    lazy val label: String = s"${property.label} = ${value.toString}"
   }
 
   trait AnyNotEqual extends AnyCompareCondition
@@ -213,7 +207,7 @@ object objects {
     val property: P,
     val value: P#Value#Raw
   ) extends AnyNotEqual with CompareCondition[P] {
-    lazy val label = s"${property.label} ≠ ${value.toString}"
+    lazy val label: String = s"${property.label} ≠ ${value.toString}"
   }
 
 
@@ -222,7 +216,7 @@ object objects {
     val property: P,
     val value: P#Value#Raw
   ) extends AnyLess with CompareCondition[P] {
-    lazy val label = s"${property.label} < ${value.toString}"
+    lazy val label: String = s"${property.label} < ${value.toString}"
   }
 
   trait AnyLessOrEqual extends AnyCompareCondition
@@ -230,7 +224,7 @@ object objects {
     val property: P,
     val value: P#Value#Raw
   ) extends AnyLessOrEqual with CompareCondition[P] {
-    lazy val label = s"${property.label} ≤ ${value.toString}"
+    lazy val label: String = s"${property.label} ≤ ${value.toString}"
   }
 
 
@@ -239,7 +233,7 @@ object objects {
     val property: P,
     val value: P#Value#Raw
   ) extends AnyGreater with CompareCondition[P] {
-    lazy val label = s"${property.label} > ${value.toString}"
+    lazy val label: String = s"${property.label} > ${value.toString}"
   }
 
   trait AnyGreaterOrEqual extends AnyCompareCondition
@@ -247,7 +241,7 @@ object objects {
     val property: P,
     val value: P#Value#Raw
   ) extends AnyGreaterOrEqual with CompareCondition[P] {
-    lazy val label = s"${property.label} ≥ ${value.toString}"
+    lazy val label: String = s"${property.label} ≥ ${value.toString}"
   }
 
 
@@ -264,13 +258,15 @@ object objects {
     val end: P#Value#Raw
   ) extends AnyInterval {
     type Property = P
-    lazy val label = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"
+    lazy val label: String = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"
   }
 
 
 
   /* ## Tensor product */
   sealed trait AnyTensorObj extends AnyGraphObject {
+
+    type Raw = Any
 
     type Left <: AnyGraphObject
     val  left: Left
@@ -285,7 +281,7 @@ object objects {
     type Left = L
     type Right = R
 
-    lazy val label = s"(${left.label} ⊗ ${right.label})"
+    lazy val label: String = s"(${left.label} ⊗ ${right.label})"
   }
 
   // \otimes symbol: f ⊗ s: F ⊗ S
@@ -294,7 +290,9 @@ object objects {
 
   case object unit extends AnyGraphObject {
 
-    lazy val label = this.toString
+    type Raw = Any
+
+    lazy val label: String = this.toString
   }
   type unit = unit.type
 
@@ -302,6 +300,8 @@ object objects {
 
   /* ## Biproduct */
   sealed trait AnyBiproductObj extends AnyGraphObject {
+
+    type Raw = Any
 
     type Left <: AnyGraphObject
     val  left: Left
@@ -316,13 +316,15 @@ object objects {
     type Left = L
     type Right = R
 
-    lazy val label = s"(${left.label} ⊕ ${right.label})"
+    lazy val label: String = s"(${left.label} ⊕ ${right.label})"
   }
 
 
   case object zero extends AnyGraphObject {
 
-    lazy val label = this.toString
+    type Raw = Any
+
+    lazy val label: String = this.toString
   }
   type zero = zero.type
 

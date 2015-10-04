@@ -7,18 +7,18 @@ object morphisms {
   import s.objects._, s.morphisms._
 
 
-  implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F #= VF):
+  implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
     GraphMorphismValOps[F, VF] =
     GraphMorphismValOps[F, VF](vt.value)
 
   case class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vf: VF) extends AnyVal {
 
-    // (F #= t) ⊗ (S #= s) : (F ⊗ S) #= (t, s)
-    def ⊗[S <: AnyGraphMorphism, VS](vs: S #= VS): TensorMorph[F, S] #= (VF, VS) =
+    // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
+    def ⊗[S <: AnyGraphMorphism, VS](vs: S := VS): TensorMorph[F, S] := (VF, VS) =
       new Denotes( (vf, vs.value) )
 
-    // (F #= t) ⊕ (S #= s) : (F ⊕ S) #= (t, s)
-    def ⊕[S <: AnyGraphMorphism, VS](vs: S #= VS): BiproductMorph[F, S] #= (VF, VS) =
+    // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
+    def ⊕[S <: AnyGraphMorphism, VS](vs: S := VS): BiproductMorph[F, S] := (VF, VS) =
       new Denotes( (vf, vs.value) )
   }
 
