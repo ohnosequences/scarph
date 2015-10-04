@@ -30,13 +30,10 @@ object evals {
   @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
   trait Eval[
     I <: M#In#Raw,
-    M <: AnyGraphMorphism  //{
-    //   type In <: AnyGraphObject { type Raw >: I }
-    //   type Out <: AnyGraphObject { type Raw >: O }
-    // }
-    ,
+    M <: AnyGraphMorphism,
     O <: M#Out#Raw
-  ] extends AnyEval {
+  ]
+  extends AnyEval {
 
     type InMorph = M
     type InVal = I
@@ -528,7 +525,7 @@ object evals {
 
     // X → X ⊕ X
     implicit final def eval_fork[
-      I <: BiproductBound with T#Raw, T <: AnyGraphObject
+      I <: BiproductBound, T <: AnyGraphObject { type Raw >: I }
     ]:  Eval[I, fork[T], RawBiproduct[I, I]] =
     new Eval[I, fork[T], RawBiproduct[I, I]] {
 
@@ -541,7 +538,7 @@ object evals {
 
     // X ⊕ X → X
     implicit final def eval_merge[
-      O <: BiproductBound with T#Raw, T <: AnyGraphObject
+      O <: BiproductBound, T <: AnyGraphObject { type Raw >: O }
     ](implicit
       mergeable: Mergeable[O]
     ):  Eval[RawBiproduct[O, O], merge[T], O] =
@@ -555,7 +552,7 @@ object evals {
 
     // I → X
     implicit final def eval_fromZero[
-      T <: AnyGraphObject, O <: BiproductBound with T#Raw
+      O <: BiproductBound, T <: AnyGraphObject { type Raw >: O }
     ](implicit
       z: ZeroFor[T, O]
     ):  Eval[RawZero, fromZero[T], O] =
@@ -568,7 +565,7 @@ object evals {
 
     // X → I
     implicit final def eval_toZero[
-      T <: AnyGraphObject, I <: BiproductBound with T#Raw
+      I <: BiproductBound, T <: AnyGraphObject { type Raw >: I }
     ]:  Eval[I, toZero[T], RawZero] =
     new Eval[I, toZero[T], RawZero] {
 
@@ -580,8 +577,8 @@ object evals {
 
     // L ⊕ R → L
     implicit final def eval_leftProj[
-      A <: BiproductBound with L#Raw, B <: BiproductBound,
-      L <: AnyGraphObject, R <: AnyGraphObject
+      A <: BiproductBound, B <: BiproductBound,
+      L <: AnyGraphObject { type Raw >: A }, R <: AnyGraphObject
     ]:  Eval[RawBiproduct[A, B], leftProj[L ⊕ R], A] =
     new Eval[RawBiproduct[A, B], leftProj[L ⊕ R], A] {
 
@@ -592,8 +589,8 @@ object evals {
 
     // L ⊕ R → R
     implicit final def eval_rightProj[
-      A <: BiproductBound, B <: BiproductBound with R#Raw,
-      L <: AnyGraphObject, R <: AnyGraphObject
+      A <: BiproductBound, B <: BiproductBound,
+      L <: AnyGraphObject, R <: AnyGraphObject { type Raw >: B }
     ]:  Eval[RawBiproduct[A, B], rightProj[L ⊕ R], B] =
     new Eval[RawBiproduct[A, B], rightProj[L ⊕ R], B] {
 
@@ -605,8 +602,8 @@ object evals {
 
     // L → L ⊕ R
     implicit final def eval_leftInj[
-      A <: BiproductBound with L#Raw, B <: BiproductBound,
-      L <: AnyGraphObject, R <: AnyGraphObject
+      A <: BiproductBound, B <: BiproductBound,
+      L <: AnyGraphObject { type Raw >: A }, R <: AnyGraphObject
     ](implicit
       b: ZeroFor[R, B]
     ):  Eval[A, leftInj[L ⊕ R], RawBiproduct[A, B]] =
@@ -620,8 +617,8 @@ object evals {
 
     // R → L ⊕ R
     implicit final def eval_rightInj[
-      A <: BiproductBound, B <: BiproductBound with R#Raw,
-      L <: AnyGraphObject, R <: AnyGraphObject
+      A <: BiproductBound, B <: BiproductBound,
+      L <: AnyGraphObject, R <: AnyGraphObject { type Raw >: B }
     ](implicit
       a: ZeroFor[L, A]
     ):  Eval[B, rightInj[L ⊕ R], RawBiproduct[A, B]] =

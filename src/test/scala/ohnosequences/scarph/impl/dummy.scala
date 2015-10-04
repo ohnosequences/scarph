@@ -120,14 +120,14 @@ case object dummy {
 
     import morphisms._
 
-    // implicit def eval_getV[P <: AnyProperty { type Owner <: AnyVertex }]:
-    //     Eval[DummyVertex, get[P], P#Value#Raw] =
-    // new Eval[DummyVertex, get[P], P#Value#Raw] {
-    //
-    //   def rawApply(morph: InMorph): InVal => OutVal = const(())
-    //
-    //   def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    // }
+    implicit def eval_getV[P <: AnyProperty { type Owner <: AnyVertex }]:
+        Eval[DummyVertex, get[P], P#Value#Raw] =
+    new Eval[DummyVertex, get[P], P#Value#Raw] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = ???
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
 
     implicit def eval_getE[P <: AnyProperty { type Owner <: AnyEdge }]:
         Eval[DummyEdge, get[P], P#Value#Raw] =
@@ -139,18 +139,24 @@ case object dummy {
     }
 
 
-    implicit def eval_lookupV[P <: AnyProperty { type Owner <: AnyVertex }]:
-        Eval[P#Value#Raw, lookup[P], DummyVertex] =
-    new Eval[P#Value#Raw, lookup[P], DummyVertex] {
+    implicit def eval_lookupV[
+      V,
+      P <: AnyProperty { type Owner <: AnyVertex; type Value <: AnyValueType { type Raw >: V }  }
+    ]
+    : Eval[V, lookup[P], DummyVertex] =
+    new Eval[V, lookup[P], DummyVertex] {
 
       def rawApply(morph: InMorph): InVal => OutVal = const(DummyVertex)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit def eval_lookupE[P <: AnyProperty { type Owner <: AnyEdge }]:
-        Eval[P#Value#Raw, lookup[P], DummyEdge] =
-    new Eval[P#Value#Raw, lookup[P], DummyEdge] {
+    implicit def eval_lookupE[
+      V,
+      P <: AnyProperty { type Owner <: AnyEdge; type Value <: AnyValueType { type Raw >: V }  }
+    ]
+    : Eval[V, lookup[P], DummyEdge] =
+    new Eval[V, lookup[P], DummyEdge] {
 
       def rawApply(morph: InMorph): InVal => OutVal = const(DummyEdge)
 
@@ -158,7 +164,6 @@ case object dummy {
     }
 
   }
-
 
   case object predicateStructure {
     import morphisms._
@@ -183,17 +188,15 @@ case object dummy {
 
   }
 
-
-
   case object syntax {
     import ohnosequences.cosas.types._
     import ohnosequences.scarph.objects._
 
-    implicit def dummyObjectValOps[F <: AnyGraphObject, VF <: Dummy with F#Raw](vf: F := VF):
+    implicit def dummyObjectValOps[F <: AnyGraphObject { type Raw >: VF}, VF <: Dummy](vf: F := VF):
       DummyObjectValOps[F, VF] =
       DummyObjectValOps[F, VF](vf.value)
 
-    case class DummyObjectValOps[F <: AnyGraphObject, VF <: Dummy with F#Raw](vf: VF) extends AnyVal {
+    case class DummyObjectValOps[F <: AnyGraphObject { type Raw >: VF }, VF <: Dummy](vf: VF) extends AnyVal {
 
       def ⊗[S <: AnyGraphObject, VS <: Dummy with S#Raw](vs: S := VS): (F ⊗ S) := DummyTensor[VF, VS] =
         new Denotes( DummyTensor(vf, vs.value) )

@@ -75,6 +75,15 @@ class DummyTests extends org.scalatest.FunSuite {
     import dummy.propertyStructure._
     import queries.propertyStructure._
 
+    // TODO these are methods because of lacking implementations
+    def p1 = eval(q_getV)(du)
+    def p2 = eval(q_lookupV)(dnames)(eval_lookupV)
+    def p3 = eval(q_compV)(dnames)
+
+    def p4 = eval(q_getE)(dp)
+    def p5 = eval(q_lookupE)(dtimes)
+    def p6 = eval(q_compE)(dp)
+
     // assertTaggedEq( eval(q_getV)(du), dages )
     // assertTaggedEq( eval(q_lookupV)(dnames), du )
     // assertTaggedEq( eval(q_compV)(dnames), dages )
@@ -127,6 +136,6 @@ class DummyTests extends org.scalatest.FunSuite {
     info(rmorph.label)
 
     // FIXME: this rewrite strategy doesn't work
-    assert{ rmorph == (outV(follows) >=> (inV(follows) >=> outV(follows)))}
+    assert{ rmorph === (outV(follows) >=> (inV(follows) >=> outV(follows)))}
   }
 }
