@@ -3,7 +3,7 @@ package ohnosequences.scarph
 object evals {
 
   import ohnosequences.cosas.types._
-  import objects._, morphisms._, implementations._
+  import objects._, morphisms._
 
   /* Transforms a morphism to a function */
   trait AnyEval extends AnyMorphismTransform {
@@ -42,6 +42,11 @@ object evals {
     // TODO: this should output the computational behavior of the eval here
     final def evalPlan: String = eval.present(f).mkString("")
   }
+
+  def eval[I, IM <: AnyGraphMorphism, O](m: IM)(i: IM#In := I)(implicit
+      eval: Eval[I, IM, O]
+    ): IM#Out := O =
+    new evaluate[I, IM, O](m, eval).on(i)
 
   class evalWithIn[I] {
 
@@ -314,10 +319,11 @@ object evals {
     def merge(l: T, r: T): T
   }
 
-  trait ZeroFor[T0] {
+  trait ZeroFor[O <: AnyGraphObject, T0] {
 
+    type Obj = O
     type T = T0
-    def zero(o: AnyGraphObject): T
+    def zero(o: Obj): T
   }
 
   trait BiproductStructure {
@@ -333,10 +339,6 @@ object evals {
     def mergeRaw[X <: BiproductBound](t: RawBiproduct[X, X])
       (implicit m: Mergeable[X]): X =
         m.merge(leftProjRaw(t), rightProjRaw(t))
-
-    def fromZeroRaw[X <: BiproductBound](o: AnyGraphObject)(u: RawZero)
-      (implicit z: ZeroFor[X]): X =
-        z.zero(o)
 
     def toZeroRaw[X <: BiproductBound](x: X): RawZero
 
@@ -394,11 +396,11 @@ object evals {
     implicit final def eval_fromZero[
       T <: AnyGraphObject, O <: BiproductBound
     ](implicit
-      z: ZeroFor[O]
+      z: ZeroFor[T, O]
     ):  Eval[RawZero, fromZero[T], O] =
     new Eval[RawZero, fromZero[T], O] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = fromZeroRaw[O](morph.obj)
+      def rawApply(morph: InMorph): InVal => OutVal = _ => z.zero(morph.obj)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -445,7 +447,7 @@ object evals {
       A <: BiproductBound, B <: BiproductBound,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
-      b: ZeroFor[B]
+      b: ZeroFor[R, B]
     ):  Eval[A, leftInj[L ⊕ R], RawBiproduct[A, B]] =
     new Eval[A, leftInj[L ⊕ R], RawBiproduct[A, B]] {
 
@@ -460,24 +462,26 @@ object evals {
       A <: BiproductBound, B <: BiproductBound,
       L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
-      a: ZeroFor[A]
+      a: ZeroFor[L, A]
     ):  Eval[B, rightInj[L ⊕ R], RawBiproduct[A, B]] =
     new Eval[B, rightInj[L ⊕ R], RawBiproduct[A, B]] {
 
       def rawApply(morph: InMorph): InVal => OutVal =
-        biproductRaw(a.zero(morph.biproduct.right), _)
+        biproductRaw(a.zero(morph.biproduct.left), _)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit def zeroForBiproduct[L <: BiproductBound, R <: BiproductBound]
-    (implicit
-      l: ZeroFor[L],
-      r: ZeroFor[R]
-    ):  ZeroFor[RawBiproduct[L, R]] =
-    new ZeroFor[RawBiproduct[L, R]] {
+    implicit def zeroForBiproduct[
+      LO <: AnyGraphObject, L <: BiproductBound,
+      RO <: AnyGraphObject, R <: BiproductBound
+    ](implicit
+      l: ZeroFor[LO, L],
+      r: ZeroFor[RO, R]
+    ):  ZeroFor[BiproductObj[LO, RO], RawBiproduct[L, R]] =
+    new ZeroFor[BiproductObj[LO, RO], RawBiproduct[L, R]] {
 
-      def zero(o: AnyGraphObject): T = biproductRaw(l.zero(o), r.zero(o))
+      def zero(o: Obj): T = biproductRaw(l.zero(o.left), r.zero(o.right))
     }
 
     implicit def fromUnitBiproduct[U, L <: BiproductBound, R <: BiproductBound]
@@ -491,40 +495,5 @@ object evals {
     }
 
   }
-
-
-
-/*
-    implicit final def eval_quantify[
-      P <: AnyPredicate, RawPred, RawElem
-    ](implicit
-      predImpl: PredicateImpl[P, RawPred, RawElem]
-    ):  Eval[RawElem, quantify[P], RawPred] =
-    new Eval[RawElem, quantify[P], RawPred] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := predImpl.quantify(input.value, morph.predicate)
-      }
-
-      def present(morph: InMorph): Seq[String] = morph.label
-    }
-
-
-    implicit final def eval_coerce[
-      P <: AnyPredicate, RawPred, RawElem
-    ](implicit
-      predImpl: PredicateImpl[P, RawPred, RawElem]
-    ):  Eval[RawPred, coerce[P], RawElem] =
-    new Eval[RawPred, coerce[P], RawElem] {
-
-      def apply(morph: InMorph): OutMorph = { input: Input =>
-        (morph.out: InMorph#Out) := predImpl.coerce(input.value)
-      }
-
-      def present(morph: InMorph): Seq[String] = morph.label
-    }
-
-  }
-*/
 
 }
