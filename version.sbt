@@ -1,1 +1,1 @@
-version in ThisBuild := "0.5.0.better-tests-SNAPSHOT"
+version in ThisBuild := "0.5.0-SNAPSHOT"
