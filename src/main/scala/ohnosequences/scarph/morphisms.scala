@@ -785,11 +785,65 @@ object morphisms {
   // abstract class DerivedMorphism[M <: AnyGraphMorphism](val morph: M)
   //   extends AnyDerivedMorphism { type Morph = M }
 
+  trait AnyBiproductTrace extends AnyGraphMorphism {
+
+    type Morph <: AnyGraphMorphism {
+      type In <: AnyBiproductObj
+      type Out <: AnyBiproductObj { type Right = In#Right }
+    }
+    val morph: Morph
+
+    type     In >: Morph#In#Left <: Morph#In#Left
+    lazy val in: In = morph.in.left
+
+    type     Out >: Morph#Out#Left <: Morph#Out#Left
+    lazy val out = morph.out.left
+
+    type Dagger = daggerBiproductTrace[Morph]
+    lazy val dagger = daggerBiproductTrace[Morph](morph)
+
+    lazy val label = s"biproductTrace(${morph.label})"
+  }
+
+  case class biproductTrace[
+    M <: AnyGraphMorphism {
+      type In <: AnyBiproductObj
+      type Out <: AnyBiproductObj { type Right = In#Right }
+    }
+  ](val morph: M) extends AnyBiproductTrace {
+
+    type Morph = M
+    type     In = Morph#In#Left
+    type     Out = Morph#Out#Left
+  }
+
+  case class daggerBiproductTrace[
+    M <: AnyGraphMorphism {
+      type In <: AnyBiproductObj
+      type Out <: AnyBiproductObj { type Right = In#Right }
+    }
+  ](val morph: M) extends AnyGraphMorphism {
+
+    type Morph = M
+
+    type     In = Morph#Out#Left
+    lazy val in = morph.out.left
+
+    type     Out = Morph#In#Left
+    lazy val out = morph.in.left
+
+    type Dagger = biproductTrace[Morph]
+    lazy val dagger = biproductTrace[Morph](morph)
+
+    lazy val label = s"biproductTrace(${morph.label})"
+  }
+
 
   trait AnyTensorTrace extends AnyGraphMorphism {
 
     type Morph <: AnyGraphMorphism {
       type In <: AnyTensorObj
+      // TODO this or the non-symmetric version?
       type Out <: AnyTensorObj { type Right = In#Right }
     }
     val morph: Morph
@@ -806,7 +860,7 @@ object morphisms {
     lazy val label = s"tensorTrace(${morph.label})"
   }
 
-  // Trace
+  // tensor Trace
   case class tensorTrace[
     M <: AnyGraphMorphism {
       type In <: AnyTensorObj
@@ -817,11 +871,6 @@ object morphisms {
     type Morph = M
     type     In = Morph#In#Left
     type     Out = Morph#Out#Left
-
-    // type Dagger = daggerTensorTrace[Morph]
-    // lazy val dagger = daggerTensorTrace[Morph](morph)
-    //
-    // lazy val label = s"tensorTrace(${morph.label})"
   }
 
   case class daggerTensorTrace[
@@ -829,7 +878,7 @@ object morphisms {
       type In <: AnyTensorObj
       type Out <: AnyTensorObj { type Right = In#Right }
     }
-  ](morph: M) extends AnyGraphMorphism {
+  ](val morph: M) extends AnyGraphMorphism {
 
     type Morph = M
 

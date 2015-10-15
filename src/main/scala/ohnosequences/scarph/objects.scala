@@ -4,16 +4,12 @@ case object objects {
 
   import ohnosequences.cosas._, types._, typeSets._
 
-  // FIXME: this should be in cosas
   trait AnyGraphType extends AnyType
 
-  /* Graph objects are represented as their id-morphisms */
   trait AnyGraphObject extends AnyGraphType
 
-  /* A graph element is either a vertex or an edge, only they can have properties */
   sealed trait AnyGraphElement extends AnyGraphObject { type Raw = Any }
 
-  /* Vertex type is very simple */
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
 
