@@ -410,37 +410,42 @@ object morphisms {
   }
 
 
-  case class get[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
+  type get[P <: AnyProperty] = outV[P]
+  def get[P <: AnyProperty](p: P): get[P] = get[P](p)
 
-    type Property = P
+  type lookup[P <: AnyProperty] = inV[P]
+  def lookup[P <: AnyProperty](p: P): lookup[P] = inV[P](p)
+  // case class get[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
+  //
+  //   type Property = P
+  //
+  //   type     In = Property#SourceVertex
+  //   lazy val in: In = property.sourceVertex
+  //
+  //   type     Out = Property#TargetVertex
+  //   lazy val out: Out = property.targetVertex
+  //
+  //   type     Dagger = lookup[Property]
+  //   lazy val dagger: Dagger = lookup(property)
+  //
+  //   lazy val label: String = s"get(${property.label})"
+  // }
 
-    type     In = Property#Owner
-    lazy val in: In = property.owner
-
-    type     Out = Property#Value
-    lazy val out: Out = property.value
-
-    type     Dagger = lookup[Property]
-    lazy val dagger: Dagger = lookup(property)
-
-    lazy val label: String = s"get(${property.label})"
-  }
-
-  case class lookup[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
-
-    type Property = P
-
-    type     Out = Property#Owner
-    lazy val out: Out = property.owner
-
-    type     In = Property#Value
-    lazy val in: In = property.value
-
-    type Dagger = get[Property]
-    lazy val dagger: Dagger = get(property)
-
-    lazy val label: String = s"lookup(${property.label})"
-  }
+  // case class lookup[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
+  //
+  //   type Property = P
+  //
+  //   type     Out = Property#SourceVertex
+  //   lazy val out: Out = property.sourceVertex
+  //
+  //   type     In = Property#TargetVertex
+  //   lazy val in: In = property.targetVertex
+  //
+  //   type Dagger = get[Property]
+  //   lazy val dagger: Dagger = get(property)
+  //
+  //   lazy val label: String = s"lookup(${property.label})"
+  // }
 
 
   case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitiveMorph {
@@ -475,8 +480,6 @@ object morphisms {
 
     lazy val label: String = s"coerce(${predicate.label})"
   }
-
-
 
   sealed trait AnyTensorMorph extends AnyGraphMorphism { tensor =>
 
@@ -867,5 +870,4 @@ object morphisms {
 
     lazy val label: String = s"tensorTrace(${morph.label})"
   }
-
 }

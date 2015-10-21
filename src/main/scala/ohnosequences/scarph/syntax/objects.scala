@@ -39,15 +39,15 @@ object objects {
 
   case class ConditionOps[P <: AnyProperty](property: P) extends AnyVal {
 
-    def ===(value: P#Value#Raw): Equal[P] = Equal(property, value)
-    def =/=(value: P#Value#Raw): NotEqual[P] = NotEqual(property, value)
+    def ===(value: P#TargetVertex#Raw): Equal[P] = Equal(property, value)
+    def =/=(value: P#TargetVertex#Raw): NotEqual[P] = NotEqual(property, value)
 
-    def <(value: P#Value#Raw): Less[P] = Less(property, value)
-    def ≤(value: P#Value#Raw): LessOrEqual[P] = LessOrEqual(property, value)
+    def <(value: P#TargetVertex#Raw): Less[P] = Less(property, value)
+    def ≤(value: P#TargetVertex#Raw): LessOrEqual[P] = LessOrEqual(property, value)
 
-    def >(value: P#Value#Raw): Greater[P] = Greater(property, value)
-    def ≥(value: P#Value#Raw): GreaterOrEqual[P] = GreaterOrEqual(property, value)
+    def >(value: P#TargetVertex#Raw): Greater[P] = Greater(property, value)
+    def ≥(value: P#TargetVertex#Raw): GreaterOrEqual[P] = GreaterOrEqual(property, value)
 
-    def between(s: P#Value#Raw, e: P#Value#Raw): Interval[P] = Interval(property, s, e)
+    def between(s: P#TargetVertex#Raw, e: P#TargetVertex#Raw): Interval[P] = Interval(property, s, e)
   }
 }
