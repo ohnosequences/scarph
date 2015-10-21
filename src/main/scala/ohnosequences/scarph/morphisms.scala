@@ -57,10 +57,10 @@ object morphisms {
     type Second = S
 
     type     In = First#In
-    lazy val in = first.in: In
+    lazy val in: In = first.in: In
 
     type     Out = Second#Out
-    lazy val out = second.out: Out
+    lazy val out: Out = second.out: Out
 
     type     Dagger = Composition[Second#Dagger, First#Dagger]
     lazy val dagger: Dagger = Composition(second.dagger, first.dagger)
@@ -99,15 +99,15 @@ object morphisms {
     type Obj = X
 
     type     In = Obj
-    lazy val in = obj
+    lazy val in: In = obj
 
     type     Out = Obj
-    lazy val out = obj
+    lazy val out: Out = obj
 
     type     Dagger = id[Obj]
-    lazy val dagger = id(obj)
+    lazy val dagger: Dagger = id(obj)
 
-    lazy val label = s"id(${obj.label})"
+    lazy val label: String = s"id(${obj.label})"
   }
 
 
@@ -116,15 +116,15 @@ object morphisms {
     type Obj = X
 
     type     In = unit
-    lazy val in = unit
+    lazy val in: In = unit
 
     type     Out = Obj
-    lazy val out = obj
+    lazy val out: Out = obj
 
     type     Dagger = toUnit[Obj]
-    lazy val dagger = toUnit(obj)
+    lazy val dagger: Dagger = toUnit(obj)
 
-    lazy val label = s"fromUnit(${obj.label})"
+    lazy val label: String = s"fromUnit(${obj.label})"
   }
 
   // X → I
@@ -132,15 +132,15 @@ object morphisms {
     type Obj = X
 
     type     Out = unit
-    lazy val out = unit
+    lazy val out: Out = unit
 
     type     In = Obj
-    lazy val in = obj
+    lazy val in: In = obj
 
     type     Dagger = fromUnit[Obj]
-    lazy val dagger = fromUnit(obj)
+    lazy val dagger: Dagger = fromUnit(obj)
 
-    lazy val label = s"toUnit(${obj.label})"
+    lazy val label: String = s"toUnit(${obj.label})"
   }
 
   // △: X → X ⊗ X
@@ -148,15 +148,15 @@ object morphisms {
     type Obj = X
 
     type     In = Obj
-    lazy val in = obj
+    lazy val in: In = obj
 
     type     Out = Obj ⊗ Obj
-    lazy val out = obj ⊗ obj
+    lazy val out: Out = obj ⊗ obj
 
     type     Dagger = matchUp[Obj]
-    lazy val dagger = matchUp(obj)
+    lazy val dagger: Dagger = matchUp(obj)
 
-    lazy val label = s"duplicate(${obj.label})"
+    lazy val label: String = s"duplicate(${obj.label})"
   }
 
   // ▽: X ⊗ X → X
@@ -164,15 +164,15 @@ object morphisms {
     type Obj = X
 
     type     Out = Obj
-    lazy val out = obj
+    lazy val out: Out = obj
 
     type     In = Obj ⊗ Obj
-    lazy val in = obj ⊗ obj
+    lazy val in: In = obj ⊗ obj
 
     type     Dagger = duplicate[Obj]
-    lazy val dagger = duplicate(obj)
+    lazy val dagger: Dagger = duplicate(obj)
 
-    lazy val label = s"matchUp(${obj.label} ⊗ ${obj.label})"
+    lazy val label: String = s"matchUp(${obj.label} ⊗ ${obj.label})"
   }
 
 
@@ -181,15 +181,15 @@ object morphisms {
     type Obj = X
 
     type     In = zero
-    lazy val in = zero
+    lazy val in: In = zero
 
     type     Out = Obj
-    lazy val out = obj
+    lazy val out: Out = obj
 
     type     Dagger = toZero[Obj]
-    lazy val dagger = toZero(obj)
+    lazy val dagger: Dagger = toZero(obj)
 
-    lazy val label = s"fromZero(${obj.label})"
+    lazy val label: String = s"fromZero(${obj.label})"
   }
 
   // X → 0
@@ -197,15 +197,15 @@ object morphisms {
     type Obj = X
 
     type     Out = zero
-    lazy val out = zero
+    lazy val out: Out = zero
 
     type     In = Obj
-    lazy val in = obj
+    lazy val in: In = obj
 
     type     Dagger = fromZero[Obj]
-    lazy val dagger = fromZero(obj)
+    lazy val dagger: Dagger = fromZero(obj)
 
-    lazy val label = s"toZero(${obj.label})"
+    lazy val label: String = s"toZero(${obj.label})"
   }
 
   // X -> X ⊕ X
@@ -213,15 +213,15 @@ object morphisms {
     type Obj = X
 
     type     In = Obj
-    lazy val in = obj
+    lazy val in: In = obj
 
     type     Out = BiproductObj[Obj, Obj]
-    lazy val out = BiproductObj(obj, obj)
+    lazy val out: Out = BiproductObj(obj, obj)
 
     type     Dagger = merge[Obj]
-    lazy val dagger = merge(obj)
+    lazy val dagger: Dagger = merge(obj)
 
-    lazy val label = s"fork(${obj.label})"
+    lazy val label: String = s"fork(${obj.label})"
   }
 
   // X ⊕ X -> X
@@ -229,15 +229,15 @@ object morphisms {
     type Obj = X
 
     type     Out = Obj
-    lazy val out = obj
+    lazy val out: Out = obj
 
     type     In = BiproductObj[Obj, Obj]
-    lazy val in = BiproductObj(obj, obj)
+    lazy val in: In = BiproductObj(obj, obj)
 
     type     Dagger = fork[Obj]
-    lazy val dagger = fork(obj)
+    lazy val dagger: Dagger = fork(obj)
 
-    lazy val label = s"merge(${obj.label} ⊕ ${obj.label})"
+    lazy val label: String = s"merge(${obj.label} ⊕ ${obj.label})"
   }
 
 
@@ -247,15 +247,15 @@ object morphisms {
     type Biproduct = B
 
     type     In = Biproduct#Left
-    lazy val in = biproduct.left
+    lazy val in: In = biproduct.left
 
     type     Out = Biproduct
-    lazy val out = biproduct
+    lazy val out: Out = biproduct
 
     type     Dagger = leftProj[Biproduct]
-    lazy val dagger = leftProj(biproduct)
+    lazy val dagger: Dagger = leftProj(biproduct)
 
-    lazy val label = s"(${biproduct.left.label} leftInj ${biproduct.label})"
+    lazy val label: String = s"(${biproduct.left.label} leftInj ${biproduct.label})"
   }
 
   // L ⊕ R → L
@@ -264,15 +264,15 @@ object morphisms {
     type Biproduct = B
 
     type     Out = Biproduct#Left
-    lazy val out = biproduct.left
+    lazy val out: Out = biproduct.left
 
     type     In = Biproduct
-    lazy val in = biproduct
+    lazy val in: In = biproduct
 
     type     Dagger = leftInj[Biproduct]
-    lazy val dagger = leftInj(biproduct)
+    lazy val dagger: Dagger = leftInj(biproduct)
 
-    lazy val label = s"leftProj(${biproduct.label})"
+    lazy val label: String = s"leftProj(${biproduct.label})"
   }
 
 
@@ -281,15 +281,15 @@ object morphisms {
     type Biproduct = B
 
     type     In = Biproduct#Right
-    lazy val in = biproduct.right
+    lazy val in: In = biproduct.right
 
     type     Out = Biproduct
-    lazy val out = biproduct
+    lazy val out: Out = biproduct
 
     type     Dagger = rightProj[Biproduct]
-    lazy val dagger = rightProj(biproduct)
+    lazy val dagger: Dagger = rightProj(biproduct)
 
-    lazy val label = s"(${biproduct.right.label} rightInj ${biproduct.label})"
+    lazy val label: String = s"(${biproduct.right.label} rightInj ${biproduct.label})"
   }
 
   // L ⊕ R → R
@@ -298,15 +298,15 @@ object morphisms {
     type Biproduct = B
 
     type     Out = Biproduct#Right
-    lazy val out = biproduct.right
+    lazy val out: Out = biproduct.right
 
     type     In = Biproduct
-    lazy val in = biproduct
+    lazy val in: In = biproduct
 
     type     Dagger = rightInj[Biproduct]
-    lazy val dagger = rightInj(biproduct)
+    lazy val dagger: Dagger = rightInj(biproduct)
 
-    lazy val label = s"leftProj(${biproduct.label})"
+    lazy val label: String = s"leftProj(${biproduct.label})"
   }
 
 
@@ -315,13 +315,13 @@ object morphisms {
     type Edge = E
 
     type     In = Edge
-    lazy val in = edge
+    lazy val in: In = edge
 
     type     Out = Edge#TargetVertex
-    lazy val out = edge.targetVertex
+    lazy val out: Out = edge.targetVertex
 
     type     Dagger = inE[Edge]
-    lazy val dagger = inE(edge)
+    lazy val dagger: Dagger = inE(edge)
 
     lazy val label: String = s"target(${edge.label})"
   }
@@ -331,16 +331,16 @@ object morphisms {
     type Edge = E
 
     type     Out = Edge
-    lazy val out = edge
+    lazy val out: Out = edge
 
     type     In = Edge#TargetVertex
-    lazy val in = edge.targetVertex
+    lazy val in: In = edge.targetVertex
 
     type     Dagger = target[Edge]
-    lazy val dagger = target(edge)
+    lazy val dagger: Dagger = target(edge)
 
 
-    lazy val label = s"inE(${edge.label})"
+    lazy val label: String = s"inE(${edge.label})"
   }
 
 
@@ -349,13 +349,13 @@ object morphisms {
     type Edge = E
 
     type     In = Edge
-    lazy val in = edge
+    lazy val in: In = edge
 
     type     Out = Edge#SourceVertex
-    lazy val out = edge.sourceVertex
+    lazy val out: Out = edge.sourceVertex
 
     type     Dagger = outE[Edge]
-    lazy val dagger = outE(edge)
+    lazy val dagger: Dagger = outE(edge)
 
     lazy val label: String = s"source(${edge.label})"
   }
@@ -365,15 +365,15 @@ object morphisms {
     type Edge = E
 
     type     Out = Edge
-    lazy val out = edge
+    lazy val out: Out = edge
 
     type     In = Edge#SourceVertex
-    lazy val in = edge.sourceVertex
+    lazy val in: In = edge.sourceVertex
 
     type     Dagger = source[Edge]
-    lazy val dagger = source(edge)
+    lazy val dagger: Dagger = source(edge)
 
-    lazy val label = s"outE(${edge.label})"
+    lazy val label: String = s"outE(${edge.label})"
   }
 
 
@@ -382,13 +382,13 @@ object morphisms {
     type Edge = E
 
     type     In = Edge#SourceVertex
-    lazy val in = edge.sourceVertex
+    lazy val in: In = edge.sourceVertex
 
     type     Out = Edge#TargetVertex
-    lazy val out = edge.targetVertex
+    lazy val out: Out = edge.targetVertex
 
     type     Dagger = inV[Edge]
-    lazy val dagger = inV(edge)
+    lazy val dagger: Dagger = inV(edge)
 
     lazy val label: String = s"outV(${edge.label})"
   }
@@ -398,15 +398,15 @@ object morphisms {
     type Edge = E
 
     type     Out = Edge#SourceVertex
-    lazy val out = edge.sourceVertex
+    lazy val out: Out = edge.sourceVertex
 
     type     In = Edge#TargetVertex
-    lazy val in = edge.targetVertex
+    lazy val in: In = edge.targetVertex
 
     type     Dagger = outV[Edge]
-    lazy val dagger = outV(edge)
+    lazy val dagger: Dagger = outV(edge)
 
-    lazy val label = s"inV(${edge.label})"
+    lazy val label: String = s"inV(${edge.label})"
   }
 
 
@@ -415,13 +415,13 @@ object morphisms {
     type Property = P
 
     type     In = Property#Owner
-    lazy val in = property.owner
+    lazy val in: In = property.owner
 
     type     Out = Property#Value
-    lazy val out = property.value
+    lazy val out: Out = property.value
 
     type     Dagger = lookup[Property]
-    lazy val dagger = lookup(property)
+    lazy val dagger: Dagger = lookup(property)
 
     lazy val label: String = s"get(${property.label})"
   }
@@ -431,15 +431,15 @@ object morphisms {
     type Property = P
 
     type     Out = Property#Owner
-    lazy val out = property.owner
+    lazy val out: Out = property.owner
 
     type     In = Property#Value
-    lazy val in = property.value
+    lazy val in: In = property.value
 
     type Dagger = get[Property]
-    lazy val dagger = get(property)
+    lazy val dagger: Dagger = get(property)
 
-    lazy val label = s"lookup(${property.label})"
+    lazy val label: String = s"lookup(${property.label})"
   }
 
 
@@ -448,13 +448,13 @@ object morphisms {
     type Predicate = P
 
     type     In = Predicate#Element
-    lazy val in = predicate.element
+    lazy val in: In = predicate.element
 
     type     Out = Predicate
-    lazy val out = predicate
+    lazy val out: Out = predicate
 
     type     Dagger = coerce[Predicate]
-    lazy val dagger = coerce(predicate)
+    lazy val dagger: Dagger = coerce(predicate)
 
     lazy val label: String = s"quantify(${predicate.label})"
   }
@@ -465,13 +465,13 @@ object morphisms {
     type Predicate = P
 
     type     Out = Predicate#Element
-    lazy val out = predicate.element
+    lazy val out: Out = predicate.element
 
     type     In = Predicate
-    lazy val in = predicate
+    lazy val in: In = predicate
 
     type     Dagger = quantify[Predicate]
-    lazy val dagger = quantify(predicate)
+    lazy val dagger: Dagger = quantify(predicate)
 
     lazy val label: String = s"coerce(${predicate.label})"
   }
@@ -502,15 +502,15 @@ object morphisms {
     type Right = R
 
     type     In = TensorObj[Left#In, Right#In]
-    lazy val in = TensorObj(left.in, right.in): In
+    lazy val in: In = TensorObj(left.in, right.in): In
 
     type     Out = TensorObj[Left#Out, Right#Out]
-    lazy val out = TensorObj(left.out, right.out): Out
+    lazy val out: Out = TensorObj(left.out, right.out): Out
 
     type     Dagger = TensorMorph[Left#Dagger, Right#Dagger]
-    lazy val dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+    lazy val dagger: Dagger = TensorMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
 
-    lazy val label = s"(${left.label} ⊗ ${right.label})"
+    lazy val label: String = s"(${left.label} ⊗ ${right.label})"
   }
 
   sealed trait AnyBiproductMorph extends AnyGraphMorphism { biprod =>
@@ -537,15 +537,15 @@ object morphisms {
     type Right = R
 
     type     In = BiproductObj[Left#In, Right#In]
-    lazy val in = BiproductObj(left.in, right.in): In
+    lazy val in: In = BiproductObj(left.in, right.in): In
 
     type     Out = BiproductObj[Left#Out, Right#Out]
-    lazy val out = BiproductObj(left.out, right.out): Out
+    lazy val out: Out = BiproductObj(left.out, right.out): Out
 
     type     Dagger = BiproductMorph[Left#Dagger, Right#Dagger]
-    lazy val dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
+    lazy val dagger: Dagger = BiproductMorph(left.dagger: Left#Dagger, right.dagger: Right#Dagger)
 
-    lazy val label = s"(${left.label} ⊕ ${right.label})"
+    lazy val label: String = s"(${left.label} ⊕ ${right.label})"
   }
 
 
@@ -565,13 +565,13 @@ object morphisms {
     extends AnyNaturalIsomorphism {
 
     type     In = L ⊗ R
-    lazy val in = l ⊗ r
+    lazy val in: In = l ⊗ r
 
     type     Out = R ⊗ L
-    lazy val out = r ⊗ l
+    lazy val out: Out = r ⊗ l
 
     type     Dagger = symmetry[R, L]
-    lazy val dagger = symmetry(r, l)
+    lazy val dagger: Dagger = symmetry(r, l)
 
     lazy val label: String = s"symmetry(${l.label}, ${r.label})"
   }
@@ -580,13 +580,13 @@ object morphisms {
     (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
 
     type     In = A ⊗ (B ⊗ C)
-    lazy val in = a ⊗ (b ⊗ c)
+    lazy val in: In = a ⊗ (b ⊗ c)
 
     type     Out = (A ⊗ B) ⊗ C
-    lazy val out = (a ⊗ b) ⊗ c
+    lazy val out: Out = (a ⊗ b) ⊗ c
 
     type     Dagger = associateRight[A, B, C]
-    lazy val dagger = associateRight(a, b, c)
+    lazy val dagger: Dagger = associateRight(a, b, c)
 
     lazy val label: String = s"associateLeft(${a.label} ⊗ (${b.label} ⊕ ${c.label}))"
   }
@@ -595,13 +595,13 @@ object morphisms {
     (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
 
     type     In = (A ⊗ B) ⊗ C
-    lazy val in = (a ⊗ b) ⊗ c
+    lazy val in: In = (a ⊗ b) ⊗ c
 
     type     Out = A ⊗ (B ⊗ C)
-    lazy val out = a ⊗ (b ⊗ c)
+    lazy val out: Out = a ⊗ (b ⊗ c)
 
     type     Dagger = associateLeft[A, B, C]
-    lazy val dagger = associateLeft(a, b, c)
+    lazy val dagger: Dagger = associateLeft(a, b, c)
 
     lazy val label: String = s"associateRight((${a.label} ⊗ ${b.label}) ⊗ ${c.label})"
   }
@@ -611,13 +611,13 @@ object morphisms {
     (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
     type     In = U ⊗ (A ⊕ B)
-    lazy val in = u ⊗ (a ⊕ b)
+    lazy val in: In = u ⊗ (a ⊕ b)
 
     type     Out = (U ⊗ A) ⊕ (U ⊗ B)
-    lazy val out = (u ⊗ a) ⊕ (u ⊗ b)
+    lazy val out: Out = (u ⊗ a) ⊕ (u ⊗ b)
 
     type     Dagger = undistribute[U, A, B]
-    lazy val dagger = undistribute(u, a, b)
+    lazy val dagger: Dagger = undistribute(u, a, b)
 
     lazy val label: String = s"distribute(${u.label} ⊗ (${a.label} ⊕ ${b.label}))"
   }
@@ -626,13 +626,13 @@ object morphisms {
     (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
     type     Out = U ⊗ (A ⊕ B)
-    lazy val out = u ⊗ (a ⊕ b)
+    lazy val out: Out = u ⊗ (a ⊕ b)
 
     type     In = (U ⊗ A) ⊕ (U ⊗ B)
-    lazy val in = (u ⊗ a) ⊕ (u ⊗ b)
+    lazy val in: In = (u ⊗ a) ⊕ (u ⊗ b)
 
     type     Dagger = distribute[U, A, B]
-    lazy val dagger = distribute(u, a, b)
+    lazy val dagger: Dagger = distribute(u, a, b)
 
     lazy val label: String = s"undistribute((${u.label} ⊗ ${a.label}) ⊕ (${u.label} ⊗ ${b.label}))"
   }
@@ -642,30 +642,30 @@ object morphisms {
   case class leftUnit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = unit ⊗ X
-    lazy val in = unit ⊗ x
+    lazy val in: In = unit ⊗ x
 
     type     Out = X
-    lazy val out = x
+    lazy val out: Out = x
 
     type     Dagger = leftCounit[X]
-    lazy val dagger = leftCounit(x)
+    lazy val dagger: Dagger = leftCounit(x)
 
-    lazy val label = s"leftUnit(I ⊗ ${x.label})"
+    lazy val label: String = s"leftUnit(I ⊗ ${x.label})"
   }
 
   // X → I ⊗ X
   case class leftCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     Out = unit ⊗ X
-    lazy val out = unit ⊗ x
+    lazy val out: Out = unit ⊗ x
 
     type     In = X
-    lazy val in = x
+    lazy val in: In = x
 
     type     Dagger = leftUnit[X]
-    lazy val dagger = leftUnit(x)
+    lazy val dagger: Dagger = leftUnit(x)
 
-    lazy val label = s"leftCounit(${x.label})"
+    lazy val label: String = s"leftCounit(${x.label})"
 
   }
 
@@ -674,30 +674,30 @@ object morphisms {
   case class rightUnit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = X ⊗ unit
-    lazy val in = x ⊗ unit
+    lazy val in: In = x ⊗ unit
 
     type     Out = X
-    lazy val out = x
+    lazy val out: Out = x
 
     type     Dagger = rightCounit[X]
-    lazy val dagger = rightCounit(x)
+    lazy val dagger: Dagger = rightCounit(x)
 
-    lazy val label = s"rightUnit(${x.label} ⊗ I)"
+    lazy val label: String = s"rightUnit(${x.label} ⊗ I)"
   }
 
   // X → I ⊗ X
   case class rightCounit[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = X
-    lazy val in = x
+    lazy val in: In = x
 
     type     Out = X ⊗ unit
-    lazy val out = x ⊗ unit
+    lazy val out: Out = x ⊗ unit
 
     type     Dagger = rightUnit[X]
-    lazy val dagger = rightUnit(x)
+    lazy val dagger: Dagger = rightUnit(x)
 
-    lazy val label = s"rightCounit(${x.label})"
+    lazy val label: String = s"rightCounit(${x.label})"
   }
 
 
@@ -705,30 +705,30 @@ object morphisms {
   case class leftZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = zero ⊕ X
-    lazy val in = zero ⊕ x
+    lazy val in: In = zero ⊕ x
 
     type     Out = X
-    lazy val out = x
+    lazy val out: Out = x
 
     type     Dagger = leftCozero[X]
-    lazy val dagger = leftCozero(x)
+    lazy val dagger: Dagger = leftCozero(x)
 
-    lazy val label = s"leftZero(0 ⊕ ${x.label})"
+    lazy val label: String = s"leftZero(0 ⊕ ${x.label})"
   }
 
   // X → 0 ⊕ X
   case class leftCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     Out = zero ⊕ X
-    lazy val out = zero ⊕ x
+    lazy val out: Out = zero ⊕ x
 
     type     In = X
-    lazy val in = x
+    lazy val in: In = x
 
     type     Dagger = leftZero[X]
-    lazy val dagger = leftZero(x)
+    lazy val dagger: Dagger = leftZero(x)
 
-    lazy val label = s"leftCozero(${x.label})"
+    lazy val label: String = s"leftCozero(${x.label})"
 
   }
 
@@ -737,53 +737,31 @@ object morphisms {
   case class rightZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = X ⊕ zero
-    lazy val in = x ⊕ zero
+    lazy val in: In = x ⊕ zero
 
     type     Out = X
-    lazy val out = x
+    lazy val out: Out = x
 
     type     Dagger = rightCozero[X]
-    lazy val dagger = rightCozero(x)
+    lazy val dagger: Dagger = rightCozero(x)
 
-    lazy val label = s"rightZero(${x.label} ⊕ 0)"
+    lazy val label: String = s"rightZero(${x.label} ⊕ 0)"
   }
 
   // X → 0 ⊕ X
   case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
     type     In = X
-    lazy val in = x
+    lazy val in: In = x
 
     type     Out = X ⊕ zero
-    lazy val out = x ⊕ zero
+    lazy val out: Out = x ⊕ zero
 
     type     Dagger = rightZero[X]
-    lazy val dagger = rightZero(x)
+    lazy val dagger: Dagger = rightZero(x)
 
-    lazy val label = s"rightCozero(${x.label})"
+    lazy val label: String = s"rightCozero(${x.label})"
   }
-
-
-  // /* A derived morphism is just an alias for some other morphisms (we can derive eval for it)*/
-  // trait AnyDerivedMorphism extends AnyGraphMorphism { self =>
-  //
-  //   type Morph <: AnyGraphMorphism
-  //   val  morph: Morph
-  //
-  //   type     In = Morph#In
-  //   lazy val in = morph.in
-  //
-  //   type     Out = Morph#Out
-  //   lazy val out = morph.out
-  //
-  //   type     Dagger <: AnyDerivedMorphism {
-  //     type Morph = self.Dagger
-  //   }
-  //   // lazy val dagger = morph.dagger
-  // }
-  //
-  // abstract class DerivedMorphism[M <: AnyGraphMorphism](val morph: M)
-  //   extends AnyDerivedMorphism { type Morph = M }
 
   trait AnyBiproductTrace extends AnyGraphMorphism {
 
@@ -793,16 +771,16 @@ object morphisms {
     }
     val morph: Morph
 
-    type     In >: Morph#In#Left <: Morph#In#Left
-    lazy val in: In = morph.in.left
+    type      In = Morph#In#Left
+    lazy val  in: In = morph.in.left
 
-    type     Out >: Morph#Out#Left <: Morph#Out#Left
-    lazy val out = morph.out.left
+    type      Out = Morph#Out#Left
+    lazy val  out: Out = morph.out.left
 
-    type Dagger = daggerBiproductTrace[Morph]
-    lazy val dagger = daggerBiproductTrace[Morph](morph)
+    type      Dagger = daggerBiproductTrace[Morph]
+    lazy val  dagger: Dagger = daggerBiproductTrace[Morph](morph)
 
-    lazy val label = s"biproductTrace(${morph.label})"
+    lazy val  label: String = s"biproductTrace(${morph.label})"
   }
 
   case class biproductTrace[
@@ -813,8 +791,6 @@ object morphisms {
   ](val morph: M) extends AnyBiproductTrace {
 
     type Morph = M
-    type     In = Morph#In#Left
-    type     Out = Morph#Out#Left
   }
 
   case class daggerBiproductTrace[
@@ -827,15 +803,15 @@ object morphisms {
     type Morph = M
 
     type     In = Morph#Out#Left
-    lazy val in = morph.out.left
+    lazy val in: In = morph.out.left
 
     type     Out = Morph#In#Left
-    lazy val out = morph.in.left
+    lazy val out: Out = morph.in.left
 
     type Dagger = biproductTrace[Morph]
-    lazy val dagger = biproductTrace[Morph](morph)
+    lazy val dagger: Dagger = biproductTrace[Morph](morph)
 
-    lazy val label = s"biproductTrace(${morph.label})"
+    lazy val label: String = s"biproductTrace(${morph.label})"
   }
 
 
@@ -848,16 +824,16 @@ object morphisms {
     }
     val morph: Morph
 
-    type     In >: Morph#In#Left <: Morph#In#Left
+    type     In = Morph#In#Left
     lazy val in: In = morph.in.left
 
-    type     Out >: Morph#Out#Left <: Morph#Out#Left
-    lazy val out = morph.out.left
+    type     Out = Morph#Out#Left
+    lazy val out: Out = morph.out.left
 
     type Dagger = daggerTensorTrace[Morph]
-    lazy val dagger = daggerTensorTrace[Morph](morph)
+    lazy val dagger: Dagger = daggerTensorTrace[Morph](morph)
 
-    lazy val label = s"tensorTrace(${morph.label})"
+    lazy val label: String = s"tensorTrace(${morph.label})"
   }
 
   // tensor Trace
@@ -869,8 +845,6 @@ object morphisms {
   ](val morph: M) extends AnyTensorTrace {
 
     type Morph = M
-    type     In = Morph#In#Left
-    type     Out = Morph#Out#Left
   }
 
   case class daggerTensorTrace[
@@ -883,15 +857,15 @@ object morphisms {
     type Morph = M
 
     type     In = Morph#Out#Left
-    lazy val in = morph.out.left
+    lazy val in: In = morph.out.left
 
     type     Out = Morph#In#Left
-    lazy val out = morph.in.left
+    lazy val out: Out = morph.in.left
 
     type Dagger = tensorTrace[Morph]
-    lazy val dagger = tensorTrace[Morph](morph)
+    lazy val dagger: Dagger = tensorTrace[Morph](morph)
 
-    lazy val label = s"tensorTrace(${morph.label})"
+    lazy val label: String = s"tensorTrace(${morph.label})"
   }
 
 }
