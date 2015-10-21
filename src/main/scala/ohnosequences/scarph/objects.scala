@@ -64,8 +64,13 @@ case object objects {
 
   case object AnyEdge {
 
-    type From[S <: AnyVertex] = AnyEdge { type SourceVertex = S }
-    type   To[T <: AnyVertex] = AnyEdge { type TargetVertex = T }
+    type From[S <: AnyGraphObject] = AnyEdge { type SourceVertex = S }
+    type   To[T <: AnyGraphObject] = AnyEdge { type TargetVertex = T }
+
+    type betweenElements = AnyEdge {
+      type SourceArity <: AnyArity { type GraphObject <: AnyGraphElement }
+      type TargetArity <: AnyArity { type GraphObject <: AnyGraphElement }
+    }
   }
 
   import scala.reflect.ClassTag
@@ -81,6 +86,12 @@ case object objects {
     val rawTag = rt
   }
 
+
+  // type AnyProperty = AnyEdge {
+  //
+  //   type SourceArity <: AnyArity { type GraphObject <: AnyGraphElement }
+  //   type TargetArity <: AnyArity { type GraphObject <: AnyValueType }
+  // }
   /* This is like an edge between an element and a raw type */
   trait AnyProperty extends AnyGraphType {
 

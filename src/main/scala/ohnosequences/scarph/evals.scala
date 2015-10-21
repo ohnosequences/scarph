@@ -400,7 +400,7 @@ object evals {
 
 
     implicit final def eval_outV[
-      E <: AnyEdge
+      E <: AnyEdge.betweenElements
     ]:  Eval[RawSource, outV[E], RawTarget] =
     new Eval[RawSource, outV[E], RawTarget] {
 
@@ -410,7 +410,7 @@ object evals {
     }
 
     implicit final def eval_inV[
-      E <: AnyEdge
+      E <: AnyEdge.betweenElements
     ]:  Eval[RawTarget, inV[E], RawSource] =
     new Eval[RawTarget, inV[E], RawSource] {
 
@@ -421,7 +421,7 @@ object evals {
 
 
     implicit final def eval_outE[
-      E <: AnyEdge
+      E <: AnyEdge.betweenElements
     ]:  Eval[RawSource, outE[E], RawEdge] =
     new Eval[RawSource, outE[E], RawEdge] {
 
@@ -431,7 +431,7 @@ object evals {
     }
 
     implicit final def eval_source[
-      E <: AnyEdge
+      E <: AnyEdge.betweenElements
     ]:  Eval[RawEdge, source[E], RawSource] =
     new Eval[RawEdge, source[E], RawSource] {
 
@@ -442,7 +442,7 @@ object evals {
 
 
     implicit final def eval_inE[
-      E <: AnyEdge
+      E <: AnyEdge.betweenElements
     ]:  Eval[RawTarget, inE[E], RawEdge] =
     new Eval[RawTarget, inE[E], RawEdge] {
 
@@ -452,7 +452,7 @@ object evals {
     }
 
     implicit final def eval_target[
-      E <: AnyEdge
+      E <: AnyEdge.betweenElements
     ]:  Eval[RawEdge, target[E], RawTarget] =
     new Eval[RawEdge, target[E], RawTarget] {
 
