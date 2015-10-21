@@ -16,32 +16,35 @@ case object objects {
 
   trait AnyArity {
 
-    type Vertex <: AnyVertex
-    val  vertex: Vertex
+    type GraphObject <: AnyGraphObject
+    val  graphObject: GraphObject
   }
 
-  abstract class Arity[V <:AnyVertex](val vertex: V) extends AnyArity { type Vertex = V }
+  abstract class Arity[GO <: AnyGraphObject](val graphObject: GO) extends AnyArity {
 
-  case class  OneOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
-  case class AtLeastOne[V <: AnyVertex](v: V) extends Arity[V](v)
-  case class ExactlyOne[V <: AnyVertex](v: V) extends Arity[V](v)
-  case class ManyOrNone[V <: AnyVertex](v: V) extends Arity[V](v)
+    type GraphObject = GO
+  }
+
+  case class  OneOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+  case class AtLeastOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+  case class ExactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+  case class ManyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
 
 
-  /* Edges connect vertices and have in/out arities */
+  /* Edges connect objects and have in/out arities */
   trait AnyEdge extends AnyGraphElement {
 
     type SourceArity <: AnyArity
     val  sourceArity: SourceArity
 
-    type SourceVertex <: SourceArity#Vertex
+    type SourceVertex <: SourceArity#GraphObject
     val  sourceVertex: SourceVertex
 
 
     type TargetArity <: AnyArity
     val  targetArity: TargetArity
 
-    type TargetVertex <: TargetArity#Vertex
+    type TargetVertex <: TargetArity#GraphObject
     val  targetVertex: TargetVertex
   }
 
@@ -50,13 +53,13 @@ case object objects {
 
     type SourceArity = S
     lazy val sourceArity = st._1
-    type SourceVertex = SourceArity#Vertex
-    lazy val sourceVertex = sourceArity.vertex
+    type SourceVertex = SourceArity#GraphObject
+    lazy val sourceVertex = sourceArity.graphObject
 
     type TargetArity = T
     lazy val targetArity = st._2
-    type TargetVertex = TargetArity#Vertex
-    lazy val targetVertex = targetArity.vertex
+    type TargetVertex = TargetArity#GraphObject
+    lazy val targetVertex = targetArity.graphObject
   }
 
   case object AnyEdge {
