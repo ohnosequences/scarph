@@ -411,7 +411,7 @@ object morphisms {
 
 
   type get[P <: AnyProperty] = outV[P]
-  def get[P <: AnyProperty](p: P): get[P] = get[P](p)
+  def get[P <: AnyProperty](p: P): get[P] = outV[P](p)
 
   type lookup[P <: AnyProperty] = inV[P]
   def lookup[P <: AnyProperty](p: P): lookup[P] = inV[P](p)

@@ -72,17 +72,18 @@ case object objects {
 
   import scala.reflect.ClassTag
   /* Property values have raw types that are covered as graph objects */
-  trait AnyValueType extends properties.AnyProperty with AnyGraphObject {
+  trait AnyValueType extends AnyGraphObject {
 
-    def rawTag: ClassTag[Raw]
+    type Raw = Any
+    type Value
+    def valueTag: ClassTag[Value]
   }
 
-  class ValueOfType[R](val label: String)(implicit rt: ClassTag[R]) extends AnyValueType {
+  class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
 
-    type Raw = R
-    val rawTag = rt
+    // TODO fix Raw here? Container[Raw] where Container is defined in PropertyStructure
+    type Value = V
   }
-
 
   type AnyProperty = AnyEdge {
 

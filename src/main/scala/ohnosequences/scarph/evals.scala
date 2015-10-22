@@ -389,14 +389,14 @@ object evals {
     type RawSource
     type RawTarget
 
-    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget
-    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource
+    def outVRaw(edge: AnyEdge.betweenElements)(v: RawSource): RawTarget
+    def inVRaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawSource
 
-    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge
-    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource
+    def outERaw(edge: AnyEdge.betweenElements)(v: RawSource): RawEdge
+    def sourceRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawSource
 
-    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge
-    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget
+    def inERaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawEdge
+    def targetRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawTarget
 
 
     implicit final def eval_outV[

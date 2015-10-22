@@ -22,14 +22,14 @@ case object dummy {
     type RawSource = DummyVertex
     type RawTarget = DummyVertex
 
-    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
-    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
+    def outVRaw(edge: AnyEdge.betweenElements)(v: RawSource): RawTarget = DummyVertex
+    def inVRaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawSource = DummyVertex
 
-    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge = DummyEdge
-    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource = DummyVertex
+    def outERaw(edge: AnyEdge.betweenElements)(v: RawSource): RawEdge = DummyEdge
+    def sourceRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawSource = DummyVertex
 
-    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge = DummyEdge
-    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget = DummyVertex
+    def inERaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawEdge = DummyEdge
+    def targetRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawTarget = DummyVertex
   }
 
 
