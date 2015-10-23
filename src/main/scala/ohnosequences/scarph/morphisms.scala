@@ -315,8 +315,8 @@ object morphisms {
     type     In = Edge
     lazy val in: In = edge
 
-    type     Out = Edge#TargetVertex
-    lazy val out: Out = edge.targetVertex
+    type     Out = Edge#Target
+    lazy val out: Out = edge.target
 
     type     Dagger = inE[Edge]
     lazy val dagger: Dagger = inE(edge)
@@ -331,8 +331,8 @@ object morphisms {
     type     Out = Edge
     lazy val out: Out = edge
 
-    type     In = Edge#TargetVertex
-    lazy val in: In = edge.targetVertex
+    type     In = Edge#Target
+    lazy val in: In = edge.target
 
     type     Dagger = target[Edge]
     lazy val dagger: Dagger = target(edge)
@@ -349,8 +349,8 @@ object morphisms {
     type     In = Edge
     lazy val in: In = edge
 
-    type     Out = Edge#SourceVertex
-    lazy val out: Out = edge.sourceVertex
+    type     Out = Edge#Source
+    lazy val out: Out = edge.source
 
     type     Dagger = outE[Edge]
     lazy val dagger: Dagger = outE(edge)
@@ -365,8 +365,8 @@ object morphisms {
     type     Out = Edge
     lazy val out: Out = edge
 
-    type     In = Edge#SourceVertex
-    lazy val in: In = edge.sourceVertex
+    type     In = Edge#Source
+    lazy val in: In = edge.source
 
     type     Dagger = source[Edge]
     lazy val dagger: Dagger = source(edge)
@@ -375,15 +375,15 @@ object morphisms {
   }
 
 
-  case class outV[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
+  case class outV[E <: AnyRelation](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
-    type     In = Edge#SourceVertex
-    lazy val in: In = edge.sourceVertex
+    type     In = Edge#Source
+    lazy val in: In = edge.source
 
-    type     Out = Edge#TargetVertex
-    lazy val out: Out = edge.targetVertex
+    type     Out = Edge#Target
+    lazy val out: Out = edge.target
 
     type     Dagger = inV[Edge]
     lazy val dagger: Dagger = inV(edge)
@@ -391,15 +391,15 @@ object morphisms {
     lazy val label: String = s"outV(${edge.label})"
   }
 
-  case class inV[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
+  case class inV[E <: AnyRelation](val edge: E) extends AnyPrimitiveMorph {
 
     type Edge = E
 
-    type     Out = Edge#SourceVertex
-    lazy val out: Out = edge.sourceVertex
+    type     Out = Edge#Source
+    lazy val out: Out = edge.source
 
-    type     In = Edge#TargetVertex
-    lazy val in: In = edge.targetVertex
+    type     In = Edge#Target
+    lazy val in: In = edge.target
 
     type     Dagger = outV[Edge]
     lazy val dagger: Dagger = outV(edge)
@@ -417,11 +417,11 @@ object morphisms {
   //
   //   type Property = P
   //
-  //   type     In = Property#SourceVertex
-  //   lazy val in: In = property.sourceVertex
+  //   type     In = Property#Source
+  //   lazy val in: In = property.source
   //
-  //   type     Out = Property#TargetVertex
-  //   lazy val out: Out = property.targetVertex
+  //   type     Out = Property#Target
+  //   lazy val out: Out = property.Target
   //
   //   type     Dagger = lookup[Property]
   //   lazy val dagger: Dagger = lookup(property)
@@ -433,11 +433,11 @@ object morphisms {
   //
   //   type Property = P
   //
-  //   type     Out = Property#SourceVertex
-  //   lazy val out: Out = property.sourceVertex
+  //   type     Out = Property#Source
+  //   lazy val out: Out = property.source
   //
-  //   type     In = Property#TargetVertex
-  //   lazy val in: In = property.targetVertex
+  //   type     In = Property#Target
+  //   lazy val in: In = property.Target
   //
   //   type Dagger = get[Property]
   //   lazy val dagger: Dagger = get(property)

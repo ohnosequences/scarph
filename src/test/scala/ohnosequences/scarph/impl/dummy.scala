@@ -22,14 +22,14 @@ case object dummy {
     type RawSource = DummyVertex
     type RawTarget = DummyVertex
 
-    def outVRaw(edge: AnyEdge.betweenElements)(v: RawSource): RawTarget = DummyVertex
-    def inVRaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawSource = DummyVertex
+    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
+    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
 
-    def outERaw(edge: AnyEdge.betweenElements)(v: RawSource): RawEdge = DummyEdge
-    def sourceRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawSource = DummyVertex
+    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge = DummyEdge
+    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource = DummyVertex
 
-    def inERaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawEdge = DummyEdge
-    def targetRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawTarget = DummyVertex
+    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge = DummyEdge
+    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget = DummyVertex
   }
 
 
@@ -120,18 +120,18 @@ case object dummy {
 
     import morphisms._
 
-    implicit def eval_getV[P <: AnyProperty { type SourceVertex <: AnyVertex }]:
-        Eval[DummyVertex, get[P], P#TargetVertex#Raw] =
-    new Eval[DummyVertex, get[P], P#TargetVertex#Raw] {
+    implicit def eval_getV[P <: AnyProperty { type Source <: AnyVertex }]:
+        Eval[DummyVertex, get[P], P#Target#Raw] =
+    new Eval[DummyVertex, get[P], P#Target#Raw] {
 
       def rawApply(morph: InMorph): InVal => OutVal = ???
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-    implicit def eval_getE[P <: AnyProperty { type SourceVertex <: AnyEdge }]:
-        Eval[DummyEdge, get[P], P#TargetVertex#Raw] =
-    new Eval[DummyEdge, get[P], P#TargetVertex#Raw] {
+    implicit def eval_getE[P <: AnyProperty { type Source <: AnyEdge }]:
+        Eval[DummyEdge, get[P], P#Target#Raw] =
+    new Eval[DummyEdge, get[P], P#Target#Raw] {
 
       def rawApply(morph: InMorph): InVal => OutVal = ???
 
@@ -141,7 +141,7 @@ case object dummy {
 
     implicit def eval_lookupV[
       V,
-      P <: AnyProperty { type SourceVertex <: AnyVertex; type TargetVertex <: AnyValueType { type Raw >: V }  }
+      P <: AnyProperty { type Source <: AnyVertex; type Target <: AnyValueType { type Raw >: V }  }
     ]
     : Eval[V, lookup[P], DummyVertex] =
     new Eval[V, lookup[P], DummyVertex] {
@@ -153,7 +153,7 @@ case object dummy {
 
     implicit def eval_lookupE[
       V,
-      P <: AnyProperty { type SourceVertex <: AnyEdge; type TargetVertex <: AnyValueType { type Raw >: V }  }
+      P <: AnyProperty { type Source <: AnyEdge; type Target <: AnyValueType { type Raw >: V }  }
     ]
     : Eval[V, lookup[P], DummyEdge] =
     new Eval[V, lookup[P], DummyEdge] {

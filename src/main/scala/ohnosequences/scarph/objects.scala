@@ -8,6 +8,31 @@ case object objects {
 
   trait AnyGraphObject extends AnyGraphType
 
+  trait AnyRelation extends AnyGraphObject {
+
+    type SourceArity <: AnyArity
+    val  sourceArity: SourceArity
+
+    type Source >: SourceArity#GraphObject <: SourceArity#GraphObject
+    lazy val  source: Source = sourceArity.graphObject
+
+
+    type TargetArity <: AnyArity
+    val  targetArity: TargetArity
+
+    type Target >: TargetArity#GraphObject <: TargetArity#GraphObject
+    lazy val  target: Target = targetArity.graphObject
+  }
+
+
+  trait AnyEdge extends AnyRelation with AnyGraphElement {
+
+    type SourceArity <: AnyArity.OfVertices
+
+    type TargetArity <: AnyArity.OfVertices
+  }
+
+  // stuff that normally can have properties
   sealed trait AnyGraphElement extends AnyGraphObject
 
   trait AnyVertex extends AnyGraphElement
@@ -20,6 +45,13 @@ case object objects {
     val  graphObject: GraphObject
   }
 
+  case object AnyArity {
+
+    type OfVertices   = AnyArity { type GraphObject <: AnyVertex }
+    type OfElements   = AnyArity { type GraphObject <: AnyGraphElement }
+    type OfValueTypes = AnyArity { type GraphObject <: AnyValueType }
+  }
+
   abstract class Arity[GO <: AnyGraphObject](val graphObject: GO) extends AnyArity {
 
     type GraphObject = GO
@@ -30,50 +62,30 @@ case object objects {
   case class ExactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
   case class ManyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
 
-  /* Edges connect objects and have in/out arities */
-  trait AnyEdge extends AnyGraphElement {
-
-    type SourceArity <: AnyArity
-    val  sourceArity: SourceArity
-
-    type SourceVertex >: SourceArity#GraphObject <: SourceArity#GraphObject
-    lazy val  sourceVertex: SourceVertex = sourceArity.graphObject
-
-
-    type TargetArity <: AnyArity
-    val  targetArity: TargetArity
-
-    type TargetVertex >: TargetArity#GraphObject <: TargetArity#GraphObject
-    lazy val  targetVertex: TargetVertex = targetArity.graphObject
-  }
-
   /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
-  class Edge[S <: AnyArity, T <: AnyArity]( st: (S, T))(val label: String) extends AnyEdge {
+  class Edge[
+    S <: AnyArity.OfVertices,
+    T <: AnyArity.OfVertices
+  ](st: (S, T))(val label: String) extends AnyEdge {
 
     type SourceArity = S
     lazy val sourceArity = st._1
-    type SourceVertex = SourceArity#GraphObject
+    type Source = SourceArity#GraphObject
 
-    type TargetVertex = TargetArity#GraphObject
     type TargetArity = T
     lazy val targetArity = st._2
+    type Target = TargetArity#GraphObject
   }
 
   case object AnyEdge {
 
-    type From[S <: AnyGraphObject] = AnyEdge { type SourceVertex = S }
-    type   To[T <: AnyGraphObject] = AnyEdge { type TargetVertex = T }
-
-    type betweenElements = AnyEdge {
-      type SourceArity <: AnyArity { type GraphObject <: AnyVertex }
-      type TargetArity <: AnyArity { type GraphObject <: AnyVertex }
-    }
+    type From[S <: AnyVertex] = AnyEdge { type Source = S }
+    type   To[T <: AnyVertex] = AnyEdge { type Target = T }
   }
 
   import scala.reflect.ClassTag
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyGraphObject {
-
 
     type Value
     def valueTag: ClassTag[Value]
@@ -85,11 +97,12 @@ case object objects {
     type Value = V
   }
 
-  type AnyProperty = AnyEdge {
+  trait AnyProperty extends AnyRelation {
 
-    type SourceArity <: AnyArity { type GraphObject <: AnyGraphElement }
-    type TargetArity <: AnyArity { type GraphObject <: AnyValueType }
+    type SourceArity <: AnyArity.OfElements
+    type TargetArity <: AnyArity.OfValueTypes
   }
+
   /* This is like an edge between an element and a raw type */
   // trait AnyProperty extends AnyGraphType {
   //
@@ -103,25 +116,24 @@ case object objects {
   // }
 
   class Property[
-    O <: AnyArity { type GraphObject <: AnyGraphElement },
-    V <: AnyArity { type GraphObject <: AnyValueType }
+    O <: AnyArity.OfElements,
+    V <: AnyArity.OfValueTypes
   ]
   (val st: (O,V))(val label: String)
-  extends AnyEdge
+  extends AnyProperty
   {
-
     type SourceArity = O
     lazy val sourceArity = st._1
-    type SourceVertex = SourceArity#GraphObject
+    type Source = SourceArity#GraphObject
 
     type TargetArity = V
     lazy val targetArity = st._2
-    type TargetVertex = TargetArity#GraphObject
+    type Target = TargetArity#GraphObject
   }
 
   case object AnyProperty {
 
-    type withRaw[R] = AnyProperty { type Value <: AnyValueType { type Raw = R } }
+    // type withRaw[R] = AnyProperty { type Value <: AnyValueType { type Raw = R } }
   }
 
   trait AnyPredicate extends AnyGraphObject {
@@ -184,8 +196,8 @@ case object objects {
     type Property <: AnyProperty
     val  property: Property
 
-    type     Element = Property#SourceVertex
-    lazy val element = property.sourceVertex
+    type     Element = Property#Source
+    lazy val element = property.source
 
     val label: String
     override final def toString = label
@@ -202,7 +214,7 @@ case object objects {
   trait AnyCompareCondition extends AnyCondition {
     type Property <: AnyProperty //{ type Raw <: Comparable[_] }
 
-    val value: Property#TargetVertex#Raw
+    val value: Property#Target#Raw
   }
 
   trait CompareCondition[P <: AnyProperty]
@@ -212,7 +224,7 @@ case object objects {
   trait AnyEqual extends AnyCompareCondition
   case class Equal[P <: AnyProperty](
     val property: P,
-    val value: P#TargetVertex#Raw
+    val value: P#Target#Raw
   ) extends AnyEqual with CompareCondition[P] {
     lazy val label: String = s"${property.label} = ${value.toString}"
   }
@@ -220,7 +232,7 @@ case object objects {
   trait AnyNotEqual extends AnyCompareCondition
   case class NotEqual[P <: AnyProperty](
     val property: P,
-    val value: P#TargetVertex#Raw
+    val value: P#Target#Raw
   ) extends AnyNotEqual with CompareCondition[P] {
     lazy val label: String = s"${property.label} ≠ ${value.toString}"
   }
@@ -229,7 +241,7 @@ case object objects {
   trait AnyLess extends AnyCompareCondition
   case class Less[P <: AnyProperty](
     val property: P,
-    val value: P#TargetVertex#Raw
+    val value: P#Target#Raw
   ) extends AnyLess with CompareCondition[P] {
     lazy val label: String = s"${property.label} < ${value.toString}"
   }
@@ -237,7 +249,7 @@ case object objects {
   trait AnyLessOrEqual extends AnyCompareCondition
   case class LessOrEqual[P <: AnyProperty](
     val property: P,
-    val value: P#TargetVertex#Raw
+    val value: P#Target#Raw
   ) extends AnyLessOrEqual with CompareCondition[P] {
     lazy val label: String = s"${property.label} ≤ ${value.toString}"
   }
@@ -246,7 +258,7 @@ case object objects {
   trait AnyGreater extends AnyCompareCondition
   case class Greater[P <: AnyProperty](
     val property: P,
-    val value: P#TargetVertex#Raw
+    val value: P#Target#Raw
   ) extends AnyGreater with CompareCondition[P] {
     lazy val label: String = s"${property.label} > ${value.toString}"
   }
@@ -254,7 +266,7 @@ case object objects {
   trait AnyGreaterOrEqual extends AnyCompareCondition
   case class GreaterOrEqual[P <: AnyProperty](
     val property: P,
-    val value: P#TargetVertex#Raw
+    val value: P#Target#Raw
   ) extends AnyGreaterOrEqual with CompareCondition[P] {
     lazy val label: String = s"${property.label} ≥ ${value.toString}"
   }
@@ -263,14 +275,14 @@ case object objects {
   trait AnyInterval extends AnyCondition {
     type Property <: AnyProperty
 
-    val start: Property#TargetVertex#Raw
-    val end: Property#TargetVertex#Raw
+    val start: Property#Target#Raw
+    val end: Property#Target#Raw
   }
 
   case class Interval[P <: AnyProperty](
     val property: P,
-    val start: P#TargetVertex#Raw,
-    val end: P#TargetVertex#Raw
+    val start: P#Target#Raw,
+    val end: P#Target#Raw
   ) extends AnyInterval {
     type Property = P
     lazy val label: String = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"

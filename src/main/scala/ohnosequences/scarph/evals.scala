@@ -366,18 +366,18 @@ object evals {
     type RawSource
     type RawTarget
 
-    def outVRaw(edge: AnyEdge.betweenElements)(v: RawSource): RawTarget
-    def inVRaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawSource
+    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget
+    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource
 
-    def outERaw(edge: AnyEdge.betweenElements)(v: RawSource): RawEdge
-    def sourceRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawSource
+    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge
+    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource
 
-    def inERaw(edge: AnyEdge.betweenElements)(v: RawTarget): RawEdge
-    def targetRaw(edge: AnyEdge.betweenElements)(e: RawEdge): RawTarget
+    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge
+    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget
 
 
     implicit final def eval_outV[
-      E <: AnyEdge.betweenElements
+      E <: AnyEdge
     ]:  Eval[RawSource, outV[E], RawTarget] =
     new Eval[RawSource, outV[E], RawTarget] {
 
@@ -387,7 +387,7 @@ object evals {
     }
 
     implicit final def eval_inV[
-      E <: AnyEdge.betweenElements
+      E <: AnyEdge
     ]:  Eval[RawTarget, inV[E], RawSource] =
     new Eval[RawTarget, inV[E], RawSource] {
 
@@ -398,7 +398,7 @@ object evals {
 
 
     implicit final def eval_outE[
-      E <: AnyEdge.betweenElements
+      E <: AnyEdge
     ]:  Eval[RawSource, outE[E], RawEdge] =
     new Eval[RawSource, outE[E], RawEdge] {
 
@@ -408,7 +408,7 @@ object evals {
     }
 
     implicit final def eval_source[
-      E <: AnyEdge.betweenElements
+      E <: AnyEdge
     ]:  Eval[RawEdge, source[E], RawSource] =
     new Eval[RawEdge, source[E], RawSource] {
 
@@ -419,7 +419,7 @@ object evals {
 
 
     implicit final def eval_inE[
-      E <: AnyEdge.betweenElements
+      E <: AnyEdge
     ]:  Eval[RawTarget, inE[E], RawEdge] =
     new Eval[RawTarget, inE[E], RawEdge] {
 
@@ -429,7 +429,7 @@ object evals {
     }
 
     implicit final def eval_target[
-      E <: AnyEdge.betweenElements
+      E <: AnyEdge
     ]:  Eval[RawEdge, target[E], RawTarget] =
     new Eval[RawEdge, target[E], RawTarget] {
 

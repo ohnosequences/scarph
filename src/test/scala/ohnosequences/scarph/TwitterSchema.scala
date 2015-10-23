@@ -54,7 +54,7 @@ case object twitter extends AnyGraphSchema {
 
   /* Edges with their properties */
   case object posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted") {
-    case object time  extends Property(ManyOrNone(posted) -> ExactlyOne(twitter.time))("time")
+    case object time  extends Property(ManyOrNone(posted) -> ExactlyOne(ohnosequences.scarph.test.twitter.time))("time")
   }
 
   case object follows extends Edge(ManyOrNone(user) -> ManyOrNone(user))("follows")
