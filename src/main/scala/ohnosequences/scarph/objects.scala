@@ -4,11 +4,11 @@ case object objects {
 
   import ohnosequences.cosas._, types._, typeSets._
 
-  trait AnyGraphType extends AnyType
+  trait AnyGraphType extends AnyType { type Raw = Any }
 
   trait AnyGraphObject extends AnyGraphType
 
-  sealed trait AnyGraphElement extends AnyGraphObject { type Raw = Any }
+  sealed trait AnyGraphElement extends AnyGraphObject
 
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
@@ -74,7 +74,7 @@ case object objects {
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyGraphObject {
 
-    type Raw = Any
+
     type Value
     def valueTag: ClassTag[Value]
   }
@@ -93,7 +93,7 @@ case object objects {
   /* This is like an edge between an element and a raw type */
   // trait AnyProperty extends AnyGraphType {
   //
-  //   type Raw = Any
+  //
   //
   //   type Owner <: AnyGraphElement
   //   val  owner: Owner
@@ -126,7 +126,7 @@ case object objects {
 
   trait AnyPredicate extends AnyGraphObject {
 
-    type Raw = Any
+
 
     type Element <: AnyGraphElement
     val  element: Element
@@ -179,7 +179,7 @@ case object objects {
   /* A condition is a restriction on the property values */
   trait AnyCondition {
 
-    type Raw = Any
+
 
     type Property <: AnyProperty
     val  property: Property
@@ -281,7 +281,7 @@ case object objects {
   /* ## Tensor product */
   sealed trait AnyTensorObj extends AnyGraphObject {
 
-    type Raw = Any
+
 
     type Left <: AnyGraphObject
     val  left: Left
@@ -305,7 +305,7 @@ case object objects {
 
   case object unit extends AnyGraphObject {
 
-    type Raw = Any
+
 
     lazy val label: String = this.toString
   }
@@ -316,7 +316,7 @@ case object objects {
   /* ## Biproduct */
   sealed trait AnyBiproductObj extends AnyGraphObject {
 
-    type Raw = Any
+
 
     type Left <: AnyGraphObject
     val  left: Left
@@ -337,7 +337,7 @@ case object objects {
 
   case object zero extends AnyGraphObject {
 
-    type Raw = Any
+
 
     lazy val label: String = this.toString
   }

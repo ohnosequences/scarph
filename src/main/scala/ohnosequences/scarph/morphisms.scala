@@ -7,9 +7,7 @@ object morphisms {
 
 
   /* Morphisms are spans */
-  trait AnyGraphMorphism extends AnyGraphType { morphism =>
-
-    type Raw = Any
+  trait AnyGraphMorphism extends AnyGraphType {
 
     type In <: AnyGraphObject
     val  in: In
