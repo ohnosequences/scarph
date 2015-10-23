@@ -381,7 +381,7 @@ object evals {
     ]:  Eval[RawSource, outV[E], RawTarget] =
     new Eval[RawSource, outV[E], RawTarget] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = outVRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = outVRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -391,7 +391,7 @@ object evals {
     ]:  Eval[RawTarget, inV[E], RawSource] =
     new Eval[RawTarget, inV[E], RawSource] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = inVRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = inVRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -402,7 +402,7 @@ object evals {
     ]:  Eval[RawSource, outE[E], RawEdge] =
     new Eval[RawSource, outE[E], RawEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = outERaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = outERaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -412,7 +412,7 @@ object evals {
     ]:  Eval[RawEdge, source[E], RawSource] =
     new Eval[RawEdge, source[E], RawSource] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = sourceRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = sourceRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -423,7 +423,7 @@ object evals {
     ]:  Eval[RawTarget, inE[E], RawEdge] =
     new Eval[RawTarget, inE[E], RawEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = inERaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = inERaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -433,7 +433,7 @@ object evals {
     ]:  Eval[RawEdge, target[E], RawTarget] =
     new Eval[RawEdge, target[E], RawTarget] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = targetRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = targetRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }

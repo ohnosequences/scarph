@@ -5,7 +5,6 @@ object morphisms {
   import ohnosequences.cosas.types._
   import objects._
 
-
   /* Morphisms are spans */
   trait AnyGraphMorphism extends AnyGraphType {
 
@@ -308,103 +307,103 @@ object morphisms {
   }
 
 
-  case class target[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
+  case class target[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
 
-    type Edge = E
+    type Relation = E
 
-    type     In = Edge
-    lazy val in: In = edge
+    type     In = Relation
+    lazy val in: In = relation
 
-    type     Out = Edge#Target
-    lazy val out: Out = edge.target
+    type     Out = Relation#Target
+    lazy val out: Out = relation.target
 
-    type     Dagger = inE[Edge]
-    lazy val dagger: Dagger = inE(edge)
+    type     Dagger = inE[Relation]
+    lazy val dagger: Dagger = inE(relation)
 
-    lazy val label: String = s"target(${edge.label})"
+    lazy val label: String = s"target(${relation.label})"
   }
 
-  case class inE[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
+  case class inE[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
 
-    type Edge = E
+    type Relation = E
 
-    type     Out = Edge
-    lazy val out: Out = edge
+    type     Out = Relation
+    lazy val out: Out = relation
 
-    type     In = Edge#Target
-    lazy val in: In = edge.target
+    type     In = Relation#Target
+    lazy val in: In = relation.target
 
-    type     Dagger = target[Edge]
-    lazy val dagger: Dagger = target(edge)
-
-
-    lazy val label: String = s"inE(${edge.label})"
-  }
+    type     Dagger = target[Relation]
+    lazy val dagger: Dagger = target(relation)
 
 
-  case class source[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
-    type Edge = E
-
-    type     In = Edge
-    lazy val in: In = edge
-
-    type     Out = Edge#Source
-    lazy val out: Out = edge.source
-
-    type     Dagger = outE[Edge]
-    lazy val dagger: Dagger = outE(edge)
-
-    lazy val label: String = s"source(${edge.label})"
-  }
-
-  case class outE[E <: AnyEdge](val edge: E) extends AnyPrimitiveMorph {
-
-    type Edge = E
-
-    type     Out = Edge
-    lazy val out: Out = edge
-
-    type     In = Edge#Source
-    lazy val in: In = edge.source
-
-    type     Dagger = source[Edge]
-    lazy val dagger: Dagger = source(edge)
-
-    lazy val label: String = s"outE(${edge.label})"
+    lazy val label: String = s"inE(${relation.label})"
   }
 
 
-  case class outV[E <: AnyRelation](val edge: E) extends AnyPrimitiveMorph {
+  case class source[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
 
-    type Edge = E
+    type Relation = E
 
-    type     In = Edge#Source
-    lazy val in: In = edge.source
+    type     In = Relation
+    lazy val in: In = relation
 
-    type     Out = Edge#Target
-    lazy val out: Out = edge.target
+    type     Out = Relation#Source
+    lazy val out: Out = relation.source
 
-    type     Dagger = inV[Edge]
-    lazy val dagger: Dagger = inV(edge)
+    type     Dagger = outE[Relation]
+    lazy val dagger: Dagger = outE(relation)
 
-    lazy val label: String = s"outV(${edge.label})"
+    lazy val label: String = s"source(${relation.label})"
   }
 
-  case class inV[E <: AnyRelation](val edge: E) extends AnyPrimitiveMorph {
+  case class outE[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
 
-    type Edge = E
+    type Relation = E
 
-    type     Out = Edge#Source
-    lazy val out: Out = edge.source
+    type     Out = Relation
+    lazy val out: Out = relation
 
-    type     In = Edge#Target
-    lazy val in: In = edge.target
+    type     In = Relation#Source
+    lazy val in: In = relation.source
 
-    type     Dagger = outV[Edge]
-    lazy val dagger: Dagger = outV(edge)
+    type     Dagger = source[Relation]
+    lazy val dagger: Dagger = source(relation)
 
-    lazy val label: String = s"inV(${edge.label})"
+    lazy val label: String = s"outE(${relation.label})"
+  }
+
+
+  case class outV[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
+
+    type Relation = E
+
+    type     In = Relation#Source
+    lazy val in: In = relation.source
+
+    type     Out = Relation#Target
+    lazy val out: Out = relation.target
+
+    type     Dagger = inV[Relation]
+    lazy val dagger: Dagger = inV(relation)
+
+    lazy val label: String = s"outV(${relation.label})"
+  }
+
+  case class inV[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
+
+    type Relation = E
+
+    type     Out = Relation#Source
+    lazy val out: Out = relation.source
+
+    type     In = Relation#Target
+    lazy val in: In = relation.target
+
+    type     Dagger = outV[Relation]
+    lazy val dagger: Dagger = outV(relation)
+
+    lazy val label: String = s"inV(${relation.label})"
   }
 
 
@@ -413,38 +412,6 @@ object morphisms {
 
   type lookup[P <: AnyProperty] = inV[P]
   def lookup[P <: AnyProperty](p: P): lookup[P] = inV[P](p)
-  // case class get[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
-  //
-  //   type Property = P
-  //
-  //   type     In = Property#Source
-  //   lazy val in: In = property.source
-  //
-  //   type     Out = Property#Target
-  //   lazy val out: Out = property.Target
-  //
-  //   type     Dagger = lookup[Property]
-  //   lazy val dagger: Dagger = lookup(property)
-  //
-  //   lazy val label: String = s"get(${property.label})"
-  // }
-
-  // case class lookup[P <: AnyProperty](val property: P) extends AnyPrimitiveMorph {
-  //
-  //   type Property = P
-  //
-  //   type     Out = Property#Source
-  //   lazy val out: Out = property.source
-  //
-  //   type     In = Property#Target
-  //   lazy val in: In = property.Target
-  //
-  //   type Dagger = get[Property]
-  //   lazy val dagger: Dagger = get(property)
-  //
-  //   lazy val label: String = s"lookup(${property.label})"
-  // }
-
 
   case class quantify[P <: AnyPredicate](val predicate: P) extends AnyPrimitiveMorph {
 
