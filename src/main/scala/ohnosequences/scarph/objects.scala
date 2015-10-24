@@ -60,12 +60,12 @@ case object objects {
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyGraphObject {
 
-    type Value
-    def valueTag: ClassTag[Value]
+    type Val
+    def valueTag: ClassTag[Val]
   }
   class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
 
-    type Value = V
+    type Val = V
   }
 
 
@@ -98,10 +98,12 @@ case object objects {
 
     type SourceArity <: AnyArity.OfElements
     type TargetArity <: AnyArity.OfValueTypes
+
+    type Target >: TargetArity#GraphObject <: TargetArity#GraphObject
   }
   case object AnyProperty {
 
-    type withValue[V] = AnyProperty { type Target <: AnyValueType { type Value = V } }
+    type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
   }
   class Property[
     O <: AnyArity.OfElements,
@@ -111,11 +113,11 @@ case object objects {
   extends AnyProperty
   {
     type SourceArity = O
-    lazy val sourceArity = st._1
+    lazy val sourceArity: SourceArity = st._1
     type Source = SourceArity#GraphObject
 
     type TargetArity = V
-    lazy val targetArity = st._2
+    lazy val targetArity: TargetArity = st._2
     type Target = TargetArity#GraphObject
   }
 

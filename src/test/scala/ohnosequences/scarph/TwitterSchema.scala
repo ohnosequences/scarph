@@ -40,7 +40,7 @@ case object twitter extends AnyGraphSchema {
   /* Vertices with their properties */
   case object user extends Vertex("user") {
     case object name    extends Property(ManyOrNone(user) -> ExactlyOne(twitter.name))("name")
-    case object age     extends Property(ManyOrNone(user) -> ExactlyOne(twitter.age))("age")
+    case object age     extends Property(ManyOrNone(user) -> ExactlyOne(ohnosequences.scarph.test.twitter.age))("age")
     // example of shared value types:
     case object bio     extends Property(ManyOrNone(user) -> OneOrNone(twitter.text))("bio")
     case object webpage extends Property(ManyOrNone(user) -> OneOrNone(twitter.url))("webpage")
