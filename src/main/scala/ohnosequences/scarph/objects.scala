@@ -98,8 +98,6 @@ case object objects {
 
     type SourceArity <: AnyArity.OfElements
     type TargetArity <: AnyArity.OfValueTypes
-
-    type Target >: TargetArity#GraphObject <: TargetArity#GraphObject
   }
   case object AnyProperty {
 
