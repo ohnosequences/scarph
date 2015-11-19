@@ -1,12 +1,9 @@
 Nice.scalaProject
 
 name          := "scarph"
-description   := "Scala graph API"
 organization  := "ohnosequences"
-bucketSuffix  := "era7.com"
-
-scalaVersion        := "2.11.7"
-crossScalaVersions  := Seq("2.10.5", scalaVersion.value)
+description   := "Scala graph API"
+scalaVersion  := "2.11.7"
 
 libraryDependencies ++= Seq(
   "ohnosequences"   %% "cosas"       % "0.7.1",
@@ -14,12 +11,8 @@ libraryDependencies ++= Seq(
 )
 
 // shows time for each test:
-testOptions     in Test               += Tests.Argument("-oD")
+testOptions in Test += Tests.Argument("-oD")
+
+// publish settings
 publishArtifact in (Test, packageBin) := true
-
-// incOptions := incOptions.value.withNameHashing(false)
-
-// dependencyOverrides ++= Set(
-//   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.3",
-//   "org.scala-lang.modules" %% "scala-xml" % "1.0.3"
-// )
+bucketSuffix := "era7.com"
