@@ -105,36 +105,40 @@ class DummyTests extends org.scalatest.FunSuite {
 
   import rewrites._
 
-  object compositionToRight extends AnyRewriteStrategy {
+  case object compositionToLeft extends AnyRecursiveRightAssocRewriteStrategy {
 
-    // implicit final def right_bias_assoc[
-    //   F <: AnyGraphMorphism,
-    //   G <: AnyGraphMorphism { type In = F#Out },
-    //   H <: AnyGraphMorphism { type In = G#Out }
-    // ]: ( (F >=> G) >=> H ) rewriteTo ( F >=> (G >=> H) )
-    // = rewriteTo( fg_h => {
-    //
-    //     val fg  = fg_h.first
-    //     val h   = fg_h.second
-    //
-    //     val f = fg.first
-    //     val g = fg.second
-    //
-    //     f >=> (g >=> h)
-    //   })
+    implicit final def left_bias_assoc[
+      F <: AnyGraphMorphism,
+      G <: AnyGraphMorphism { type In = F#Out },
+      H <: AnyGraphMorphism { type In = G#Out }
+    ]
+    : (F >=> (G >=> H)) rewriteTo ((F >=> G) >=> H)
+    = rewriteTo (
+      {
+        f_gh: F >=> (G >=> H) => {
 
+          val f  = f_gh.first
+          val gh = f_gh.second
+
+          val g = gh.first
+          val h = gh.second
+
+          ((f >=> g) >=> h): (F >=> G) >=> H
+        }
+      }
+    )
   }
 
   ignore("rewriting composition") {
-    import compositionToRight._
 
-    val morph = (outV(follows) >=> inV(follows)) >=> outV(follows)
-    val rmorph = apply(compositionToRight) to morph
+    val morph     = outV(follows) >=> ( inV(follows) >=> ( outV(follows) >=> ( inV(follows) >=> outV(follows) )))
+    val shouldBe  = ((( outV(follows) >=> inV(follows) ) >=> outV(follows) ) >=> inV(follows) ) >=> outV(follows)
+
+    val rmorph = apply(compositionToLeft).to(morph)
 
     info(morph.label)
     info(rmorph.label)
 
-    // FIXME: this rewrite strategy doesn't work
-    assert{ rmorph === (outV(follows) >=> (inV(follows) >=> outV(follows)))}
+    assert{ apply(compositionToLeft).to(morph) === shouldBe }
   }
 }

@@ -79,7 +79,6 @@ object morphisms {
       f >=> s.morphisms.rightInj(b)
   }
 
-
   type RefineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Right }
 

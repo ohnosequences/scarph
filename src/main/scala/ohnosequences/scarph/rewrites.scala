@@ -24,7 +24,7 @@ object rewrites {
       : OM = rewrite(m)
   }
 
-  object rewrite {
+  case object rewrite {
 
     def apply[M <: AnyGraphMorphism, OM <: M#In --> M#Out]
       (m: M)(implicit rewr: Rewrite[M, OM])

@@ -1,9 +1,8 @@
 package ohnosequences.scarph
 
-object schemas {
+case object schemas {
 
   import objects._
-
 
   trait AnyGraphSchema extends AnyGraphType {
 
@@ -13,7 +12,7 @@ object schemas {
     val properties: Set[AnyProperty]
   }
 
-  class GraphSchema(
+  abstract class GraphSchema(
     val label: String,
     val vertices: Set[AnyVertex],
     val edges: Set[AnyEdge],
