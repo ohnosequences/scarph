@@ -63,7 +63,7 @@ case object queries {
   object propertyStructure extends TestBlock("Property structure") {
 
     val q_getV = get(user.age)
-    val q_lookupV = lookup(user.name)
+    val q_lookupV = inV(user.name)
     val q_compV = q_lookupV >=> q_getV
 
     val q_getE = get(posted.time)

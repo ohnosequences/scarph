@@ -9,7 +9,7 @@ scalaVersion        := "2.11.7"
 crossScalaVersions  := Seq("2.10.5", scalaVersion.value)
 
 libraryDependencies ++= Seq(
-  "ohnosequences"   %% "cosas"       % "0.7.1-SNAPSHOT",
+  "ohnosequences"   %% "cosas"       % "0.7.1",
   "org.scalatest"   %% "scalatest"   % "2.2.5" % Test
 )
 

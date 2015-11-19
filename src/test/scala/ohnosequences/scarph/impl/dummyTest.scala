@@ -83,7 +83,7 @@ class DummyTests extends org.scalatest.FunSuite {
     def p4 = eval(q_getE)(dp)
     def p5 = eval(q_lookupE)(dtimes)
     def p6 = eval(q_compE)(dp)
-
+    //
     // assertTaggedEq( eval(q_getV)(du), dages )
     // assertTaggedEq( eval(q_lookupV)(dnames), du )
     // assertTaggedEq( eval(q_compV)(dnames), dages )
@@ -102,7 +102,6 @@ class DummyTests extends org.scalatest.FunSuite {
     assertTaggedEq( eval(q_coerce)(pred := du.value), du )
     assertTaggedEq( eval(q_comp)(du), du )
   }
-
 
   import rewrites._
 

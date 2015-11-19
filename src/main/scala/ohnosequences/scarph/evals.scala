@@ -8,8 +8,8 @@ object evals {
   /* Transforms a morphism to a function */
   trait AnyEval extends AnyMorphismTransform {
 
-    type InVal <: InMorph#In#Raw
-    type OutVal <: InMorph#Out#Raw
+    type InVal
+    type OutVal
 
     type Input = InMorph#In := InVal
     type Output = InMorph#Out := OutVal
@@ -28,23 +28,14 @@ object evals {
   }
 
   @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
-  trait Eval[
-    I <: M#In#Raw,
-    M <: AnyGraphMorphism,
-    O <: M#Out#Raw
-  ]
-  extends AnyEval {
+  trait Eval[I, M <: AnyGraphMorphism, O] extends AnyEval {
 
     type InMorph = M
     type InVal = I
     type OutVal = O
   }
 
-  final class evaluate[
-    I <: M#In#Raw,
-    M <: AnyGraphMorphism,
-    O <: M#Out#Raw
-  ](
+  final class evaluate[I, M <: AnyGraphMorphism, O](
     val f: M,
     val eval: Eval[I, M, O]
   )
@@ -56,28 +47,24 @@ object evals {
     final def evalPlan: String = eval.present(f).mkString("")
   }
 
-  def eval[
-    I <: IM#In#Raw,
-    IM <: AnyGraphMorphism,
-    O <: IM#Out#Raw
-  ]
+  def eval[I, IM <: AnyGraphMorphism, O]
   (m: IM)(i: IM#In := I)(implicit
     eval: Eval[I, IM, O]
   )
   : IM#Out := O =
     new evaluate[I, IM, O](m, eval).on(i)
 
-  class evalWithIn[I <: IM#In#Raw, IM <: AnyGraphMorphism] {
+  class evalWithIn[I, IM <: AnyGraphMorphism] {
 
-    def apply[O <: IM#Out#Raw](m: IM)(implicit
+    def apply[O](m: IM)(implicit
       eval: Eval[I, IM, O]
     ):  evaluate[I, IM, O] =
     new evaluate[I, IM, O](m, eval)
   }
 
-  def evalOn[I <: M#In#Raw, M <: AnyGraphMorphism]: evalWithIn[I,M] = new evalWithIn[I,M] {}
+  def evalOn[I, M <: AnyGraphMorphism]: evalWithIn[I,M] = new evalWithIn[I,M] {}
 
-  class evalWithInOut[I <: IM#In#Raw, IM <: AnyGraphMorphism, O <: IM#Out#Raw] {
+  class evalWithInOut[I, IM <: AnyGraphMorphism, O] {
 
     def apply(m: IM)(implicit
       eval: Eval[I, IM, O]
@@ -85,13 +72,13 @@ object evals {
     new evaluate[I, IM, O](m, eval)
   }
 
-  def evalInOut[I <: IM#In#Raw, IM <: AnyGraphMorphism, O <: IM#Out#Raw]: evalWithInOut[I, IM, O] =
+  def evalInOut[I, IM <: AnyGraphMorphism, O]: evalWithInOut[I, IM, O] =
     new evalWithInOut[I, IM, O] {}
 
 
   trait CategoryStructure extends CategoryStructure2 {
 
-    implicit final def eval_id[X <: AnyGraphObject, I <: X#Raw]:
+    implicit final def eval_id[X <: AnyGraphObject, I]:
         Eval[I, morphisms.id[X], I] =
     new Eval[I, morphisms.id[X], I] {
 
@@ -103,13 +90,9 @@ object evals {
     // F >=> S
     implicit final def eval_composition[
       I, X, O,
-      F <: AnyGraphMorphism {
-        type In <: AnyGraphObject { type Raw >: I }
-        type Out <: AnyGraphObject { type Raw >: X }
-      },
+      F <: AnyGraphMorphism,
       S <: AnyGraphMorphism {
         type In = F#Out
-        type Out <: AnyGraphObject { type Raw >: O }
       }
     ](implicit
       evalFirst:  Eval[I, F, X],
@@ -191,14 +174,8 @@ object evals {
     implicit final def eval_tensor[
       IL <: TensorBound, IR <: TensorBound,
       OL <: TensorBound, OR <: TensorBound,
-      L <: AnyGraphMorphism {
-        type In <: AnyGraphObject { type Raw >: IL }
-        type Out <: AnyGraphObject { type Raw >: OL }
-      },
-      R <: AnyGraphMorphism {
-        type In <: AnyGraphObject { type Raw >: IR }
-        type Out <: AnyGraphObject { type Raw >: OR }
-      }
+      L <: AnyGraphMorphism,
+      R <: AnyGraphMorphism
     ](implicit
       evalLeft:  Eval[IL, L, OL],
       evalRight: Eval[IR, R, OR]
@@ -233,7 +210,7 @@ object evals {
 
     // △: X → X ⊗ X
     implicit final def eval_duplicate[
-      I <: TensorBound, T <: AnyGraphObject { type Raw >: I }
+      I <: TensorBound, T <: AnyGraphObject
     ]:  Eval[I, duplicate[T], RawTensor[I, I]] =
     new Eval[I, duplicate[T], RawTensor[I, I]] {
 
@@ -246,7 +223,7 @@ object evals {
 
     // ▽: X ⊗ X → X
     implicit final def eval_matchUp[
-      O <: TensorBound, T <: AnyGraphObject { type Raw >: O }
+      O <: TensorBound, T <: AnyGraphObject
     ](implicit
       matchable: Matchable[O]
     ):  Eval[RawTensor[O, O], matchUp[T], O] =
@@ -262,7 +239,7 @@ object evals {
 
     // I → X
     implicit final def eval_fromUnit[
-      O, T <: AnyGraphObject { type Raw >: O }
+      O, T <: AnyGraphObject
     ](implicit
       fu: FromUnit[RawUnit, O]
     ):  Eval[RawUnit, fromUnit[T], O] =
@@ -277,7 +254,7 @@ object evals {
 
     // X → I
     implicit final def eval_toUnit[
-      I <: TensorBound, T <: AnyGraphObject { type Raw >: I }
+      I <: TensorBound, T <: AnyGraphObject
     ]:  Eval[I, toUnit[T], RawUnit] =
     new Eval[I, toUnit[T], RawUnit] {
 
@@ -360,7 +337,7 @@ object evals {
     // }
 
     implicit final def eval_rightUnit[
-      I <: TensorBound, T <: AnyGraphObject { type Raw >: I }
+      I <: TensorBound, T <: AnyGraphObject
     ]:  Eval[RawTensor[I, RawUnit], rightUnit[T], I] =
     new Eval[RawTensor[I, RawUnit], rightUnit[T], I] {
 
@@ -371,7 +348,7 @@ object evals {
     }
 
     implicit final def eval_rightCounit[
-      I <: TensorBound, T <: AnyGraphObject { type Raw >: I }
+      I <: TensorBound, T <: AnyGraphObject
     ]:  Eval[I, rightCounit[T], RawTensor[I, RawUnit]] =
     new Eval[I, rightCounit[T], RawTensor[I, RawUnit]] {
 
@@ -404,7 +381,7 @@ object evals {
     ]:  Eval[RawSource, outV[E], RawTarget] =
     new Eval[RawSource, outV[E], RawTarget] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = outVRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = outVRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -414,7 +391,7 @@ object evals {
     ]:  Eval[RawTarget, inV[E], RawSource] =
     new Eval[RawTarget, inV[E], RawSource] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = inVRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = inVRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -425,7 +402,7 @@ object evals {
     ]:  Eval[RawSource, outE[E], RawEdge] =
     new Eval[RawSource, outE[E], RawEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = outERaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = outERaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -435,7 +412,7 @@ object evals {
     ]:  Eval[RawEdge, source[E], RawSource] =
     new Eval[RawEdge, source[E], RawSource] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = sourceRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = sourceRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -446,7 +423,7 @@ object evals {
     ]:  Eval[RawTarget, inE[E], RawEdge] =
     new Eval[RawTarget, inE[E], RawEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = inERaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = inERaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -456,7 +433,7 @@ object evals {
     ]:  Eval[RawEdge, target[E], RawTarget] =
     new Eval[RawEdge, target[E], RawTarget] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = targetRaw(morph.edge)
+      def rawApply(morph: InMorph): InVal => OutVal = targetRaw(morph.relation)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -525,7 +502,7 @@ object evals {
 
     // X → X ⊕ X
     implicit final def eval_fork[
-      I <: BiproductBound, T <: AnyGraphObject { type Raw >: I }
+      I <: BiproductBound, T <: AnyGraphObject
     ]:  Eval[I, fork[T], RawBiproduct[I, I]] =
     new Eval[I, fork[T], RawBiproduct[I, I]] {
 
@@ -538,7 +515,7 @@ object evals {
 
     // X ⊕ X → X
     implicit final def eval_merge[
-      O <: BiproductBound, T <: AnyGraphObject { type Raw >: O }
+      O <: BiproductBound, T <: AnyGraphObject
     ](implicit
       mergeable: Mergeable[O]
     ):  Eval[RawBiproduct[O, O], merge[T], O] =
@@ -552,7 +529,7 @@ object evals {
 
     // I → X
     implicit final def eval_fromZero[
-      O <: BiproductBound, T <: AnyGraphObject { type Raw >: O }
+      O <: BiproductBound, T <: AnyGraphObject
     ](implicit
       z: ZeroFor[T, O]
     ):  Eval[RawZero, fromZero[T], O] =
@@ -565,7 +542,7 @@ object evals {
 
     // X → I
     implicit final def eval_toZero[
-      I <: BiproductBound, T <: AnyGraphObject { type Raw >: I }
+      I <: BiproductBound, T <: AnyGraphObject
     ]:  Eval[I, toZero[T], RawZero] =
     new Eval[I, toZero[T], RawZero] {
 
@@ -578,7 +555,7 @@ object evals {
     // L ⊕ R → L
     implicit final def eval_leftProj[
       A <: BiproductBound, B <: BiproductBound,
-      L <: AnyGraphObject { type Raw >: A }, R <: AnyGraphObject
+      L <: AnyGraphObject, R <: AnyGraphObject
     ]:  Eval[RawBiproduct[A, B], leftProj[L ⊕ R], A] =
     new Eval[RawBiproduct[A, B], leftProj[L ⊕ R], A] {
 
@@ -590,7 +567,7 @@ object evals {
     // L ⊕ R → R
     implicit final def eval_rightProj[
       A <: BiproductBound, B <: BiproductBound,
-      L <: AnyGraphObject, R <: AnyGraphObject { type Raw >: B }
+      L <: AnyGraphObject, R <: AnyGraphObject
     ]:  Eval[RawBiproduct[A, B], rightProj[L ⊕ R], B] =
     new Eval[RawBiproduct[A, B], rightProj[L ⊕ R], B] {
 
@@ -603,7 +580,7 @@ object evals {
     // L → L ⊕ R
     implicit final def eval_leftInj[
       A <: BiproductBound, B <: BiproductBound,
-      L <: AnyGraphObject { type Raw >: A }, R <: AnyGraphObject
+      L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
       b: ZeroFor[R, B]
     ):  Eval[A, leftInj[L ⊕ R], RawBiproduct[A, B]] =
@@ -618,7 +595,7 @@ object evals {
     // R → L ⊕ R
     implicit final def eval_rightInj[
       A <: BiproductBound, B <: BiproductBound,
-      L <: AnyGraphObject, R <: AnyGraphObject { type Raw >: B }
+      L <: AnyGraphObject, R <: AnyGraphObject
     ](implicit
       a: ZeroFor[L, A]
     ):  Eval[B, rightInj[L ⊕ R], RawBiproduct[A, B]] =

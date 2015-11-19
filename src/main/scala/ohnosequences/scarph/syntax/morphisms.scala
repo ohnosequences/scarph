@@ -212,7 +212,7 @@ object morphisms {
 
   case class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) extends AnyVal {
 
-    def get[P <: AnyProperty { type Owner = F#Out }](p: P):
+    def get[P <: AnyProperty { type Source = F#Out }](p: P):
       F >=> s.morphisms.get[P] =
       f >=> s.morphisms.get(p)
 
@@ -281,20 +281,20 @@ object morphisms {
 
   case class VertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F) extends AnyVal {
 
-    def inE[E <: AnyEdge.To[F#Out]](e: E):
+    def inE[E <: AnyEdge with AnyEdge.To[F#Out]](e: E):
       F >=> s.morphisms.inE[E] =
       f >=> s.morphisms.inE(e)
 
-    def inV[E <: AnyEdge.To[F#Out]](e: E):
+    def inV[E <: AnyEdge with AnyEdge.To[F#Out]](e: E):
       F >=> s.morphisms.inV[E] =
       f >=> s.morphisms.inV(e)
 
 
-    def outE[E <: AnyEdge.From[F#Out]](e: E):
+    def outE[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
       F >=> s.morphisms.outE[E] =
       f >=> s.morphisms.outE(e)
 
-    def outV[E <: AnyEdge.From[F#Out]](e: E):
+    def outV[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
       F >=> s.morphisms.outV[E] =
       f >=> s.morphisms.outV(e)
   }
