@@ -1,12 +1,12 @@
 package ohnosequences.scarph
 
-object evals {
+case object evals {
 
   import ohnosequences.cosas.types._
   import objects._, morphisms._
 
   /* Transforms a morphism to a function */
-  trait AnyEval extends AnyMorphismTransform {
+  trait AnyEval extends Any with AnyMorphismTransform {
 
     type InVal
     type OutVal
@@ -28,7 +28,7 @@ object evals {
   }
 
   @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
-  trait Eval[I, M <: AnyGraphMorphism, O] extends AnyEval {
+  trait Eval[I, M <: AnyGraphMorphism, O] extends Any with AnyEval {
 
     type InMorph = M
     type InVal = I
@@ -76,7 +76,7 @@ object evals {
     new evalWithInOut[I, IM, O] {}
 
 
-  trait CategoryStructure extends CategoryStructure2 {
+  trait CategoryStructure {
 
     implicit final def eval_id[X <: AnyGraphObject, I]:
         Eval[I, morphisms.id[X], I] =
@@ -113,22 +113,6 @@ object evals {
     }
   }
 
-  trait CategoryStructure2 {
-
-    // implicit final def eval_derived[
-    //   I, O, D <: AnyDerivedMorphism
-    // ](implicit
-    //   inner: Eval[I, D#Morph, O]
-    // ):  Eval[I, D, O] =
-    // new Eval[I, D, O] {
-    //
-    //   def rawApply(morph: InMorph): InVal => OutVal = inner.rawApply(morph.morph)
-    //
-    //   def present(morph: InMorph): Seq[String] = inner.present(morph.morph)
-    // }
-
-  }
-
   trait Matchable[T0] {
 
     type T = T0
@@ -142,7 +126,7 @@ object evals {
     def fromUnit(u: U, o: AnyGraphObject): T
   }
 
-  object FromUnit {
+  case object FromUnit {
 
     implicit def unitToUnit[U]:
         FromUnit[U, U] =
@@ -168,7 +152,6 @@ object evals {
     //     fu.fromUnit(u, o)
 
     def toUnitRaw[X <: TensorBound](x: X): RawUnit
-
 
     // IL ⊗ IR → OL ⊗ OR
     implicit final def eval_tensor[
@@ -440,7 +423,6 @@ object evals {
 
   }
 
-
   trait Mergeable[T0] {
 
     type T = T0
@@ -551,7 +533,6 @@ object evals {
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
 
-
     // L ⊕ R → L
     implicit final def eval_leftProj[
       A <: BiproductBound, B <: BiproductBound,
@@ -628,7 +609,5 @@ object evals {
 
       def fromUnit(u: U, o: AnyGraphObject): T = biproductRaw(l.fromUnit(u, o), r.fromUnit(u, o))
     }
-
   }
-
 }

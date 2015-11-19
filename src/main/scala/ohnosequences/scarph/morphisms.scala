@@ -27,7 +27,7 @@ case object morphisms {
   type DaggerOf[M <: AnyGraphMorphism] = M#Out --> M#In
 
   // TODO this should be somewhere
-  trait AnyMorphismTransform {
+  trait AnyMorphismTransform extends Any {
 
     type InMorph <: AnyGraphMorphism
     type OutMorph
