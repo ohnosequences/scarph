@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-object morphisms {
+case object morphisms {
 
   import ohnosequences.cosas.types._
   import objects._
@@ -26,7 +26,7 @@ object morphisms {
 
   type DaggerOf[M <: AnyGraphMorphism] = M#Out --> M#In
 
-
+  // TODO this should be somewhere
   trait AnyMorphismTransform {
 
     type InMorph <: AnyGraphMorphism
@@ -39,10 +39,10 @@ object morphisms {
   sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 
     type First <: AnyGraphMorphism
-    type Second <: AnyGraphMorphism //{ type In = First#Out }
+    type Second <: AnyGraphMorphism // NOTE should be { type In = First#Out }
 
-    type In  <: First#In
-    type Out <: Second#Out
+    type In  >: First#In <: First#In
+    type Out >: Second#Out <: Second#Out
   }
 
   case class Composition[
@@ -65,7 +65,6 @@ object morphisms {
     lazy val label: String = s"(${first.label} >=> ${second.label})"
   }
 
-
   /* Basic aliases */
   type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
 
@@ -82,8 +81,6 @@ object morphisms {
   }
 
   trait AnyPrimitiveMorph extends AnyGraphMorphism { morph =>
-
-    // type Raw = Any
 
     type Dagger <: AnyPrimitiveMorph {
       type Dagger >: morph.type <: AnyPrimitiveMorph
@@ -237,7 +234,6 @@ object morphisms {
     lazy val label: String = s"merge(${obj.label} ⊕ ${obj.label})"
   }
 
-
   // L → L ⊕ R
   case class leftInj[B <: AnyBiproductObj](val biproduct: B) extends AnyPrimitiveMorph {
 
@@ -340,7 +336,6 @@ object morphisms {
     lazy val label: String = s"inE(${relation.label})"
   }
 
-
   case class source[E <: AnyRelation](val relation: E) extends AnyPrimitiveMorph {
 
     type Relation = E
@@ -406,7 +401,7 @@ object morphisms {
     lazy val label: String = s"inV(${relation.label})"
   }
 
-
+  // NOTE aliases for properties
   type get[P <: AnyProperty] = outV[P]
   def get[P <: AnyProperty](p: P): get[P] = outV[P](p)
 
@@ -516,17 +511,12 @@ object morphisms {
     lazy val label: String = s"(${left.label} ⊕ ${right.label})"
   }
 
-
-
-
-
   trait AnyNaturalIsomorphism extends AnyPrimitiveMorph { iso =>
 
     type Dagger <: AnyNaturalIsomorphism {
       type Dagger >: iso.type <: AnyNaturalIsomorphism
     }
   }
-
 
   // σ: L ⊗ R → R ⊗ L
   case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
@@ -573,7 +563,6 @@ object morphisms {
 
     lazy val label: String = s"associateRight((${a.label} ⊗ ${b.label}) ⊗ ${c.label})"
   }
-
 
   case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
     (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
@@ -697,7 +686,6 @@ object morphisms {
     lazy val dagger: Dagger = leftZero(x)
 
     lazy val label: String = s"leftCozero(${x.label})"
-
   }
 
 
