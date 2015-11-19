@@ -44,3 +44,7 @@ For non-generic axioms an API for writing recursive rewritings would be really u
 #### Internalizing axioms
 
 If we assume a dagger monoidal closed structure, we can reduce checking equality between parallel morphisms to the case of morphisms with target (or source) $I$ (take names or conames). That amounts to an internal version of extensionality. In spans it basically says that.
+
+### Axioms and rewriting
+
+Shall we prohibit rewritings not based on axioms? sounds attractive, but would it make something useful impossible?
