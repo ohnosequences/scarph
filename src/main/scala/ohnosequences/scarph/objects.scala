@@ -5,28 +5,31 @@ case object objects {
   import scala.reflect.ClassTag
   import ohnosequences.cosas._, types._, typeSets._
 
-  trait AnyGraphType extends AnyType { type Raw = Any }
+  trait AnyGraphType extends AnyType {
 
-  trait AnyGraphObject extends AnyGraphType
+    type Raw = Any
+  }
+
+  sealed trait AnyGraphObject extends AnyGraphType
 
   trait AnyRelation extends AnyGraphObject {
 
     type SourceArity <: AnyArity
     val  sourceArity: SourceArity
 
+    // NOTE >: <: bounds needed due to type inference issues
     type Source >: SourceArity#GraphObject <: SourceArity#GraphObject
-    lazy val  source: Source = sourceArity.graphObject
-
+    lazy val source: Source = sourceArity.graphObject
 
     type TargetArity <: AnyArity
     val  targetArity: TargetArity
 
+    // NOTE >: <: bounds needed due to type inference issues
     type Target >: TargetArity#GraphObject <: TargetArity#GraphObject
-    lazy val  target: Target = targetArity.graphObject
+    lazy val target: Target = targetArity.graphObject
   }
 
-
-  // stuff that normally can have properties
+  // NOTE in tradititional graph data models, only "elements" can have properties
   sealed trait AnyGraphElement extends AnyGraphObject
 
   trait AnyVertex extends AnyGraphElement
@@ -37,23 +40,24 @@ case object objects {
     type SourceArity <: AnyArity.OfVertices
     type TargetArity <: AnyArity.OfVertices
   }
+
   case object AnyEdge {
 
     type From[S <: AnyVertex] = AnyEdge { type Source = S }
     type   To[T <: AnyVertex] = AnyEdge { type Target = T }
   }
   /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
-  class Edge[
+  abstract class Edge[
     S <: AnyArity.OfVertices,
     T <: AnyArity.OfVertices
   ](st: (S, T))(val label: String) extends AnyEdge {
 
     type SourceArity = S
-    lazy val sourceArity = st._1
+    lazy val sourceArity: SourceArity = st._1
     type Source = SourceArity#GraphObject
 
     type TargetArity = T
-    lazy val targetArity = st._2
+    lazy val targetArity: TargetArity = st._2
     type Target = TargetArity#GraphObject
   }
 
@@ -63,13 +67,10 @@ case object objects {
     type Val
     def valueTag: ClassTag[Val]
   }
-  class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
+  abstract class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
 
     type Val = V
   }
-
-
-
 
   trait AnyArity {
 
@@ -103,7 +104,7 @@ case object objects {
 
     type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
   }
-  class Property[
+  abstract class Property[
     O <: AnyArity.OfElements,
     V <: AnyArity.OfValueTypes
   ]
@@ -136,7 +137,7 @@ case object objects {
 
   /* Empty predicate doesn't have any restrictions */
   trait AnyEmptyPredicate extends AnyPredicate {
-    lazy val conditions = List[AnyCondition]()
+    lazy val conditions: List[AnyCondition] = List[AnyCondition]()
   }
 
   case class EmptyPredicate[E <: AnyGraphElement](val element: E)
@@ -152,12 +153,12 @@ case object objects {
     val  body: Body
 
     type     Element = Body#Element
-    lazy val element = body.element
+    lazy val element: Element = body.element
 
     type Condition <: AnyCondition.OnElement[Body#Element]
     val  condition: Condition
 
-    lazy val conditions = condition :: body.conditions
+    lazy val conditions: List[AnyCondition] = condition :: body.conditions
   }
 
   case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElement[B#Element]]
@@ -174,10 +175,10 @@ case object objects {
     val  property: Property
 
     type     Element = Property#Source
-    lazy val element = property.source
+    lazy val element: Element = property.source
 
     val label: String
-    override final def toString = label
+    override final def toString: String = label
   }
 
   case object AnyCondition {
@@ -185,7 +186,6 @@ case object objects {
     type OnProperty[P <: AnyProperty] = AnyCondition { type Property = P }
     type OnElement[E <: AnyGraphElement] = AnyCondition { type Element = E }
   }
-
 
   /* Comparison conditions with **One** property value */
   trait AnyCompareCondition extends AnyCondition {
@@ -213,7 +213,6 @@ case object objects {
   ) extends AnyNotEqual with CompareCondition[P] {
     lazy val label: String = s"${property.label} ≠ ${value.toString}"
   }
-
 
   trait AnyLess extends AnyCompareCondition
   case class Less[P <: AnyProperty](
@@ -247,10 +246,8 @@ case object objects {
     lazy val label: String = s"${property.label} ≥ ${value.toString}"
   }
 
-
   trait AnyInterval extends AnyCondition {
     type Property <: AnyProperty
-
     val start: Property#Target#Raw
     val end: Property#Target#Raw
   }
@@ -263,7 +260,6 @@ case object objects {
     type Property = P
     lazy val label: String = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"
   }
-
 
 
   /* ## Tensor product */
@@ -287,15 +283,12 @@ case object objects {
 
   // \otimes symbol: f ⊗ s: F ⊗ S
   type ⊗[F <: AnyGraphObject, S <: AnyGraphObject] = TensorObj[F, S]
-
+  type unit = unit.type
 
   case object unit extends AnyGraphObject {
 
     lazy val label: String = this.toString
   }
-  type unit = unit.type
-
-
 
   /* ## Biproduct */
   sealed trait AnyBiproductObj extends AnyGraphObject {
@@ -316,14 +309,14 @@ case object objects {
     lazy val label: String = s"(${left.label} ⊕ ${right.label})"
   }
 
+  // NOTE \oplus symbol: f ⊕ s: F ⊕ S
+  type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
+  type zero = zero.type
+
   case object zero extends AnyGraphObject {
 
     lazy val label: String = this.toString
   }
-  type zero = zero.type
-
-  // \oplus symbol: f ⊕ s: F ⊕ S
-  type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
 
   implicit def graphObjectOps[O <: AnyGraphObject](o: O):
     GraphObjectOps[O] =
@@ -331,8 +324,7 @@ case object objects {
 
   case class GraphObjectOps[O <: AnyGraphObject](val obj: O) extends AnyVal {
 
-    def ⊗[S <: AnyGraphObject](other: S): TensorObj[O, S] = TensorObj(obj, other)
-    def ⊕[S <: AnyGraphObject](other: S): BiproductObj[O, S] = BiproductObj(obj, other)
+    def ⊗[S <: AnyGraphObject](other: S): O ⊗ S = TensorObj(obj, other)
+    def ⊕[S <: AnyGraphObject](other: S): O ⊕ S = BiproductObj(obj, other)
   }
-
 }
