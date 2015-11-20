@@ -35,7 +35,7 @@ Taking the dagger structure as primitive, axioms should relate the respective da
 
 ### Uses
 
-There's an obvious use for implementing static query rewriting for a given schema. If there's a particular (atomic) pattern that you *always* want to rewrite to something else, it would be good to have a way of recursing through a particular query and do just that. For non-primitive patterns, more care should be taken and a truly recursive solution would be needed.
+There's an obvious application: implementing static query rewriting for a given schema. If there's a particular (atomic) pattern that you *always* want to rewrite to something else, it would be good to have a way of recursing through a particular query and do just that. For non-primitive patterns, more care should be taken and a truly recursive solution would be needed.
 
 In the case of generic axioms, they are also useful for implementations. We can provide a set of generic tests which implementations can use for "proving" their correctness. This also calls for assuming that the types used in implementations would have an equality for morphisms, which in most cases would have the form of an uncheckable extensional function equality. In the Titan case, for example, we are essentially working in spans viewed as the kleisli category of the free commutative monoid monad, with `Iterable[X]`s representing the free commutative monoid on `X`. Equality for them is defined by equality in `X` up to reordering; and function equality by extensionality.
 
@@ -47,4 +47,9 @@ If we assume a dagger monoidal closed structure, we can reduce checking equality
 
 ### Axioms and rewriting
 
-Shall we prohibit rewritings not based on axioms? sounds attractive, but would it make something useful impossible?
+Shall we prohibit rewritings not based on axioms? sounds attractive, but would it make something useful impossible? Another point to consider is how to *use* axioms. If they're going to be part of the implicit scope, we need to
+
+1. find a place for generic axioms, so that they don't need to be explicitly imported
+2. morphism-specific axioms (like being dagger mono) could be part of the graph schema
+
+It would be nice if we could derive a set of rules for composing rewritings which would amount to naturality.
