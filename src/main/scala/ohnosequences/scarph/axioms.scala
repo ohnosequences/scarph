@@ -21,6 +21,9 @@ case object axioms {
     type Second = S
   }
 
+  type ≅[F <: AnyGraphMorphism,S <: AnyGraphMorphism { type In = F#In; type Out = F#Out }] =
+    AnyAxiom { type First = F; type Second = S }
+
   // example: category axioms
   class CompositionIsAssociative[
     F <: AnyGraphMorphism,
@@ -64,5 +67,24 @@ case object axioms {
 
   class IdentitiesAreTheirDagger[O <: AnyGraphObject]
   extends Axiom[id[O]#Dagger, id[O]]
+
+  // other non-generic axioms: dagger mono, dagger epi
+  class DaggerMono[
+    F <: AnyGraphMorphism {
+      type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In}
+    }
+  ]
+  extends Axiom[F >=> F#Dagger, id[F#In]]
+
+  class DaggerEpi[
+    F <: AnyGraphMorphism {
+      type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In}
+    }
+  ]
+  extends Axiom[Composition[F#Dagger, F], id[F#Out]]
+
+  // dagger monoidal category axioms
+  // see http://ncatlab.org/nlab/show/symmetric+monoidal+dagger-category
+  // class AssociatorDagger ...
 
 }
