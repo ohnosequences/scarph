@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 case object evals {
 
-  import ohnosequences.cosas.types._
+  import ohnosequences.cosas._, types._
   import objects._, morphisms._
 
   /* Transforms a morphism to a function */

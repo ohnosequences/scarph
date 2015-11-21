@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 case object morphisms {
 
-  import ohnosequences.cosas.types._
+  import ohnosequences.cosas.{ zero => _, _}, types.{ unit => _, _}
   import objects._
 
   /* Morphisms are spans */

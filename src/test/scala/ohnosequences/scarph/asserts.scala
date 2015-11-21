@@ -2,7 +2,7 @@ package ohnosequences.scarph.test
 
 case object asserts {
 
-  import ohnosequences.cosas._, types._, equalities._
+  import ohnosequences.cosas._, types._
   import org.scalatest.Assertions._
 
   // not only compares the values, but also check the types equality (essential for tagged values)

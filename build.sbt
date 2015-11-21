@@ -6,7 +6,7 @@ description   := "Scala graph API"
 scalaVersion  := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "ohnosequences"   %% "cosas"       % "0.7.1",
+  "ohnosequences"   %% "cosas"       % "0.8.0-SNAPSHOT",
   "org.scalatest"   %% "scalatest"   % "2.2.5" % Test
 )
 
