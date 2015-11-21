@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.cosas._, typeSets._
+import ohnosequences.cosas._
 
 import ohnosequences.{ scarph => s }
 import s.objects._, s.schemas._

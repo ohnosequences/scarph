@@ -3,7 +3,7 @@ package ohnosequences.scarph
 case object objects {
 
   import scala.reflect.ClassTag
-  import ohnosequences.cosas._, types._, typeSets._
+  import ohnosequences.cosas._, types.{ unit => _, _}
 
   trait AnyGraphType extends AnyType {
 

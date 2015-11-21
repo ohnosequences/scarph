@@ -2,7 +2,7 @@ package ohnosequences.scarph.syntax
 
 object morphisms {
 
-  import ohnosequences.cosas.types._
+  import ohnosequences.cosas.types.{ unit => _, _}
   import ohnosequences.{ scarph => s }
   import s.objects._, s.morphisms._
 
