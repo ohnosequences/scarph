@@ -5,62 +5,68 @@ import ohnosequences.cosas._, fns._
 
 case object rewrites {
 
-
-  // NOTE could add here an axiom witness
-  case class Rewrite[
-    S <: AnyRewriting {
-      type In1 >: IE
-      type Out >: OE
-    },
-    IE <: AnyGraphMorphism, // { type In = OE#In; type Out = OE#Out },
-    OE <: AnyGraphMorphism
-  ](val rewr: IE => OE) extends AnyApp1At[S, IE] {
-
-    type Y = OE
-
-    final def apply(in: X1): Y = rewr(in)
-  }
-
   trait AnyRewriting extends AnyDepFn1 {
 
     type In1 = AnyGraphMorphism
     type Out = AnyGraphMorphism // is a bound needed here?
   }
 
+
+  // NOTE: could add here an axiom witness
+  @annotation.implicitNotFound("""Cannot rewrite morphism
+    ${IM}
+  to
+    ${OM}
+  using ${S}
+  """)
+  case class Rewrite[
+    S <: AnyRewriting {
+      type In1 >: IM
+      type Out >: OM
+    },
+    IM <: AnyGraphMorphism, // { type In = OM#In; type Out = OM#Out },
+    OM <: AnyGraphMorphism
+  ](val rewr: IM => OM) extends AnyApp1At[S, IM] {
+
+    type Y = OM
+
+    final def apply(in: X1): Y = rewr(in)
+  }
+
   case object AnyRewriting extends ReduceCompositionWithIdentities {
 
-    // TODO once we are using axioms this should be redundant using dagger monos/epis
+    // TODO: once we are using axioms this should be redundant using dagger monos/epis
 
+    // U - iso, U ∘ U† ~> id
     implicit def unitaryIsoLeft[
       S <: AnyRewriting,
       U <: AnyNaturalIsomorphism
-    ]
-    : Rewrite[S, morphisms.Composition[U, U#Dagger], id[U#In]] =
-      Rewrite { u_ud: morphisms.Composition[U, U#Dagger] => id[U#In](u_ud.first.in) }
+    ]: Rewrite[S, morphisms.Composition[U, U#Dagger], id[U#In]] =
+       Rewrite { u_ud: morphisms.Composition[U, U#Dagger] => id[U#In](u_ud.first.in) }
 
+    // U - iso, U† ∘ U ~> id
     implicit def unitaryIsoRight[
       S <: AnyRewriting,
       U <: AnyNaturalIsomorphism
-    ]
-    : Rewrite[S, morphisms.Composition[U#Dagger, U], id[U#Out]] =
-      Rewrite { u_ud: morphisms.Composition[U#Dagger, U] => id[U#Out](u_ud.second.out) }
+    ]: Rewrite[S, morphisms.Composition[U#Dagger, U], id[U#Out]] =
+       Rewrite { u_ud: morphisms.Composition[U#Dagger, U] => id[U#Out](u_ud.second.out) }
   }
 
   trait ReduceCompositionWithIdentities extends DoNothing {
 
+    // F ∘ id ~> F
     implicit def leftIdentities[
       S <: AnyRewriting,
       F <: AnyGraphMorphism
-    ]
-    : Rewrite[S, F >=> id[F#Out], F] =
-      Rewrite { f_id: F >=> id[F#Out] => f_id.first }
+    ]: Rewrite[S, F >=> id[F#Out], F] =
+       Rewrite { f_id: F >=> id[F#Out] => f_id.first }
 
+    // id ∘ F ~> F
     implicit def rightIdentities[
       S <: AnyRewriting,
       F <: AnyGraphMorphism
-    ]
-    : Rewrite[S, morphisms.Composition[id[F#In], F], F] =
-      Rewrite { id_f: morphisms.Composition[id[F#In], F] => id_f.second }
+    ]: Rewrite[S, morphisms.Composition[id[F#In], F], F] =
+       Rewrite { id_f: morphisms.Composition[id[F#In], F] => id_f.second }
   }
 
   trait DoNothing {
@@ -70,7 +76,7 @@ case object rewrites {
       S <: AnyRewriting,
       F <: AnyGraphMorphism
     ]: Rewrite[S, F, F] =
-       Rewrite { f: F => f }
+       Rewrite(Predef.identity[F])
   }
 
 
