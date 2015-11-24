@@ -105,40 +105,66 @@ class DummyTests extends org.scalatest.FunSuite {
 
   import rewrites._
 
-  case object compositionToLeft extends AnyRecursiveRightAssocRewriteStrategy {
+  test("basic rewriting") {
+
+    case object basic extends AnyRewriting
+
+    println(
+      basic(symmetry(user, tweet) >=> symmetry(tweet, user)).label
+    )
+    // implicitly[
+    //   Rewrite[AnyRewrite, ]
+    // ]
+  }
+
+  case object compositionToLeft extends RecurseOverComposition {
 
     implicit final def left_bias_assoc[
       F <: AnyGraphMorphism,
       G <: AnyGraphMorphism { type In = F#Out },
-      H <: AnyGraphMorphism { type In = G#Out }
-    ]
-    : (F >=> (G >=> H)) rewriteTo ((F >=> G) >=> H)
-    = rewriteTo (
-      {
-        f_gh: F >=> (G >=> H) => {
-
-          val f  = f_gh.first
-          val gh = f_gh.second
-
-          val g = gh.first
-          val h = gh.second
-
-          ((f >=> g) >=> h): (F >=> G) >=> H
-        }
-      }
+      H <: AnyGraphMorphism { type In = G#Out },
+      I <: F#In ==> H#Out
+    ](implicit
+      recurse: Rewrite[compositionToLeft.type, F#In, H#Out, (F >=>> G) >=>> H, I]
     )
+    : Rewrite[compositionToLeft.type, F#In, H#Out,
+        F >=>> (G >=>> H),
+    // (F >=>> G) >=>> H
+        I
+      ]
+    = Rewrite { f_gh: F >=>> (G >=>> H) =>
+
+      val f  = f_gh.first
+      val gh = f_gh.second
+      val g = gh.first
+      val h = gh.second
+
+      recurse((f >=> g) >=> h)
+    }
+
   }
 
-  ignore("rewriting composition") {
+  test("rewriting composition") {
 
-    val morph     = outV(follows) >=> ( inV(follows) >=> ( outV(follows) >=> ( inV(follows) >=> outV(follows) )))
-    val shouldBe  = ((( outV(follows) >=> inV(follows) ) >=> outV(follows) ) >=> inV(follows) ) >=> outV(follows)
+    // val morph     = outV(follows) >=> ( inV(follows) >=> ( outV(follows) >=> ( inV(follows) >=> outV(follows) )))
+    // val shouldBe  = ((( outV(follows) >=> inV(follows) ) >=> outV(follows) ) >=> inV(follows) ) >=> outV(follows)
+    val morph = id(user) >=> (id(user) >=> id(user))
+    val shouldBe = (id(user) >=> id(user)) >=> id(user)
 
-    val rmorph = apply(compositionToLeft).to(morph)
+    val rmorph = compositionToLeft(morph)(
+      compositionToLeft.left_bias_assoc[
+        id[user.type], id[user.type], id[user.type],
+        (id[user.type] >=>> id[user.type]) >=>> id[user.type]
+      ]
+      //   AnyRewriting.default[compositionToLeft.type, (id[user.type] >=> id[user.type]) >=> id[user.type]]
+      //   // RecurseOverComposition.goInside
+      // )
+    )
 
     info(morph.label)
     info(rmorph.label)
+    // info(shouldBe.label)
 
-    assert{ apply(compositionToLeft).to(morph) === shouldBe }
+    // assert{ rmorph === shouldBe }
   }
 }
