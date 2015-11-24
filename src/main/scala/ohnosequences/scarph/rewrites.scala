@@ -1,6 +1,6 @@
 package ohnosequences.scarph
 
-import morphisms._, axioms._
+import objects._, morphisms._, axioms._
 import ohnosequences.cosas._, fns._
 
 case object rewrites {
@@ -24,8 +24,11 @@ case object rewrites {
       type In1 >: IM
       type Out >: OM
     },
-    IM <: AnyGraphMorphism, // { type In = OM#In; type Out = OM#Out },
-    OM <: AnyGraphMorphism
+    I <: AnyGraphObject, O <: AnyGraphObject,
+    IM <: I --> O,
+    OM <: I --> O
+    // IM <: AnyGraphMorphism, // { type In = OM#In; type Out = OM#Out },
+    // OM <: IM#In --> IM#Out
   ](val rewr: IM => OM) extends AnyApp1At[S, IM] {
 
     type Y = OM
@@ -40,16 +43,18 @@ case object rewrites {
     // U - iso, U ∘ U† ~> id
     implicit def unitaryIsoLeft[
       S <: AnyRewriting,
-      U <: AnyNaturalIsomorphism
-    ]: Rewrite[S, morphisms.Composition[U, U#Dagger], id[U#In]] =
-       Rewrite { u_ud: morphisms.Composition[U, U#Dagger] => id[U#In](u_ud.first.in) }
+      U <: AnyNaturalIsomorphism,
+      UD <: DaggerOf[U]
+    ]: Rewrite[S, U#In, U#In, U >=>> UD, id[U#In]] =
+       Rewrite { u_ud: U >=>> UD => id[U#In](u_ud.first.in) }
 
     // U - iso, U† ∘ U ~> id
     implicit def unitaryIsoRight[
       S <: AnyRewriting,
-      U <: AnyNaturalIsomorphism
-    ]: Rewrite[S, morphisms.Composition[U#Dagger, U], id[U#Out]] =
-       Rewrite { u_ud: morphisms.Composition[U#Dagger, U] => id[U#Out](u_ud.second.out) }
+      U <: AnyNaturalIsomorphism,
+      UD <: DaggerOf[U]
+    ]: Rewrite[S, U#Out, U#Out, UD >>=> U, id[U#Out]] =
+       Rewrite { u_ud: UD >>=> U => id[U#Out](u_ud.second.out) }
   }
 
   trait ReduceCompositionWithIdentities extends DoNothing {
@@ -58,15 +63,15 @@ case object rewrites {
     implicit def leftIdentities[
       S <: AnyRewriting,
       F <: AnyGraphMorphism
-    ]: Rewrite[S, F >=> id[F#Out], F] =
-       Rewrite { f_id: F >=> id[F#Out] => f_id.first }
+    ]: Rewrite[S, F#In, F#Out, F >=>> id[F#Out], F] =
+       Rewrite { f_id: F >=>> id[F#Out] => f_id.first }
 
     // id ∘ F ~> F
     implicit def rightIdentities[
       S <: AnyRewriting,
       F <: AnyGraphMorphism
-    ]: Rewrite[S, morphisms.Composition[id[F#In], F], F] =
-       Rewrite { id_f: morphisms.Composition[id[F#In], F] => id_f.second }
+    ]: Rewrite[S, F#In, F#Out, id[F#In] >>=> F, F] =
+       Rewrite { id_f: id[F#In] >>=> F => id_f.second }
   }
 
   trait DoNothing {
@@ -75,10 +80,9 @@ case object rewrites {
     implicit def default[
       S <: AnyRewriting,
       F <: AnyGraphMorphism
-    ]: Rewrite[S, F, F] =
+    ]: Rewrite[S, F#In, F#Out, F, F] =
        Rewrite(Predef.identity[F])
   }
-
 
 
 

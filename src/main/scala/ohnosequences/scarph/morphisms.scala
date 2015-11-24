@@ -24,7 +24,9 @@ case object morphisms {
   // non-strict:
   type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
 
-  type DaggerOf[M <: AnyGraphMorphism] = M#Out --> M#In
+  type DaggerOf[M <: AnyGraphMorphism] = M#Dagger { type In = M#Out; type Out = M#In }
+    // M#Out --> M#In
+
 
   // TODO this should be somewhere
   trait AnyMorphismTransform extends Any {
@@ -67,6 +69,9 @@ case object morphisms {
 
   /* Basic aliases */
   type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+
+  type >=>>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+  type >>=>[F <: AnyGraphMorphism { type Out = S#In }, S <: AnyGraphMorphism] = Composition[F, S]
 
   implicit def graphMorphismOps[F <: AnyGraphMorphism](f: F):
         GraphMorphismOps[F] =
