@@ -120,18 +120,15 @@ class DummyTests extends org.scalatest.FunSuite {
   case object compositionToLeft extends RecurseOverComposition {
 
     implicit final def left_bias_assoc[
-      F <: AnyGraphMorphism,
+      F <: AnyGraphMorphism { type In = O#In },
       G <: AnyGraphMorphism { type In = F#Out },
-      H <: AnyGraphMorphism { type In = G#Out },
-      I <: F#In ==> H#Out
+      H <: AnyGraphMorphism { type In = G#Out ; type Out = O#Out },
+      // leaving O free:
+      O <: AnyGraphMorphism
     ](implicit
-      recurse: Rewrite[compositionToLeft.type, F#In, H#Out, (F >=>> G) >=>> H, I]
+      recurse: AnyRewrite[compositionToLeft.type, (F >=>> G) >=>> H] { type OutMorph = O }
     )
-    : Rewrite[compositionToLeft.type, F#In, H#Out,
-        F >=>> (G >=>> H),
-    // (F >=>> G) >=>> H
-        I
-      ]
+    : AnyRewrite[compositionToLeft.type, F >=>> (G >=>> H)] { type OutMorph = O }
     = Rewrite { f_gh: F >=>> (G >=>> H) =>
 
       val f  = f_gh.first
@@ -146,25 +143,16 @@ class DummyTests extends org.scalatest.FunSuite {
 
   test("rewriting composition") {
 
-    // val morph     = outV(follows) >=> ( inV(follows) >=> ( outV(follows) >=> ( inV(follows) >=> outV(follows) )))
-    // val shouldBe  = ((( outV(follows) >=> inV(follows) ) >=> outV(follows) ) >=> inV(follows) ) >=> outV(follows)
-    val morph = id(user) >=> (id(user) >=> id(user))
-    val shouldBe = (id(user) >=> id(user)) >=> id(user)
+    val x = id(user)
+    val morph    = x >=> (x >=> (x >=> (x >=> x)))
+    val shouldBe = (((x >=> x) >=> x) >=> x) >=> x
 
-    val rmorph = compositionToLeft(morph)(
-      compositionToLeft.left_bias_assoc[
-        id[user.type], id[user.type], id[user.type],
-        (id[user.type] >=>> id[user.type]) >=>> id[user.type]
-      ]
-      //   AnyRewriting.default[compositionToLeft.type, (id[user.type] >=> id[user.type]) >=> id[user.type]]
-      //   // RecurseOverComposition.goInside
-      // )
-    )
+    val rmorph = compositionToLeft(morph)
 
-    info(morph.label)
-    info(rmorph.label)
-    // info(shouldBe.label)
+    info("original:  " + morph.label)
+    info("rewritten: " + rmorph.label)
+    info("should be: " + shouldBe.label)
 
-    // assert{ rmorph === shouldBe }
+    assert{ rmorph === shouldBe }
   }
 }
