@@ -107,28 +107,29 @@ class DummyTests extends org.scalatest.FunSuite {
 
   test("basic rewriting") {
 
-    case object basic extends AnyRewriting
+    case object basic extends ReduceIsoDagger
 
-    println(
-      basic(symmetry(user, tweet) >=> symmetry(tweet, user)).label
+    assertResult(id(user ⊗ tweet))(
+      basic(
+        symmetry(user, tweet) >=> symmetry(tweet, user)
+      )
     )
-    // implicitly[
-    //   Rewrite[AnyRewrite, ]
-    // ]
   }
 
-  case object compositionToLeft extends RecurseOverComposition {
+  case object compositionToLeft extends AnyRewriting { //RecurseOverComposition {
 
     implicit final def left_bias_assoc[
-      F <: AnyGraphMorphism { type In = O#In },
-      G <: AnyGraphMorphism { type In = F#Out },
-      H <: AnyGraphMorphism { type In = G#Out ; type Out = O#Out },
-      // leaving O free:
-      O <: AnyGraphMorphism
+      F <: AnyGraphMorphism { type In = FGO#In },
+      G <: AnyGraphMorphism { type In = F#Out ; type Out = FGO#Out },
+      H <: AnyGraphMorphism { type In = G#Out }, //; type Out = O#Out },
+      FGO <: AnyGraphMorphism
+      // We cannot add another free out-type, because then FGO will depend on it
+      // O <: AnyGraphMorphism
     ](implicit
-      recurse: AnyRewrite[compositionToLeft.type, (F >=>> G) >=>> H] { type OutMorph = O }
+      recurseFG: AnyRewrite[compositionToLeft.type, F >=>> G] { type OutMorph = FGO },
+      recurseH:  AnyRewrite[compositionToLeft.type, FGO >=>> H]
     )
-    : AnyRewrite[compositionToLeft.type, F >=>> (G >=>> H)] { type OutMorph = O }
+    : AnyRewrite[compositionToLeft.type, F >=>> (G >=>> H)] { type OutMorph = recurseH.OutMorph }
     = Rewrite { f_gh: F >=>> (G >=>> H) =>
 
       val f  = f_gh.first
@@ -136,7 +137,9 @@ class DummyTests extends org.scalatest.FunSuite {
       val g = gh.first
       val h = gh.second
 
-      recurse((f >=> g) >=> h)
+      // recurse(recurseFG(f >=> g) >=> recurseH(h))
+      val fgo: FGO = recurseFG(f >=> g)
+      recurseH(fgo >=> h)
     }
 
   }
@@ -144,15 +147,37 @@ class DummyTests extends org.scalatest.FunSuite {
   test("rewriting composition") {
 
     val x = id(user)
-    val morph    = x >=> (x >=> (x >=> (x >=> x)))
+    val morph    = x >=> ((x >=> x) >=> (x >=> x))
     val shouldBe = (((x >=> x) >=> x) >=> x) >=> x
 
     val rmorph = compositionToLeft(morph)
 
-    info("original:  " + morph.label)
-    info("rewritten: " + rmorph.label)
-    info("should be: " + shouldBe.label)
+    // info("original:   " + morph.label)
+    // info("rewritten:  " + rmorph.label)
+    // info("should be:  " + shouldBe.label)
 
-    assert{ rmorph === shouldBe }
+    assertResult(shouldBe){ rmorph }
+
+    // composing 7 x's in any way should yield this after rewriting:
+    val x7 = ((((((x >=> x) >=> x) >=> x) >=> x) >=> x) >=> x)
+
+    assertResult(x7) {
+      compositionToLeft(
+        x >=> (x >=> (x >=> (x >=> (x >=> (x >=> x)))))
+      )
+    }
+
+    assertResult(x7) {
+      compositionToLeft(
+        x >=> (x >=> (x >=> x) >=> (x >=> x) >=> x)
+      )
+    }
+
+    // assertResult(x7) {
+    info {
+      compositionToLeft(
+        x >=> ((x >=> x) >=> x) >=> x >=> (x >=> x)
+      ).label
+    }
   }
 }

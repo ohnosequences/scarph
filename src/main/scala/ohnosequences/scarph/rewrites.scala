@@ -12,20 +12,30 @@ case object rewrites {
   }
 
   case object AnyRewriting {
+    implicit def rewritingSyntax[R <: AnyRewriting](r: R):
+      RewritingSyntax[R] =
+      RewritingSyntax[R](r)
 
     // this is a fallback case for any strategy:
     implicit def default[
       R <: AnyRewriting,
       F <: AnyGraphMorphism
     ]: AnyRewrite[R, F] { type OutMorph = F } =
-       Rewrite(Predef.identity[F])
+       Rewrite[R, F, F](Predef.identity[F])
   }
 
+  case class RewritingSyntax[R <: AnyRewriting](r: R) extends AnyVal {
+
+    // def rewrite[
+    //   IM <: AnyGraphMorphism
+    //   OM <: IM#In --> IM#Out
+    // ](im: IM)(implicit
+    //   rewr: AnyRewrite[DeepRewriting[R], IM] { type OutMorph = OM }
+    // ): OM = rewr(im)
+  }
 
   trait AnyRewrite[
-    R <: AnyRewriting {
-      type In1 >: IM
-    },
+    R <: AnyRewriting,
     IM <: AnyGraphMorphism
   ] extends AnyApp1At[R, IM] {
 
@@ -42,10 +52,7 @@ case object rewrites {
   using ${R}
   """)
   case class Rewrite[
-    R <: AnyRewriting {
-      type In1 >: IM
-      type Out >: OM
-    },
+    R <: AnyRewriting,
     IM <: AnyGraphMorphism,
     OM <: IM#In --> IM#Out
   ](val rewr: IM => OM) extends AnyRewrite[R, IM] {
@@ -61,6 +68,7 @@ case object rewrites {
   case object ReduceIsoDagger {
     // TODO: once we are using axioms this should be redundant using dagger monos/epis
 
+    // TODO:  this should be recursive
     // U - iso, U ∘ U† ~> id
     implicit def unitaryIsoLeft[
       R <: ReduceIsoDagger,
@@ -81,6 +89,7 @@ case object rewrites {
 
   trait ReduceCompositionWithIdentities extends ReduceIsoDagger
   case object ReduceCompositionWithIdentities {
+    // TODO:  this should be recursive
 
     // F ∘ id ~> F
     implicit def leftIdentities[
@@ -91,29 +100,37 @@ case object rewrites {
 
     // id ∘ F ~> F
     implicit def rightIdentities[
-      R <: AnyRewriting,
+      R <: ReduceCompositionWithIdentities,
       F <: AnyGraphMorphism
     ]: AnyRewrite[R, id[F#In] >>=> F] { type OutMorph = F } =
        Rewrite { id_f: id[F#In] >>=> F => id_f.second }
   }
 
 
-  trait RecurseOverComposition extends AnyRewriting //ReduceCompositionWithIdentities
+  trait RecurseOverComposition extends AnyRewriting
   case object RecurseOverComposition {
 
     // rewrites composed moprhisms
     implicit def goInside[
       R <: RecurseOverComposition,
-      F <: AnyGraphMorphism,
-      S <: AnyGraphMorphism { type In = F#Out },
-      F1 <: F#In ==> F#Out,
-      S1 <: S#In ==> S#Out
+      // F <: AnyGraphMorphism,
+      // S <: AnyGraphMorphism { type In = F#Out },
+      // F1 <: F#In ==> F#Out,
+      // S1 <: S#In ==> S#Out
+      F <: AnyGraphMorphism { type In = F1#In },
+      S <: AnyGraphMorphism { type In = F#Out; type Out = S1#Out },
+      F1 <: AnyGraphMorphism,
+      S1 <: AnyGraphMorphism { type In = F1#Out }
     ](implicit
       rewriteF: AnyRewrite[R, F] { type OutMorph = F1 },
       rewriteS: AnyRewrite[R, S] { type OutMorph = S1 }
-    ): AnyRewrite[R, F  >=>> S] { type OutMorph = F1 >=>> S1 } =
+    ): AnyRewrite[R, F >=>> S] { type OutMorph = F1 >=>> S1 } =
        Rewrite { f_s: F >=>> S =>
-         rewriteF(f_s.first) >=> rewriteS(f_s.second)
+
+         val f1: F1 = rewriteF(f_s.first)
+         val s1: S1 = rewriteS(f_s.second)
+
+         f1 >=> s1
        }
   }
 
