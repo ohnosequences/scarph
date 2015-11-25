@@ -116,6 +116,45 @@ class DummyTests extends org.scalatest.FunSuite {
     )
   }
 
+  test("reducing identities") {
+    val i = id(user)
+    val x = outV(follows)
+
+    case object reduceL extends ReduceLeftIdentities
+    case object reduceR extends ReduceRightIdentities
+    val reduceIds = reduceR ∘ reduceL
+
+    // info(reduceL(i >=> x).label)
+    // info(reduceR(x >=> i).label)
+    // info((reduceR ∘ reduceL)((i >=> (x >=> (i >=> (i >=> i)))) >=> i).label)
+
+    assertResult(i)(
+      reduceIds(i >=> i)
+    )
+
+    assertResult(i)(
+      reduceIds(i >=> (i >=> i))
+    )
+
+    assertResult(i)(
+      reduceIds(i >=> ((i >=> (i >=> i)) >=> i))
+    )
+
+    assertResult(x)(
+      reduceIds(i >=> x)
+    )
+
+    assertResult(x)(
+      reduceIds(x >=> i)
+    )
+
+    // a case for RecurseOverComposition:
+    assertResult(x >=> x)(
+      reduceIds((x >=> i) >=> (i >=> x))
+    )
+  }
+
+
   case object compositionToLeft extends compositionToLeft_2 {
 
     implicit final def left_bias_assoc[

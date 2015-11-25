@@ -27,6 +27,11 @@ case object morphisms {
   type DaggerOf[M <: AnyGraphMorphism] = M#Dagger { type In = M#Out; type Out = M#In }
     // M#Out --> M#In
 
+  case object AnyGraphMorphism {
+
+    type From[I <: AnyGraphObject] = AnyGraphMorphism { type In = I }
+    type To[O <: AnyGraphObject] = AnyGraphMorphism { type Out = O }
+  }
 
   // TODO this should be somewhere
   trait AnyMorphismTransform extends Any {
@@ -80,7 +85,7 @@ case object morphisms {
   case class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) extends AnyVal {
 
     def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
-
+    
     def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
     def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
   }
