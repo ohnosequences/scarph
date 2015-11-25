@@ -39,7 +39,7 @@ case object rewrites {
     IM <: AnyGraphMorphism
   ] extends AnyApp1At[R, IM] {
 
-    type OutMorph <: IM#In --> IM#Out
+    type OutMorph <: AnyGraphMorphism
 
     type Y = OutMorph
   }
@@ -54,7 +54,7 @@ case object rewrites {
   case class Rewrite[
     R <: AnyRewriting,
     IM <: AnyGraphMorphism,
-    OM <: IM#In --> IM#Out
+    OM <: AnyGraphMorphism
   ](val rewr: IM => OM) extends AnyRewrite[R, IM] {
 
     type OutMorph = OM
@@ -113,12 +113,8 @@ case object rewrites {
     // rewrites composed moprhisms
     implicit def goInside[
       R <: RecurseOverComposition,
-      // F <: AnyGraphMorphism,
-      // S <: AnyGraphMorphism { type In = F#Out },
-      // F1 <: F#In ==> F#Out,
-      // S1 <: S#In ==> S#Out
-      F <: AnyGraphMorphism { type In = F1#In },
-      S <: AnyGraphMorphism { type In = F#Out; type Out = S1#Out },
+      F <: AnyGraphMorphism,
+      S <: AnyGraphMorphism { type In = F#Out },
       F1 <: AnyGraphMorphism,
       S1 <: AnyGraphMorphism { type In = F1#Out }
     ](implicit

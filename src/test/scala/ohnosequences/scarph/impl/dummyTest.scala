@@ -116,32 +116,52 @@ class DummyTests extends org.scalatest.FunSuite {
     )
   }
 
-  case object compositionToLeft extends AnyRewriting { //RecurseOverComposition {
+  case object compositionToLeft extends compositionToLeft_2 {
 
     implicit final def left_bias_assoc[
-      F <: AnyGraphMorphism { type In = FGO#In },
-      G <: AnyGraphMorphism { type In = F#Out ; type Out = FGO#Out },
-      H <: AnyGraphMorphism { type In = G#Out }, //; type Out = O#Out },
-      FGO <: AnyGraphMorphism
-      // We cannot add another free out-type, because then FGO will depend on it
-      // O <: AnyGraphMorphism
+      F <: AnyGraphMorphism { type Out = G#In },
+      G <: AnyGraphMorphism { type In = FO#Out; type Out = H#In },
+      H <: AnyGraphMorphism { type In = FGO#Out },
+      FO <: AnyGraphMorphism,
+      FGO <: AnyGraphMorphism,
+      O <: AnyGraphMorphism
     ](implicit
-      recurseFG: AnyRewrite[compositionToLeft.type, F >=>> G] { type OutMorph = FGO },
-      recurseH:  AnyRewrite[compositionToLeft.type, FGO >=>> H]
+      rewriteF: AnyRewrite[compositionToLeft.type, F] { type OutMorph = FO },
+      rewriteG: AnyRewrite[compositionToLeft.type, FO >=>> G] { type OutMorph = FGO },
+      rewriteH: AnyRewrite[compositionToLeft.type, FGO >=>> H] { type OutMorph = O }
     )
-    : AnyRewrite[compositionToLeft.type, F >=>> (G >=>> H)] { type OutMorph = recurseH.OutMorph }
-    = Rewrite { f_gh: F >=>> (G >=>> H) =>
+    : AnyRewrite[compositionToLeft.type, F >>=> (G >>=> H)] { type OutMorph = O }
+    = Rewrite { f_gh: F >>=> (G >>=> H) =>
 
-      val f  = f_gh.first
-      val gh = f_gh.second
-      val g = gh.first
-      val h = gh.second
+      val f = f_gh.first
+      val g = f_gh.second.first
+      val h = f_gh.second.second
 
-      // recurse(recurseFG(f >=> g) >=> recurseH(h))
-      val fgo: FGO = recurseFG(f >=> g)
-      recurseH(fgo >=> h)
+      rewriteH(rewriteG(rewriteF(f) >=> g) >=> h)
     }
 
+  }
+
+  trait compositionToLeft_2 extends RecurseOverComposition {
+
+    implicit final def left_bias_assoc_2[
+      F <: AnyGraphMorphism { type Out = G#In },
+      G <: AnyGraphMorphism { type In = FO#Out; type Out = H#In },
+      H <: AnyGraphMorphism { type In = O#Out },
+      FO <: AnyGraphMorphism,
+      O <: AnyGraphMorphism
+    ](implicit
+      rewriteF: AnyRewrite[compositionToLeft.type, F] { type OutMorph = FO },
+      rewriteG: AnyRewrite[compositionToLeft.type, FO >=>> G] { type OutMorph = O }
+    )
+    : AnyRewrite[compositionToLeft.type, F >>=> G] { type OutMorph = O }
+    = Rewrite { f_g: F >>=> G =>
+
+      val f = f_g.first
+      val g = f_g.second
+
+      rewriteG(rewriteF(f) >=> g)
+    }
   }
 
   test("rewriting composition") {
@@ -173,11 +193,13 @@ class DummyTests extends org.scalatest.FunSuite {
       )
     }
 
-    // assertResult(x7) {
-    info {
-      compositionToLeft(
-        x >=> ((x >=> x) >=> x) >=> x >=> (x >=> x)
-      ).label
+    // Checking that f gets rewritten
+    val f = (x >=> (x >=> x)) >=> x
+    val g = x >=> x
+    val h = x
+
+    assertResult(x7) {
+      compositionToLeft( f >=> (g >=> h) )
     }
   }
 }
