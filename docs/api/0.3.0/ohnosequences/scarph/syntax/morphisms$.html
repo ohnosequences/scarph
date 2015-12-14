@@ -1,0 +1,1037 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>morphisms - ohnosequences.scarph.syntax.morphisms</title>
+          <meta name="description" content="morphisms - ohnosequences.scarph.syntax.morphisms" />
+          <meta name="keywords" content="morphisms ohnosequences.scarph.syntax.morphisms" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'ohnosequences.scarph.syntax.morphisms$';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Object" src="../../../lib/object_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="ohnosequences">ohnosequences</a>.<a href="../package.html" class="extype" name="ohnosequences.scarph">scarph</a>.<a href="package.html" class="extype" name="ohnosequences.scarph.syntax">syntax</a></p>
+        <h1>morphisms</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="ohnosequences.scarph.syntax">package syntax</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <span class="name">morphisms</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="ohnosequences.scarph.syntax.morphisms"><span>morphisms</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="ohnosequences.scarph.syntax.morphisms.BiproductSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BiproductSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="BiproductSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]:BiproductSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$BiproductSyntax.html"><span class="name">BiproductSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyBiproductObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.BiproductSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@BiproductSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.DistributableOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DistributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,ohnosequences.scarph.objects.⊕[F#Out#Right#Left,F#Out#Right#Right]]}"></a>
+      <a id="DistributableOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}]:DistributableOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">DistributableOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj{type Right &lt;: ohnosequences.scarph.objects.AnyBiproductObj} }</span>]</span><span class="result"> = <span class="extype" name="ohnosequences.scarph.syntax.morphisms.DistributableOut.F">F</span> with <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊗[F#Out#Left,ohnosequences.scarph.objects.⊕[F#Out#Right#Left,F#Out#Right#Right]] }</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@DistributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,ohnosequences.scarph.objects.⊕[F#Out#Right#Left,F#Out#Right#Right]]}" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.DistributableSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DistributableSyntax[X&lt;:ohnosequences.scarph.objects.AnyGraphObject,A&lt;:ohnosequences.scarph.objects.AnyGraphObject,B&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[X,ohnosequences.scarph.objects.⊕[A,B]]}]extendsProductwithSerializable"></a>
+      <a id="DistributableSyntax[X&lt;:AnyGraphObject,A&lt;:AnyGraphObject,B&lt;:AnyGraphObject,F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[X,ohnosequences.scarph.objects.⊕[A,B]]}]:DistributableSyntax[X,A,B,F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$DistributableSyntax.html"><span class="name">DistributableSyntax</span></a><span class="tparams">[<span name="X">X &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="A">A &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="B">B &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊗[X,ohnosequences.scarph.objects.⊕[A,B]] }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.DistributableSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@DistributableSyntax[X&lt;:ohnosequences.scarph.objects.AnyGraphObject,A&lt;:ohnosequences.scarph.objects.AnyGraphObject,B&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[X,ohnosequences.scarph.objects.⊕[A,B]]}]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.EdgeSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EdgeSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyEdge}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="EdgeSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyEdge}]:EdgeSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$EdgeSyntax.html"><span class="name">EdgeSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyEdge }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.EdgeSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@EdgeSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyEdge}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.ElementSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ElementSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyGraphElement}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="ElementSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyGraphElement}]:ElementSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$ElementSyntax.html"><span class="name">ElementSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyGraphElement }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.ElementSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@ElementSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyGraphElement}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.GraphMorphismSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GraphMorphismSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism]extendsAnyValwithProductwithSerializable"></a>
+      <a id="GraphMorphismSyntax[F&lt;:AnyGraphMorphism]:GraphMorphismSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$GraphMorphismSyntax.html"><span class="name">GraphMorphismSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a></span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.GraphMorphismSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@GraphMorphismSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.GraphMorphismValOps" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GraphMorphismValOps[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism,VF]extendsAnyValwithProductwithSerializable"></a>
+      <a id="GraphMorphismValOps[F&lt;:AnyGraphMorphism,VF]:GraphMorphismValOps[F,VF]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$GraphMorphismValOps.html"><span class="name">GraphMorphismValOps</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a></span>, <span name="VF">VF</span>]</span><span class="params">(<span name="vf">vf: <span class="extype" name="ohnosequences.cosas.types.:=">:=</span>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.GraphMorphismValOps.F">F</span>, <span class="extype" name="ohnosequences.scarph.syntax.morphisms.GraphMorphismValOps.VF">VF</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@GraphMorphismValOps[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism,VF]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.MatchUpSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MatchUpSyntax[T&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[T,T]}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="MatchUpSyntax[T&lt;:AnyGraphObject,F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[T,T]}]:MatchUpSyntax[T,F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$MatchUpSyntax.html"><span class="name">MatchUpSyntax</span></a><span class="tparams">[<span name="T">T &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊗[T,T] }</span>]</span><span class="params">(<span name="f">f: <a href="#SameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameTensorOut">SameTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.MatchUpSyntax.F">F</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@MatchUpSyntax[T&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[T,T]}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.MergeSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MergeSyntax[T&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[T,T]}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="MergeSyntax[T&lt;:AnyGraphObject,F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[T,T]}]:MergeSyntax[T,F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$MergeSyntax.html"><span class="name">MergeSyntax</span></a><span class="tparams">[<span name="T">T &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊕[T,T] }</span>]</span><span class="params">(<span name="f">f: <a href="#SameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameBiproductOut">SameBiproductOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.MergeSyntax.F">F</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@MergeSyntax[T&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[T,T]}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.PredicateSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PredicateSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyPredicate}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="PredicateSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyPredicate}]:PredicateSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$PredicateSyntax.html"><span class="name">PredicateSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyPredicate }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.PredicateSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@PredicateSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyPredicate}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.RefineTensorOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RefineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right]}"></a>
+      <a id="RefineTensorOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]:RefineTensorOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">RefineTensorOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj }</span>]</span><span class="result"> = <span class="extype" name="ohnosequences.scarph.syntax.morphisms.RefineTensorOut.F">F</span> with <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right] }</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@RefineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right]}" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.SameBiproductOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left]}"></a>
+      <a id="SameBiproductOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]:SameBiproductOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SameBiproductOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyBiproductObj }</span>]</span><span class="result"> = <span class="extype" name="ohnosequences.scarph.syntax.morphisms.SameBiproductOut.F">F</span> with <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left] }</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@SameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left]}" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.SameTensorOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left]}"></a>
+      <a id="SameTensorOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]:SameTensorOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">SameTensorOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj }</span>]</span><span class="result"> = <span class="extype" name="ohnosequences.scarph.syntax.morphisms.SameTensorOut.F">F</span> with <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left] }</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@SameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left]}" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.TensorSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TensorSyntax[L&lt;:ohnosequences.scarph.objects.AnyGraphObject,R&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[L,R]}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="TensorSyntax[L&lt;:AnyGraphObject,R&lt;:AnyGraphObject,F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[L,R]}]:TensorSyntax[L,R,F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$TensorSyntax.html"><span class="name">TensorSyntax</span></a><span class="tparams">[<span name="L">L &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="R">R &lt;: <a href="../objects$$AnyGraphObject.html" class="extype" name="ohnosequences.scarph.objects.AnyGraphObject">AnyGraphObject</a></span>, <span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.⊗[L,R] }</span>]</span><span class="params">(<span name="f">f: <a href="#RefineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.RefineTensorOut">RefineTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.TensorSyntax.F">F</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@TensorSyntax[L&lt;:ohnosequences.scarph.objects.AnyGraphObject,R&lt;:ohnosequences.scarph.objects.AnyGraphObject,F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[L,R]}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.UnitSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UnitSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.unit}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="UnitSyntax[F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.unit}]:UnitSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$UnitSyntax.html"><span class="name">UnitSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.unit }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.UnitSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@UnitSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.unit}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.VertexSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="VertexSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyVertex}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="VertexSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyVertex}]:VertexSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$VertexSyntax.html"><span class="name">VertexSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyVertex }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.VertexSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@VertexSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyVertex}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms.ZeroSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZeroSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.zero}]extendsAnyValwithProductwithSerializable"></a>
+      <a id="ZeroSyntax[F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.zero}]:ZeroSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="morphisms$$ZeroSyntax.html"><span class="name">ZeroSyntax</span></a><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.zero }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.ZeroSyntax.F">F</span></span>)</span><span class="result"> extends <span class="extype" name="scala.AnyVal">AnyVal</span> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@ZeroSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.zero}]extendsAnyValwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@##():Int" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#biproductSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="biproductSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](f:F):ohnosequences.scarph.syntax.morphisms.BiproductSyntax[F]"></a>
+      <a id="biproductSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](F):BiproductSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">biproductSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyBiproductObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.biproductSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$BiproductSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.BiproductSyntax">BiproductSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.biproductSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@biproductSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](f:F):ohnosequences.scarph.syntax.morphisms.BiproductSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@clone():Object" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#distributableOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="distributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}](f:F):ohnosequences.scarph.syntax.morphisms.DistributableOut[F]"></a>
+      <a id="distributableOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}](F):DistributableOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">distributableOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj{type Right &lt;: ohnosequences.scarph.objects.AnyBiproductObj} }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.distributableOut.F">F</span></span>)</span><span class="result">: <a href="#DistributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,ohnosequences.scarph.objects.⊕[F#Out#Right#Left,F#Out#Right#Right]]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.DistributableOut">DistributableOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.distributableOut.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@distributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}](f:F):ohnosequences.scarph.syntax.morphisms.DistributableOut[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#distributableSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="distributableSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.DistributableOut[F]):ohnosequences.scarph.syntax.morphisms.DistributableSyntax[F#Out#Left,F#Out#Right#Left,F#Out#Right#Right,ohnosequences.scarph.syntax.morphisms.DistributableOut[F]]"></a>
+      <a id="distributableSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}](F)((F)⇒DistributableOut[F]):DistributableSyntax[morphisms.&lt;refinement&gt;.Out.Left,morphisms.&lt;refinement&gt;.&lt;refinement&gt;.Right.Left,morphisms.&lt;refinement&gt;.&lt;refinement&gt;.Right.Right,DistributableOut[F]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">distributableSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj{type Right &lt;: ohnosequences.scarph.objects.AnyBiproductObj} }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.distributableSyntax.F">F</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="refine">refine: (<span class="extype" name="ohnosequences.scarph.syntax.morphisms.distributableSyntax.F">F</span>) ⇒ <a href="#DistributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,ohnosequences.scarph.objects.⊕[F#Out#Right#Left,F#Out#Right#Right]]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.DistributableOut">DistributableOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.distributableSyntax.F">F</span>]</span>)</span><span class="result">: <a href="morphisms$$DistributableSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.DistributableSyntax">DistributableSyntax</a>[<span class="extype" name="ohnosequences.scarph.objects.AnyTensorObj.Left">morphisms.&lt;refinement&gt;.Out.Left</span>, <span class="extype" name="ohnosequences.scarph.objects.AnyBiproductObj.Left">morphisms.&lt;refinement&gt;.&lt;refinement&gt;.Right.Left</span>, <span class="extype" name="ohnosequences.scarph.objects.AnyBiproductObj.Right">morphisms.&lt;refinement&gt;.&lt;refinement&gt;.Right.Right</span>, <a href="#DistributableOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,ohnosequences.scarph.objects.⊕[F#Out#Right#Left,F#Out#Right#Right]]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.DistributableOut">DistributableOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.distributableSyntax.F">F</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@distributableSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj{typeRight&lt;:ohnosequences.scarph.objects.AnyBiproductObj}}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.DistributableOut[F]):ohnosequences.scarph.syntax.morphisms.DistributableSyntax[F#Out#Left,F#Out#Right#Left,F#Out#Right#Right,ohnosequences.scarph.syntax.morphisms.DistributableOut[F]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#edgeSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="edgeSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyEdge}](f:F):ohnosequences.scarph.syntax.morphisms.EdgeSyntax[F]"></a>
+      <a id="edgeSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyEdge}](F):EdgeSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">edgeSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyEdge }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.edgeSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$EdgeSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.EdgeSyntax">EdgeSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.edgeSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@edgeSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyEdge}](f:F):ohnosequences.scarph.syntax.morphisms.EdgeSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#elementSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="elementSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyGraphElement}](f:F):ohnosequences.scarph.syntax.morphisms.ElementSyntax[F]"></a>
+      <a id="elementSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyGraphElement}](F):ElementSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">elementSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyGraphElement }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.elementSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$ElementSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.ElementSyntax">ElementSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.elementSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@elementSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyGraphElement}](f:F):ohnosequences.scarph.syntax.morphisms.ElementSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#graphMorphismSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="graphMorphismSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism](f:F):ohnosequences.scarph.syntax.morphisms.GraphMorphismSyntax[F]"></a>
+      <a id="graphMorphismSyntax[F&lt;:AnyGraphMorphism](F):GraphMorphismSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">graphMorphismSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a></span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.graphMorphismSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$GraphMorphismSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.GraphMorphismSyntax">GraphMorphismSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.graphMorphismSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@graphMorphismSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism](f:F):ohnosequences.scarph.syntax.morphisms.GraphMorphismSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#graphMorphismValOps" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="graphMorphismValOps[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism,VF](vt:ohnosequences.cosas.types.:=[F,VF]):ohnosequences.scarph.syntax.morphisms.GraphMorphismValOps[F,VF]"></a>
+      <a id="graphMorphismValOps[F&lt;:AnyGraphMorphism,VF](:=[F,VF]):GraphMorphismValOps[F,VF]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">graphMorphismValOps</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a></span>, <span name="VF">VF</span>]</span><span class="params">(<span name="vt">vt: <span class="extype" name="ohnosequences.cosas.types.:=">:=</span>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.graphMorphismValOps.F">F</span>, <span class="extype" name="ohnosequences.scarph.syntax.morphisms.graphMorphismValOps.VF">VF</span>]</span>)</span><span class="result">: <a href="morphisms$$GraphMorphismValOps.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.GraphMorphismValOps">GraphMorphismValOps</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.graphMorphismValOps.F">F</span>, <span class="extype" name="ohnosequences.scarph.syntax.morphisms.graphMorphismValOps.VF">VF</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@graphMorphismValOps[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism,VF](vt:ohnosequences.cosas.types.:=[F,VF]):ohnosequences.scarph.syntax.morphisms.GraphMorphismValOps[F,VF]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#matchUpSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="matchUpSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.SameTensorOut[F]):ohnosequences.scarph.syntax.morphisms.MatchUpSyntax[F#Out#Left,ohnosequences.scarph.syntax.morphisms.SameTensorOut[F]]"></a>
+      <a id="matchUpSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](F)((F)⇒SameTensorOut[F]):MatchUpSyntax[morphisms.&lt;refinement&gt;.Out.Left,SameTensorOut[F]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">matchUpSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.matchUpSyntax.F">F</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="refine">refine: (<span class="extype" name="ohnosequences.scarph.syntax.morphisms.matchUpSyntax.F">F</span>) ⇒ <a href="#SameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameTensorOut">SameTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.matchUpSyntax.F">F</span>]</span>)</span><span class="result">: <a href="morphisms$$MatchUpSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.MatchUpSyntax">MatchUpSyntax</a>[<span class="extype" name="ohnosequences.scarph.objects.AnyTensorObj.Left">morphisms.&lt;refinement&gt;.Out.Left</span>, <a href="#SameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameTensorOut">SameTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.matchUpSyntax.F">F</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@matchUpSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.SameTensorOut[F]):ohnosequences.scarph.syntax.morphisms.MatchUpSyntax[F#Out#Left,ohnosequences.scarph.syntax.morphisms.SameTensorOut[F]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#mergeSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="mergeSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.SameBiproductOut[F]):ohnosequences.scarph.syntax.morphisms.MergeSyntax[F#Out#Left,ohnosequences.scarph.syntax.morphisms.SameBiproductOut[F]]"></a>
+      <a id="mergeSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](F)((F)⇒SameBiproductOut[F]):MergeSyntax[morphisms.&lt;refinement&gt;.Out.Left,SameBiproductOut[F]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">mergeSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyBiproductObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.mergeSyntax.F">F</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="refine">refine: (<span class="extype" name="ohnosequences.scarph.syntax.morphisms.mergeSyntax.F">F</span>) ⇒ <a href="#SameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameBiproductOut">SameBiproductOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.mergeSyntax.F">F</span>]</span>)</span><span class="result">: <a href="morphisms$$MergeSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.MergeSyntax">MergeSyntax</a>[<span class="extype" name="ohnosequences.scarph.objects.AnyBiproductObj.Left">morphisms.&lt;refinement&gt;.Out.Left</span>, <a href="#SameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameBiproductOut">SameBiproductOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.mergeSyntax.F">F</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@mergeSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.SameBiproductOut[F]):ohnosequences.scarph.syntax.morphisms.MergeSyntax[F#Out#Left,ohnosequences.scarph.syntax.morphisms.SameBiproductOut[F]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@notify():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#predicateSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="predicateSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyPredicate}](f:F):ohnosequences.scarph.syntax.morphisms.PredicateSyntax[F]"></a>
+      <a id="predicateSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyPredicate}](F):PredicateSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">predicateSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyPredicate }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.predicateSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$PredicateSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.PredicateSyntax">PredicateSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.predicateSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@predicateSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyPredicate}](f:F):ohnosequences.scarph.syntax.morphisms.PredicateSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#refineTensorOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="refineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F):ohnosequences.scarph.syntax.morphisms.RefineTensorOut[F]"></a>
+      <a id="refineTensorOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](F):RefineTensorOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">refineTensorOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.refineTensorOut.F">F</span></span>)</span><span class="result">: <a href="#RefineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.RefineTensorOut">RefineTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.refineTensorOut.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@refineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F):ohnosequences.scarph.syntax.morphisms.RefineTensorOut[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#sameBiproductOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](f:F)(implicitcheck:=:=[F#Out#Left,F#Out#Right]):ohnosequences.scarph.syntax.morphisms.SameBiproductOut[F]"></a>
+      <a id="sameBiproductOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](F)(=:=[morphisms.&lt;refinement&gt;.Out.Left,morphisms.&lt;refinement&gt;.Out.Right]):SameBiproductOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sameBiproductOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyBiproductObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.sameBiproductOut.F">F</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="check">check: <span class="extype" name="scala.Predef.=:=">=:=</span>[<span class="extype" name="ohnosequences.scarph.objects.AnyBiproductObj.Left">morphisms.&lt;refinement&gt;.Out.Left</span>, <span class="extype" name="ohnosequences.scarph.objects.AnyBiproductObj.Right">morphisms.&lt;refinement&gt;.Out.Right</span>]</span>)</span><span class="result">: <a href="#SameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊕[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameBiproductOut">SameBiproductOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.sameBiproductOut.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@sameBiproductOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyBiproductObj}](f:F)(implicitcheck:=:=[F#Out#Left,F#Out#Right]):ohnosequences.scarph.syntax.morphisms.SameBiproductOut[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#sameTensorOut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F)(implicitcheck:=:=[F#Out#Left,F#Out#Right]):ohnosequences.scarph.syntax.morphisms.SameTensorOut[F]"></a>
+      <a id="sameTensorOut[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](F)(=:=[morphisms.&lt;refinement&gt;.Out.Left,morphisms.&lt;refinement&gt;.Out.Right]):SameTensorOut[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sameTensorOut</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.sameTensorOut.F">F</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="check">check: <span class="extype" name="scala.Predef.=:=">=:=</span>[<span class="extype" name="ohnosequences.scarph.objects.AnyTensorObj.Left">morphisms.&lt;refinement&gt;.Out.Left</span>, <span class="extype" name="ohnosequences.scarph.objects.AnyTensorObj.Right">morphisms.&lt;refinement&gt;.Out.Right</span>]</span>)</span><span class="result">: <a href="#SameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Left]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.SameTensorOut">SameTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.sameTensorOut.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@sameTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F)(implicitcheck:=:=[F#Out#Left,F#Out#Right]):ohnosequences.scarph.syntax.morphisms.SameTensorOut[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#tensorSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="tensorSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.RefineTensorOut[F]):ohnosequences.scarph.syntax.morphisms.TensorSyntax[F#Out#Left,F#Out#Right,ohnosequences.scarph.syntax.morphisms.RefineTensorOut[F]]"></a>
+      <a id="tensorSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](F)((F)⇒RefineTensorOut[F]):TensorSyntax[morphisms.&lt;refinement&gt;.Out.Left,morphisms.&lt;refinement&gt;.Out.Right,RefineTensorOut[F]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tensorSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyTensorObj }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.tensorSyntax.F">F</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="refine">refine: (<span class="extype" name="ohnosequences.scarph.syntax.morphisms.tensorSyntax.F">F</span>) ⇒ <a href="#RefineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.RefineTensorOut">RefineTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.tensorSyntax.F">F</span>]</span>)</span><span class="result">: <a href="morphisms$$TensorSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.TensorSyntax">TensorSyntax</a>[<span class="extype" name="ohnosequences.scarph.objects.AnyTensorObj.Left">morphisms.&lt;refinement&gt;.Out.Left</span>, <span class="extype" name="ohnosequences.scarph.objects.AnyTensorObj.Right">morphisms.&lt;refinement&gt;.Out.Right</span>, <a href="#RefineTensorOut[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}]=Fwithohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.⊗[F#Out#Left,F#Out#Right]}" class="extmbr" name="ohnosequences.scarph.syntax.morphisms.RefineTensorOut">RefineTensorOut</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.tensorSyntax.F">F</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@tensorSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyTensorObj}](f:F)(implicitrefine:F=&gt;ohnosequences.scarph.syntax.morphisms.RefineTensorOut[F]):ohnosequences.scarph.syntax.morphisms.TensorSyntax[F#Out#Left,F#Out#Right,ohnosequences.scarph.syntax.morphisms.RefineTensorOut[F]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#unitSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unitSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.unit}](f:F):ohnosequences.scarph.syntax.morphisms.UnitSyntax[F]"></a>
+      <a id="unitSyntax[F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.unit}](F):UnitSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unitSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.unit }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.unitSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$UnitSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.UnitSyntax">UnitSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.unitSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@unitSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.unit}](f:F):ohnosequences.scarph.syntax.morphisms.UnitSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="ohnosequences.scarph.syntax.morphisms#vertexSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="vertexSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyVertex}](f:F):ohnosequences.scarph.syntax.morphisms.VertexSyntax[F]"></a>
+      <a id="vertexSyntax[F&lt;:AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyVertex}](F):VertexSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">vertexSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out &lt;: ohnosequences.scarph.objects.AnyVertex }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.vertexSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$VertexSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.VertexSyntax">VertexSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.vertexSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@vertexSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut&lt;:ohnosequences.scarph.objects.AnyVertex}](f:F):ohnosequences.scarph.syntax.morphisms.VertexSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@wait():Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="ohnosequences.scarph.syntax.morphisms#zeroSyntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="zeroSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.zero}](f:F):ohnosequences.scarph.syntax.morphisms.ZeroSyntax[F]"></a>
+      <a id="zeroSyntax[F&lt;:AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.zero}](F):ZeroSyntax[F]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">zeroSyntax</span><span class="tparams">[<span name="F">F &lt;: <a href="../morphisms$$AnyGraphMorphism.html" class="extype" name="ohnosequences.scarph.morphisms.AnyGraphMorphism">AnyGraphMorphism</a> { type Out = ohnosequences.scarph.objects.zero }</span>]</span><span class="params">(<span name="f">f: <span class="extype" name="ohnosequences.scarph.syntax.morphisms.zeroSyntax.F">F</span></span>)</span><span class="result">: <a href="morphisms$$ZeroSyntax.html" class="extype" name="ohnosequences.scarph.syntax.morphisms.ZeroSyntax">ZeroSyntax</a>[<span class="extype" name="ohnosequences.scarph.syntax.morphisms.zeroSyntax.F">F</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#ohnosequences.scarph.syntax.morphisms$@zeroSyntax[F&lt;:ohnosequences.scarph.morphisms.AnyGraphMorphism{typeOut=ohnosequences.scarph.objects.zero}](f:F):ohnosequences.scarph.syntax.morphisms.ZeroSyntax[F]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="scala.Product">
+              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
+            </div><div class="parent" name="scala.Equals">
+              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
