@@ -2,150 +2,230 @@
 ```scala
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, implementations._, objects._, evals._
+import ohnosequences.scarph._, objects._, evals._
+import scala.Function.const
 
-trait DummyEvals extends DefaultEvals {
+case object dummy {
 
-  case object Dummy
-  type Dummy = Dummy.type
+  trait Dummy
 
-  implicit def tensorImpl:
-      TensorImpl[Dummy, Dummy, Dummy] =
-  new TensorImpl[Dummy, Dummy, Dummy] {
+  case object DummyEdge extends Dummy
+  type DummyEdge = DummyEdge.type
 
-    def apply(l: RawLeft, r: RawRight): RawTensor = Dummy
-    def leftProj(t: RawTensor): RawLeft = Dummy
-    def rightProj(t: RawTensor): RawRight = Dummy
-  }
-
-  implicit def matchUpImpl:
-      MatchUpImpl[Dummy] =
-  new MatchUpImpl[Dummy] {
-
-    def matchUp(l: Raw, r: Raw): Raw = Dummy
-  }
+  case object DummyVertex extends Dummy
+  type DummyVertex = DummyVertex.type
 
 
-  implicit def unitImpl[O <: AnyGraphObject]:
-      UnitImpl[O, Dummy, Dummy] =
-  new UnitImpl[O, Dummy, Dummy] {
+  case object categoryStructure extends CategoryStructure
 
-    def fromUnit(u: RawUnit, o: Object): RawObject = Dummy
-    def toUnit(s: RawObject): RawUnit = Dummy
-  }
+  case object graphStructure extends GraphStructure {
 
+    type RawEdge = DummyEdge
+    type RawSource = DummyVertex
+    type RawTarget = DummyVertex
 
-  implicit def biproductImpl:
-      BiproductImpl[Dummy, Dummy, Dummy] =
-  new BiproductImpl[Dummy, Dummy, Dummy] {
+    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
+    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
 
-    def apply(l: RawLeft, r: RawRight): RawBiproduct = Dummy
-    def leftProj(b: RawBiproduct): RawLeft = Dummy
-    def leftInj(l: RawLeft): RawBiproduct = Dummy
-    def rightProj(b: RawBiproduct): RawRight = Dummy
-    def rightInj(r: RawRight): RawBiproduct = Dummy
+    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge = DummyEdge
+    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource = DummyVertex
+
+    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge = DummyEdge
+    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget = DummyVertex
   }
 
 
-  implicit def mergeImpl:
-      MergeImpl[Dummy] =
-  new MergeImpl[Dummy] {
+  case class DummyTensor[L <: Dummy, R <: Dummy](l: L, r: R) extends Dummy
 
-    def merge(l: Raw, r: Raw): Raw = Dummy
+  case object DummyUnit extends Dummy
+  type DummyUnit = DummyUnit.type
+
+  case object tensorStructure extends TensorStructure {
+
+    type TensorBound = Dummy
+    type RawTensor[L <: TensorBound, R <: TensorBound] = DummyTensor[L, R]
+    type RawUnit = DummyUnit
+
+    def tensorRaw[L <: TensorBound, R <: TensorBound](l: L, r: R): RawTensor[L, R] = DummyTensor(l, r)
+    def leftRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L = t.l
+    def rightRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): R = t.r
+    def toUnitRaw[X <: TensorBound](x: X): RawUnit = DummyUnit
+
+
+    implicit def dummyMatch[T <: Dummy]:
+        Matchable[T] =
+    new Matchable[T] { def matchUp(l: T, r: T): T = l }
+
+    // implicit def dummyUnitToEdge:
+    //     FromUnit[DummyUnit, DummyEdge] =
+    // new FromUnit[DummyUnit, DummyEdge] { def fromUnit(u: U, e: AnyGraphObject): T = DummyEdge }
+
+    implicit def dummyUnitToVertex:
+        FromUnit[DummyUnit, DummyVertex] =
+    new FromUnit[DummyUnit, DummyVertex] { def fromUnit(u: U, e: AnyGraphObject): T = DummyVertex }
+
+    // implicit def dummyUnitToTensor[U, L <: Dummy, R <: Dummy]
+    // (implicit
+    //   l: FromUnit[U, L],
+    //   r: FromUnit[U, R]
+    // ):  FromUnit[U, DummyTensor[L, R]] =
+    // new FromUnit[U, DummyTensor[L, R]] {
+    //
+    //   def fromUnit(u: U, e: AnyGraphObject): T =
+    //     DummyTensor(
+    //       l.fromUnit(u, e),
+    //       r.fromUnit(u, e)
+    //     )
+    // }
+
   }
 
 
-  implicit def zeroImpl:
-      ZeroImpl[Dummy] =
-  new ZeroImpl[Dummy] { def apply(): Raw = Dummy }
+  case class DummyBiproduct[L <: Dummy, R <: Dummy](l: L, r: R) extends Dummy
+
+  case object DummyZero extends Dummy
+  type DummyZero = DummyZero.type
 
 
-  implicit def edgeImpl:
-      EdgeImpl[Dummy, Dummy, Dummy] =
-  new EdgeImpl[Dummy, Dummy, Dummy] {
+  case object biproductStructure extends BiproductStructure {
 
-    def source(e: RawEdge): RawSource = Dummy
-    def target(e: RawEdge): RawTarget = Dummy
+    type BiproductBound = Dummy
+    type RawBiproduct[L <: BiproductBound, R <: BiproductBound] = DummyBiproduct[L, R]
+    type RawZero = DummyZero
+
+    def biproductRaw[L <: BiproductBound, R <: BiproductBound](l: L, r: R): RawBiproduct[L, R] =
+      DummyBiproduct[L, R](l, r)
+
+    def leftProjRaw[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): L = t.l
+    def rightProjRaw[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): R = t.r
+
+    def toZeroRaw[X <: BiproductBound](x: X): RawZero = DummyZero
+
+
+    implicit def dummyMerge[T <: Dummy]:
+        Mergeable[T] =
+    new Mergeable[T] { def merge(l: T, r: T): T = r }
+
+
+    implicit def dummyZeroEdge[E <: AnyEdge]:
+        ZeroFor[E, DummyEdge] =
+    new ZeroFor[E, DummyEdge] { def zero(o: Obj): T = DummyEdge }
+
+    implicit def dummyZeroVertex[V <: AnyVertex]:
+        ZeroFor[V, DummyVertex] =
+    new ZeroFor[V, DummyVertex] { def zero(o: Obj): T = DummyVertex }
+
   }
 
 
-  implicit def vertexInImpl[E <: AnyEdge]:
-      VertexInImpl[E, Dummy, Dummy, Dummy] =
-  new VertexInImpl[E, Dummy, Dummy, Dummy] {
+  case object propertyStructure {
 
-    def inE(v: RawVertex, e: Edge): RawInEdge = Dummy
-    def inV(v: RawVertex, e: Edge): RawInVertex = Dummy
+    import morphisms._
+
+    implicit def eval_getV[P <: AnyProperty { type Source <: AnyVertex }]:
+        Eval[DummyVertex, get[P], P#Target#Raw] =
+    new Eval[DummyVertex, get[P], P#Target#Raw] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = ???
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit def eval_getE[P <: AnyProperty { type Source <: AnyEdge }]:
+        Eval[DummyEdge, get[P], P#Target#Raw] =
+    new Eval[DummyEdge, get[P], P#Target#Raw] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = ???
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+
+    implicit def eval_lookupV[
+      V,
+      P <: AnyProperty { type Source <: AnyVertex; type Target <: AnyValueType { type Raw >: V }  }
+    ]
+    : Eval[V, lookup[P], DummyVertex] =
+    new Eval[V, lookup[P], DummyVertex] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = const(DummyVertex)
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit def eval_lookupE[
+      V,
+      P <: AnyProperty { type Source <: AnyEdge; type Target <: AnyValueType { type Raw >: V }  }
+    ]
+    : Eval[V, lookup[P], DummyEdge] =
+    new Eval[V, lookup[P], DummyEdge] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = const(DummyEdge)
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
   }
 
+  case object predicateStructure {
+    import morphisms._
 
-  implicit def vertexOutImpl[E <: AnyEdge]:
-      VertexOutImpl[E, Dummy, Dummy, Dummy] =
-  new VertexOutImpl[E, Dummy, Dummy, Dummy] {
+    implicit def eval_quantify[D <: Dummy, P <: AnyPredicate]:
+        Eval[D, quantify[P], D] =
+    new Eval[D, quantify[P], D] {
 
-    def outE(v: RawVertex, e: Edge): RawOutEdge = Dummy
-    def outV(v: RawVertex, e: Edge): RawOutVertex = Dummy
+      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
+    implicit def eval_coerce[D <: Dummy, P <: AnyPredicate]:
+        Eval[D, coerce[P], D] =
+    new Eval[D, coerce[P], D] {
+
+      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+
+      def present(morph: InMorph): Seq[String] = Seq(morph.label)
+    }
+
   }
 
+  case object syntax {
+    import ohnosequences.cosas.types._
+    import ohnosequences.scarph.objects._
 
-  implicit def dummyPropertyImpl[P <: AnyProperty]:
-      PropertyImpl[P, Dummy, Dummy] =
-  new PropertyImpl[P, Dummy, Dummy] {
+    implicit def dummyObjectValOps[F <: AnyGraphObject { type Raw >: VF}, VF <: Dummy](vf: F := VF):
+      DummyObjectValOps[F, VF] =
+      DummyObjectValOps[F, VF](vf)
 
-    def get(e: RawElement, p: Property): RawValue = Dummy
-    def lookup(r: RawValue, p: Property): RawElement = Dummy
-  }
+    case class DummyObjectValOps[F <: AnyGraphObject { type Raw >: VF }, VF <: Dummy](vf: F := VF) extends AnyVal {
 
+      def ⊗[S <: AnyGraphObject, VS <: Dummy with S#Raw](vs: S := VS): (F ⊗ S) := DummyTensor[VF, VS] =
+        (vf.tpe ⊗ vs.tpe) := DummyTensor(vf.value, vs.value)
 
-  implicit def dummyPredicateImpl[P <: AnyPredicate]:
-      PredicateImpl[P, Dummy, Dummy] =
-  new PredicateImpl[P, Dummy, Dummy] {
-
-    def quantify(e: RawElement, p: Predicate): RawPredicate = Dummy
-    def coerce(p: RawPredicate): RawElement = Dummy
+      def ⊕[S <: AnyGraphObject, VS <: Dummy with S#Raw](vs: S := VS): (F ⊕ S) := DummyBiproduct[VF, VS] =
+        (vf.tpe ⊕ vs.tpe) := DummyBiproduct(vf.value, vs.value)
+    }
   }
 
 }
 
-object dummy extends DummyEvals
-
 ```
 
 
-------
 
-### Index
 
-+ src
-  + test
-    + scala
-      + ohnosequences
-        + scarph
-          + [TwitterQueries.scala][test/scala/ohnosequences/scarph/TwitterQueries.scala]
-          + impl
-            + [dummyTest.scala][test/scala/ohnosequences/scarph/impl/dummyTest.scala]
-            + [dummy.scala][test/scala/ohnosequences/scarph/impl/dummy.scala]
-          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
-  + main
-    + scala
-      + ohnosequences
-        + scarph
-          + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
-          + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
-          + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
-          + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + syntax
-            + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
-
-[test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../TwitterQueries.scala.md
-[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: dummyTest.scala.md
-[test/scala/ohnosequences/scarph/impl/dummy.scala]: dummy.scala.md
-[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/axioms.scala]: ../../../../../main/scala/ohnosequences/scarph/axioms.scala.md
+[main/scala/ohnosequences/scarph/evals.scala]: ../../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/morphisms.scala.md
 [main/scala/ohnosequences/scarph/objects.scala]: ../../../../../main/scala/ohnosequences/scarph/objects.scala.md
-[main/scala/ohnosequences/scarph/evals.scala]: ../../../../../main/scala/ohnosequences/scarph/evals.scala.md
-[main/scala/ohnosequences/scarph/implementations.scala]: ../../../../../main/scala/ohnosequences/scarph/implementations.scala.md
+[main/scala/ohnosequences/scarph/rewrites.scala]: ../../../../../main/scala/ohnosequences/scarph/rewrites.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../../main/scala/ohnosequences/scarph/schemas.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: ../../../../../main/scala/ohnosequences/scarph/syntax/objects.scala.md
+[test/scala/ohnosequences/scarph/asserts.scala]: ../asserts.scala.md
+[test/scala/ohnosequences/scarph/impl/dummy.scala]: dummy.scala.md
+[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: dummyTest.scala.md
+[test/scala/ohnosequences/scarph/implicitSearch.scala]: ../implicitSearch.scala.md
+[test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../TwitterQueries.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../TwitterSchema.scala.md

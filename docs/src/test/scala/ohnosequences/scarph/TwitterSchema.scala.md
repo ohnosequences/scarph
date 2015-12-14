@@ -2,13 +2,13 @@
 ```scala
 package ohnosequences.scarph.test
 
-import ohnosequences.cosas._, typeSets._
+import ohnosequences.cosas._
 
 import ohnosequences.{ scarph => s }
 import s.objects._, s.schemas._
 
 
-object twitter extends AnyGraphSchema {
+case object twitter extends AnyGraphSchema {
 
   lazy val label = this.toString
 
@@ -45,16 +45,16 @@ Vertices with their properties
 
 ```scala
   case object user extends Vertex("user") {
-    case object name    extends Property(user -> twitter.name)("name")
-    case object age     extends Property(user -> twitter.age)("age")
+    case object name    extends Property(ManyOrNone(user) -> ExactlyOne(twitter.name))("name")
+    case object age     extends Property(ManyOrNone(user) -> ExactlyOne(ohnosequences.scarph.test.twitter.age))("age")
     // example of shared value types:
-    case object bio     extends Property(user -> twitter.text)("bio")
-    case object webpage extends Property(user -> twitter.url)("webpage")
+    case object bio     extends Property(ManyOrNone(user) -> OneOrNone(twitter.text))("bio")
+    case object webpage extends Property(ManyOrNone(user) -> OneOrNone(twitter.url))("webpage")
   }
 
   case object tweet extends Vertex("tweet") {
-    case object text extends Property(tweet -> twitter.text)("text")
-    case object url  extends Property(tweet -> twitter.url)("url")
+    case object text extends Property(ManyOrNone(tweet) -> ExactlyOne(twitter.text))("text")
+    case object url  extends Property(ManyOrNone(tweet) -> ExactlyOne(twitter.url))("url")
   }
 ```
 
@@ -62,17 +62,17 @@ Edges with their properties
 
 ```scala
   case object posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted") {
-    case object time  extends Property(posted -> twitter.time)("time")
+    case object time  extends Property(ManyOrNone(posted) -> ExactlyOne(ohnosequences.scarph.test.twitter.time))("time")
   }
 
   case object follows extends Edge(ManyOrNone(user) -> ManyOrNone(user))("follows")
 
   case object liked extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("liked") {
-    case object time extends Property(liked -> twitter.time)("time")
+    case object time extends Property(ManyOrNone(liked) -> ExactlyOne(twitter.time))("time")
   }
 
   case object reposted extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("reposted") {
-    case object time extends Property(reposted -> twitter.time)("time")
+    case object time extends Property(ManyOrNone(reposted) -> ExactlyOne(twitter.time))("time")
   }
 
 }
@@ -80,41 +80,19 @@ Edges with their properties
 ```
 
 
-------
 
-### Index
 
-+ src
-  + test
-    + scala
-      + ohnosequences
-        + scarph
-          + [TwitterQueries.scala][test/scala/ohnosequences/scarph/TwitterQueries.scala]
-          + impl
-            + [dummyTest.scala][test/scala/ohnosequences/scarph/impl/dummyTest.scala]
-            + [dummy.scala][test/scala/ohnosequences/scarph/impl/dummy.scala]
-          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
-  + main
-    + scala
-      + ohnosequences
-        + scarph
-          + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
-          + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
-          + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
-          + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + syntax
-            + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
-
-[test/scala/ohnosequences/scarph/TwitterQueries.scala]: TwitterQueries.scala.md
-[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: impl/dummyTest.scala.md
-[test/scala/ohnosequences/scarph/impl/dummy.scala]: impl/dummy.scala.md
-[test/scala/ohnosequences/scarph/TwitterSchema.scala]: TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/axioms.scala]: ../../../../main/scala/ohnosequences/scarph/axioms.scala.md
+[main/scala/ohnosequences/scarph/evals.scala]: ../../../../main/scala/ohnosequences/scarph/evals.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../../../../main/scala/ohnosequences/scarph/morphisms.scala.md
 [main/scala/ohnosequences/scarph/objects.scala]: ../../../../main/scala/ohnosequences/scarph/objects.scala.md
-[main/scala/ohnosequences/scarph/evals.scala]: ../../../../main/scala/ohnosequences/scarph/evals.scala.md
-[main/scala/ohnosequences/scarph/implementations.scala]: ../../../../main/scala/ohnosequences/scarph/implementations.scala.md
+[main/scala/ohnosequences/scarph/rewrites.scala]: ../../../../main/scala/ohnosequences/scarph/rewrites.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../../../../main/scala/ohnosequences/scarph/schemas.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: ../../../../main/scala/ohnosequences/scarph/syntax/objects.scala.md
+[test/scala/ohnosequences/scarph/asserts.scala]: asserts.scala.md
+[test/scala/ohnosequences/scarph/impl/dummy.scala]: impl/dummy.scala.md
+[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: impl/dummyTest.scala.md
+[test/scala/ohnosequences/scarph/implicitSearch.scala]: implicitSearch.scala.md
+[test/scala/ohnosequences/scarph/TwitterQueries.scala]: TwitterQueries.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: TwitterSchema.scala.md

@@ -2,7 +2,7 @@
 ```scala
 package ohnosequences.scarph.syntax
 
-object morphisms {
+case object morphisms {
 
   import ohnosequences.cosas.types._
   import ohnosequences.{ scarph => s }
@@ -11,17 +11,17 @@ object morphisms {
 
   implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
     GraphMorphismValOps[F, VF] =
-    GraphMorphismValOps[F, VF](vt.value)
+    GraphMorphismValOps[F, VF](vt)
 
-  case class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vf: VF) extends AnyVal {
+  case class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vf: F := VF) extends AnyVal {
 
     // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
     def ⊗[S <: AnyGraphMorphism, VS](vs: S := VS): TensorMorph[F, S] := (VF, VS) =
-      new Denotes( (vf, vs.value) )
+      TensorMorph(vf.tpe, vs.tpe) := ((vf.value, vs.value))
 
     // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
     def ⊕[S <: AnyGraphMorphism, VS](vs: S := VS): BiproductMorph[F, S] := (VF, VS) =
-      new Denotes( (vf, vs.value) )
+      BiproductMorph(vf.tpe, vs.tpe) := ((vf.value, vs.value))
   }
 
   implicit def graphMorphismSyntax[F <: AnyGraphMorphism](f: F):
@@ -80,7 +80,6 @@ object morphisms {
       F >=> s.morphisms.rightInj[B] =
       f >=> s.morphisms.rightInj(b)
   }
-
 
   type RefineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Right }
@@ -216,7 +215,7 @@ Element types
 
   case class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) extends AnyVal {
 
-    def get[P <: AnyProperty { type Owner = F#Out }](p: P):
+    def get[P <: AnyProperty { type Source = F#Out }](p: P):
       F >=> s.morphisms.get[P] =
       f >=> s.morphisms.get(p)
 
@@ -291,20 +290,20 @@ Vertex types
 
   case class VertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F) extends AnyVal {
 
-    def inE[E <: AnyEdge.To[F#Out]](e: E):
+    def inE[E <: AnyEdge with AnyEdge.To[F#Out]](e: E):
       F >=> s.morphisms.inE[E] =
       f >=> s.morphisms.inE(e)
 
-    def inV[E <: AnyEdge.To[F#Out]](e: E):
+    def inV[E <: AnyEdge with AnyEdge.To[F#Out]](e: E):
       F >=> s.morphisms.inV[E] =
       f >=> s.morphisms.inV(e)
 
 
-    def outE[E <: AnyEdge.From[F#Out]](e: E):
+    def outE[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
       F >=> s.morphisms.outE[E] =
       f >=> s.morphisms.outE(e)
 
-    def outV[E <: AnyEdge.From[F#Out]](e: E):
+    def outV[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
       F >=> s.morphisms.outV[E] =
       f >=> s.morphisms.outV(e)
   }
@@ -314,41 +313,19 @@ Vertex types
 ```
 
 
-------
 
-### Index
 
-+ src
-  + test
-    + scala
-      + ohnosequences
-        + scarph
-          + [TwitterQueries.scala][test/scala/ohnosequences/scarph/TwitterQueries.scala]
-          + impl
-            + [dummyTest.scala][test/scala/ohnosequences/scarph/impl/dummyTest.scala]
-            + [dummy.scala][test/scala/ohnosequences/scarph/impl/dummy.scala]
-          + [TwitterSchema.scala][test/scala/ohnosequences/scarph/TwitterSchema.scala]
-  + main
-    + scala
-      + ohnosequences
-        + scarph
-          + [morphisms.scala][main/scala/ohnosequences/scarph/morphisms.scala]
-          + [objects.scala][main/scala/ohnosequences/scarph/objects.scala]
-          + [evals.scala][main/scala/ohnosequences/scarph/evals.scala]
-          + [implementations.scala][main/scala/ohnosequences/scarph/implementations.scala]
-          + [schemas.scala][main/scala/ohnosequences/scarph/schemas.scala]
-          + syntax
-            + [morphisms.scala][main/scala/ohnosequences/scarph/syntax/morphisms.scala]
-            + [objects.scala][main/scala/ohnosequences/scarph/syntax/objects.scala]
-
-[test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
-[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
-[test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
-[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
+[main/scala/ohnosequences/scarph/axioms.scala]: ../axioms.scala.md
+[main/scala/ohnosequences/scarph/evals.scala]: ../evals.scala.md
 [main/scala/ohnosequences/scarph/morphisms.scala]: ../morphisms.scala.md
 [main/scala/ohnosequences/scarph/objects.scala]: ../objects.scala.md
-[main/scala/ohnosequences/scarph/evals.scala]: ../evals.scala.md
-[main/scala/ohnosequences/scarph/implementations.scala]: ../implementations.scala.md
+[main/scala/ohnosequences/scarph/rewrites.scala]: ../rewrites.scala.md
 [main/scala/ohnosequences/scarph/schemas.scala]: ../schemas.scala.md
 [main/scala/ohnosequences/scarph/syntax/morphisms.scala]: morphisms.scala.md
 [main/scala/ohnosequences/scarph/syntax/objects.scala]: objects.scala.md
+[test/scala/ohnosequences/scarph/asserts.scala]: ../../../../../test/scala/ohnosequences/scarph/asserts.scala.md
+[test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
+[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
+[test/scala/ohnosequences/scarph/implicitSearch.scala]: ../../../../../test/scala/ohnosequences/scarph/implicitSearch.scala.md
+[test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
+[test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
