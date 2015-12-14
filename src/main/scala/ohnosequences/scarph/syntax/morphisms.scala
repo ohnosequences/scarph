@@ -2,24 +2,24 @@ package ohnosequences.scarph.syntax
 
 object morphisms {
 
-  import ohnosequences.cosas.types._
+  import ohnosequences.cosas._, types._
   import ohnosequences.{ scarph => s }
   import s.objects._, s.morphisms._
 
 
-  implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
+  implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vf: F := VF):
     GraphMorphismValOps[F, VF] =
-    GraphMorphismValOps[F, VF](vt.value)
+    GraphMorphismValOps[F, VF](vf)
 
-  case class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vf: VF) extends AnyVal {
+  case class GraphMorphismValOps[F <: AnyGraphMorphism, VF](vf: F := VF) extends AnyVal {
 
     // (F := t) ⊗ (S := s) : (F ⊗ S) := (t, s)
     def ⊗[S <: AnyGraphMorphism, VS](vs: S := VS): TensorMorph[F, S] := (VF, VS) =
-      new Denotes( (vf, vs.value) )
+      TensorMorph(vf.tpe, vs.tpe) := ( (vf.value, vs.value) )
 
     // (F := t) ⊕ (S := s) : (F ⊕ S) := (t, s)
     def ⊕[S <: AnyGraphMorphism, VS](vs: S := VS): BiproductMorph[F, S] := (VF, VS) =
-      new Denotes( (vf, vs.value) )
+      BiproductMorph(vf.tpe, vs.tpe) := ( (vf.value, vs.value) )
   }
 
   implicit def graphMorphismSyntax[F <: AnyGraphMorphism](f: F):

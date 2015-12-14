@@ -189,20 +189,20 @@ case object dummy {
   }
 
   case object syntax {
-    import ohnosequences.cosas.types._
-    import ohnosequences.scarph.objects._
+    import ohnosequences.cosas._, types._
+    import ohnosequences.scarph.objects._, morphisms._
 
     implicit def dummyObjectValOps[F <: AnyGraphObject { type Raw >: VF}, VF <: Dummy](vf: F := VF):
       DummyObjectValOps[F, VF] =
-      DummyObjectValOps[F, VF](vf.value)
+      DummyObjectValOps[F, VF](vf)
 
-    case class DummyObjectValOps[F <: AnyGraphObject { type Raw >: VF }, VF <: Dummy](vf: VF) extends AnyVal {
+    case class DummyObjectValOps[F <: AnyGraphObject { type Raw >: VF }, VF <: Dummy](vf: F := VF) extends AnyVal {
 
       def ⊗[S <: AnyGraphObject, VS <: Dummy with S#Raw](vs: S := VS): (F ⊗ S) := DummyTensor[VF, VS] =
-        new Denotes( DummyTensor(vf, vs.value) )
+        TensorObj(vf.tpe, vs.tpe) := DummyTensor(vf.value, vs.value)
 
       def ⊕[S <: AnyGraphObject, VS <: Dummy with S#Raw](vs: S := VS): (F ⊕ S) := DummyBiproduct[VF, VS] =
-        new Denotes( DummyBiproduct(vf, vs.value) )
+        BiproductObj(vf.tpe, vs.tpe) := DummyBiproduct(vf.value, vs.value)
     }
   }
 
