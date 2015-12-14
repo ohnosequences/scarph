@@ -25,7 +25,7 @@ case object objects {
     val  targetArity: TargetArity
 
     // NOTE >: <: bounds needed due to type inference issues
-    type Target >: TargetArity#GraphObject <: TargetArity#GraphObject
+    type Target = TargetArity#GraphObject // <: TargetArity#GraphObject
     lazy val target: Target = targetArity.graphObject
   }
 
@@ -58,7 +58,7 @@ case object objects {
 
     type TargetArity = T
     lazy val targetArity: TargetArity = st._2
-    type Target = TargetArity#GraphObject
+    // type Target = TargetArity#GraphObject
   }
 
   /* Property values have raw types that are covered as graph objects */
@@ -117,7 +117,7 @@ case object objects {
 
     type TargetArity = V
     lazy val targetArity: TargetArity = st._2
-    type Target = TargetArity#GraphObject
+    // type Target = TargetArity#GraphObject
   }
 
   trait AnyPredicate extends AnyGraphObject {

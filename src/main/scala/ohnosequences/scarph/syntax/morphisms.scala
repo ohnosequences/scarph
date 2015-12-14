@@ -280,13 +280,13 @@ case object morphisms {
 
   case class VertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F) extends AnyVal {
 
-    def inE[E <: AnyEdge with AnyEdge.To[F#Out]](e: E):
-      F >=> s.morphisms.inE[E] =
-      f >=> s.morphisms.inE(e)
+    def inE[E <: AnyEdge.To[F#Out]](e: E):
+      Composition[F, s.morphisms.inE[E]] =
+      Composition(f, s.morphisms.inE(e))
 
-    def inV[E <: AnyEdge with AnyEdge.To[F#Out]](e: E):
-      F >=> s.morphisms.inV[E] =
-      f >=> s.morphisms.inV(e)
+    def inV[E <: AnyEdge.To[F#Out]](e: E):
+      Composition[F, s.morphisms.inV[E]] =
+      Composition(f, s.morphisms.inV(e))
 
 
     def outE[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
