@@ -1,0 +1,1 @@
+Since the last release (v0.2.0) Scarph has been totally rewritten (several times). Now it is based on the [cosas-0.8](https://github.com/ohnosequences/cosas/releases/tag/v0.8.0) library (ex-typesets), which absorbed some generic concepts first appeared here (such as type denotations). Scarph is still on the way to the stable v1.0 release.

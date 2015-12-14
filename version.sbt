@@ -1,1 +1,1 @@
-version in ThisBuild := "0.5.0-properties-as-edges-SNAPSHOT"
+version in ThisBuild := "0.3.0-SNAPSHOT"
