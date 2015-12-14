@@ -212,8 +212,8 @@ case object morphisms {
   case class ElementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F) extends AnyVal {
 
     def get[P <: AnyProperty { type Source = F#Out }](p: P):
-      F >=> s.morphisms.get[P] =
-      f >=> s.morphisms.get(p)
+      Composition[F, s.morphisms.get[P]] =
+      Composition(f, s.morphisms.get(p))
 
     def quantify[P <: AnyPredicate.On[F#Out]](p: P):
       F >=> s.morphisms.quantify[P] =
@@ -290,12 +290,12 @@ case object morphisms {
 
 
     def outE[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
-      F >=> s.morphisms.outE[E] =
-      f >=> s.morphisms.outE(e)
+      Composition[F, s.morphisms.outE[E]] =
+      Composition(f, s.morphisms.outE(e))
 
     def outV[E <: AnyEdge with AnyEdge.From[F#Out]](e: E):
-      F >=> s.morphisms.outV[E] =
-      f >=> s.morphisms.outV(e)
+      Composition[F, s.morphisms.outV[E]] =
+      Composition(f, s.morphisms.outV(e))
   }
 
 }

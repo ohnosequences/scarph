@@ -10,30 +10,38 @@ case object objects {
     type Raw = Any
   }
 
+
+
   sealed trait AnyGraphObject extends AnyGraphType
+
+
 
   trait AnyRelation extends AnyGraphObject {
 
     type SourceArity <: AnyArity
     val  sourceArity: SourceArity
 
-    // NOTE >: <: bounds needed due to type inference issues
-    type Source >: SourceArity#GraphObject <: SourceArity#GraphObject
+    type Source = SourceArity#GraphObject
     lazy val source: Source = sourceArity.graphObject
 
     type TargetArity <: AnyArity
     val  targetArity: TargetArity
 
-    // NOTE >: <: bounds needed due to type inference issues
-    type Target = TargetArity#GraphObject // <: TargetArity#GraphObject
+    type Target = TargetArity#GraphObject
     lazy val target: Target = targetArity.graphObject
   }
+
+
 
   // NOTE in tradititional graph data models, only "elements" can have properties
   sealed trait AnyGraphElement extends AnyGraphObject
 
+
+
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
+
+
 
   trait AnyEdge extends AnyRelation with AnyGraphElement {
 
@@ -46,6 +54,7 @@ case object objects {
     type From[S <: AnyVertex] = AnyEdge { type Source = S }
     type   To[T <: AnyVertex] = AnyEdge { type Target = T }
   }
+
   /* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
   abstract class Edge[
     S <: AnyArity.OfVertices,
@@ -54,12 +63,12 @@ case object objects {
 
     type SourceArity = S
     lazy val sourceArity: SourceArity = st._1
-    type Source = SourceArity#GraphObject
 
     type TargetArity = T
     lazy val targetArity: TargetArity = st._2
-    // type Target = TargetArity#GraphObject
   }
+
+
 
   /* Property values have raw types that are covered as graph objects */
   trait AnyValueType extends AnyGraphObject {
@@ -67,10 +76,13 @@ case object objects {
     type Val
     def valueTag: ClassTag[Val]
   }
+
   abstract class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
 
     type Val = V
   }
+
+
 
   trait AnyArity {
 
@@ -95,30 +107,32 @@ case object objects {
   case class ExactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
   case class ManyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
 
+
+
   trait AnyProperty extends AnyRelation {
 
     type SourceArity <: AnyArity.OfElements
     type TargetArity <: AnyArity.OfValueTypes
   }
+
   case object AnyProperty {
 
     type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
   }
+
   abstract class Property[
     O <: AnyArity.OfElements,
     V <: AnyArity.OfValueTypes
-  ]
-  (val st: (O,V))(val label: String)
-  extends AnyProperty
-  {
+  ](val st: (O,V))(val label: String) extends AnyProperty {
+
     type SourceArity = O
     lazy val sourceArity: SourceArity = st._1
-    type Source = SourceArity#GraphObject
 
     type TargetArity = V
     lazy val targetArity: TargetArity = st._2
-    // type Target = TargetArity#GraphObject
   }
+
+
 
   trait AnyPredicate extends AnyGraphObject {
 
@@ -140,11 +154,13 @@ case object objects {
     lazy val conditions: List[AnyCondition] = List[AnyCondition]()
   }
 
+
   case class EmptyPredicate[E <: AnyGraphElement](val element: E)
     extends AnyEmptyPredicate {
 
     type Element = E
   }
+
 
   /* This is just like cons, but controlling, that all conditions are on the same element type */
   trait AnyAndPredicate extends AnyPredicate {
@@ -168,6 +184,7 @@ case object objects {
     type Condition = C
   }
 
+
   /* A condition is a restriction on the property values */
   trait AnyCondition {
 
@@ -186,6 +203,7 @@ case object objects {
     type OnProperty[P <: AnyProperty] = AnyCondition { type Property = P }
     type OnElement[E <: AnyGraphElement] = AnyCondition { type Element = E }
   }
+
 
   /* Comparison conditions with **One** property value */
   trait AnyCompareCondition extends AnyCondition {
@@ -262,6 +280,7 @@ case object objects {
   }
 
 
+
   /* ## Tensor product */
   sealed trait AnyTensorObj extends AnyGraphObject {
 
@@ -289,6 +308,8 @@ case object objects {
 
     lazy val label: String = this.toString
   }
+
+
 
   /* ## Biproduct */
   sealed trait AnyBiproductObj extends AnyGraphObject {
@@ -318,6 +339,7 @@ case object objects {
     lazy val label: String = this.toString
   }
 
+
   implicit def graphObjectOps[O <: AnyGraphObject](o: O):
     GraphObjectOps[O] =
     GraphObjectOps[O](o)
@@ -327,4 +349,5 @@ case object objects {
     def ⊗[S <: AnyGraphObject](other: S): O ⊗ S = TensorObj(obj, other)
     def ⊕[S <: AnyGraphObject](other: S): O ⊕ S = BiproductObj(obj, other)
   }
+
 }
