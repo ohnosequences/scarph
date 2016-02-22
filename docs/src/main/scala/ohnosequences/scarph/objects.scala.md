@@ -12,30 +12,38 @@ case object objects {
     type Raw = Any
   }
 
+
+
   sealed trait AnyGraphObject extends AnyGraphType
+
+
 
   trait AnyRelation extends AnyGraphObject {
 
     type SourceArity <: AnyArity
     val  sourceArity: SourceArity
 
-    // NOTE >: <: bounds needed due to type inference issues
-    type Source >: SourceArity#GraphObject <: SourceArity#GraphObject
+    type Source = SourceArity#GraphObject
     lazy val source: Source = sourceArity.graphObject
 
     type TargetArity <: AnyArity
     val  targetArity: TargetArity
 
-    // NOTE >: <: bounds needed due to type inference issues
-    type Target >: TargetArity#GraphObject <: TargetArity#GraphObject
+    type Target = TargetArity#GraphObject
     lazy val target: Target = targetArity.graphObject
   }
+
+
 
   // NOTE in tradititional graph data models, only "elements" can have properties
   sealed trait AnyGraphElement extends AnyGraphObject
 
+
+
   trait AnyVertex extends AnyGraphElement
   class Vertex(val label: String) extends AnyVertex
+
+
 
   trait AnyEdge extends AnyRelation with AnyGraphElement {
 
@@ -60,11 +68,9 @@ This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted")
 
     type SourceArity = S
     lazy val sourceArity: SourceArity = st._1
-    type Source = SourceArity#GraphObject
 
     type TargetArity = T
     lazy val targetArity: TargetArity = st._2
-    type Target = TargetArity#GraphObject
   }
 ```
 
@@ -76,10 +82,13 @@ Property values have raw types that are covered as graph objects
     type Val
     def valueTag: ClassTag[Val]
   }
+
   abstract class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
 
     type Val = V
   }
+
+
 
   trait AnyArity {
 
@@ -104,30 +113,32 @@ Property values have raw types that are covered as graph objects
   case class ExactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
   case class ManyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
 
+
+
   trait AnyProperty extends AnyRelation {
 
     type SourceArity <: AnyArity.OfElements
     type TargetArity <: AnyArity.OfValueTypes
   }
+
   case object AnyProperty {
 
     type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
   }
+
   abstract class Property[
     O <: AnyArity.OfElements,
     V <: AnyArity.OfValueTypes
-  ]
-  (val st: (O,V))(val label: String)
-  extends AnyProperty
-  {
+  ](val st: (O,V))(val label: String) extends AnyProperty {
+
     type SourceArity = O
     lazy val sourceArity: SourceArity = st._1
-    type Source = SourceArity#GraphObject
 
     type TargetArity = V
     lazy val targetArity: TargetArity = st._2
-    type Target = TargetArity#GraphObject
   }
+
+
 
   trait AnyPredicate extends AnyGraphObject {
 
@@ -151,6 +162,7 @@ Empty predicate doesn't have any restrictions
   trait AnyEmptyPredicate extends AnyPredicate {
     lazy val conditions: List[AnyCondition] = List[AnyCondition]()
   }
+
 
   case class EmptyPredicate[E <: AnyGraphElement](val element: E)
     extends AnyEmptyPredicate {
@@ -344,6 +356,7 @@ Comparison conditions with **One** property value
     lazy val label: String = this.toString
   }
 
+
   implicit def graphObjectOps[O <: AnyGraphObject](o: O):
     GraphObjectOps[O] =
     GraphObjectOps[O](o)
@@ -353,6 +366,7 @@ Comparison conditions with **One** property value
     def ⊗[S <: AnyGraphObject](other: S): O ⊗ S = TensorObj(obj, other)
     def ⊕[S <: AnyGraphObject](other: S): O ⊕ S = BiproductObj(obj, other)
   }
+
 }
 
 ```
