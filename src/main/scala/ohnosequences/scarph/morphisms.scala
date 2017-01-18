@@ -15,6 +15,14 @@ trait AnyGraphMorphism extends AnyGraphType {
   val  dagger: Dagger
 }
 
+trait AnyMorphismTransform extends Any {
+
+  type InMorph <: AnyGraphMorphism
+  type OutMorph
+
+  def apply(morph: InMorph): OutMorph
+}
+
 /* Sequential sition of two morphisms */
 sealed trait AnyComposition extends AnyGraphMorphism { composition =>
 

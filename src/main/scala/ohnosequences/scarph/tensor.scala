@@ -64,7 +64,7 @@ case class TensorMorph[L <: AnyGraphMorphism, R <: AnyGraphMorphism]
 }
 
 
-// I → X
+/* #### `I → X` */
 case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitiveMorph {
   type Obj = X
 
@@ -80,7 +80,7 @@ case class fromUnit[X <: AnyGraphObject](val obj: X) extends AnyPrimitiveMorph {
   lazy val label: String = s"fromUnit(${obj.label})"
 }
 
-// X → I
+/* #### `X → I` */
 case class toUnit[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
   type Obj = X
 
@@ -96,7 +96,7 @@ case class toUnit[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
   lazy val label: String = s"toUnit(${obj.label})"
 }
 
-// △: X → X ⊗ X
+/* #### `△: X → X ⊗ X` */
 case class duplicate[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
   type Obj = X
 
@@ -112,7 +112,7 @@ case class duplicate[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
   lazy val label: String = s"duplicate(${obj.label})"
 }
 
-// ▽: X ⊗ X → X
+/* #### `▽: X ⊗ X → X` */
 case class matchUp[X <: AnyGraphObject](obj: X) extends AnyPrimitiveMorph {
   type Obj = X
 

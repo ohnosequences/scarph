@@ -26,7 +26,19 @@ package object syntax {
     F with AnyGraphMorphism { type Out = F#Out#Left ⊕ F#Out#Left }
 
 
-  /* ## Minimal necessary syntax */
+
+  implicit def elementPredicateOps[E <: AnyGraphElement](e: E):
+      ElementPredicateOps[E] =
+      ElementPredicateOps[E](e)
+
+  implicit def predicateOps[P <: AnyPredicate](p: P):
+      PredicateOps[P] =
+      PredicateOps[P](p)
+
+  implicit final def conditionOps[P <: AnyProperty](property: P):
+    ConditionOps[P] =
+    ConditionOps[P](property)
+
 
   implicit final def graphMorphismValOps[F <: AnyGraphMorphism, VF](vt: F := VF):
     GraphMorphismValOps[F, VF] =

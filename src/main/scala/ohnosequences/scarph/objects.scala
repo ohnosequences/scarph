@@ -67,8 +67,6 @@ abstract class Edge[
   lazy val targetArity: TargetArity = st._2
 }
 
-
-
 /* Property values have raw types that are covered as graph objects */
 trait AnyValueType extends AnyGraphObject {
 

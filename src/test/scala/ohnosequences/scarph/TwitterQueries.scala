@@ -1,11 +1,9 @@
 package ohnosequences.scarph.test
 
-case object queries {
+import ohnosequences.scarph._, syntax._
+import ohnosequences.scarph.test.twitter._
 
-  import ohnosequences.{ scarph => s }
-  import s.objects._, s.morphisms._
-  import s.syntax._, morphisms._, objects._
-  import s.test.twitter._
+case object queries {
 
   class TestBlock(val label: String)
 

@@ -2,14 +2,6 @@ package ohnosequences.scarph
 
 object rewrites {
 
-  trait AnyMorphismTransform extends Any {
-
-    type InMorph <: AnyGraphMorphism
-    type OutMorph
-
-    def apply(morph: InMorph): OutMorph
-  }
-
   /* Transforms a morphism to another morphism with same domain/codomain */
   trait AnyRewrite extends AnyMorphismTransform {
 
