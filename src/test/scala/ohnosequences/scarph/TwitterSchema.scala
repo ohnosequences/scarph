@@ -1,7 +1,7 @@
 package ohnosequences.scarph.test
 
 import ohnosequences.cosas._
-import ohnosequences.scarph._, schemas._
+import ohnosequences.scarph._
 
 
 case object twitter extends AnyGraphSchema {
