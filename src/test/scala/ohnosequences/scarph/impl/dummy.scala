@@ -1,6 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, objects._, evals._
+import ohnosequences.scarph._, evals._
 import scala.Function.const
 
 case object dummy {
@@ -118,8 +118,6 @@ case object dummy {
 
   case object propertyStructure {
 
-    import morphisms._
-
     implicit def eval_getV[P <: AnyProperty { type Source <: AnyVertex }]:
         Eval[DummyVertex, get[P], P#Target#Raw] =
     new Eval[DummyVertex, get[P], P#Target#Raw] {
@@ -166,7 +164,6 @@ case object dummy {
   }
 
   case object predicateStructure {
-    import morphisms._
 
     implicit def eval_quantify[D <: Dummy, P <: AnyPredicate]:
         Eval[D, quantify[P], D] =
@@ -190,7 +187,6 @@ case object dummy {
 
   case object syntax {
     import ohnosequences.cosas.types._
-    import ohnosequences.scarph.objects._
 
     implicit def dummyObjectValOps[F <: AnyGraphObject { type Raw >: VF}, VF <: Dummy](vf: F := VF):
       DummyObjectValOps[F, VF] =

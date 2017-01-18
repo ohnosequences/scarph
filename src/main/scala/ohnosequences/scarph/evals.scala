@@ -3,7 +3,6 @@ package ohnosequences.scarph
 case object evals {
 
   import ohnosequences.cosas._, types._
-  import objects._, morphisms._
 
   /* Transforms a morphism to a function */
   trait AnyEval extends Any with AnyMorphismTransform {
@@ -79,8 +78,8 @@ case object evals {
   trait CategoryStructure {
 
     implicit final def eval_id[X <: AnyGraphObject, I]:
-        Eval[I, morphisms.id[X], I] =
-    new Eval[I, morphisms.id[X], I] {
+        Eval[I, ohnosequences.scarph.id[X], I] =
+    new Eval[I, ohnosequences.scarph.id[X], I] {
 
       def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal => inVal }
 

@@ -1,7 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, objects._, morphisms._, evals._
-import syntax.morphisms._
+import ohnosequences.scarph._, evals._, syntax._
 import asserts._, twitter._, dummy._, dummy.syntax._
 
 class DummyTests extends org.scalatest.FunSuite {
