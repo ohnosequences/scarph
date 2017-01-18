@@ -1,7 +1,5 @@
 package ohnosequences.scarph
 
-import objects._, morphisms._
-
 case object axioms {
 
   trait AnyAxiom {

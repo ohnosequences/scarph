@@ -3,7 +3,7 @@ package ohnosequences.scarph.syntax
 object objects {
 
   import ohnosequences.cosas.types._
-  import ohnosequences.scarph.objects._
+  import ohnosequences.scarph._
 
 
   /* A way of building a predicate from an element */

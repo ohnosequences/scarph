@@ -2,8 +2,6 @@ package ohnosequences.scarph
 
 case object schemas {
 
-  import objects._
-
   trait AnyGraphSchema extends AnyGraphType {
 
     val vertices: Set[AnyVertex]
