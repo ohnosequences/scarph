@@ -1,6 +1,8 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._, evals._
+import ohnosequences.scarph._
+import ohnosequences.scarph.impl._
+import ohnosequences.cosas.types._
 import scala.Function.const
 
 case object dummy {
@@ -14,9 +16,9 @@ case object dummy {
   type DummyVertex = DummyVertex.type
 
 
-  case object categoryStructure extends CategoryStructure
+  case object categoryStructure extends DaggerCategory
 
-  case object graphStructure extends GraphStructure {
+  case object graphStructure extends Relations {
 
     type RawEdge = DummyEdge
     type RawSource = DummyVertex
@@ -38,7 +40,7 @@ case object dummy {
   case object DummyUnit extends Dummy
   type DummyUnit = DummyUnit.type
 
-  case object tensorStructure extends TensorStructure {
+  case object tensorStructure extends Tensors {
 
     type TensorBound = Dummy
     type RawTensor[L <: TensorBound, R <: TensorBound] = DummyTensor[L, R]
@@ -85,7 +87,7 @@ case object dummy {
   type DummyZero = DummyZero.type
 
 
-  case object biproductStructure extends BiproductStructure {
+  case object biproductStructure extends Biproducts {
 
     type BiproductBound = Dummy
     type RawBiproduct[L <: BiproductBound, R <: BiproductBound] = DummyBiproduct[L, R]
@@ -119,8 +121,8 @@ case object dummy {
   case object propertyStructure {
 
     implicit def eval_getV[P <: AnyProperty { type Source <: AnyVertex }]:
-        Eval[DummyVertex, get[P], P#Target#Raw] =
-    new Eval[DummyVertex, get[P], P#Target#Raw] {
+        ohnosequences.scarph.impl.Eval[DummyVertex, get[P], P#Target#Raw] =
+    new ohnosequences.scarph.impl.Eval[DummyVertex, get[P], P#Target#Raw] {
 
       def rawApply(morph: InMorph): InVal => OutVal = ???
 
@@ -186,7 +188,6 @@ case object dummy {
   }
 
   case object syntax {
-    import ohnosequences.cosas.types._
 
     implicit def dummyObjectValOps[F <: AnyGraphObject { type Raw >: VF}, VF <: Dummy](vf: F := VF):
       DummyObjectValOps[F, VF] =
