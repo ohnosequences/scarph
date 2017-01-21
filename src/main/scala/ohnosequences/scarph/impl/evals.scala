@@ -6,19 +6,19 @@ import ohnosequences.cosas._, types._
 /* Transforms a morphism to a function */
 trait AnyEval extends AnyMorphismTransform {
 
-  type InVal
-  type OutVal
+  type RawInput
+  type RawOutput
 
-  type Input  = InMorph#In  := InVal
-  type Output = InMorph#Out := OutVal
+  def raw_apply(morph: InMorph): RawInput => RawOutput
+
+  // Same but with tags:
+  type Input  = InMorph#In  := RawInput
+  type Output = InMorph#Out := RawOutput
 
   type OutMorph = Input => Output
 
-  def rawApply(morph: InMorph): InVal => OutVal
-
-  // same but with tags:
   final def apply(morph: InMorph): OutMorph = { input: Input =>
-    (morph.out: InMorph#Out) := rawApply(morph)(input.value)
+    (morph.out: InMorph#Out) := raw_apply(morph)(input.value)
   }
 
   def present(morph: InMorph): Seq[String]
@@ -28,8 +28,8 @@ trait AnyEval extends AnyMorphismTransform {
 trait Eval[I, M <: AnyGraphMorphism, O] extends AnyEval {
 
   type InMorph = M
-  type InVal = I
-  type OutVal = O
+  type RawInput = I
+  type RawOutput = O
 }
 
 final class evaluate[I, M <: AnyGraphMorphism, O](

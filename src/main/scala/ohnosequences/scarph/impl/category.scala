@@ -5,10 +5,10 @@ import ohnosequences.scarph._
 trait DaggerCategory {
 
   implicit final def eval_id[X <: AnyGraphObject, I]:
-      Eval[I, ohnosequences.scarph.id[X], I] =
-  new Eval[I, ohnosequences.scarph.id[X], I] {
+      Eval[I, id[X], I] =
+  new Eval[I, id[X], I] {
 
-    def rawApply(morph: InMorph): InVal => OutVal = { inVal: InVal => inVal }
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput => raw_input }
 
     final def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
@@ -26,11 +26,11 @@ trait DaggerCategory {
   ):  Eval[I, F >=> S, O] =
   new Eval[I, F >=> S, O] {
 
-    def rawApply(morph: InMorph): InVal => OutVal =
-      { inVal: InVal =>
+    def raw_apply(morph: InMorph): RawInput => RawOutput =
+      { raw_input: RawInput =>
 
-        val firstResult = evalFirst.rawApply(morph.first)(inVal)
-        evalSecond.rawApply(morph.second)(firstResult)
+        val firstResult = evalFirst.raw_apply(morph.first)(raw_input)
+        evalSecond.raw_apply(morph.second)(firstResult)
       }
 
     def present(morph: InMorph): Seq[String] =

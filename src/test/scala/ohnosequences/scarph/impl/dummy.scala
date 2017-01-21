@@ -24,14 +24,14 @@ case object dummy {
     type RawSource = DummyVertex
     type RawTarget = DummyVertex
 
-    def outVRaw(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
-    def inVRaw(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
+    def raw_outV(edge: AnyEdge)(v: RawSource): RawTarget = DummyVertex
+    def raw_inV(edge: AnyEdge)(v: RawTarget): RawSource = DummyVertex
 
-    def outERaw(edge: AnyEdge)(v: RawSource): RawEdge = DummyEdge
-    def sourceRaw(edge: AnyEdge)(e: RawEdge): RawSource = DummyVertex
+    def raw_outE(edge: AnyEdge)(v: RawSource): RawEdge = DummyEdge
+    def raw_source(edge: AnyEdge)(e: RawEdge): RawSource = DummyVertex
 
-    def inERaw(edge: AnyEdge)(v: RawTarget): RawEdge = DummyEdge
-    def targetRaw(edge: AnyEdge)(e: RawEdge): RawTarget = DummyVertex
+    def raw_inE(edge: AnyEdge)(v: RawTarget): RawEdge = DummyEdge
+    def raw_target(edge: AnyEdge)(e: RawEdge): RawTarget = DummyVertex
   }
 
 
@@ -46,10 +46,10 @@ case object dummy {
     type RawTensor[L <: TensorBound, R <: TensorBound] = DummyTensor[L, R]
     type RawUnit = DummyUnit
 
-    def tensorRaw[L <: TensorBound, R <: TensorBound](l: L, r: R): RawTensor[L, R] = DummyTensor(l, r)
-    def leftRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L = t.l
-    def rightRaw[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): R = t.r
-    def toUnitRaw[X <: TensorBound](x: X): RawUnit = DummyUnit
+    def raw_tensor[L <: TensorBound, R <: TensorBound](l: L, r: R): RawTensor[L, R] = DummyTensor(l, r)
+    def raw_left[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): L = t.l
+    def raw_right[L <: TensorBound, R <: TensorBound](t: RawTensor[L, R]): R = t.r
+    def raw_toUnit[X <: TensorBound](x: X): RawUnit = DummyUnit
 
 
     implicit def dummyMatch[T <: Dummy]:
@@ -93,18 +93,18 @@ case object dummy {
     type RawBiproduct[L <: BiproductBound, R <: BiproductBound] = DummyBiproduct[L, R]
     type RawZero = DummyZero
 
-    def biproductRaw[L <: BiproductBound, R <: BiproductBound](l: L, r: R): RawBiproduct[L, R] =
+    def raw_biproduct[L <: BiproductBound, R <: BiproductBound](l: L, r: R): RawBiproduct[L, R] =
       DummyBiproduct[L, R](l, r)
 
-    def leftProjRaw[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): L = t.l
-    def rightProjRaw[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): R = t.r
+    def raw_leftProj[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): L = t.l
+    def raw_rightProj[L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): R = t.r
 
-    def toZeroRaw[X <: BiproductBound](x: X): RawZero = DummyZero
+    def raw_toZero[X <: BiproductBound](x: X): RawZero = DummyZero
 
 
     implicit def dummyMerge[T <: Dummy]:
-        Mergeable[T] =
-    new Mergeable[T] { def merge(l: T, r: T): T = r }
+        RawMerge[T] =
+    new RawMerge[T] { def apply(l: T, r: T): T = r }
 
 
     implicit def dummyZeroEdge[E <: AnyEdge]:
@@ -124,7 +124,7 @@ case object dummy {
         ohnosequences.scarph.impl.Eval[DummyVertex, get[P], P#Target#Raw] =
     new ohnosequences.scarph.impl.Eval[DummyVertex, get[P], P#Target#Raw] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = ???
+      def raw_apply(morph: InMorph): RawInput => RawOutput = ???
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -133,7 +133,7 @@ case object dummy {
         Eval[DummyEdge, get[P], P#Target#Raw] =
     new Eval[DummyEdge, get[P], P#Target#Raw] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = ???
+      def raw_apply(morph: InMorph): RawInput => RawOutput = ???
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -146,7 +146,7 @@ case object dummy {
     : Eval[V, lookup[P], DummyVertex] =
     new Eval[V, lookup[P], DummyVertex] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = const(DummyVertex)
+      def raw_apply(morph: InMorph): RawInput => RawOutput = const(DummyVertex)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -158,7 +158,7 @@ case object dummy {
     : Eval[V, lookup[P], DummyEdge] =
     new Eval[V, lookup[P], DummyEdge] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = const(DummyEdge)
+      def raw_apply(morph: InMorph): RawInput => RawOutput = const(DummyEdge)
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -171,7 +171,7 @@ case object dummy {
         Eval[D, quantify[P], D] =
     new Eval[D, quantify[P], D] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+      def raw_apply(morph: InMorph): RawInput => RawOutput = identity[D]
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
@@ -180,7 +180,7 @@ case object dummy {
         Eval[D, coerce[P], D] =
     new Eval[D, coerce[P], D] {
 
-      def rawApply(morph: InMorph): InVal => OutVal = identity[D]
+      def raw_apply(morph: InMorph): RawInput => RawOutput = identity[D]
 
       def present(morph: InMorph): Seq[String] = Seq(morph.label)
     }
