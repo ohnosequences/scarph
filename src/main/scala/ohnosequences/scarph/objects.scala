@@ -36,12 +36,13 @@ trait AnyRelation extends AnyGraphObject {
 sealed trait AnyGraphElement extends AnyGraphObject
 
 
-
+/* A vertex is a simple graph object representing some type of entities */
 trait AnyVertex extends AnyGraphElement
-class Vertex(val label: String) extends AnyVertex
+abstract class Vertex(val label: String) extends AnyVertex
 
 
 
+/* An edge is an object representing relation between vertex-objects */
 trait AnyEdge extends AnyRelation with AnyGraphElement {
 
   type SourceArity <: AnyArity.OfVertices
@@ -54,7 +55,9 @@ case object AnyEdge {
   type   To[T <: AnyVertex] = AnyEdge { type Target = T }
 }
 
-/* This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted") */
+/* This constructor encourages to use this syntax:
+    `case class posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted")`
+*/
 abstract class Edge[
   S <: AnyArity.OfVertices,
   T <: AnyArity.OfVertices
@@ -67,7 +70,33 @@ abstract class Edge[
   lazy val targetArity: TargetArity = st._2
 }
 
-/* Property values have raw types that are covered as graph objects */
+
+/* Properties are relations connecting element-objects (vertices or edges) with value-objects (scalar types) */
+trait AnyProperty extends AnyRelation {
+
+  type SourceArity <: AnyArity.OfElements
+  type TargetArity <: AnyArity.OfValueTypes
+}
+
+case object AnyProperty {
+
+  type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
+}
+
+abstract class Property[
+  O <: AnyArity.OfElements,
+  V <: AnyArity.OfValueTypes
+](val st: (O,V))(val label: String) extends AnyProperty {
+
+  type SourceArity = O
+  lazy val sourceArity: SourceArity = st._1
+
+  type TargetArity = V
+  lazy val targetArity: TargetArity = st._2
+}
+
+
+/* Property values have scalar types wrapped as graph objects */
 trait AnyValueType extends AnyGraphObject {
 
   type Val
