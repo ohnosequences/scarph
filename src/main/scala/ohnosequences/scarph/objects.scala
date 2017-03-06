@@ -38,8 +38,15 @@ sealed trait AnyGraphElement extends AnyGraphObject
 
 /* A vertex is a simple graph object representing some type of entities */
 trait AnyVertex extends AnyGraphElement
+
 abstract class Vertex(val label: String) extends AnyVertex
 
+// /* You can use this class to automize vertices labeling. It has to be instantiated as a `case object` and its name will be used as a base label. If you want to transform it (e.g. add a prefix) provide an implicit function for relabeling. */
+// abstract class vertex(implicit relabel: String => String = identity)
+//   extends AnyVertex { _ : Singleton with Product =>
+//
+//     final val label: String = relabel(this.productPrefix)
+//   }
 
 
 /* An edge is an object representing relation between vertex-objects */
