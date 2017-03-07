@@ -208,24 +208,47 @@ trait Tensors {
   //   def present(morph: InMorph): Seq[String] = Seq(morph.label)
   // }
 
+  implicit final def eval_leftUnit[
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[RawTensor[RawUnit, X], leftUnit[T], X] =
+  new Eval[RawTensor[RawUnit, X], leftUnit[T], X] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_right
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
+
+  implicit final def eval_leftCounit[
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[X, leftCounit[T], RawTensor[RawUnit, X]] =
+  new Eval[X, leftCounit[T], RawTensor[RawUnit, X]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      raw_tensor(raw_toUnit[X](raw_input), raw_input)
+    }
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
+
   implicit final def eval_rightUnit[
-    I <: TensorBound, T <: AnyGraphObject
-  ]:  Eval[RawTensor[I, RawUnit], rightUnit[T], I] =
-  new Eval[RawTensor[I, RawUnit], rightUnit[T], I] {
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[RawTensor[X, RawUnit], rightUnit[T], X] =
+  new Eval[RawTensor[X, RawUnit], rightUnit[T], X] {
 
     // FIXME: this is wrong!
+    // But why? It should be (id[X] ⊗ fromUnit[X]).matchUp, where fromUnit[X] just gives all instances of X, which is being matched with the input instance of X should be just input itself
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_left
 
     def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_rightCounit[
-    I <: TensorBound, T <: AnyGraphObject
-  ]:  Eval[I, rightCounit[T], RawTensor[I, RawUnit]] =
-  new Eval[I, rightCounit[T], RawTensor[I, RawUnit]] {
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[X, rightCounit[T], RawTensor[X, RawUnit]] =
+  new Eval[X, rightCounit[T], RawTensor[X, RawUnit]] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
-      raw_tensor(raw_input, raw_toUnit[I](raw_input))
+      raw_tensor(raw_input, raw_toUnit[X](raw_input))
     }
 
     def present(morph: InMorph): Seq[String] = Seq(morph.label)
