@@ -135,4 +135,17 @@ package object syntax {
         VertexSyntax[F] =
     new VertexSyntax[F](f)
 
+
+  implicit def addVertexSyntax[G](u: unit := G):
+        AddVertexSyntax[G] =
+    new AddVertexSyntax[G](u)
+
+  implicit def addEdgeSyntax[E <: AnyEdge](e: E):
+        AddEdgeSyntax[E] =
+    new AddEdgeSyntax[E](e)
+
+  implicit def setPropertySyntax[E <: AnyGraphElement, RE](e: E := RE):
+        SetPropertySyntax[E, RE] =
+    new SetPropertySyntax[E, RE](e)
+
 }
