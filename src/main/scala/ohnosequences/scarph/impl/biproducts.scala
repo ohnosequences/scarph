@@ -20,7 +20,7 @@ trait Biproducts {
 
   type BiproductBound
   type RawBiproduct[L <: BiproductBound, R <: BiproductBound]
-  type RawZero
+  type RawZero <: BiproductBound
 
   def raw_biproduct[L <: BiproductBound, R <: BiproductBound](l: L, r: R): RawBiproduct[L, R]
   def raw_leftProj [L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): L
@@ -189,5 +189,51 @@ trait Biproducts {
   new FromUnit[U, RawBiproduct[L, R]] {
 
     def fromUnit(u: U, o: AnyGraphObject): T = raw_biproduct(l.fromUnit(u, o), r.fromUnit(u, o))
+  }
+
+  // Isomorphisms
+
+  implicit final def eval_leftZero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[RawBiproduct[RawZero, X], leftZero[T], X] =
+  new Eval[RawBiproduct[RawZero, X], leftZero[T], X] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_rightProj
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
+
+  implicit final def eval_leftCozero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[X, leftCozero[T], RawBiproduct[RawZero, X]] =
+  new Eval[X, leftCozero[T], RawBiproduct[RawZero, X]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      raw_biproduct(raw_toZero[X](raw_input), raw_input)
+    }
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
+
+  implicit final def eval_rightZero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[RawBiproduct[X, RawZero], rightZero[T], X] =
+  new Eval[RawBiproduct[X, RawZero], rightZero[T], X] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_leftProj
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
+
+  implicit final def eval_rightCozero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[X, rightCozero[T], RawBiproduct[X, RawZero]] =
+  new Eval[X, rightCozero[T], RawBiproduct[X, RawZero]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      raw_biproduct(raw_input, raw_toZero[X](raw_input))
+    }
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 }
