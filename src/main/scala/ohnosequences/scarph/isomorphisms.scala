@@ -24,6 +24,7 @@ case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
   lazy val label: String = s"symmetry(${l.label}, ${r.label})"
 }
 
+// A ⊗ (B ⊗ C) → (A ⊗ B) ⊗ C
 case class associateLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
   (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
 
@@ -39,6 +40,7 @@ case class associateLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraph
   lazy val label: String = s"associateLeft(${a.label} ⊗ (${b.label} ⊕ ${c.label}))"
 }
 
+// (A ⊗ B) ⊗ C → A ⊗ (B ⊗ C)
 case class associateRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
   (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
 
@@ -54,6 +56,7 @@ case class associateRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGrap
   lazy val label: String = s"associateRight((${a.label} ⊗ ${b.label}) ⊗ ${c.label})"
 }
 
+// U ⊗ (A ⊕ B) → (U ⊗ A) ⊕ (U ⊗ B)
 case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
   (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
@@ -69,6 +72,7 @@ case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObj
   lazy val label: String = s"distribute(${u.label} ⊗ (${a.label} ⊕ ${b.label}))"
 }
 
+// (U ⊗ A) ⊕ (U ⊗ B) → U ⊗ (A ⊕ B)
 case class undistribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]
   (u: U, a: A, b: B) extends AnyNaturalIsomorphism {
 
@@ -194,7 +198,7 @@ case class rightZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
   lazy val label: String = s"rightZero(${x.label} ⊕ 0)"
 }
 
-// X → 0 ⊕ X
+// X → X ⊕ 0
 case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
   type     In = X
