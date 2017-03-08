@@ -231,7 +231,7 @@ case class rightZero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
   lazy val label: String = s"rightZero(${x.label} ⊕ 0)"
 }
 
-// X → 0 ⊕ X
+// X → X ⊕ 0
 case class rightCozero[X <: AnyGraphObject](x: X) extends AnyNaturalIsomorphism {
 
   type     In = X
