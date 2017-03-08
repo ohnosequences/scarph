@@ -24,8 +24,40 @@ case class symmetry[L <: AnyGraphObject, R <: AnyGraphObject](l: L, r: R)
   lazy val label: String = s"symmetry(${l.label}, ${r.label})"
 }
 
+// A ⊕ (B ⊕ C) → (A ⊕ B) ⊕ C
+case class associateBiproductLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
+  (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
+
+  type     In = A ⊕ (B ⊕ C)
+  lazy val in: In = a ⊕ (b ⊕ c)
+
+  type     Out = (A ⊕ B) ⊕ C
+  lazy val out: Out = (a ⊕ b) ⊕ c
+
+  type     Dagger = associateBiproductRight[A, B, C]
+  lazy val dagger: Dagger = associateBiproductRight(a, b, c)
+
+  lazy val label: String = s"associateBiproductLeft(${a.label} ⊕ (${b.label} ⊕ ${c.label}))"
+}
+
+// (A ⊕ B) ⊕ C → A ⊕ (B ⊕ C)
+case class associateBiproductRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
+  (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
+
+  type     In = (A ⊕ B) ⊕ C
+  lazy val in: In = (a ⊕ b) ⊕ c
+
+  type     Out = A ⊕ (B ⊕ C)
+  lazy val out: Out = a ⊕ (b ⊕ c)
+
+  type     Dagger = associateBiproductLeft[A, B, C]
+  lazy val dagger: Dagger = associateBiproductLeft(a, b, c)
+
+  lazy val label: String = s"associateBiproductRight((${a.label} ⊕ ${b.label}) ⊕ ${c.label})"
+}
+
 // A ⊗ (B ⊗ C) → (A ⊗ B) ⊗ C
-case class associateLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
+case class associateTensorLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
   (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
 
   type     In = A ⊗ (B ⊗ C)
@@ -34,14 +66,14 @@ case class associateLeft[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraph
   type     Out = (A ⊗ B) ⊗ C
   lazy val out: Out = (a ⊗ b) ⊗ c
 
-  type     Dagger = associateRight[A, B, C]
-  lazy val dagger: Dagger = associateRight(a, b, c)
+  type     Dagger = associateTensorRight[A, B, C]
+  lazy val dagger: Dagger = associateTensorRight(a, b, c)
 
-  lazy val label: String = s"associateLeft(${a.label} ⊗ (${b.label} ⊕ ${c.label}))"
+  lazy val label: String = s"associateTensorLeft(${a.label} ⊗ (${b.label} ⊗ ${c.label}))"
 }
 
 // (A ⊗ B) ⊗ C → A ⊗ (B ⊗ C)
-case class associateRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
+case class associateTensorRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject]
   (a: A, b: B, c: C) extends AnyNaturalIsomorphism {
 
   type     In = (A ⊗ B) ⊗ C
@@ -50,11 +82,12 @@ case class associateRight[A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGrap
   type     Out = A ⊗ (B ⊗ C)
   lazy val out: Out = a ⊗ (b ⊗ c)
 
-  type     Dagger = associateLeft[A, B, C]
-  lazy val dagger: Dagger = associateLeft(a, b, c)
+  type     Dagger = associateTensorLeft[A, B, C]
+  lazy val dagger: Dagger = associateTensorLeft(a, b, c)
 
-  lazy val label: String = s"associateRight((${a.label} ⊗ ${b.label}) ⊗ ${c.label})"
+  lazy val label: String = s"associateTensorRight((${a.label} ⊗ ${b.label}) ⊗ ${c.label})"
 }
+
 
 // U ⊗ (A ⊕ B) → (U ⊗ A) ⊕ (U ⊗ B)
 case class distribute[U <: AnyGraphObject, A <: AnyGraphObject, B <: AnyGraphObject]

@@ -61,7 +61,7 @@ trait Tensors {
       )
     }
 
-    def present(morph: InMorph): Seq[String] =
+    override def present(morph: InMorph): Seq[String] =
       ("(" +: evalLeft.present(morph.left)) ++
       (" ⊗ " +: evalRight.present(morph.right) :+ ")")
   }
@@ -76,8 +76,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_tensor[B, A](raw_right(raw_input), raw_left(raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // △: X → X ⊗ X
@@ -89,8 +87,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_tensor[I, I](raw_input, raw_input)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // ▽: X ⊗ X → X
@@ -104,8 +100,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       matchable.matchUp(raw_left(raw_input), raw_right(raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -120,8 +114,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       fu.fromUnit(raw_input, morph.obj)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // X → I
@@ -131,8 +123,6 @@ trait Tensors {
   new Eval[I, toUnit[T], RawUnit] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_toUnit
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit def fromUnitTensor[U, L <: TensorBound, R <: TensorBound]
@@ -145,11 +135,11 @@ trait Tensors {
     def fromUnit(u: U, o: AnyGraphObject): T = raw_tensor(l.fromUnit(u, o), r.fromUnit(u, o))
   }
 
-  implicit final def eval_associateLeft[
+  implicit final def eval_associateTensorLeft[
     A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
     X <: TensorBound, Y <: TensorBound, Z <: TensorBound
-  ]:  Eval[RawTensor[X, RawTensor[Y, Z]], associateLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] =
-  new Eval[RawTensor[X, RawTensor[Y, Z]], associateLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] {
+  ]:  Eval[RawTensor[X, RawTensor[Y, Z]], associateTensorLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] =
+  new Eval[RawTensor[X, RawTensor[Y, Z]], associateTensorLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       val x: X = raw_left(raw_input)
@@ -158,15 +148,13 @@ trait Tensors {
 
       raw_tensor(raw_tensor(x, y), z)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
-  implicit final def eval_associateRight[
+  implicit final def eval_associateTensorRight[
     A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
     X <: TensorBound, Y <: TensorBound, Z <: TensorBound
-  ]:  Eval[RawTensor[RawTensor[X, Y], Z], associateRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] =
-  new Eval[RawTensor[RawTensor[X, Y], Z], associateRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] {
+  ]:  Eval[RawTensor[RawTensor[X, Y], Z], associateTensorRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] =
+  new Eval[RawTensor[RawTensor[X, Y], Z], associateTensorRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       val x: X = raw_left(raw_left(raw_input))
@@ -175,8 +163,6 @@ trait Tensors {
 
       raw_tensor(x, raw_tensor(y, z))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // implicit final def eval_tensorTrace[
@@ -208,26 +194,41 @@ trait Tensors {
   //   def present(morph: InMorph): Seq[String] = Seq(morph.label)
   // }
 
+  implicit final def eval_leftUnit[
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[RawTensor[RawUnit, X], leftUnit[T], X] =
+  new Eval[RawTensor[RawUnit, X], leftUnit[T], X] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_right
+  }
+
+  implicit final def eval_leftCounit[
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[X, leftCounit[T], RawTensor[RawUnit, X]] =
+  new Eval[X, leftCounit[T], RawTensor[RawUnit, X]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      raw_tensor(raw_toUnit[X](raw_input), raw_input)
+    }
+  }
+
   implicit final def eval_rightUnit[
-    I <: TensorBound, T <: AnyGraphObject
-  ]:  Eval[RawTensor[I, RawUnit], rightUnit[T], I] =
-  new Eval[RawTensor[I, RawUnit], rightUnit[T], I] {
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[RawTensor[X, RawUnit], rightUnit[T], X] =
+  new Eval[RawTensor[X, RawUnit], rightUnit[T], X] {
 
     // FIXME: this is wrong!
+    // But why? It should be (id[X] ⊗ fromUnit[X]).matchUp, where fromUnit[X] just gives all instances of X, which is being matched with the input instance of X should be just input itself
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_left
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_rightCounit[
-    I <: TensorBound, T <: AnyGraphObject
-  ]:  Eval[I, rightCounit[T], RawTensor[I, RawUnit]] =
-  new Eval[I, rightCounit[T], RawTensor[I, RawUnit]] {
+    X <: TensorBound, T <: AnyGraphObject
+  ]:  Eval[X, rightCounit[T], RawTensor[X, RawUnit]] =
+  new Eval[X, rightCounit[T], RawTensor[X, RawUnit]] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
-      raw_tensor(raw_input, raw_toUnit[I](raw_input))
+      raw_tensor(raw_input, raw_toUnit[X](raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 }

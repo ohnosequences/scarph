@@ -19,8 +19,8 @@ trait ZeroFor[O <: AnyGraphObject, T0] {
 trait Biproducts {
 
   type BiproductBound
-  type RawBiproduct[L <: BiproductBound, R <: BiproductBound]
-  type RawZero
+  type RawBiproduct[L <: BiproductBound, R <: BiproductBound] <: BiproductBound
+  type RawZero <: BiproductBound
 
   def raw_biproduct[L <: BiproductBound, R <: BiproductBound](l: L, r: R): RawBiproduct[L, R]
   def raw_leftProj [L <: BiproductBound, R <: BiproductBound](t: RawBiproduct[L, R]): L
@@ -53,7 +53,7 @@ trait Biproducts {
       )
     }
 
-    def present(morph: InMorph): Seq[String] =
+    override def present(morph: InMorph): Seq[String] =
       ("(" +: evalLeft.present(morph.left)) ++
       (" ⊕ " +: evalRight.present(morph.right) :+ ")")
   }
@@ -67,8 +67,6 @@ trait Biproducts {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_biproduct[I, I](raw_input, raw_input)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // X ⊕ X → X
@@ -85,8 +83,6 @@ trait Biproducts {
         raw_rightProj(raw_input)
       )
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -99,8 +95,6 @@ trait Biproducts {
   new Eval[RawZero, fromZero[T], T0] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = _ => z.zero(morph.obj)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // T0 → 0
@@ -110,8 +104,6 @@ trait Biproducts {
   new Eval[T0, toZero[T], RawZero] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_toZero
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // L ⊕ R → L
@@ -122,8 +114,6 @@ trait Biproducts {
   new Eval[RawBiproduct[A, B], leftProj[L ⊕ R], A] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_leftProj
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // L ⊕ R → R
@@ -134,8 +124,6 @@ trait Biproducts {
   new Eval[RawBiproduct[A, B], rightProj[L ⊕ R], B] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_rightProj
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -150,8 +138,6 @@ trait Biproducts {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput =
       raw_biproduct(_, b.zero(morph.biproduct.right))
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // R → L ⊕ R
@@ -165,8 +151,6 @@ trait Biproducts {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput =
       raw_biproduct(a.zero(morph.biproduct.left), _)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit def zeroForBiproduct[
@@ -189,5 +173,73 @@ trait Biproducts {
   new FromUnit[U, RawBiproduct[L, R]] {
 
     def fromUnit(u: U, o: AnyGraphObject): T = raw_biproduct(l.fromUnit(u, o), r.fromUnit(u, o))
+  }
+
+  // Isomorphisms
+
+  implicit final def eval_associateBiproductLeft[
+    A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
+    X <: BiproductBound, Y <: BiproductBound, Z <: BiproductBound
+  ]:  Eval[RawBiproduct[X, RawBiproduct[Y, Z]], associateBiproductLeft[A, B, C], RawBiproduct[RawBiproduct[X, Y], Z]] =
+  new Eval[RawBiproduct[X, RawBiproduct[Y, Z]], associateBiproductLeft[A, B, C], RawBiproduct[RawBiproduct[X, Y], Z]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      val x: X = raw_leftProj(raw_input)
+      val y: Y = raw_leftProj(raw_rightProj(raw_input))
+      val z: Z = raw_rightProj(raw_rightProj(raw_input))
+
+      raw_biproduct(raw_biproduct(x, y), z)
+    }
+  }
+
+  implicit final def eval_associateBiproductRight[
+    A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
+    X <: BiproductBound, Y <: BiproductBound, Z <: BiproductBound
+  ]:  Eval[RawBiproduct[RawBiproduct[X, Y], Z], associateBiproductRight[A, B, C], RawBiproduct[X, RawBiproduct[Y, Z]]] =
+  new Eval[RawBiproduct[RawBiproduct[X, Y], Z], associateBiproductRight[A, B, C], RawBiproduct[X, RawBiproduct[Y, Z]]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      val x: X = raw_leftProj(raw_leftProj(raw_input))
+      val y: Y = raw_rightProj(raw_leftProj(raw_input))
+      val z: Z = raw_rightProj(raw_input)
+
+      raw_biproduct(x, raw_biproduct(y, z))
+    }
+  }
+
+  implicit final def eval_leftZero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[RawBiproduct[RawZero, X], leftZero[T], X] =
+  new Eval[RawBiproduct[RawZero, X], leftZero[T], X] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_rightProj
+  }
+
+  implicit final def eval_leftCozero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[X, leftCozero[T], RawBiproduct[RawZero, X]] =
+  new Eval[X, leftCozero[T], RawBiproduct[RawZero, X]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      raw_biproduct(raw_toZero[X](raw_input), raw_input)
+    }
+  }
+
+  implicit final def eval_rightZero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[RawBiproduct[X, RawZero], rightZero[T], X] =
+  new Eval[RawBiproduct[X, RawZero], rightZero[T], X] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_leftProj
+  }
+
+  implicit final def eval_rightCozero[
+    X <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[X, rightCozero[T], RawBiproduct[X, RawZero]] =
+  new Eval[X, rightCozero[T], RawBiproduct[X, RawZero]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      raw_biproduct(raw_input, raw_toZero[X](raw_input))
+    }
   }
 }
