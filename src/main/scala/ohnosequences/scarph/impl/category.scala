@@ -5,11 +5,8 @@ import ohnosequences.scarph._
 trait DaggerCategory {
 
   implicit final def eval_id[X <: AnyGraphObject, I]:
-      Eval[I, id[X], I] =
-  new Eval[I, id[X], I] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput => raw_input }
-  }
+      Eval[id[X], I, I] =
+  new Eval[id[X], I, I]({ _ => raw_input => raw_input })
 
   // F >=> S
   implicit final def eval_composition[
@@ -19,17 +16,14 @@ trait DaggerCategory {
       type In = F#Out
     }
   ](implicit
-    evalFirst:  Eval[I, F, X],
-    evalSecond: Eval[X, S, O]
-  ):  Eval[I, F >=> S, O] =
-  new Eval[I, F >=> S, O] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput =
-      { raw_input: RawInput =>
+    evalFirst:  Eval[F, I, X],
+    evalSecond: Eval[S, X, O]
+  ):  Eval[F >=> S, I, O] =
+  new Eval[F >=> S, I, O]({ morph => raw_input =>
 
         val firstResult = evalFirst.raw_apply(morph.first)(raw_input)
         evalSecond.raw_apply(morph.second)(firstResult)
-      }
+      }) {
 
     override def present(morph: InMorph): Seq[String] =
       ("(" +: evalFirst.present(morph.first)) ++

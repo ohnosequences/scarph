@@ -25,16 +25,20 @@ trait AnyEval extends AnyMorphismTransform {
 }
 
 @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")
-trait Eval[I, M <: AnyGraphMorphism, O] extends AnyEval {
+case class Eval[M <: AnyGraphMorphism, I, O](
+  val raw: M => (I => O)
+) extends AnyEval {
 
   type InMorph = M
   type RawInput = I
   type RawOutput = O
+
+  final def raw_apply(morph: InMorph): RawInput => RawOutput = raw(morph)
 }
 
-final class evaluate[I, M <: AnyGraphMorphism, O](
+final class evaluate[M <: AnyGraphMorphism, I, O](
   val f: M,
-  val eval: Eval[I, M, O]
+  val eval: Eval[M, I, O]
 ) {
 
   final def on(input: M#In := I): M#Out := O = eval(f).apply(input)
@@ -43,32 +47,35 @@ final class evaluate[I, M <: AnyGraphMorphism, O](
   final def evalPlan: String = eval.present(f).mkString("")
 }
 
-class evalWithIn[I, IM <: AnyGraphMorphism] {
+class evalWithIn[M <: AnyGraphMorphism, I] {
 
-  def apply[O](m: IM)(implicit
-    eval: Eval[I, IM, O]
-  ):  evaluate[I, IM, O] =
-  new evaluate[I, IM, O](m, eval)
+  def apply[O](m: M)(implicit
+    eval: Eval[M, I, O]
+  ):  evaluate[M, I, O] =
+  new evaluate[M, I, O](m, eval)
 }
 
-class evalWithInOut[I, IM <: AnyGraphMorphism, O] {
+class evalWithInOut[M <: AnyGraphMorphism, I, O] {
 
-  def apply(m: IM)(implicit
-    eval: Eval[I, IM, O]
-  ):  evaluate[I, IM, O] =
-  new evaluate[I, IM, O](m, eval)
+  def apply(m: M)(implicit
+    eval: Eval[M, I, O]
+  ):  evaluate[M, I, O] =
+  new evaluate[M, I, O](m, eval)
 }
 
 
 case object evaluate {
 
-  def apply[I, IM <: AnyGraphMorphism, O](m: IM)(i: IM#In := I)(implicit eval: Eval[I, IM, O]): IM#Out := O =
-    new evaluate[I, IM, O](m, eval).on(i)
+  def apply[M <: AnyGraphMorphism, I, O](m: M)(i: M#In := I)
+    (implicit eval: Eval[M, I, O]): M#Out := O =
+      new evaluate[M, I, O](m, eval).on(i)
 
-  def withIn[I, M <: AnyGraphMorphism]: evalWithIn[I,M] =
-    new evalWithIn[I, M] {}
+  def withIn[M <: AnyGraphMorphism, I]:
+      evalWithIn[M, I] =
+  new evalWithIn[M, I] {}
 
-  def withInOut[I, IM <: AnyGraphMorphism, O]: evalWithInOut[I, IM, O] =
-    new evalWithInOut[I, IM, O] {}
+  def withInOut[M <: AnyGraphMorphism, I, O]:
+      evalWithInOut[M, I, O] =
+  new evalWithInOut[M, I, O] {}
 
 }

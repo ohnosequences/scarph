@@ -18,54 +18,13 @@ trait Relations {
   def raw_target(edge: AnyEdge)(e: RawEdge): RawTarget
 
 
-  implicit final def eval_outV[
-    E <: AnyEdge
-  ]:  Eval[RawSource, outV[E], RawTarget] =
-  new Eval[RawSource, outV[E], RawTarget] {
+  implicit final def eval_outV[E <: AnyEdge]: Eval[outV[E], RawSource, RawTarget] = new Eval( morph => raw_outV(morph.relation) )
+  implicit final def eval_inV[E <: AnyEdge]:  Eval[inV[E],  RawTarget, RawSource] = new Eval( morph => raw_inV(morph.relation) )
 
-    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_outV(morph.relation)
-  }
+  implicit final def eval_inE[E <: AnyEdge]:  Eval[inE[E],  RawTarget, RawEdge] = new Eval( morph => raw_inE(morph.relation) )
+  implicit final def eval_outE[E <: AnyEdge]: Eval[outE[E], RawSource, RawEdge] = new Eval( morph => raw_outE(morph.relation) )
 
-  implicit final def eval_inV[
-    E <: AnyEdge
-  ]:  Eval[RawTarget, inV[E], RawSource] =
-  new Eval[RawTarget, inV[E], RawSource] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_inV(morph.relation)
-  }
-
-
-  implicit final def eval_outE[
-    E <: AnyEdge
-  ]:  Eval[RawSource, outE[E], RawEdge] =
-  new Eval[RawSource, outE[E], RawEdge] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_outE(morph.relation)
-  }
-
-  implicit final def eval_source[
-    E <: AnyEdge
-  ]:  Eval[RawEdge, source[E], RawSource] =
-  new Eval[RawEdge, source[E], RawSource] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_source(morph.relation)
-  }
-
-
-  implicit final def eval_inE[
-    E <: AnyEdge
-  ]:  Eval[RawTarget, inE[E], RawEdge] =
-  new Eval[RawTarget, inE[E], RawEdge] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_inE(morph.relation)
-  }
-
-  implicit final def eval_target[
-    E <: AnyEdge
-  ]:  Eval[RawEdge, target[E], RawTarget] =
-  new Eval[RawEdge, target[E], RawTarget] {
-
-    def raw_apply(morph: InMorph): RawInput => RawOutput = raw_target(morph.relation)
-  }
+  implicit final def eval_source[E <: AnyEdge]: Eval[source[E], RawEdge, RawSource] = new Eval( morph => raw_source(morph.relation) )
+  implicit final def eval_target[E <: AnyEdge]: Eval[target[E], RawEdge, RawTarget] = new Eval( morph => raw_target(morph.relation) )
 
 }
