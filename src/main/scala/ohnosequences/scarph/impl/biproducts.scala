@@ -147,16 +147,6 @@ trait Biproducts {
     def zero(o: Obj): T = raw_biproduct(l.zero(o.left), r.zero(o.right))
   }
 
-  implicit def fromUnitBiproduct[U, L <: BiproductBound, R <: BiproductBound]
-  (implicit
-    l: FromUnit[U, L],
-    r: FromUnit[U, R]
-  ):  FromUnit[U, RawBiproduct[L, R]] =
-  new FromUnit[U, RawBiproduct[L, R]] {
-
-    def fromUnit(u: U, o: AnyGraphObject): T = raw_biproduct(l.fromUnit(u, o), r.fromUnit(u, o))
-  }
-
   // Isomorphisms
 
   implicit final def eval_associateBiproductLeft[
