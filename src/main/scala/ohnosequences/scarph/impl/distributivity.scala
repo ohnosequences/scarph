@@ -58,4 +58,15 @@ trait Distributivity extends Tensors with Biproducts {
     def fromUnit(u: U, o: AnyGraphObject): T = raw_biproduct(l.fromUnit(u, o), r.fromUnit(u, o))
   }
 
+  implicit def fromZeroTensor[
+    LO <: AnyGraphObject, L <: BiproductBound,
+    RO <: AnyGraphObject, R <: BiproductBound
+  ](implicit
+    l_fromZero: RawFromZero[L],
+    r_fromZero: RawFromZero[R]
+  ):  RawFromZero[RawTensor[L, R]] =
+  new RawFromZero[RawTensor[L, R]] {
+
+    def apply() = raw_tensor(l_fromZero(), r_fromZero())
+  }
 }

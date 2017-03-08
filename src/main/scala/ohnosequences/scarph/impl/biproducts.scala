@@ -2,19 +2,10 @@ package ohnosequences.scarph.impl
 
 import ohnosequences.scarph._
 
-trait RawMerge[T0] {
+trait RawMerge[T] { def apply(l: T, r: T): T }
 
-  type T = T0
-  def apply(l: T, r: T): T
-}
+trait RawFromZero[T] { def apply(): T }
 
-// TODO: I think object type is not needed here, this should be just FromZero[X]
-trait ZeroFor[O <: AnyGraphObject, T0] {
-
-  type Obj = O
-  type T = T0
-  def zero(o: Obj): T
-}
 
 trait Biproducts {
 
@@ -81,19 +72,19 @@ trait Biproducts {
   )
 
 
-  // 0 → T0
+  // 0 → RT
   implicit final def eval_fromZero[
-    T <: AnyGraphObject, T0 <: BiproductBound
+    T <: AnyGraphObject, RT <: BiproductBound
   ](implicit
-    z: ZeroFor[T, T0]
-  ):  Eval[fromZero[T], RawZero, T0] =
-  new Eval( morph => _ => z.zero(morph.obj) )
+    t_fromZero: RawFromZero[RT]
+  ):  Eval[fromZero[T], RawZero, RT] =
+  new Eval( _ => _ => t_fromZero() )
 
-  // T0 → 0
+  // RT → 0
   implicit final def eval_toZero[
-    T0 <: BiproductBound, T <: AnyGraphObject
-  ]:  Eval[toZero[T], T0, RawZero] =
-  new Eval( morph => raw_toZero )
+    RT <: BiproductBound, T <: AnyGraphObject
+  ]:  Eval[toZero[T], RT, RawZero] =
+  new Eval( _ => raw_toZero )
 
 
   // L ⊕ R → L
@@ -116,11 +107,11 @@ trait Biproducts {
     A <: BiproductBound, B <: BiproductBound,
     L <: AnyGraphObject, R <: AnyGraphObject
   ](implicit
-    b: ZeroFor[R, B]
+    b_fromZero: RawFromZero[B]
   ):  Eval[leftInj[L ⊕ R], A, RawBiproduct[A, B]] =
   new Eval( morph => raw_input =>
 
-    raw_biproduct(raw_input, b.zero(morph.biproduct.right))
+    raw_biproduct(raw_input, b_fromZero())
   )
 
   // R → L ⊕ R
@@ -128,23 +119,23 @@ trait Biproducts {
     A <: BiproductBound, B <: BiproductBound,
     L <: AnyGraphObject, R <: AnyGraphObject
   ](implicit
-    a: ZeroFor[L, A]
+    a_fromZero: RawFromZero[A]
   ):  Eval[rightInj[L ⊕ R], B, RawBiproduct[A, B]] =
   new Eval( morph => raw_input =>
 
-    raw_biproduct(a.zero(morph.biproduct.left), raw_input)
+    raw_biproduct(a_fromZero(), raw_input)
   )
 
   implicit def zeroForBiproduct[
     LO <: AnyGraphObject, L <: BiproductBound,
     RO <: AnyGraphObject, R <: BiproductBound
   ](implicit
-    l: ZeroFor[LO, L],
-    r: ZeroFor[RO, R]
-  ):  ZeroFor[BiproductObj[LO, RO], RawBiproduct[L, R]] =
-  new ZeroFor[BiproductObj[LO, RO], RawBiproduct[L, R]] {
+    l_fromZero: RawFromZero[L],
+    r_fromZero: RawFromZero[R]
+  ):  RawFromZero[RawBiproduct[L, R]] =
+  new RawFromZero[RawBiproduct[L, R]] {
 
-    def zero(o: Obj): T = raw_biproduct(l.zero(o.left), r.zero(o.right))
+    def apply() = raw_biproduct(l_fromZero(), r_fromZero())
   }
 
   // Isomorphisms
