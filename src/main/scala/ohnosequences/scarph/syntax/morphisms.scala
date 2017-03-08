@@ -72,22 +72,25 @@ case class TensorSyntax[
   L <: AnyGraphObject,
   R <: AnyGraphObject,
   F <: AnyGraphMorphism { type Out = L ⊗ R }
-](f: RefineTensorOut[F]) extends AnyVal {
+](val f: TensorRefine[F]) extends AnyVal {
 
   def twist:
-    F >=> scarph.symmetry[F#Out#Left, F#Out#Right] =
+    F >=> scarph.symmetry[L, R] =
     f >=> scarph.symmetry(f.out.left, f.out.right)
 }
 
 
-case class MatchUpSyntax[T <: AnyGraphObject, F <: AnyGraphMorphism { type Out = T ⊗ T }](f: SameTensorOut[F]) extends AnyVal {
+case class MatchUpSyntax[
+  X <: AnyGraphObject,
+  F <: AnyGraphMorphism { type Out = X ⊗ X }
+](val f: MatchUpRefine[F]) extends AnyVal {
 
   def matchUp:
-    F >=> scarph.matchUp[F#Out#Left] =
+    F >=> scarph.matchUp[X] =
     f >=> scarph.matchUp(f.out.left)
 }
 
-case class DistributableSyntax[
+case class DistributeSyntax[
   X <: AnyGraphObject,
   A <: AnyGraphObject,
   B <: AnyGraphObject,
@@ -95,11 +98,11 @@ case class DistributableSyntax[
 ](val f: F) {
 
   def distribute:
-    F >=> scarph.distribute[X,A,B] =
+    F >=> scarph.distribute[X, A, B] =
     f >=> scarph.distribute(f.out.left, f.out.right.left, f.out.right.right)
 }
 
-case class UndistributableSyntax[
+case class UndistributeSyntax[
   X <: AnyGraphObject,
   A <: AnyGraphObject,
   B <: AnyGraphObject,
@@ -107,7 +110,7 @@ case class UndistributableSyntax[
 ](val f: F) {
 
   def distribute:
-    F >=> scarph.undistribute[X,A,B] =
+    F >=> scarph.undistribute[X, A, B] =
     f >=> scarph.undistribute(f.out.left.left, f.out.left.right, f.out.right.right)
 }
 
@@ -120,6 +123,54 @@ case class BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }
   def rightProj:
     F >=> scarph.rightProj[F#Out] =
     f >=> scarph.rightProj(f.out)
+}
+
+case class AssociateBiproductLeftSyntax[
+  A <: AnyGraphObject,
+  B <: AnyGraphObject,
+  C <: AnyGraphObject,
+  F <: AnyGraphMorphism { type Out = A ⊕ (B ⊕ C) }
+](val f: F) {
+
+  def associateLeft:
+    F >=> scarph.associateBiproductLeft[A, B, C] =
+    f >=> scarph.associateBiproductLeft(f.out.left, f.out.right.left, f.out.right.right)
+}
+
+case class AssociateBiproductRightSyntax[
+  A <: AnyGraphObject,
+  B <: AnyGraphObject,
+  C <: AnyGraphObject,
+  F <: AnyGraphMorphism { type Out = (A ⊕ B) ⊕ C }
+](val f: F) {
+
+  def associateRight:
+    F >=> scarph.associateBiproductRight[A, B, C] =
+    f >=> scarph.associateBiproductRight(f.out.left.left, f.out.left.right, f.out.right)
+}
+
+case class AssociateTensorLeftSyntax[
+  A <: AnyGraphObject,
+  B <: AnyGraphObject,
+  C <: AnyGraphObject,
+  F <: AnyGraphMorphism { type Out = A ⊗ (B ⊗ C) }
+](val f: F) {
+
+  def associateLeft:
+    F >=> scarph.associateTensorLeft[A, B, C] =
+    f >=> scarph.associateTensorLeft(f.out.left, f.out.right.left, f.out.right.right)
+}
+
+case class AssociateTensorRightSyntax[
+  A <: AnyGraphObject,
+  B <: AnyGraphObject,
+  C <: AnyGraphObject,
+  F <: AnyGraphMorphism { type Out = (A ⊗ B) ⊗ C }
+](val f: F) {
+
+  def associateRight:
+    F >=> scarph.associateTensorRight[A, B, C] =
+    f >=> scarph.associateTensorRight(f.out.left.left, f.out.left.right, f.out.right)
 }
 
 

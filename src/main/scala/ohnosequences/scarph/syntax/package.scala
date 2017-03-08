@@ -4,16 +4,39 @@ import ohnosequences.cosas.types._
 
 package object syntax {
 
-  /* ## Type aliases */
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // L ⊗ R
 
-  type RefineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+  type TensorRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Right }
 
-  type SameTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+  implicit def rensorRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): TensorRefine[F] = f
+
+  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => TensorRefine[F]):
+        TensorSyntax[F#Out#Left, F#Out#Right, TensorRefine[F]] =
+    new TensorSyntax[F#Out#Left, F#Out#Right, TensorRefine[F]](refine(f))
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // X ⊗ X → X
+
+  type MatchUpRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Left }
 
+  implicit def matchUpRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit check: F#Out#Left =:= F#Out#Right): MatchUpRefine[F] = f
 
-  type DistributableOut[
+  implicit def matchUpSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => MatchUpRefine[F]):
+        MatchUpSyntax[F#Out#Left, MatchUpRefine[F]] =
+    new MatchUpSyntax[F#Out#Left, MatchUpRefine[F]](refine(f))
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // X ⊗ (A ⊕ B) → (X ⊗ A) ⊕ (X ⊗ B)
+
+  type DistributeRefine[
     F <: AnyGraphMorphism {
       type Out <: AnyTensorObj {
         type Right <: AnyBiproductObj
@@ -21,7 +44,40 @@ package object syntax {
     }
   ] = F with AnyGraphMorphism { type Out = F#Out#Left ⊗ (F#Out#Right#Left ⊕ F#Out#Right#Right) }
 
-  type UndistributableOut[
+  implicit def distributeRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F): DistributeRefine[F] = f
+
+
+  implicit def distributeSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F)(implicit refine: F => DistributeRefine[F]):
+    DistributeSyntax[
+      F#Out#Left,        // X
+      F#Out#Right#Left,  // A
+      F#Out#Right#Right, // B
+      DistributeRefine[F]
+    ] =
+    new DistributeSyntax[
+      F#Out#Left,        // X
+      F#Out#Right#Left,  // A
+      F#Out#Right#Right, // B
+      DistributeRefine[F]
+    ](refine(f))
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // (X ⊗ A) ⊕ (X ⊗ B) → X ⊗ (A ⊕ B)
+
+  type UndistributeRefine[
     F <: AnyGraphMorphism {
       type Out <: AnyBiproductObj {
         type Left  <: AnyTensorObj
@@ -30,11 +86,213 @@ package object syntax {
     }
   ] = F with AnyGraphMorphism { type Out = (F#Out#Left#Left ⊗ F#Out#Left#Right) ⊕ (F#Out#Left#Left ⊗ F#Out#Right#Right) }
 
+  implicit def undistributeRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left  <: AnyTensorObj
+        type Right <: AnyTensorObj
+      }
+    }
+  ](f: F)(implicit check: F#Out#Left#Left =:= F#Out#Right#Left): UndistributeRefine[F] = f
+
+
+  implicit def undistributeSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left  <: AnyTensorObj
+        type Right <: AnyTensorObj
+      }
+    }
+  ](f: F)(implicit refine: F => UndistributeRefine[F]):
+    UndistributeSyntax[
+      F#Out#Left#Left,   // X
+      F#Out#Left#Right,  // A
+      F#Out#Right#Right, // B
+      UndistributeRefine[F]
+    ] =
+    new UndistributeSyntax[
+      F#Out#Left#Left,   // X
+      F#Out#Left#Right,  // A
+      F#Out#Right#Right, // B
+      UndistributeRefine[F]
+    ](refine(f))
+
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // X ⊕ X → X
 
   type SameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊕ F#Out#Left }
 
+  implicit def sameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
+    (implicit check: F#Out#Left =:= F#Out#Right): SameBiproductOut[F] = f
 
+  implicit def mergeSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
+    (implicit refine: F => SameBiproductOut[F]):
+        MergeSyntax[F#Out#Left, SameBiproductOut[F]] =
+    new MergeSyntax[F#Out#Left, SameBiproductOut[F]](refine(f))
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // A ⊕ (B ⊕ C) → (A ⊕ B) ⊕ C
+
+  type AssociateBiproductLeftRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = F#Out#Left ⊕ (F#Out#Right#Left ⊕ F#Out#Right#Right) }
+
+  implicit def associateBiproductLeftRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F): AssociateBiproductLeftRefine[F] = f
+
+  implicit def associateBiproductLeftSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Right <: AnyBiproductObj
+      }
+    }
+  ](f: F)(implicit refine: F => AssociateBiproductLeftRefine[F]):
+    AssociateBiproductLeftSyntax[
+      F#Out#Left,        // A
+      F#Out#Right#Left,  // B
+      F#Out#Right#Right, // C
+      AssociateBiproductLeftRefine[F]
+    ] =
+    AssociateBiproductLeftSyntax[
+      F#Out#Left,        // A
+      F#Out#Right#Left,  // B
+      F#Out#Right#Right, // C
+      AssociateBiproductLeftRefine[F]
+    ](refine(f))
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // (A ⊕ B) ⊕ C → A ⊕ (B ⊕ C)
+
+  type AssociateBiproductRightRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left <: AnyBiproductObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = (F#Out#Left#Left ⊕ F#Out#Left#Right) ⊕ F#Out#Right }
+
+  implicit def associateBiproductRightRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left <: AnyBiproductObj
+      }
+    }
+  ](f: F): AssociateBiproductRightRefine[F] = f
+
+  implicit def associateBiproductRightSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left <: AnyBiproductObj
+      }
+    }
+  ](f: F)(implicit refine: F => AssociateBiproductRightRefine[F]):
+    AssociateBiproductRightSyntax[
+      F#Out#Left#Left,   // A
+      F#Out#Left#Right,  // B
+      F#Out#Right,       // C
+      AssociateBiproductRightRefine[F]
+    ] =
+    AssociateBiproductRightSyntax[
+      F#Out#Left#Left,   // A
+      F#Out#Left#Right,  // B
+      F#Out#Right,       // C
+      AssociateBiproductRightRefine[F]
+    ](refine(f))
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // A ⊗ (B ⊗ C) → (A ⊗ B) ⊗ C
+
+  type AssociateTensorLeftRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyTensorObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = F#Out#Left ⊗ (F#Out#Right#Left ⊗ F#Out#Right#Right) }
+
+  implicit def associateTensorLeftRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyTensorObj
+      }
+    }
+  ](f: F): AssociateTensorLeftRefine[F] = f
+
+  implicit def associateTensorLeftSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Right <: AnyTensorObj
+      }
+    }
+  ](f: F)(implicit refine: F => AssociateTensorLeftRefine[F]):
+    AssociateTensorLeftSyntax[
+      F#Out#Left,        // A
+      F#Out#Right#Left,  // B
+      F#Out#Right#Right, // C
+      AssociateTensorLeftRefine[F]
+    ] =
+    AssociateTensorLeftSyntax[
+      F#Out#Left,        // A
+      F#Out#Right#Left,  // B
+      F#Out#Right#Right, // C
+      AssociateTensorLeftRefine[F]
+    ](refine(f))
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // (A ⊗ B) ⊗ C → A ⊗ (B ⊗ C)
+
+  type AssociateTensorRightRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Left <: AnyTensorObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = (F#Out#Left#Left ⊗ F#Out#Left#Right) ⊗ F#Out#Right }
+
+  implicit def associateTensorRightRefine[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Left <: AnyTensorObj
+      }
+    }
+  ](f: F): AssociateTensorRightRefine[F] = f
+
+  implicit def associateTensorRightSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyTensorObj {
+        type Left <: AnyTensorObj
+      }
+    }
+  ](f: F)(implicit refine: F => AssociateTensorRightRefine[F]):
+    AssociateTensorRightSyntax[
+      F#Out#Left#Left,   // A
+      F#Out#Left#Right,  // B
+      F#Out#Right,       // C
+      AssociateTensorRightRefine[F]
+    ] =
+    AssociateTensorRightSyntax[
+      F#Out#Left#Left,   // A
+      F#Out#Left#Right,  // B
+      F#Out#Right,       // C
+      AssociateTensorRightRefine[F]
+    ](refine(f))
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////
+  // Simple syntax
 
   implicit def elementPredicateOps[E <: AnyGraphElement](e: E):
       ElementPredicateOps[E] =
@@ -56,99 +314,6 @@ package object syntax {
   implicit def graphMorphismSyntax[F <: AnyGraphMorphism](f: F):
     GraphMorphismSyntax[F] =
     GraphMorphismSyntax[F](f)
-
-
-  implicit def refineTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): RefineTensorOut[F] = f
-
-  implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
-    (implicit refine: F => RefineTensorOut[F]):
-        TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]] =
-    new TensorSyntax[F#Out#Left, F#Out#Right, RefineTensorOut[F]](refine(f))
-
-
-  implicit def sameTensorOut[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
-    (implicit check: F#Out#Left =:= F#Out#Right): SameTensorOut[F] = f
-
-  implicit def matchUpSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
-    (implicit refine: F => SameTensorOut[F]):
-        MatchUpSyntax[F#Out#Left, SameTensorOut[F]] =
-    new MatchUpSyntax[F#Out#Left, SameTensorOut[F]](refine(f))
-
-
-  implicit def distributableOut[
-    F <: AnyGraphMorphism {
-      type Out <: AnyTensorObj {
-        type Right <: AnyBiproductObj
-      }
-    }
-  ](f: F): DistributableOut[F] = f
-
-
-  implicit def distributableSyntax[
-    F <: AnyGraphMorphism {
-      type Out <: AnyTensorObj {
-        type Right <: AnyBiproductObj
-      }
-    }
-  ](f: F)(implicit refine: F => DistributableOut[F]):
-    DistributableSyntax[
-      F#Out#Left,        // X
-      F#Out#Right#Left,  // A
-      F#Out#Right#Right, // B
-      DistributableOut[F]
-    ] =
-    new DistributableSyntax[
-      F#Out#Left,        // X
-      F#Out#Right#Left,  // A
-      F#Out#Right#Right, // B
-      DistributableOut[F]
-    ](refine(f))
-
-
-  implicit def undistributableOut[
-    F <: AnyGraphMorphism {
-      type Out <: AnyBiproductObj {
-        type Left  <: AnyTensorObj
-        type Right <: AnyTensorObj
-      }
-    }
-  ](f: F)(implicit check: F#Out#Left#Left =:= F#Out#Right#Left): UndistributableOut[F] = f
-
-
-  implicit def undistributableSyntax[
-    F <: AnyGraphMorphism {
-      type Out <: AnyBiproductObj {
-        type Left  <: AnyTensorObj
-        type Right <: AnyTensorObj
-      }
-    }
-  ](f: F)(implicit refine: F => UndistributableOut[F]):
-    UndistributableSyntax[
-      F#Out#Left#Left,   // X
-      F#Out#Left#Right,  // A
-      F#Out#Right#Right, // B
-      UndistributableOut[F]
-    ] =
-    new UndistributableSyntax[
-      F#Out#Left#Left,   // X
-      F#Out#Left#Right,  // A
-      F#Out#Right#Right, // B
-      UndistributableOut[F]
-    ](refine(f))
-
-
-  implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
-        BiproductSyntax[F] =
-    new BiproductSyntax[F](f)
-
-
-  implicit def sameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
-    (implicit check: F#Out#Left =:= F#Out#Right): SameBiproductOut[F] = f
-
-  implicit def mergeSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F)
-    (implicit refine: F => SameBiproductOut[F]):
-        MergeSyntax[F#Out#Left, SameBiproductOut[F]] =
-    new MergeSyntax[F#Out#Left, SameBiproductOut[F]](refine(f))
 
 
   implicit def elementSyntax[F <: AnyGraphMorphism { type Out <: AnyGraphElement }](f: F):
@@ -174,6 +339,10 @@ package object syntax {
   implicit def vertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](f: F):
         VertexSyntax[F] =
     new VertexSyntax[F](f)
+
+  implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):
+        BiproductSyntax[F] =
+    new BiproductSyntax[F](f)
 
 
   implicit def addVertexSyntax[G](u: unit := G):
