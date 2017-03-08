@@ -107,13 +107,8 @@ case object dummy {
     new RawMerge[T] { def apply(l: T, r: T): T = r }
 
 
-    implicit def dummyZeroEdge[E <: AnyEdge]:
-        ZeroFor[E, DummyEdge] =
-    new ZeroFor[E, DummyEdge] { def zero(o: Obj): T = DummyEdge }
-
-    implicit def dummyZeroVertex[V <: AnyVertex]:
-        ZeroFor[V, DummyVertex] =
-    new ZeroFor[V, DummyVertex] { def zero(o: Obj): T = DummyVertex }
+    implicit val dummyZeroEdge:   RawFromZero[DummyEdge]   = new RawFromZero[DummyEdge]   { def apply() = DummyEdge }
+    implicit val dummyZeroVertex: RawFromZero[DummyVertex] = new RawFromZero[DummyVertex] { def apply() = DummyVertex }
 
   }
 
@@ -121,69 +116,37 @@ case object dummy {
   case object propertyStructure {
 
     implicit def eval_getV[P <: AnyProperty { type Source <: AnyVertex }]:
-        ohnosequences.scarph.impl.Eval[DummyVertex, get[P], P#Target#Raw] =
-    new ohnosequences.scarph.impl.Eval[DummyVertex, get[P], P#Target#Raw] {
-
-      def raw_apply(morph: InMorph): RawInput => RawOutput = ???
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+        Eval[get[P], DummyVertex, P#Target#Raw] =
+    new Eval( ??? )
 
     implicit def eval_getE[P <: AnyProperty { type Source <: AnyEdge }]:
-        Eval[DummyEdge, get[P], P#Target#Raw] =
-    new Eval[DummyEdge, get[P], P#Target#Raw] {
-
-      def raw_apply(morph: InMorph): RawInput => RawOutput = ???
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+        Eval[get[P], DummyEdge, P#Target#Raw] =
+    new Eval( ??? )
 
 
     implicit def eval_lookupV[
       V,
       P <: AnyProperty { type Source <: AnyVertex; type Target <: AnyValueType { type Raw >: V }  }
-    ]
-    : Eval[V, lookup[P], DummyVertex] =
-    new Eval[V, lookup[P], DummyVertex] {
-
-      def raw_apply(morph: InMorph): RawInput => RawOutput = const(DummyVertex)
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+    ]:  Eval[lookup[P], V, DummyVertex] =
+    new Eval( _ => const(DummyVertex) )
 
     implicit def eval_lookupE[
       V,
       P <: AnyProperty { type Source <: AnyEdge; type Target <: AnyValueType { type Raw >: V }  }
-    ]
-    : Eval[V, lookup[P], DummyEdge] =
-    new Eval[V, lookup[P], DummyEdge] {
-
-      def raw_apply(morph: InMorph): RawInput => RawOutput = const(DummyEdge)
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+    ]: Eval[lookup[P], V, DummyEdge] =
+    new Eval( _ => const(DummyEdge) )
 
   }
 
   case object predicateStructure {
 
     implicit def eval_quantify[D <: Dummy, P <: AnyPredicate]:
-        Eval[D, quantify[P], D] =
-    new Eval[D, quantify[P], D] {
-
-      def raw_apply(morph: InMorph): RawInput => RawOutput = identity[D]
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+        Eval[quantify[P], D, D] =
+    new Eval( _ => identity[D] )
 
     implicit def eval_coerce[D <: Dummy, P <: AnyPredicate]:
-        Eval[D, coerce[P], D] =
-    new Eval[D, coerce[P], D] {
-
-      def raw_apply(morph: InMorph): RawInput => RawOutput = identity[D]
-
-      def present(morph: InMorph): Seq[String] = Seq(morph.label)
-    }
+        Eval[coerce[P], D, D] =
+    new Eval( _ => identity[D] )
 
   }
 
