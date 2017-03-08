@@ -68,11 +68,11 @@ case class GraphMorphismSyntax[F <: AnyGraphMorphism](f: F) extends AnyVal {
     f >=> scarph.rightInj(b)
 }
 
-case class TensorSyntax[
+case class SymmetrySyntax[
   L <: AnyGraphObject,
   R <: AnyGraphObject,
   F <: AnyGraphMorphism { type Out = L ⊗ R }
-](val f: TensorRefine[F]) extends AnyVal {
+](val f: SymmetryRefine[F]) extends AnyVal {
 
   def twist:
     F >=> scarph.symmetry[L, R] =

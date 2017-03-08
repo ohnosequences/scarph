@@ -5,17 +5,17 @@ import ohnosequences.cosas.types._
 package object syntax {
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
-  // L ⊗ R
+  // L ⊗ R → R ⊗ L
 
-  type TensorRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
+  type SymmetryRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊗ F#Out#Right }
 
-  implicit def rensorRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): TensorRefine[F] = f
+  implicit def rensorRefine[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F): SymmetryRefine[F] = f
 
   implicit def tensorSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
-    (implicit refine: F => TensorRefine[F]):
-        TensorSyntax[F#Out#Left, F#Out#Right, TensorRefine[F]] =
-    new TensorSyntax[F#Out#Left, F#Out#Right, TensorRefine[F]](refine(f))
+    (implicit refine: F => SymmetryRefine[F]):
+        SymmetrySyntax[F#Out#Left, F#Out#Right, SymmetryRefine[F]] =
+    new SymmetrySyntax[F#Out#Left, F#Out#Right, SymmetryRefine[F]](refine(f))
 
 
   /////////////////////////////////////////////////////////////////////////////////////////////////
