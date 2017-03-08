@@ -145,11 +145,11 @@ trait Tensors {
     def fromUnit(u: U, o: AnyGraphObject): T = raw_tensor(l.fromUnit(u, o), r.fromUnit(u, o))
   }
 
-  implicit final def eval_associateLeft[
+  implicit final def eval_associateTensorLeft[
     A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
     X <: TensorBound, Y <: TensorBound, Z <: TensorBound
-  ]:  Eval[RawTensor[X, RawTensor[Y, Z]], associateLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] =
-  new Eval[RawTensor[X, RawTensor[Y, Z]], associateLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] {
+  ]:  Eval[RawTensor[X, RawTensor[Y, Z]], associateTensorLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] =
+  new Eval[RawTensor[X, RawTensor[Y, Z]], associateTensorLeft[A, B, C], RawTensor[RawTensor[X, Y], Z]] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       val x: X = raw_left(raw_input)
@@ -162,11 +162,11 @@ trait Tensors {
     def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
-  implicit final def eval_associateRight[
+  implicit final def eval_associateTensorRight[
     A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
     X <: TensorBound, Y <: TensorBound, Z <: TensorBound
-  ]:  Eval[RawTensor[RawTensor[X, Y], Z], associateRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] =
-  new Eval[RawTensor[RawTensor[X, Y], Z], associateRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] {
+  ]:  Eval[RawTensor[RawTensor[X, Y], Z], associateTensorRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] =
+  new Eval[RawTensor[RawTensor[X, Y], Z], associateTensorRight[A, B, C], RawTensor[X, RawTensor[Y, Z]]] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       val x: X = raw_left(raw_left(raw_input))

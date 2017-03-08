@@ -99,6 +99,18 @@ case class DistributableSyntax[
     f >=> scarph.distribute(f.out.left, f.out.right.left, f.out.right.right)
 }
 
+case class UndistributableSyntax[
+  X <: AnyGraphObject,
+  A <: AnyGraphObject,
+  B <: AnyGraphObject,
+  F <: AnyGraphMorphism { type Out = (X ⊗ A) ⊕ (X ⊗ B) }
+](val f: F) {
+
+  def distribute:
+    F >=> scarph.undistribute[X,A,B] =
+    f >=> scarph.undistribute(f.out.left.left, f.out.left.right, f.out.right.right)
+}
+
 case class BiproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F) extends AnyVal {
 
   def leftProj:

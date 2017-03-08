@@ -21,6 +21,15 @@ package object syntax {
     }
   ] = F with AnyGraphMorphism { type Out = F#Out#Left ⊗ (F#Out#Right#Left ⊕ F#Out#Right#Right) }
 
+  type UndistributableOut[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left  <: AnyTensorObj
+        type Right <: AnyTensorObj
+      }
+    }
+  ] = F with AnyGraphMorphism { type Out = (F#Out#Left#Left ⊗ F#Out#Left#Right) ⊕ (F#Out#Left#Left ⊗ F#Out#Right#Right) }
+
 
   type SameBiproductOut[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }] =
     F with AnyGraphMorphism { type Out = F#Out#Left ⊕ F#Out#Left }
@@ -81,20 +90,51 @@ package object syntax {
         type Right <: AnyBiproductObj
       }
     }
-  ](f: F)
-    (implicit refine: F => DistributableOut[F]):
-        DistributableSyntax[
-          F#Out#Left,
-          F#Out#Right#Left,
-          F#Out#Right#Right,
-          DistributableOut[F]
-        ] =
-          new DistributableSyntax[
-            F#Out#Left,
-            F#Out#Right#Left,
-            F#Out#Right#Right,
-            DistributableOut[F]
-          ](refine(f))
+  ](f: F)(implicit refine: F => DistributableOut[F]):
+    DistributableSyntax[
+      F#Out#Left,        // X
+      F#Out#Right#Left,  // A
+      F#Out#Right#Right, // B
+      DistributableOut[F]
+    ] =
+    new DistributableSyntax[
+      F#Out#Left,        // X
+      F#Out#Right#Left,  // A
+      F#Out#Right#Right, // B
+      DistributableOut[F]
+    ](refine(f))
+
+
+  implicit def undistributableOut[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left  <: AnyTensorObj
+        type Right <: AnyTensorObj
+      }
+    }
+  ](f: F)(implicit check: F#Out#Left#Left =:= F#Out#Right#Left): UndistributableOut[F] = f
+
+
+  implicit def undistributableSyntax[
+    F <: AnyGraphMorphism {
+      type Out <: AnyBiproductObj {
+        type Left  <: AnyTensorObj
+        type Right <: AnyTensorObj
+      }
+    }
+  ](f: F)(implicit refine: F => UndistributableOut[F]):
+    UndistributableSyntax[
+      F#Out#Left#Left,   // X
+      F#Out#Left#Right,  // A
+      F#Out#Right#Right, // B
+      UndistributableOut[F]
+    ] =
+    new UndistributableSyntax[
+      F#Out#Left#Left,   // X
+      F#Out#Left#Right,  // A
+      F#Out#Right#Right, // B
+      UndistributableOut[F]
+    ](refine(f))
 
 
   implicit def biproductSyntax[F <: AnyGraphMorphism { type Out <: AnyBiproductObj }](f: F):

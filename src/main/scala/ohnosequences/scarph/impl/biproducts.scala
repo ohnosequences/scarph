@@ -19,7 +19,7 @@ trait ZeroFor[O <: AnyGraphObject, T0] {
 trait Biproducts {
 
   type BiproductBound
-  type RawBiproduct[L <: BiproductBound, R <: BiproductBound]
+  type RawBiproduct[L <: BiproductBound, R <: BiproductBound] <: BiproductBound
   type RawZero <: BiproductBound
 
   def raw_biproduct[L <: BiproductBound, R <: BiproductBound](l: L, r: R): RawBiproduct[L, R]
@@ -192,6 +192,40 @@ trait Biproducts {
   }
 
   // Isomorphisms
+
+  implicit final def eval_associateBiproductLeft[
+    A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
+    X <: BiproductBound, Y <: BiproductBound, Z <: BiproductBound
+  ]:  Eval[RawBiproduct[X, RawBiproduct[Y, Z]], associateBiproductLeft[A, B, C], RawBiproduct[RawBiproduct[X, Y], Z]] =
+  new Eval[RawBiproduct[X, RawBiproduct[Y, Z]], associateBiproductLeft[A, B, C], RawBiproduct[RawBiproduct[X, Y], Z]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      val x: X = raw_leftProj(raw_input)
+      val y: Y = raw_leftProj(raw_rightProj(raw_input))
+      val z: Z = raw_rightProj(raw_rightProj(raw_input))
+
+      raw_biproduct(raw_biproduct(x, y), z)
+    }
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
+
+  implicit final def eval_associateBiproductRight[
+    A <: AnyGraphObject, B <: AnyGraphObject, C <: AnyGraphObject,
+    X <: BiproductBound, Y <: BiproductBound, Z <: BiproductBound
+  ]:  Eval[RawBiproduct[RawBiproduct[X, Y], Z], associateBiproductRight[A, B, C], RawBiproduct[X, RawBiproduct[Y, Z]]] =
+  new Eval[RawBiproduct[RawBiproduct[X, Y], Z], associateBiproductRight[A, B, C], RawBiproduct[X, RawBiproduct[Y, Z]]] {
+
+    def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
+      val x: X = raw_leftProj(raw_leftProj(raw_input))
+      val y: Y = raw_rightProj(raw_leftProj(raw_input))
+      val z: Z = raw_rightProj(raw_input)
+
+      raw_biproduct(x, raw_biproduct(y, z))
+    }
+
+    def present(morph: InMorph): Seq[String] = Seq(morph.label)
+  }
 
   implicit final def eval_leftZero[
     X <: BiproductBound, T <: AnyGraphObject
