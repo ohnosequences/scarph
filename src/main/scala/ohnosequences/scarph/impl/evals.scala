@@ -21,7 +21,7 @@ trait AnyEval extends AnyMorphismTransform {
     (morph.out: InMorph#Out) := raw_apply(morph)(input.value)
   }
 
-  def present(morph: InMorph): Seq[String]
+  def present(morph: InMorph): Seq[String] = Seq(morph.label)
 }
 
 @annotation.implicitNotFound(msg = "Cannot evaluate morphism ${M} on input ${I}, output ${O}")

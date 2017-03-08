@@ -53,7 +53,7 @@ trait Biproducts {
       )
     }
 
-    def present(morph: InMorph): Seq[String] =
+    override def present(morph: InMorph): Seq[String] =
       ("(" +: evalLeft.present(morph.left)) ++
       (" ⊕ " +: evalRight.present(morph.right) :+ ")")
   }
@@ -67,8 +67,6 @@ trait Biproducts {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_biproduct[I, I](raw_input, raw_input)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // X ⊕ X → X
@@ -85,8 +83,6 @@ trait Biproducts {
         raw_rightProj(raw_input)
       )
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -99,8 +95,6 @@ trait Biproducts {
   new Eval[RawZero, fromZero[T], T0] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = _ => z.zero(morph.obj)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // T0 → 0
@@ -110,8 +104,6 @@ trait Biproducts {
   new Eval[T0, toZero[T], RawZero] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_toZero
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // L ⊕ R → L
@@ -122,8 +114,6 @@ trait Biproducts {
   new Eval[RawBiproduct[A, B], leftProj[L ⊕ R], A] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_leftProj
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // L ⊕ R → R
@@ -134,8 +124,6 @@ trait Biproducts {
   new Eval[RawBiproduct[A, B], rightProj[L ⊕ R], B] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_rightProj
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -150,8 +138,6 @@ trait Biproducts {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput =
       raw_biproduct(_, b.zero(morph.biproduct.right))
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // R → L ⊕ R
@@ -165,8 +151,6 @@ trait Biproducts {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput =
       raw_biproduct(a.zero(morph.biproduct.left), _)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit def zeroForBiproduct[
@@ -206,8 +190,6 @@ trait Biproducts {
 
       raw_biproduct(raw_biproduct(x, y), z)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_associateBiproductRight[
@@ -223,8 +205,6 @@ trait Biproducts {
 
       raw_biproduct(x, raw_biproduct(y, z))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_leftZero[
@@ -233,8 +213,6 @@ trait Biproducts {
   new Eval[RawBiproduct[RawZero, X], leftZero[T], X] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_rightProj
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_leftCozero[
@@ -245,8 +223,6 @@ trait Biproducts {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_biproduct(raw_toZero[X](raw_input), raw_input)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_rightZero[
@@ -255,8 +231,6 @@ trait Biproducts {
   new Eval[RawBiproduct[X, RawZero], rightZero[T], X] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_leftProj
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_rightCozero[
@@ -267,7 +241,5 @@ trait Biproducts {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_biproduct(raw_input, raw_toZero[X](raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 }

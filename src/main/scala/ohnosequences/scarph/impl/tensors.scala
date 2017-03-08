@@ -61,7 +61,7 @@ trait Tensors {
       )
     }
 
-    def present(morph: InMorph): Seq[String] =
+    override def present(morph: InMorph): Seq[String] =
       ("(" +: evalLeft.present(morph.left)) ++
       (" ⊗ " +: evalRight.present(morph.right) :+ ")")
   }
@@ -76,8 +76,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_tensor[B, A](raw_right(raw_input), raw_left(raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // △: X → X ⊗ X
@@ -89,8 +87,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_tensor[I, I](raw_input, raw_input)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // ▽: X ⊗ X → X
@@ -104,8 +100,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       matchable.matchUp(raw_left(raw_input), raw_right(raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -120,8 +114,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       fu.fromUnit(raw_input, morph.obj)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // X → I
@@ -131,8 +123,6 @@ trait Tensors {
   new Eval[I, toUnit[T], RawUnit] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_toUnit
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit def fromUnitTensor[U, L <: TensorBound, R <: TensorBound]
@@ -158,8 +148,6 @@ trait Tensors {
 
       raw_tensor(raw_tensor(x, y), z)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_associateTensorRight[
@@ -175,8 +163,6 @@ trait Tensors {
 
       raw_tensor(x, raw_tensor(y, z))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // implicit final def eval_tensorTrace[
@@ -214,8 +200,6 @@ trait Tensors {
   new Eval[RawTensor[RawUnit, X], leftUnit[T], X] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_right
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_leftCounit[
@@ -226,8 +210,6 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_tensor(raw_toUnit[X](raw_input), raw_input)
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_rightUnit[
@@ -238,8 +220,6 @@ trait Tensors {
     // FIXME: this is wrong!
     // But why? It should be (id[X] ⊗ fromUnit[X]).matchUp, where fromUnit[X] just gives all instances of X, which is being matched with the input instance of X should be just input itself
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_left
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_rightCounit[
@@ -250,7 +230,5 @@ trait Tensors {
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput =>
       raw_tensor(raw_input, raw_toUnit[X](raw_input))
     }
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 }

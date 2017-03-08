@@ -9,8 +9,6 @@ trait DaggerCategory {
   new Eval[I, id[X], I] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = { raw_input: RawInput => raw_input }
-
-    final def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   // F >=> S
@@ -33,7 +31,7 @@ trait DaggerCategory {
         evalSecond.raw_apply(morph.second)(firstResult)
       }
 
-    def present(morph: InMorph): Seq[String] =
+    override def present(morph: InMorph): Seq[String] =
       ("(" +: evalFirst.present(morph.first)) ++
       (" >=> " +: evalSecond.present(morph.second) :+ ")")
   }

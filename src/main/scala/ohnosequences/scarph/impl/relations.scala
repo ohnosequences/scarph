@@ -24,8 +24,6 @@ trait Relations {
   new Eval[RawSource, outV[E], RawTarget] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_outV(morph.relation)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_inV[
@@ -34,8 +32,6 @@ trait Relations {
   new Eval[RawTarget, inV[E], RawSource] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_inV(morph.relation)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -45,8 +41,6 @@ trait Relations {
   new Eval[RawSource, outE[E], RawEdge] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_outE(morph.relation)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_source[
@@ -55,8 +49,6 @@ trait Relations {
   new Eval[RawEdge, source[E], RawSource] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_source(morph.relation)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 
@@ -66,8 +58,6 @@ trait Relations {
   new Eval[RawTarget, inE[E], RawEdge] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_inE(morph.relation)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
   implicit final def eval_target[
@@ -76,8 +66,6 @@ trait Relations {
   new Eval[RawEdge, target[E], RawTarget] {
 
     def raw_apply(morph: InMorph): RawInput => RawOutput = raw_target(morph.relation)
-
-    def present(morph: InMorph): Seq[String] = Seq(morph.label)
   }
 
 }
