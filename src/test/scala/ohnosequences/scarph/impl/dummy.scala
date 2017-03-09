@@ -1,7 +1,6 @@
 package ohnosequences.scarph.test
 
-import ohnosequences.scarph._
-import ohnosequences.scarph.impl._
+import ohnosequences.scarph._, impl._
 import ohnosequences.cosas.types._
 import scala.Function.const
 
@@ -107,8 +106,13 @@ case object dummy {
     new RawMerge[T] { def apply(l: T, r: T): T = r }
 
 
-    implicit val dummyZeroEdge:   RawFromZero[DummyEdge]   = new RawFromZero[DummyEdge]   { def apply() = DummyEdge }
-    implicit val dummyZeroVertex: RawFromZero[DummyVertex] = new RawFromZero[DummyVertex] { def apply() = DummyVertex }
+    implicit def dummyZeroEdge[E <:AnyEdge]:
+        RawFromZero[E, DummyEdge] =
+    new RawFromZero[E, DummyEdge] { def apply(obj: E) = DummyEdge }
+
+    implicit def dummyZeroVertex[V <: AnyVertex]:
+        RawFromZero[V, DummyVertex] =
+    new RawFromZero[V, DummyVertex] { def apply(obj: V) = DummyVertex }
 
   }
 
