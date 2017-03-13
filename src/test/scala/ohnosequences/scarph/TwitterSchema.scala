@@ -4,65 +4,46 @@ import ohnosequences.cosas._
 import ohnosequences.scarph._
 
 
-case object twitter extends AnyGraphSchema {
+case object twitter extends GraphSchema {
 
   lazy val label = this.toString
 
-  lazy val vertices: Set[AnyVertex] = Set(user, tweet)
-
-  lazy val edges: Set[AnyEdge] = Set(posted, follows, liked)
-
-  lazy val valueTypes: Set[AnyValueType] = Set(name, age, text, time, url)
-
-  lazy val properties: Set[AnyProperty] = Set(
-    user.name,
-    user.age,
-    user.bio,
-    user.webpage,
-    tweet.text,
-    tweet.url,
-    posted.time,
-    liked.time,
-    reposted.time
-  )
-
-
   /* Property value types */
-  case object name extends ValueOfType[String]("name")
-  case object age  extends ValueOfType[Integer]("age")
-  case object text extends ValueOfType[String]("text")
-  case object time extends ValueOfType[String]("time") // should have some better raw type
-  case object url  extends ValueOfType[String]("url")
+  case object name extends valueOfType[String]
+  case object age  extends valueOfType[Integer]
+  case object text extends valueOfType[String]
+  case object time extends valueOfType[String] // should have some better raw type
+  case object url  extends valueOfType[String]
 
 
   /* Vertices with their properties */
-  case object user extends Vertex("user") {
-    case object name    extends Property(ManyOrNone(user) -> ExactlyOne(twitter.name))("name")
-    case object age     extends Property(ManyOrNone(user) -> ExactlyOne(ohnosequences.scarph.test.twitter.age))("age")
+  case object user extends vertex {
+    case object name    extends property(manyOrNone(user) -> exactlyOne(twitter.name))
+    case object age     extends property(manyOrNone(user) -> exactlyOne(twitter.age))
     // example of shared value types:
-    case object bio     extends Property(ManyOrNone(user) -> OneOrNone(twitter.text))("bio")
-    case object webpage extends Property(ManyOrNone(user) -> OneOrNone(twitter.url))("webpage")
+    case object bio     extends property(manyOrNone(user) -> oneOrNone(twitter.text))
+    case object webpage extends property(manyOrNone(user) -> oneOrNone(twitter.url))
   }
 
-  case object tweet extends Vertex("tweet") {
-    case object text extends Property(ManyOrNone(tweet) -> ExactlyOne(twitter.text))("text")
-    case object url  extends Property(ManyOrNone(tweet) -> ExactlyOne(twitter.url))("url")
+  case object tweet extends vertex {
+    case object text extends property(manyOrNone(tweet) -> exactlyOne(twitter.text))
+    case object url  extends property(manyOrNone(tweet) -> exactlyOne(twitter.url))
   }
 
 
   /* Edges with their properties */
-  case object posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted") {
-    case object time  extends Property(ManyOrNone(posted) -> ExactlyOne(ohnosequences.scarph.test.twitter.time))("time")
+  case object posted extends edge(exactlyOne(user) -> manyOrNone(tweet)) {
+    case object time extends property(manyOrNone(posted) -> exactlyOne(twitter.time))
   }
 
-  case object follows extends Edge(ManyOrNone(user) -> ManyOrNone(user))("follows")
+  case object follows extends edge(manyOrNone(user) -> manyOrNone(user))
 
-  case object liked extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("liked") {
-    case object time extends Property(ManyOrNone(liked) -> ExactlyOne(twitter.time))("time")
+  case object liked extends edge(manyOrNone(user) -> manyOrNone(tweet)) {
+    case object time extends property(manyOrNone(liked) -> exactlyOne(twitter.time))
   }
 
-  case object reposted extends Edge(ManyOrNone(user) -> ManyOrNone(tweet))("reposted") {
-    case object time extends Property(ManyOrNone(reposted) -> ExactlyOne(twitter.time))("time")
+  case object reposted extends edge(manyOrNone(user) -> manyOrNone(tweet)) {
+    case object time extends property(manyOrNone(reposted) -> exactlyOne(twitter.time))
   }
 
 }

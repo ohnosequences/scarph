@@ -18,7 +18,7 @@ abstract class Arity[GO <: AnyGraphObject](val graphObject: GO) extends AnyArity
   type GraphObject = GO
 }
 
-case class  OneOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-case class AtLeastOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-case class ExactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-case class ManyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+case class  oneOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+case class atLeastOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+case class exactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
+case class manyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
