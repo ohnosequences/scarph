@@ -30,6 +30,17 @@ trait AnyRelation extends AnyGraphObject {
   lazy val target: Target = targetArity.graphObject
 }
 
+abstract class Relation[
+  S <: AnyArity,
+  T <: AnyArity
+](st: (S, T)) extends AnyRelation {
+
+  type SourceArity = S
+  lazy val sourceArity: SourceArity = st._1
+
+  type TargetArity = T
+  lazy val targetArity: TargetArity = st._2
+}
 
 
 // NOTE in tradititional graph data models, only "elements" can have properties
@@ -57,18 +68,15 @@ case object AnyEdge {
 
 /* This constructor encourages to use this syntax:
     `case class posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted")`
+
+  Take a look at the GraphSchema trait for more convenient constructors
 */
 abstract class Edge[
   S <: AnyArity.OfVertices,
   T <: AnyArity.OfVertices
-](st: (S, T))(val label: String) extends AnyEdge {
-
-  type SourceArity = S
-  lazy val sourceArity: SourceArity = st._1
-
-  type TargetArity = T
-  lazy val targetArity: TargetArity = st._2
-}
+](st: (S, T))(val label: String)
+extends Relation[S, T](st)
+with AnyEdge
 
 
 /* Properties are relations connecting element-objects (vertices or edges) with value-objects (scalar types) */
@@ -86,14 +94,9 @@ case object AnyProperty {
 abstract class Property[
   O <: AnyArity.OfElements,
   V <: AnyArity.OfValueTypes
-](val st: (O,V))(val label: String) extends AnyProperty {
-
-  type SourceArity = O
-  lazy val sourceArity: SourceArity = st._1
-
-  type TargetArity = V
-  lazy val targetArity: TargetArity = st._2
-}
+](val ov: (O,V))(val label: String)
+extends Relation[O, V](ov)
+with AnyProperty 
 
 
 /* Property values have scalar types wrapped as graph objects */
