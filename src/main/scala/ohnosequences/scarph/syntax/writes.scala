@@ -7,9 +7,8 @@ case class AddVertexSyntax[G](u: unit := G) extends AnyVal {
   def addVertex[V <: AnyVertex, RV](v: V)
     (implicit
       adder: CanAddVertices[G, V, RV]
-    ): unit := G = {
-       adder.addVertex(u.value)(v)
-       u
+    ): V := RV = {
+      adder.addVertex(u.value)(v)
     }
 }
 
