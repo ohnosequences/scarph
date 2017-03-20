@@ -43,18 +43,26 @@ abstract class Relation[
 }
 
 
+sealed trait GraphElementType
+case object VertexElement extends GraphElementType
+case object   EdgeElement extends GraphElementType
+
 // NOTE in tradititional graph data models, only "elements" can have properties
-sealed trait AnyGraphElement extends AnyGraphObject
+sealed trait AnyGraphElement extends AnyGraphObject {
+
+  val elementType: GraphElementType
+}
 
 
 /* A vertex is a simple graph object representing some type of entities */
-trait AnyVertex extends AnyGraphElement
+trait AnyVertex extends AnyGraphElement { val elementType = VertexElement }
 
 abstract class Vertex(val label: String) extends AnyVertex
 
 
 /* An edge is an object representing relation between vertex-objects */
 trait AnyEdge extends AnyRelation with AnyGraphElement {
+  val elementType = EdgeElement
 
   type SourceArity <: AnyArity.OfVertices
   type TargetArity <: AnyArity.OfVertices
@@ -96,7 +104,7 @@ abstract class Property[
   V <: AnyArity.OfValueTypes
 ](val ov: (O,V))(val label: String)
 extends Relation[O, V](ov)
-with AnyProperty 
+with AnyProperty
 
 
 /* Property values have scalar types wrapped as graph objects */
