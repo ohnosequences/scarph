@@ -18,12 +18,13 @@ trait CanAddEdges[RawSource, R <: AnyEdge, RawEdge, RawTarget] {
 trait CanSetProperties[
   E <: AnyGraphElement,
   RawElement,
-  P <: AnyProperty { type Source = E }
+  P <: AnyProperty,
+  V <: P#Target#Val
 ] {
 
   def setProperty(
     e: E := RawElement,
     p: P,
-    v: P#Target#Val
+    v: V
   ): E := RawElement
 }

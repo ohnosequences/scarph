@@ -10,7 +10,7 @@ case object twitter extends GraphSchema {
 
   /* Property value types */
   case object name extends valueOfType[String]
-  case object age  extends valueOfType[Integer]
+  case object age  extends valueOfType[Int]
   case object text extends valueOfType[String]
   case object time extends valueOfType[String] // should have some better raw type
   case object url  extends valueOfType[String]

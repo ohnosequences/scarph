@@ -8,10 +8,12 @@ case object dummy {
 
   trait Dummy
 
-  case object DummyEdge extends Dummy
+  trait DummyElement extends Dummy
+
+  case object DummyEdge extends DummyElement
   type DummyEdge = DummyEdge.type
 
-  case object DummyVertex extends Dummy
+  case object DummyVertex extends DummyElement
   type DummyVertex = DummyVertex.type
 
 
