@@ -4,7 +4,7 @@ import ohnosequences.cosas.types._
 
 case class AddVertexSyntax[G](u: unit := G) extends AnyVal {
 
-  def addVertex[V <: AnyVertex, RV](v: V)
+  def add[V <: AnyVertex, RV](v: V)
     (implicit
       adder: CanAddVertices[G, V, RV]
     ): V := RV = {
@@ -12,9 +12,9 @@ case class AddVertexSyntax[G](u: unit := G) extends AnyVal {
     }
 }
 
-case class AddEdgeSyntax[E <: AnyEdge](e: E) extends AnyVal {
+case class AddEdgeSyntax[E <: AnyEdge](e: E) {
 
-  def addEdge[RE, RS, RT](
+  def add[RE, RS, RT](
     src: E#Source := RS,
     tgt: E#Target := RT
   )(implicit
@@ -24,14 +24,14 @@ case class AddEdgeSyntax[E <: AnyEdge](e: E) extends AnyVal {
   }
 }
 
-case class SetPropertySyntax[E <: AnyGraphElement, RE](e: E := RE) extends AnyVal {
+case class SetPropertySyntax[E <: AnyGraphElement, RE](e: E := RE) {
 
-  def setProperty[P <: AnyProperty { type Source = E }](
+  def set[P <: AnyProperty, V <: P#Target#Val](
     p: P,
-    v: P#Target#Val
+    v: V
   )(implicit
-    adder: CanSetProperties[E, RE, P]
+    setter: CanSetProperties[E, RE, P, V]
   ): E := RE = {
-    adder.setProperty(e, p, v)
+    setter.setProperty(e, p, v)
   }
 }

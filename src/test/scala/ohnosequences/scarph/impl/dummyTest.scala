@@ -140,4 +140,21 @@ class DummyTests extends org.scalatest.FunSuite {
 
     assert{ apply(compositionToLeft).to(morph) === shouldBe }
   }
+
+  test("adding dummy vertices and edges") {
+    import writes._
+
+    val bob = I.add(user)
+      .set(user.name, "Bob")
+      .set(user.age, 92)
+      // ...
+
+    val testTweet = I.add(tweet)
+      .set(tweet.text, "test")
+      .set(tweet.url, "http://twitter.com/bob/1234")
+
+    posted.add(bob, testTweet)
+      .set(posted.time, "5 o'clock")
+
+  }
 }
