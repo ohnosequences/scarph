@@ -2,7 +2,7 @@ package ohnosequences.scarph
 
 import scala.collection.mutable
 
-/* You can use this trait together with AutoLabel to automize labeling.  If you want to transform it (e.g. add a prefix) provide an implicit function for relabeling. */
+/* You can use this trait together with AutoLabel for labeling. If you want to transform it (e.g. add a prefix) provide an implicit function for relabeling. */
 case class SchemaLabeler[Obj <: AnyGraphObject](val relabel: String => String) {
   final def apply(lbl: String): String = relabel(lbl)
 }
@@ -16,7 +16,6 @@ trait AutoLabel[Obj <: AnyGraphObject] extends AnyGraphType {
   final val label: String = relabel(this.productPrefix)
 }
 
-
 /* This is a very generic trait: a graph schema contains lists of its elements */
 trait AnyGraphSchema extends AnyGraphType {
 
@@ -26,17 +25,18 @@ trait AnyGraphSchema extends AnyGraphType {
   def properties: Set[AnyProperty]
 }
 
-/* This class provides some tricks to reduce boilerplate in the schema definition:
-   - you declare vertices, edges, properties and the schema lists get filled automatically
+/*
+  This class provides some tricks to reduce boilerplate in the schema definition:
+
    - labels are issued automatically based on the objects names, but can be customized
 */
 abstract class GraphSchema extends AnyGraphSchema { schema =>
 
   /* These traits automatically add given element to the corresponding list */
-  trait SchemaVertex    extends AnyVertex    // { schema._vertices += this }
-  trait SchemaEdge      extends AnyEdge      // { schema._edges += this }
-  trait SchemaProperty  extends AnyProperty  // { schema._properties += this }
-  trait SchemaValueType extends AnyValueType // { schema._valueTypes += this }
+  trait SchemaVertex    extends AnyVertex
+  trait SchemaEdge      extends AnyEdge
+  trait SchemaProperty  extends AnyProperty
+  trait SchemaValueType extends AnyValueType
 
   /* A defalt instance of SchemaLabeler which prepends each "local" label with the schema label (with a '.' separator) */
   def defaultLabeler[Obj <: AnyGraphObject]: SchemaLabeler[Obj] = SchemaLabeler { lbl =>
@@ -81,5 +81,4 @@ abstract class GraphSchema extends AnyGraphSchema { schema =>
 
     type Val = V
   }
-
 }
