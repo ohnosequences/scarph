@@ -20,10 +20,10 @@ trait AutoLabel[Obj <: AnyGraphObject] extends AnyGraphType {
 /* This is a very generic trait: a graph schema contains lists of its elements */
 trait AnyGraphSchema extends AnyGraphType {
 
-  val vertices:   Set[AnyVertex]
-  val edges:      Set[AnyEdge]
-  val valueTypes: Set[AnyValueType]
-  val properties: Set[AnyProperty]
+  def vertices:   Set[AnyVertex]
+  def edges:      Set[AnyEdge]
+  def valueTypes: Set[AnyValueType]
+  def properties: Set[AnyProperty]
 }
 
 /* This class provides some tricks to reduce boilerplate in the schema definition:
@@ -32,23 +32,11 @@ trait AnyGraphSchema extends AnyGraphType {
 */
 abstract class GraphSchema extends AnyGraphSchema { schema =>
 
-  /* These lists will accumulate schema elements while you're declaring them */
-  private val _vertices:   mutable.Set[AnyVertex]    = mutable.Set()
-  private val _edges:      mutable.Set[AnyEdge]      = mutable.Set()
-  private val _valueTypes: mutable.Set[AnyValueType] = mutable.Set()
-  private val _properties: mutable.Set[AnyProperty]  = mutable.Set()
-
-  /* And these are their public immutable copies */
-  lazy final val vertices:   Set[AnyVertex]    = _vertices.toSet
-  lazy final val edges:      Set[AnyEdge]      = _edges.toSet
-  lazy final val valueTypes: Set[AnyValueType] = _valueTypes.toSet
-  lazy final val properties: Set[AnyProperty]  = _properties.toSet
-
   /* These traits automatically add given element to the corresponding list */
-  trait SchemaVertex    extends AnyVertex    { schema._vertices + this }
-  trait SchemaEdge      extends AnyEdge      { schema._edges + this }
-  trait SchemaProperty  extends AnyProperty  { schema._properties + this }
-  trait SchemaValueType extends AnyValueType { schema._valueTypes + this }
+  trait SchemaVertex    extends AnyVertex    // { schema._vertices += this }
+  trait SchemaEdge      extends AnyEdge      // { schema._edges += this }
+  trait SchemaProperty  extends AnyProperty  // { schema._properties += this }
+  trait SchemaValueType extends AnyValueType // { schema._valueTypes += this }
 
   /* A defalt instance of SchemaLabeler which prepends each "local" label with the schema label (with a '.' separator) */
   def defaultLabeler[Obj <: AnyGraphObject]: SchemaLabeler[Obj] = SchemaLabeler { lbl =>
@@ -81,9 +69,8 @@ abstract class GraphSchema extends AnyGraphSchema { schema =>
     with SchemaProperty { _ : Singleton with Product =>
 
     // NOTE: this is not AutoLabeled, but similar: we just prepend the owner label
-    final val label: String = relabel(
+    final val label: String =
       Seq(source.label, this.productPrefix).mkString(".")
-    )
   }
 
   abstract class valueOfType[V](implicit
