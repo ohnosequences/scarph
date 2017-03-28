@@ -13,7 +13,7 @@ trait AutoLabel[Obj <: AnyGraphObject] extends AnyGraphType {
 
   val relabel: SchemaLabeler[Obj]
 
-  final val label: String = relabel(this.productPrefix)
+  final val label: String = relabel(this.productPrefix).replace('.', '_')
 }
 
 /* This is a very generic trait: a graph schema contains lists of its elements */
@@ -43,7 +43,7 @@ abstract class GraphSchema extends AnyGraphSchema { schema =>
     Seq(
       schema.label,
       lbl
-    ).mkString(".")
+    ).mkString("_")
   }
 
   /* These classes are similar to ones defined in GraphObjects, but require their instances to be `case object`s (`Singleton with Product`) to take advantage of automatic labeling based on their object name */
@@ -70,7 +70,7 @@ abstract class GraphSchema extends AnyGraphSchema { schema =>
 
     // NOTE: this is not AutoLabeled, but similar: we just prepend the owner label
     final val label: String =
-      Seq(source.label, this.productPrefix).mkString(".")
+      Seq(source.label, this.productPrefix).mkString("_")
   }
 
   abstract class valueOfType[V](implicit
