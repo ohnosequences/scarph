@@ -2,91 +2,33 @@
 ```scala
 package ohnosequences.scarph
 
-case object axioms {
+import ohnosequences.cosas._, types._
 
-  trait AnyAxiom {
+trait CanAddVertices[G, V <: AnyVertex, RawVertex] {
 
-    type First <: AnyGraphMorphism
+  def addVertex(graph: G)(v: V): V := RawVertex
+}
 
-    type Second <: AnyGraphMorphism { type In = First#In; type Out = First#Out }
-  }
+trait CanAddEdges[RawSource, R <: AnyEdge, RawEdge, RawTarget] {
 
-  trait Axiom[
-    F <: AnyGraphMorphism,
-    S <: AnyGraphMorphism { type In = F#In; type Out = F#Out }
-  ]
-  extends AnyAxiom {
+  def addEdge(r: R)(
+    src: R#Source := RawSource,
+    tgt: R#Target := RawTarget
+  ): R := RawEdge
+}
 
-    type First = F
-    type Second = S
-  }
+trait CanSetProperties[
+  E <: AnyGraphElement,
+  RawElement,
+  P <: AnyProperty,
+  V <: P#Target#Val
+] {
 
-  type ≅[F <: AnyGraphMorphism,S <: AnyGraphMorphism { type In = F#In; type Out = F#Out }] =
-    AnyAxiom { type First = F; type Second = S }
-
-  // example: category axioms
-  class CompositionIsAssociative[
-    F <: AnyGraphMorphism,
-    G <: AnyGraphMorphism { type In = F#Out },
-    H <: AnyGraphMorphism { type In = G#Out }
-  ]
-  extends Axiom[F >=> (G >=> H), (F >=> G) >=> H]
-
-  class RightIdentity[F <: AnyGraphMorphism]
-  extends Axiom[F, F >=> id[F#Out]]
-
-  class LeftIdentity[F <: AnyGraphMorphism]
-  // NOTE needed due to the usual crap
-  extends Axiom[F, Composition[id[F#In], F]]
-
-  // after those: dagger category axioms
-  // crappy bounds in dagger
-  class DaggerIsInvolutive[
-    F <: AnyGraphMorphism {
-      type Dagger <: AnyGraphMorphism {
-        type Dagger <: AnyGraphMorphism {
-          type In = F#In;
-          type Out = F#Out
-        }
-      }
-    }
-  ]
-  extends Axiom[F, F#Dagger#Dagger]
-
-  // works in some cases
-  def buh[O <: AnyGraphObject]: DaggerIsInvolutive[id[O]] = new DaggerIsInvolutive[id[O]]
-  // not in others
-  // def uhoh[F <: AnyGraphMorphism, G <: AnyGraphMorphism { type In = F#Out}]: DaggerIsInvolutive[F >=> G] = ???
-
-  // more ugliness here due to insufficient bounds
-  class DaggerAntiComposition[
-    F <: AnyGraphMorphism { type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In }},
-    G <: AnyGraphMorphism { type In = F#Out; type Dagger <: AnyGraphMorphism { type In = G#Out; type Out = G#In } }
-  ]
-  extends Axiom[(F >=> G)#Dagger, G#Dagger >=> F#Dagger]
-
-  class IdentitiesAreTheirDagger[O <: AnyGraphObject]
-  extends Axiom[id[O]#Dagger, id[O]]
-
-  // other non-generic axioms: dagger mono, dagger epi
-  class DaggerMono[
-    F <: AnyGraphMorphism {
-      type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In}
-    }
-  ]
-  extends Axiom[F >=> F#Dagger, id[F#In]]
-
-  class DaggerEpi[
-    F <: AnyGraphMorphism {
-      type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In}
-    }
-  ]
-  extends Axiom[Composition[F#Dagger, F], id[F#Out]]
-
-  // dagger monoidal category axioms
-  // see http://ncatlab.org/nlab/show/symmetric+monoidal+dagger-category
-  // class AssociatorDagger ...
-
+  def setProperty(
+    e: E := RawElement,
+    p: P,
+    v: V
+  ): E := RawElement
 }
 
 ```

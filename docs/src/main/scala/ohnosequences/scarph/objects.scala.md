@@ -2,371 +2,134 @@
 ```scala
 package ohnosequences.scarph
 
-case object objects {
+import scala.reflect.ClassTag
+import ohnosequences.cosas._, types._
 
-  import scala.reflect.ClassTag
-  import ohnosequences.cosas._, types._
+trait AnyGraphType extends AnyType {
 
-  trait AnyGraphType extends AnyType {
-
-    type Raw = Any
-  }
+  type Raw = Any
+}
 
 
 
-  sealed trait AnyGraphObject extends AnyGraphType
+// FIXME: should be sealed
+trait AnyGraphObject extends AnyGraphType
 
 
 
-  trait AnyRelation extends AnyGraphObject {
+trait AnyRelation extends AnyGraphObject {
 
-    type SourceArity <: AnyArity
-    val  sourceArity: SourceArity
+  type SourceArity <: AnyArity
+  val  sourceArity: SourceArity
 
-    type Source = SourceArity#GraphObject
-    lazy val source: Source = sourceArity.graphObject
+  type Source = SourceArity#GraphObject
+  lazy val source: Source = sourceArity.graphObject
 
-    type TargetArity <: AnyArity
-    val  targetArity: TargetArity
+  type TargetArity <: AnyArity
+  val  targetArity: TargetArity
 
-    type Target = TargetArity#GraphObject
-    lazy val target: Target = targetArity.graphObject
-  }
+  type Target = TargetArity#GraphObject
+  lazy val target: Target = targetArity.graphObject
+}
+
+abstract class Relation[
+  S <: AnyArity,
+  T <: AnyArity
+](st: (S, T)) extends AnyRelation {
+
+  type SourceArity = S
+  lazy val sourceArity: SourceArity = st._1
+
+  type TargetArity = T
+  lazy val targetArity: TargetArity = st._2
+}
 
 
+sealed trait GraphElementType
+case object VertexElement extends GraphElementType
+case object   EdgeElement extends GraphElementType
 
-  // NOTE in tradititional graph data models, only "elements" can have properties
-  sealed trait AnyGraphElement extends AnyGraphObject
+// NOTE in tradititional graph data models, only "elements" can have properties
+sealed trait AnyGraphElement extends AnyGraphObject {
 
-
-
-  trait AnyVertex extends AnyGraphElement
-  class Vertex(val label: String) extends AnyVertex
-
-
-
-  trait AnyEdge extends AnyRelation with AnyGraphElement {
-
-    type SourceArity <: AnyArity.OfVertices
-    type TargetArity <: AnyArity.OfVertices
-  }
-
-  case object AnyEdge {
-
-    type From[S <: AnyVertex] = AnyEdge { type Source = S }
-    type   To[T <: AnyVertex] = AnyEdge { type Target = T }
-  }
+  val elementType: GraphElementType
+}
 ```
 
-This constructor encourages to use this syntax: Edge(user -> tweet)("tweeted")
+A vertex is a simple graph object representing some type of entities
 
 ```scala
-  abstract class Edge[
-    S <: AnyArity.OfVertices,
-    T <: AnyArity.OfVertices
-  ](st: (S, T))(val label: String) extends AnyEdge {
+trait AnyVertex extends AnyGraphElement { val elementType = VertexElement }
 
-    type SourceArity = S
-    lazy val sourceArity: SourceArity = st._1
-
-    type TargetArity = T
-    lazy val targetArity: TargetArity = st._2
-  }
+abstract class Vertex(val label: String) extends AnyVertex
 ```
 
-Property values have raw types that are covered as graph objects
+An edge is an object representing relation between vertex-objects
 
 ```scala
-  trait AnyValueType extends AnyGraphObject {
+trait AnyEdge extends AnyRelation with AnyGraphElement {
+  val elementType = EdgeElement
 
-    type Val
-    def valueTag: ClassTag[Val]
-  }
+  type SourceArity <: AnyArity.OfVertices
+  type TargetArity <: AnyArity.OfVertices
+}
 
-  abstract class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
+case object AnyEdge {
 
-    type Val = V
-  }
-
-
-
-  trait AnyArity {
-
-    type GraphObject <: AnyGraphObject
-    val  graphObject: GraphObject
-  }
-
-  case object AnyArity {
-
-    type OfVertices   = AnyArity { type GraphObject <: AnyVertex }
-    type OfElements   = AnyArity { type GraphObject <: AnyGraphElement }
-    type OfValueTypes = AnyArity { type GraphObject <: AnyValueType }
-  }
-
-  abstract class Arity[GO <: AnyGraphObject](val graphObject: GO) extends AnyArity {
-
-    type GraphObject = GO
-  }
-
-  case class  OneOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-  case class AtLeastOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-  case class ExactlyOne[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-  case class ManyOrNone[GO <: AnyGraphObject](go: GO) extends Arity[GO](go)
-
-
-
-  trait AnyProperty extends AnyRelation {
-
-    type SourceArity <: AnyArity.OfElements
-    type TargetArity <: AnyArity.OfValueTypes
-  }
-
-  case object AnyProperty {
-
-    type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
-  }
-
-  abstract class Property[
-    O <: AnyArity.OfElements,
-    V <: AnyArity.OfValueTypes
-  ](val st: (O,V))(val label: String) extends AnyProperty {
-
-    type SourceArity = O
-    lazy val sourceArity: SourceArity = st._1
-
-    type TargetArity = V
-    lazy val targetArity: TargetArity = st._2
-  }
-
-
-
-  trait AnyPredicate extends AnyGraphObject {
-
-    type Element <: AnyGraphElement
-    val  element: Element
-
-    val  conditions: List[AnyCondition]
-
-    lazy val label: String = s"(${element.label} ? ${conditions.toString})"
-  }
-
-  case object AnyPredicate {
-
-    type On[E <: AnyGraphElement] = AnyPredicate { type Element = E }
-  }
+  type From[S <: AnyVertex] = AnyEdge { type Source = S }
+  type   To[T <: AnyVertex] = AnyEdge { type Target = T }
+}
 ```
 
-Empty predicate doesn't have any restrictions
+This constructor encourages to use this syntax:
+ `case class posted extends Edge(ExactlyOne(user) -> ManyOrNone(tweet))("posted")`
+
+  Take a look at the GraphSchema trait for more convenient constructors
+
 
 ```scala
-  trait AnyEmptyPredicate extends AnyPredicate {
-    lazy val conditions: List[AnyCondition] = List[AnyCondition]()
-  }
-
-
-  case class EmptyPredicate[E <: AnyGraphElement](val element: E)
-    extends AnyEmptyPredicate {
-
-    type Element = E
-  }
+abstract class Edge[
+  S <: AnyArity.OfVertices,
+  T <: AnyArity.OfVertices
+](st: (S, T))(val label: String)
+extends Relation[S, T](st)
+with AnyEdge
 ```
 
-This is just like cons, but controlling, that all conditions are on the same element type
+Properties are relations connecting element-objects (vertices or edges) with value-objects (scalar types)
 
 ```scala
-  trait AnyAndPredicate extends AnyPredicate {
+trait AnyProperty extends AnyRelation {
 
-    type Body <: AnyPredicate
-    val  body: Body
+  type SourceArity <: AnyArity.OfElements
+  type TargetArity <: AnyArity.OfValueTypes
+}
 
-    type     Element = Body#Element
-    lazy val element: Element = body.element
+case object AnyProperty {
 
-    type Condition <: AnyCondition.OnElement[Body#Element]
-    val  condition: Condition
+  type withValue[V] = AnyProperty { type Target <: AnyValueType { type Val = V } }
+}
 
-    lazy val conditions: List[AnyCondition] = condition :: body.conditions
-  }
-
-  case class AndPredicate[B <: AnyPredicate, C <: AnyCondition.OnElement[B#Element]]
-    (val body: B, val condition: C) extends AnyAndPredicate {
-
-    type Body = B
-    type Condition = C
-  }
+abstract class Property[
+  O <: AnyArity.OfElements,
+  V <: AnyArity.OfValueTypes
+](val ov: (O,V))(val label: String)
+extends Relation[O, V](ov)
+with AnyProperty
 ```
 
-A condition is a restriction on the property values
+Property values have scalar types wrapped as graph objects
 
 ```scala
-  trait AnyCondition {
+trait AnyValueType extends AnyGraphObject {
 
-    type Property <: AnyProperty
-    val  property: Property
+  type Val
+  def valueTag: ClassTag[Val]
+}
 
-    type     Element = Property#Source
-    lazy val element: Element = property.source
+abstract class ValueOfType[V](val label: String)(implicit val valueTag: ClassTag[V]) extends AnyValueType {
 
-    val label: String
-    override final def toString: String = label
-  }
-
-  case object AnyCondition {
-
-    type OnProperty[P <: AnyProperty] = AnyCondition { type Property = P }
-    type OnElement[E <: AnyGraphElement] = AnyCondition { type Element = E }
-  }
-```
-
-Comparison conditions with **One** property value
-
-```scala
-  trait AnyCompareCondition extends AnyCondition {
-    type Property <: AnyProperty //{ type Raw <: Comparable[_] }
-
-    val value: Property#Target#Raw
-  }
-
-  trait CompareCondition[P <: AnyProperty]
-    extends AnyCompareCondition { type Property = P }
-
-
-  trait AnyEqual extends AnyCompareCondition
-  case class Equal[P <: AnyProperty](
-    val property: P,
-    val value: P#Target#Raw
-  ) extends AnyEqual with CompareCondition[P] {
-    lazy val label: String = s"${property.label} = ${value.toString}"
-  }
-
-  trait AnyNotEqual extends AnyCompareCondition
-  case class NotEqual[P <: AnyProperty](
-    val property: P,
-    val value: P#Target#Raw
-  ) extends AnyNotEqual with CompareCondition[P] {
-    lazy val label: String = s"${property.label} ≠ ${value.toString}"
-  }
-
-  trait AnyLess extends AnyCompareCondition
-  case class Less[P <: AnyProperty](
-    val property: P,
-    val value: P#Target#Raw
-  ) extends AnyLess with CompareCondition[P] {
-    lazy val label: String = s"${property.label} < ${value.toString}"
-  }
-
-  trait AnyLessOrEqual extends AnyCompareCondition
-  case class LessOrEqual[P <: AnyProperty](
-    val property: P,
-    val value: P#Target#Raw
-  ) extends AnyLessOrEqual with CompareCondition[P] {
-    lazy val label: String = s"${property.label} ≤ ${value.toString}"
-  }
-
-  trait AnyGreater extends AnyCompareCondition
-  case class Greater[P <: AnyProperty](
-    val property: P,
-    val value: P#Target#Raw
-  ) extends AnyGreater with CompareCondition[P] {
-    lazy val label: String = s"${property.label} > ${value.toString}"
-  }
-
-  trait AnyGreaterOrEqual extends AnyCompareCondition
-  case class GreaterOrEqual[P <: AnyProperty](
-    val property: P,
-    val value: P#Target#Raw
-  ) extends AnyGreaterOrEqual with CompareCondition[P] {
-    lazy val label: String = s"${property.label} ≥ ${value.toString}"
-  }
-
-  trait AnyInterval extends AnyCondition {
-    type Property <: AnyProperty
-    val start: Property#Target#Raw
-    val end: Property#Target#Raw
-  }
-
-  case class Interval[P <: AnyProperty](
-    val property: P,
-    val start: P#Target#Raw,
-    val end: P#Target#Raw
-  ) extends AnyInterval {
-    type Property = P
-    lazy val label: String = s"${start.toString} ≤ ${property.label} ≤ ${end.toString}"
-  }
-```
-
-## Tensor product
-
-```scala
-  sealed trait AnyTensorObj extends AnyGraphObject {
-
-    type Left <: AnyGraphObject
-    val  left: Left
-
-    type Right <: AnyGraphObject
-    val  right: Right
-  }
-
-  case class TensorObj[L <: AnyGraphObject, R <: AnyGraphObject]
-    (val left: L, val right: R) extends AnyTensorObj {
-
-    type Left = L
-    type Right = R
-
-    lazy val label: String = s"(${left.label} ⊗ ${right.label})"
-  }
-
-  // \otimes symbol: f ⊗ s: F ⊗ S
-  type ⊗[F <: AnyGraphObject, S <: AnyGraphObject] = TensorObj[F, S]
-  type unit = unit.type
-
-  case object unit extends AnyGraphObject {
-
-    lazy val label: String = this.toString
-  }
-```
-
-## Biproduct
-
-```scala
-  sealed trait AnyBiproductObj extends AnyGraphObject {
-
-    type Left <: AnyGraphObject
-    val  left: Left
-
-    type Right <: AnyGraphObject
-    val  right: Right
-  }
-
-  case class BiproductObj[L <: AnyGraphObject, R <: AnyGraphObject]
-    (val left: L, val right: R) extends AnyBiproductObj {
-
-    type Left = L
-    type Right = R
-
-    lazy val label: String = s"(${left.label} ⊕ ${right.label})"
-  }
-
-  // NOTE \oplus symbol: f ⊕ s: F ⊕ S
-  type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
-  type zero = zero.type
-
-  case object zero extends AnyGraphObject {
-
-    lazy val label: String = this.toString
-  }
-
-
-  implicit def graphObjectOps[O <: AnyGraphObject](o: O):
-    GraphObjectOps[O] =
-    GraphObjectOps[O](o)
-
-  case class GraphObjectOps[O <: AnyGraphObject](val obj: O) extends AnyVal {
-
-    def ⊗[S <: AnyGraphObject](other: S): O ⊗ S = TensorObj(obj, other)
-    def ⊕[S <: AnyGraphObject](other: S): O ⊕ S = BiproductObj(obj, other)
-  }
-
+  type Val = V
 }
 
 ```
@@ -374,17 +137,33 @@ Comparison conditions with **One** property value
 
 
 
-[main/scala/ohnosequences/scarph/axioms.scala]: axioms.scala.md
-[main/scala/ohnosequences/scarph/evals.scala]: evals.scala.md
-[main/scala/ohnosequences/scarph/morphisms.scala]: morphisms.scala.md
-[main/scala/ohnosequences/scarph/objects.scala]: objects.scala.md
-[main/scala/ohnosequences/scarph/rewrites.scala]: rewrites.scala.md
-[main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
-[main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
-[main/scala/ohnosequences/scarph/syntax/objects.scala]: syntax/objects.scala.md
 [test/scala/ohnosequences/scarph/asserts.scala]: ../../../../test/scala/ohnosequences/scarph/asserts.scala.md
-[test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
-[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
-[test/scala/ohnosequences/scarph/implicitSearch.scala]: ../../../../test/scala/ohnosequences/scarph/implicitSearch.scala.md
 [test/scala/ohnosequences/scarph/TwitterQueries.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterQueries.scala.md
+[test/scala/ohnosequences/scarph/impl/dummyTest.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummyTest.scala.md
+[test/scala/ohnosequences/scarph/impl/dummy.scala]: ../../../../test/scala/ohnosequences/scarph/impl/dummy.scala.md
+[test/scala/ohnosequences/scarph/impl/writes.scala]: ../../../../test/scala/ohnosequences/scarph/impl/writes.scala.md
 [test/scala/ohnosequences/scarph/TwitterSchema.scala]: ../../../../test/scala/ohnosequences/scarph/TwitterSchema.scala.md
+[test/scala/ohnosequences/scarph/implicitSearch.scala]: ../../../../test/scala/ohnosequences/scarph/implicitSearch.scala.md
+[test/scala/ohnosequences/scarph/SchemaCreation.scala]: ../../../../test/scala/ohnosequences/scarph/SchemaCreation.scala.md
+[main/scala/ohnosequences/scarph/arities.scala]: arities.scala.md
+[main/scala/ohnosequences/scarph/schemas.scala]: schemas.scala.md
+[main/scala/ohnosequences/scarph/predicates.scala]: predicates.scala.md
+[main/scala/ohnosequences/scarph/package.scala]: package.scala.md
+[main/scala/ohnosequences/scarph/objects.scala]: objects.scala.md
+[main/scala/ohnosequences/scarph/impl/distributivity.scala]: impl/distributivity.scala.md
+[main/scala/ohnosequences/scarph/impl/tensors.scala]: impl/tensors.scala.md
+[main/scala/ohnosequences/scarph/impl/evals.scala]: impl/evals.scala.md
+[main/scala/ohnosequences/scarph/impl/category.scala]: impl/category.scala.md
+[main/scala/ohnosequences/scarph/impl/biproducts.scala]: impl/biproducts.scala.md
+[main/scala/ohnosequences/scarph/impl/relations.scala]: impl/relations.scala.md
+[main/scala/ohnosequences/scarph/syntax/package.scala]: syntax/package.scala.md
+[main/scala/ohnosequences/scarph/syntax/objects.scala]: syntax/objects.scala.md
+[main/scala/ohnosequences/scarph/syntax/morphisms.scala]: syntax/morphisms.scala.md
+[main/scala/ohnosequences/scarph/syntax/writes.scala]: syntax/writes.scala.md
+[main/scala/ohnosequences/scarph/morphisms.scala]: morphisms.scala.md
+[main/scala/ohnosequences/scarph/tensor.scala]: tensor.scala.md
+[main/scala/ohnosequences/scarph/axioms.scala]: axioms.scala.md
+[main/scala/ohnosequences/scarph/isomorphisms.scala]: isomorphisms.scala.md
+[main/scala/ohnosequences/scarph/writes.scala]: writes.scala.md
+[main/scala/ohnosequences/scarph/rewrites.scala]: rewrites.scala.md
+[main/scala/ohnosequences/scarph/biproduct.scala]: biproduct.scala.md

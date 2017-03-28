@@ -2,31 +2,19 @@
 ```scala
 package ohnosequences.scarph.test
 
-case object asserts {
+import ohnosequences.cosas._
+import ohnosequences.scarph._
+import twitter._
 
-  import ohnosequences.cosas._, types._
-  import org.scalatest.Assertions._
+class SchemaCreation extends org.scalatest.FunSuite {
 
-  // not only compares the values, but also check the types equality (essential for tagged values)
-  def checkTypedEq[A, B](a: A, b: B)(implicit typesEq: A ≃ B): Boolean = a == b
+  test("sets of types are there") {
 
-  implicit def taggedOps[T <: AnyType, V <: T#Raw](v: T := V):
-    TaggedOps[T, V] =
-    TaggedOps[T, V](v)
-
-  case class TaggedOps[T <: AnyType, V <: T#Raw](v: T := V) {
-
-    def =~=[W <: T#Raw](w: T := W)(implicit typesEq: V ≃ W): Boolean = v.value == w.value
+    println { s"vertices: ${twitter.vertices.map(_.label)}" }
+    println { s"edges: ${twitter.edges.map(_.label)}" }
+    println { s"properties: ${twitter.properties.map(_.label)}" }
+    println { s"value types: ${twitter.valueTypes.map(_.label)}" }
   }
-
-  def assertTypedEq[A, B](a: A, b: B)(implicit typesEq: A ≃ B): Unit =
-    assert(a == b)
-
-  def assertTaggedEq[TA <: AnyType, A <: TA#Raw, TB <: AnyType, B <: TB#Raw](a: TA := A, b: TB := B)
-    (implicit
-      tagsEq: TA ≃ TB,
-      valsEq: A ≃ B
-    ): Unit = assert(a.value == b.value)
 }
 
 ```

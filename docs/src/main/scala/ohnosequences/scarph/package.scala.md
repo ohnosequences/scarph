@@ -1,91 +1,73 @@
 
 ```scala
-package ohnosequences.scarph
+package ohnosequences
 
-case object axioms {
+package object scarph {
+```
 
-  trait AnyAxiom {
+## Type aliases
+### Objects
 
-    type First <: AnyGraphMorphism
+```scala
+  // \otimes symbol: f ⊗ s: F ⊗ S
+  type ⊗[F <: AnyGraphObject, S <: AnyGraphObject] = TensorObj[F, S]
 
-    type Second <: AnyGraphMorphism { type In = First#In; type Out = First#Out }
+  type unit = TensorUnit.type
+  val  unit: unit = TensorUnit
+
+  // \oplus symbol: f ⊕ s: F ⊕ S
+  type ⊕[F <: AnyGraphObject, S <: AnyGraphObject] = BiproductObj[F, S]
+
+  type zero = BiproductZero.type
+  val  zero: zero = BiproductZero
+```
+
+### Morphisms
+
+```scala
+  // strict:
+  type ==>[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In = A; type Out = B }
+
+  // non-strict:
+  type -->[A <: AnyGraphObject, B <: AnyGraphObject] = AnyGraphMorphism { type In <: A; type Out <: B }
+
+  type DaggerOf[M <: AnyGraphMorphism] = M#Out --> M#In
+
+  type >=>[F <: AnyGraphMorphism, S <: AnyGraphMorphism { type In = F#Out }] = Composition[F, S]
+```
+
+### Properties
+
+```scala
+  type get[P <: AnyProperty] = outV[P]
+  def get[P <: AnyProperty](p: P): get[P] = outV[P](p)
+
+  type lookup[P <: AnyProperty] = inV[P]
+  def lookup[P <: AnyProperty](p: P): lookup[P] = inV[P](p)
+```
+
+## Minimal necessary syntax
+
+```scala
+  // implicit def graphObjectOps[O <: AnyGraphObject](o: O):
+  //   GraphObjectOps[O] =
+  //   GraphObjectOps[O](o)
+  implicit class GraphObjectOps[O <: AnyGraphObject](val obj: O) extends AnyVal {
+
+    def ⊗[S <: AnyGraphObject](other: S): O ⊗ S = TensorObj(obj, other)
+    def ⊕[S <: AnyGraphObject](other: S): O ⊕ S = BiproductObj(obj, other)
   }
 
-  trait Axiom[
-    F <: AnyGraphMorphism,
-    S <: AnyGraphMorphism { type In = F#In; type Out = F#Out }
-  ]
-  extends AnyAxiom {
+  // implicit def graphMorphismOps[M <: AnyGraphMorphism](m: M):
+  //   GraphMorphismOps[M] =
+  //   GraphMorphismOps[M](m)
+  implicit class GraphMorphismOps[F <: AnyGraphMorphism](val f: F) extends AnyVal {
 
-    type First = F
-    type Second = S
+    def >=>[S <: AnyGraphMorphism { type In = F#Out }](s: S): F >=> S = Composition(f, s)
+
+    def ⊗[S <: AnyGraphMorphism](q: S): TensorMorph[F, S] = TensorMorph(f, q)
+    def ⊕[S <: AnyGraphMorphism](q: S): BiproductMorph[F, S] = BiproductMorph(f, q)
   }
-
-  type ≅[F <: AnyGraphMorphism,S <: AnyGraphMorphism { type In = F#In; type Out = F#Out }] =
-    AnyAxiom { type First = F; type Second = S }
-
-  // example: category axioms
-  class CompositionIsAssociative[
-    F <: AnyGraphMorphism,
-    G <: AnyGraphMorphism { type In = F#Out },
-    H <: AnyGraphMorphism { type In = G#Out }
-  ]
-  extends Axiom[F >=> (G >=> H), (F >=> G) >=> H]
-
-  class RightIdentity[F <: AnyGraphMorphism]
-  extends Axiom[F, F >=> id[F#Out]]
-
-  class LeftIdentity[F <: AnyGraphMorphism]
-  // NOTE needed due to the usual crap
-  extends Axiom[F, Composition[id[F#In], F]]
-
-  // after those: dagger category axioms
-  // crappy bounds in dagger
-  class DaggerIsInvolutive[
-    F <: AnyGraphMorphism {
-      type Dagger <: AnyGraphMorphism {
-        type Dagger <: AnyGraphMorphism {
-          type In = F#In;
-          type Out = F#Out
-        }
-      }
-    }
-  ]
-  extends Axiom[F, F#Dagger#Dagger]
-
-  // works in some cases
-  def buh[O <: AnyGraphObject]: DaggerIsInvolutive[id[O]] = new DaggerIsInvolutive[id[O]]
-  // not in others
-  // def uhoh[F <: AnyGraphMorphism, G <: AnyGraphMorphism { type In = F#Out}]: DaggerIsInvolutive[F >=> G] = ???
-
-  // more ugliness here due to insufficient bounds
-  class DaggerAntiComposition[
-    F <: AnyGraphMorphism { type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In }},
-    G <: AnyGraphMorphism { type In = F#Out; type Dagger <: AnyGraphMorphism { type In = G#Out; type Out = G#In } }
-  ]
-  extends Axiom[(F >=> G)#Dagger, G#Dagger >=> F#Dagger]
-
-  class IdentitiesAreTheirDagger[O <: AnyGraphObject]
-  extends Axiom[id[O]#Dagger, id[O]]
-
-  // other non-generic axioms: dagger mono, dagger epi
-  class DaggerMono[
-    F <: AnyGraphMorphism {
-      type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In}
-    }
-  ]
-  extends Axiom[F >=> F#Dagger, id[F#In]]
-
-  class DaggerEpi[
-    F <: AnyGraphMorphism {
-      type Dagger <: AnyGraphMorphism { type In = F#Out; type Out = F#In}
-    }
-  ]
-  extends Axiom[Composition[F#Dagger, F], id[F#Out]]
-
-  // dagger monoidal category axioms
-  // see http://ncatlab.org/nlab/show/symmetric+monoidal+dagger-category
-  // class AssociatorDagger ...
 
 }
 
