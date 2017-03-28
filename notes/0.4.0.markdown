@@ -1,0 +1,1 @@
+This release adds a experimental write API, and fixes several bugs with missing morphisms and evals.
