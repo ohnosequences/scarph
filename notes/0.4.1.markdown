@@ -1,0 +1,7 @@
+This release changes the default labeling strategy in schema types: the dots are now underscores so that
+
+- `some.pkg.graph.vertex`
+
+becomes
+
+- `some_pkg_graph_vertex`
