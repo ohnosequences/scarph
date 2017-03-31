@@ -21,7 +21,7 @@ trait AutoLabel[Obj <: AnyGraphObject] extends AnyGraphType {
 
   val relabel: SchemaLabeler[Obj]
 
-  final val label: String = relabel(this.productPrefix)
+  final val label: String = relabel(this.productPrefix).replace('.', '_')
 }
 ```
 
@@ -63,7 +63,7 @@ A defalt instance of SchemaLabeler which prepends each "local" label with the sc
     Seq(
       schema.label,
       lbl
-    ).mkString(".")
+    ).mkString("_")
   }
 ```
 
@@ -93,7 +93,7 @@ These classes are similar to ones defined in GraphObjects, but require their ins
 
     // NOTE: this is not AutoLabeled, but similar: we just prepend the owner label
     final val label: String =
-      Seq(source.label, this.productPrefix).mkString(".")
+      Seq(source.label, this.productPrefix).mkString("_")
   }
 
   abstract class valueOfType[V](implicit
