@@ -8,23 +8,18 @@ trait AnyGraphType extends AnyType {
   type Raw = Any
 }
 
-
-
-// FIXME: should be sealed
 trait AnyGraphObject extends AnyGraphType
-
-
 
 trait AnyRelation extends AnyGraphObject {
 
   type SourceArity <: AnyArity
-  val  sourceArity: SourceArity
+  def  sourceArity: SourceArity
 
   type Source = SourceArity#GraphObject
   lazy val source: Source = sourceArity.graphObject
 
   type TargetArity <: AnyArity
-  val  targetArity: TargetArity
+  def  targetArity: TargetArity
 
   type Target = TargetArity#GraphObject
   lazy val target: Target = targetArity.graphObject
@@ -50,7 +45,7 @@ case object   EdgeElement extends GraphElementType
 // NOTE in tradititional graph data models, only "elements" can have properties
 sealed trait AnyGraphElement extends AnyGraphObject {
 
-  val elementType: GraphElementType
+  def elementType: GraphElementType
 }
 
 
@@ -62,6 +57,7 @@ abstract class Vertex(val label: String) extends AnyVertex
 
 /* An edge is an object representing relation between vertex-objects */
 trait AnyEdge extends AnyRelation with AnyGraphElement {
+
   val elementType = EdgeElement
 
   type SourceArity <: AnyArity.OfVertices
@@ -85,7 +81,6 @@ abstract class Edge[
 ](st: (S, T))(val label: String)
 extends Relation[S, T](st)
 with AnyEdge
-
 
 /* Properties are relations connecting element-objects (vertices or edges) with value-objects (scalar types) */
 trait AnyProperty extends AnyRelation {

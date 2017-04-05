@@ -28,7 +28,7 @@ case class EmptyPredicate[E <: AnyGraphElement](val element: E)
 }
 
 
-/* This is just like cons, but controlling, that all conditions are on the same element type */
+/* This is just like cons, but controlling that all conditions are on the same element type */
 trait AnyAndPredicate extends AnyPredicate {
 
   type Body <: AnyPredicate
