@@ -2,13 +2,14 @@ package ohnosequences.scarph
 
 import ohnosequences.cosas._, types._
 
-trait AddVertices
+/*
+This works exactly the same for properties and edges. The semantics are expected to be in a std graph scenario
 
-trait CanAddVertices[G, V <: AnyVertex, RawVertex] {
+1. the input is a set of pairs (source, target); for each pair, add an edge.
+2. you will get as output all the newly added edges
 
-  def addVertex(graph: G)(v: V): V := RawVertex
-}
-
+For properties of course the target denotations are values (of value types).
+*/
 trait WriteRelation extends AnyGraphMorphism { write =>
 
   type Relation <: AnyRelation
@@ -16,7 +17,7 @@ trait WriteRelation extends AnyGraphMorphism { write =>
 
   type In = Relation#Source ⊗ Relation#Target ⊗ unit
   val  in: In = (relation.source: Relation#Source) ⊗ (relation.target: Relation#Target) ⊗ unit
-  
+
   type Out = unit ⊗ Relation
   val  out: Out = unit ⊗ relation
 
@@ -37,6 +38,15 @@ trait DeleteRelation extends AnyGraphMorphism { delete =>
 
   type Dagger <: WriteRelation { type Relation = delete.Relation }
   val  dagger: Dagger
+}
+
+// LEGACY: will be removed
+
+trait AddVertices
+
+trait CanAddVertices[G, V <: AnyVertex, RawVertex] {
+
+  def addVertex(graph: G)(v: V): V := RawVertex
 }
 
 
