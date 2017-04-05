@@ -3,12 +3,12 @@ package ohnosequences.scarph
 import ohnosequences.cosas._, types._
 
 /*
-This works exactly the same for properties and edges. The semantics are expected to be in a std graph scenario
+  This works exactly the same for properties and edges. The semantics are expected to be in a std graph scenario
 
-1. the input is a set of pairs (source, target); for each pair, add an edge.
-2. you will get as output all the newly added edges
+  1. the input is a set of pairs (source, target); for each pair, add an edge.
+  2. you will get as output all the newly added edges
 
-For properties of course the target denotations are values (of value types).
+  For properties of course the target denotations are values (of value types).
 */
 trait WriteRelation extends AnyGraphMorphism { write =>
 
@@ -39,6 +39,39 @@ trait DeleteRelation extends AnyGraphMorphism { delete =>
   type Dagger <: WriteRelation { type Relation = delete.Relation }
   val  dagger: Dagger
 }
+
+trait WriteVertex { write =>
+
+  type Vertex <: AnyVertex
+  val vertex: Vertex
+
+  type In = unit
+  val  in: In = unit
+
+  type Out = Vertex
+  val  out: Out = vertex
+
+  type Dagger <: DeleteVertex { type Vertex = write.Vertex }
+  val  dagger: Dagger
+
+}
+
+trait DeleteVertex { delete =>
+
+  type Vertex <: AnyVertex
+  val vertex: Vertex
+
+  type In = Vertex
+  val  in: In = vertex
+
+  type Out = unit
+  val  out: Out = unit
+
+  type Dagger <: DeleteVertex { type Vertex = delete.Vertex }
+  val  dagger: Dagger
+
+}
+
 
 // LEGACY: will be removed
 
