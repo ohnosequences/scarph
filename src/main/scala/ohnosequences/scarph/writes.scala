@@ -10,6 +10,20 @@ import ohnosequences.cosas._, types._
 
   For properties of course the target denotations are values (of value types).
 */
+//
+// aspiring to syntax like
+//
+// def newUser(name: Name.Value, surname: Name.Value): unit --> User =
+//   add(User) >=> (User.name to Name("Paco")) >=> (User.surname to Name("Rodríguez"))
+//
+// val alumnos =
+//   sanitariosDeInstituto >=> cursos >=> alumnos
+//
+// val deleteInstituto =
+//   // first delete edges, then vertices
+//   lookup(ID) >=> delete(cursos) >=> (delete(Instituto) ⊗ delete(Curso))
+
+
 trait WriteRelation extends AnyGraphMorphism { write =>
 
   type Relation <: AnyRelation
