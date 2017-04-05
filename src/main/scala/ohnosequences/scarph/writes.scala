@@ -53,7 +53,6 @@ trait WriteVertex { write =>
 
   type Dagger <: DeleteVertex { type Vertex = write.Vertex }
   val  dagger: Dagger
-
 }
 
 trait DeleteVertex { delete =>
@@ -69,13 +68,10 @@ trait DeleteVertex { delete =>
 
   type Dagger <: DeleteVertex { type Vertex = delete.Vertex }
   val  dagger: Dagger
-
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // LEGACY: will be removed
-
-
 
 trait AddVertices
 
@@ -83,7 +79,6 @@ trait CanAddVertices[G, V <: AnyVertex, RawVertex] {
 
   def addVertex(graph: G)(v: V): V := RawVertex
 }
-
 
 trait CanAddEdges[RawSource, R <: AnyEdge, RawEdge, RawTarget] {
 
