@@ -15,11 +15,11 @@ trait WriteRelation extends AnyGraphMorphism { write =>
   type Relation <: AnyRelation
   val relation: Relation
 
-  type In = Relation#Source ⊗ Relation#Target ⊗ unit
-  val  in: In = (relation.source: Relation#Source) ⊗ (relation.target: Relation#Target) ⊗ unit
+  type In = Relation#Source ⊗ Relation#Target
+  val  in: In = (relation.source: Relation#Source) ⊗ (relation.target: Relation#Target)
 
-  type Out = unit ⊗ Relation
-  val  out: Out = unit ⊗ relation
+  type Out = Relation
+  val  out: Out = relation
 
   type Dagger <: DeleteRelation { type Relation = write.Relation }
   val  dagger: Dagger
@@ -30,17 +30,19 @@ trait DeleteRelation extends AnyGraphMorphism { delete =>
   type Relation <: AnyRelation
   val relation: Relation
 
-  type Out = Relation#Source ⊗ Relation#Target ⊗ unit
-  val  out: Out = (relation.source: Relation#Source) ⊗ (relation.target: Relation#Target) ⊗ unit
+  type Out = Relation#Source ⊗ Relation#Target
+  val  out: Out = (relation.source: Relation#Source) ⊗ (relation.target: Relation#Target)
 
-  type In = unit ⊗ Relation
-  val  in: In = unit ⊗ relation
+  type In = Relation
+  val  in: In = relation
 
   type Dagger <: WriteRelation { type Relation = delete.Relation }
   val  dagger: Dagger
 }
 
 // LEGACY: will be removed
+
+
 
 trait AddVertices
 
