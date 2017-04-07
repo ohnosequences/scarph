@@ -2,6 +2,17 @@ package ohnosequences.scarph
 
 import ohnosequences.cosas.types._
 
+case object writeSyntax {
+
+  implicit final class WriteRelationSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](val f: F) extends AnyVal {
+
+    def write[E <: AnyRelation { type Source = F#Out#Left; type Target = F#Out#Right}](e: E): WriteRelation[E] =
+      WriteRelation(e)
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 case class AddVertexSyntax[G](u: unit := G) extends AnyVal {
 
   def add[V <: AnyVertex, RV](v: V)

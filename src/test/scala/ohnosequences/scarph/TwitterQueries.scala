@@ -77,4 +77,11 @@ case object queries {
     val q_coerce = coerce(pred)
     val q_comp = q_quant >=> q_coerce
   }
+
+  object writesStructure extends TestBlock("writes structure") {
+
+    import writeSyntax._
+
+    val z = id(user) ⊗ id(tweet) write posted  
+  }
 }
