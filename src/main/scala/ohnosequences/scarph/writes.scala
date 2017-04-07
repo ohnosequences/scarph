@@ -23,8 +23,9 @@ import ohnosequences.cosas._, types._
 //   // first delete edges, then vertices
 //   lookup(ID) >=> delete(cursos) >=> (delete(Instituto) ⊗ delete(Curso))
 
+trait AnyWriteRelation extends AnyGraphMorphism { write =>
 
-trait WriteRelation extends AnyGraphMorphism { write =>
+  lazy val label: String = s"(add ${in.label} -(${relation.label})-> ${out.label})"
 
   type Relation <: AnyRelation
   val relation: Relation
@@ -35,11 +36,21 @@ trait WriteRelation extends AnyGraphMorphism { write =>
   type Out = Relation
   val  out: Out = relation
 
-  type Dagger <: DeleteRelation { type Relation = write.Relation }
+  type Dagger <: AnyDeleteRelation { type Relation = write.Relation }
   val  dagger: Dagger
 }
 
-trait DeleteRelation extends AnyGraphMorphism { delete =>
+case class WriteRelation[R <: AnyRelation](val relation: R) extends AnyWriteRelation {
+
+  type Relation = R
+
+  type Dagger = DeleteRelation[R]
+  val dagger: Dagger = DeleteRelation(relation)
+}
+
+trait AnyDeleteRelation extends AnyGraphMorphism { delete =>
+
+  lazy val label: String = s"(delete ${in.label} -(${relation.label})-> ${out.label})"
 
   type Relation <: AnyRelation
   val relation: Relation
@@ -50,11 +61,21 @@ trait DeleteRelation extends AnyGraphMorphism { delete =>
   type In = Relation
   val  in: In = relation
 
-  type Dagger <: WriteRelation { type Relation = delete.Relation }
+  type Dagger <: AnyWriteRelation { type Relation = delete.Relation }
   val  dagger: Dagger
 }
 
-trait WriteVertex { write =>
+case class DeleteRelation[R <: AnyRelation](val relation: R) extends AnyDeleteRelation {
+
+  type Relation = R
+
+  type Dagger = WriteRelation[R]
+  val dagger: Dagger = WriteRelation(relation)
+}
+
+trait AnyWriteVertex extends AnyGraphMorphism { write =>
+
+  lazy val label: String = s"(add ${out.label})"
 
   type Vertex <: AnyVertex
   val vertex: Vertex
@@ -65,11 +86,21 @@ trait WriteVertex { write =>
   type Out = Vertex
   val  out: Out = vertex
 
-  type Dagger <: DeleteVertex { type Vertex = write.Vertex }
+  type Dagger <: AnyDeleteVertex { type Vertex = write.Vertex }
   val  dagger: Dagger
 }
 
-trait DeleteVertex { delete =>
+case class WriteVertex[V <: AnyVertex](val vertex: V) extends AnyWriteVertex {
+
+  type Vertex = V
+
+  type Dagger = DeleteVertex[V]
+  val dagger: Dagger = DeleteVertex(vertex)
+}
+
+trait AnyDeleteVertex extends AnyGraphMorphism { delete =>
+
+  lazy val label: String = s"(delete ${out.label})"
 
   type Vertex <: AnyVertex
   val vertex: Vertex
@@ -80,8 +111,16 @@ trait DeleteVertex { delete =>
   type Out = unit
   val  out: Out = unit
 
-  type Dagger <: DeleteVertex { type Vertex = delete.Vertex }
+  type Dagger <: AnyWriteVertex { type Vertex = delete.Vertex }
   val  dagger: Dagger
+}
+
+case class DeleteVertex[V <: AnyVertex](val vertex: V) extends AnyDeleteVertex {
+
+  type Vertex = V
+
+  type Dagger = WriteVertex[V]
+  val dagger: Dagger = WriteVertex(vertex)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
