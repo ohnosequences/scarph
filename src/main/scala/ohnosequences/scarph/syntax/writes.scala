@@ -4,11 +4,47 @@ import ohnosequences.cosas.types._
 
 case object writeSyntax {
 
-  implicit final class WriteRelationSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](val f: F) extends AnyVal {
+  import syntax.SymmetryRefine
 
-    def write[E <: AnyRelation { type Source = F#Out#Left; type Target = F#Out#Right}](e: E): WriteRelation[E] =
-      WriteRelation(e)
-    }
+  /*
+
+    Need to
+
+    - organize conversions and names for refinements
+    - simpler namespaces for syntax; shouldn't need to import one hundred objects
+    - document syntax approach for types to work
+  */
+  implicit def writeSyntax[F <: AnyGraphMorphism { type Out <: AnyTensorObj }](f: F)
+    (implicit refine: F => SymmetryRefine[F]):
+        WriteRelationSyntax[F#Out#Left, F#Out#Right, SymmetryRefine[F]] =
+    new WriteRelationSyntax[F#Out#Left, F#Out#Right, SymmetryRefine[F]](refine(f))
+
+  final
+  class WriteRelationSyntax[
+    L0 <: AnyGraphObject, R0 <: AnyGraphObject,
+    F0 <: AnyGraphMorphism { type Out = L0 ⊗ R0 }
+  ](val f: SymmetryRefine[F0]) extends AnyVal {
+
+    def write[
+      E <: AnyRelation {
+        type SourceArity <: AnyArity { type GraphObject = L0 };
+        type TargetArity <: AnyArity { type GraphObject = R0 }
+      }
+    ](e: E): F0 >=> WriteRelation[L0,R0,E] =
+      f >=> WriteRelation(e)
+  }
+
+  // implicit final class DeleteRelationSyntax[F <: AnyGraphMorphism { type Out <: AnyRelation }](val f: F) extends AnyVal {
+  //
+  //   def delete: F >=> DeleteRelation[F#Out] =
+  //     f >=> DeleteRelation(f.out)
+  // }
+
+  implicit final class DeleteVertexSyntax[F <: AnyGraphMorphism { type Out <: AnyVertex }](val f: F) extends AnyVal {
+
+    def delete: F >=> DeleteVertex[F#Out] =
+      f >=> DeleteVertex(f.out)
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

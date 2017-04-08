@@ -82,6 +82,6 @@ case object queries {
 
     import writeSyntax._
 
-    val z = id(user) ⊗ id(tweet) write posted  
+    val z = ( id(user) ⊗ id(tweet) write posted ) >=> get(posted.time)
   }
 }
