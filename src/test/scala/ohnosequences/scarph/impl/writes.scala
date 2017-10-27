@@ -13,6 +13,9 @@ case object writes {
       def addVertex(graph: DummyUnit)(v: V):
         V := DummyVertex =
         v := DummyVertex
+
+      def removeVertex(graph: DummyUnit)(v: V := DummyVertex): DummyUnit =
+        graph
     }
 
   implicit def dummyCanAddEdges[E <: AnyEdge]:
@@ -24,6 +27,9 @@ case object writes {
         tgt: E#Target := DummyVertex
       ): E := DummyEdge =
          e := DummyEdge
+
+      def removeEdge(r: E := DummyEdge): Unit =
+        ()
     }
 
   implicit def dummyCanSetProperties[
