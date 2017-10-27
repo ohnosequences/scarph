@@ -5,6 +5,8 @@ import ohnosequences.cosas._, types._
 trait CanAddVertices[G, V <: AnyVertex, RawVertex] {
 
   def addVertex(graph: G)(v: V): V := RawVertex
+
+  def removeVertex(graph: G)(v: V := RawVertex): G
 }
 
 trait CanAddEdges[RawSource, R <: AnyEdge, RawEdge, RawTarget] {
@@ -13,6 +15,8 @@ trait CanAddEdges[RawSource, R <: AnyEdge, RawEdge, RawTarget] {
     src: R#Source := RawSource,
     tgt: R#Target := RawTarget
   ): R := RawEdge
+
+  def removeEdge(r: R := RawEdge): Unit
 }
 
 trait CanSetProperties[
