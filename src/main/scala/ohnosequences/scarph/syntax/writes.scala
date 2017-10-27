@@ -10,6 +10,18 @@ case class AddVertexSyntax[G](u: unit := G) extends AnyVal {
     ): V := RV = {
       adder.addVertex(u.value)(v)
     }
+
+  def removeV[V <: AnyVertex, RV](v: V := RV)(implicit
+    adder: CanAddVertices[G, V, RV]
+  )
+  : unit := G =
+    unit := adder.removeVertex(u.value)(v)
+
+  def removeE[E <: AnyEdge, RE, RS, RT](e: E := RE)(implicit
+    adder: CanAddEdges[RS, E, RE, RT]
+  )
+  : unit := G =
+    { adder.removeEdge(e); u }
 }
 
 case class AddEdgeSyntax[E <: AnyEdge](e: E) {

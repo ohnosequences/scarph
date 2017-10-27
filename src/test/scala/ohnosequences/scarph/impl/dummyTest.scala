@@ -149,12 +149,17 @@ class DummyTests extends org.scalatest.FunSuite {
       .set(user.age, 92)
       // ...
 
+    I.removeV(bob)
+
+
     val testTweet = I.add(tweet)
       .set(tweet.text, "test")
       .set(tweet.url, "http://twitter.com/bob/1234")
 
-    posted.add(bob, testTweet)
-      .set(posted.time, "5 o'clock")
+    val e =
+      posted.add(bob, testTweet)
+        .set(posted.time, "5 o'clock")
 
+    I.removeE(e)
   }
 }
